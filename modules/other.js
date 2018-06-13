@@ -8,6 +8,7 @@ var perked = false;
 var prestraidon = false;
 var cost = (updateMapCost(true));
 var mapbought = false;
+var prestigeRaidMaxSoFar = 0;
 //Activate Robo Trimp (will activate on the first zone after liquification)
 function autoRoboTrimp() {
     //exit if the cooldown is active, or we havent unlocked robotrimp.
@@ -171,14 +172,101 @@ function findLastBionic() {
 //Praiding
 
 function PrestigeRaid() {
-    var startZone = getPageSetting('PRaidingZoneStart');
-    var PAggro = getPageSetting('PAggression');
-    var PraidMax = getPageSetting('PRaidingMaxZones');
+    var StartZone = getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid. -1 to ignore
+    var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
+    var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
+    var currZone = game.global.world;
     
-    debug(startZone);
-    debug(PAggro);
-    debug(PraidMax);
-    debug("hello PrestigeRaid", "general", "");
+    if (PRaidMax > 10){
+        PRaidMax = 10;
+        setPageSetting('PRaidingMaxZones', 10);
+    }
+    if (StartZone == -1 || currZone < StartZone || prestigeRaidMaxSoFar == currZone || PRaidMax <= 0)
+        return;
+    
+    prestigeRaidMaxSoFar = currZone; //first time we're prestige raiding in this zone, only run attempt to raid once per zone
+    
+    var empowerment = getEmpowerment();
+    var lastDigitZone = currZone % 10;
+    var wantPrestigeUpTo; //the zone the alg decided to raid up to
+    //there are 7 cases: poison/wind/ice (each 2 cases depending on zones xx1-xx5 or xx6-x10), and 7th case for no empowerment before zone 236.
+    if (empowerment == "Ice"){
+        if(lastDigitZone <= 5 && lastDigitZone > 0){ //xx1-xx5
+            wantPrestigeUpTo = currZone - lastDigitZone + 5; //here aggressive is same as light because poison zones are coming up
+        }
+        else if (lastDigitZoone > 5){ //xx6-xx9
+            if(PAggro == 0){
+                wantPrestigeUpTo = currZone - lastDigitZone + 11
+            }
+            else{ //PAggro == 1
+                wantPrestigeUpTo = currZone - lastDigitZone + 13
+            }
+        }
+        else { //xx0
+            if(PAggro == 0){
+                wantPrestigeUpTo = currZone + 1;
+            }
+            else
+                wantPrestigeUpTo = currZone + 3;
+        }
+    }
+    else if (empowerment == "Poison"){
+        if(PAggro == 0){ //low aggro poison is fairly straightforward; get to last poison zone and farm 5 or 6 zones higher
+            if(lastDigitZone == 0)
+                wantPrestigeUpTo = currZone + 5;
+            else if(lastDigitZone == 5)
+                wantPrestigeUpTo = currZone + 6;
+            else
+                wantPrestigeUpTo = currZone;
+        }
+        else {//PAggro == 1
+            if(lastDigitZone == 0)
+                wantPrestigeUpTo = currZone + 5; //most available
+            else if(lastDigitZone == 5)
+                wantPrestigeUpTo = currZone + 10; //most available
+            else if(lastDigitZone < 5)
+                wantPrestigeUpTo = currZone - lastDigitZone + 5;
+            else //xx6-xx9
+                wantPrestigeUpTo = currZone - lastDigitZone + 15;
+        }
+    }
+    else if (empowerment == "Wind"){
+        if(lastDigitZone <= 5 && lastDigitZone > 0){ //xx1-xx5, fairly conservative because ice is coming up
+            wantPrestigeUpTo = currZone - lastDigitZone + 5;
+        }
+        else if (lastDigitZone == 0){
+            if(PAggro == 0)
+                wantPrestigeUpTo = currZone + 1;
+            else
+                wantPrestigeUpTo = currZone + 3;
+        }
+        else{ //xx6-xx9
+            if(PAggro == 0){
+                wantPrestigeUpTo = currZone;
+            }
+            else {
+                wantPrestigeUpTo = currZone - lastDigitZone + 13;
+            }
+        }
+    }
+    else{ //no empowerment, pre 236
+        if (lastDigitZone <= 5)
+            wantPrestigeUpTo = currZone - lastDigitZone + 5;
+        else
+            wantPrestigeUpTo = currZone - lastDigitZone + 15;
+    }
+    
+    if (wantPrestigeUpTo > currZone + PRaidMax)
+        wantPrestigeUpTo = currZone + PRaidMax; //dont go above user defined max
+    
+    
+    
+    debug("StartZone = " + StartZone, "general", "");
+    debug("PAggro = " + PAggro, "general", "");
+    debug("PRaidMax = " + PRaidMax, "general", "");
+    debug("currZone = " + currZone, "general", "");
+    debug("wantPrestigeUpTo = " + wantPrestigeUpTo, "general", "");
+    debug("empowerment = " + empowerment, "general", "");
 }
 
 function Praiding() {
