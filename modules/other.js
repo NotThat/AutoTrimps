@@ -185,6 +185,12 @@ function PrestigeRaid() {
         PRaidMax = 0;
         setPageSetting('PRaidingMaxZones', 0);
     }
+    
+    if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive) {
+        autoTrimpSettings["AutoMaps"].value = 1;
+        debug("Turning AutoMaps back on");
+    }
+    
     if (StartZone == -1 || currZone < StartZone || prestigeRaidMaxSoFar == currZone || PRaidMax <= 0)
         return;
     
