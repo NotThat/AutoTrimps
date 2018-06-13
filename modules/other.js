@@ -181,6 +181,10 @@ function PrestigeRaid() {
         PRaidMax = 10;
         setPageSetting('PRaidingMaxZones', 10);
     }
+    if (PRaidMax < 0){
+        PRaidMax = 0;
+        setPageSetting('PRaidingMaxZones', 0);
+    }
     if (StartZone == -1 || currZone < StartZone || prestigeRaidMaxSoFar == currZone || PRaidMax <= 0)
         return;
     
