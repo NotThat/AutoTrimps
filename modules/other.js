@@ -186,6 +186,7 @@ function PrestigeRaid() {
         setPageSetting('PRaidingMaxZones', 0);
     }
     
+    //this stops sitting in map selection screen with auto maps disabled
     if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive) {
         autoTrimpSettings["AutoMaps"].value = 1;
         debug("Turning AutoMaps back on");
