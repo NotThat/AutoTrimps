@@ -296,7 +296,7 @@ function PrestigeRaid() {
         game.options.menu.repeatUntil.enabled = 2;
                 
     if (game.global.preMapsActive){ 
-        plusPrestige(wantPrestigeUpTo-havePrestigeUpTo); //sets the map sliders before buying the map for prestige
+        plusPrestige(wantPrestigeUpTo-currZone); //sets the map sliders before buying the map for prestige
         if ((updateMapCost(true) <= game.resources.fragments.owned)) {
             buyMap();
             mapbought = true;
