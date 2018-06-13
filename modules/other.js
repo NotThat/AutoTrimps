@@ -175,10 +175,10 @@ function PrestigeRaid() {
     var PAggro = getPageSetting('PAggression');
     var PraidMax = getPageSetting('PRaidingMaxZones');
     
-    Debug(startZone);
-    Debug(PAggro);
-    Debug(PraidMax);
-    Debug("hello PrestigeRaid", "general", "");
+    debug(startZone);
+    debug(PAggro);
+    debug(PraidMax);
+    debug("hello PrestigeRaid", "general", "");
 }
 
 function Praiding() {
