@@ -552,7 +552,7 @@ function autoStance3() {
       var windstackzone = getPageSetting('WindStackingMin');
 
     if(game.global.world>=80) {
-        if( getEmpowerment() != "Wind" || game.global.mapsActive || game.empowerments.Wind.currentDebuffPower==200 || (windstackzone < 0) || (windstackzone >= game.global.world) || game.global.spireActive) {
+        if( getEmpowerment() != "Wind" || game.global.mapsActive || game.empowerments.Wind.currentDebuffPower==170 || (windstackzone < 0) || (windstackzone >= game.global.world) || game.global.spireActive) {
             setFormation(2);
             return;
         }

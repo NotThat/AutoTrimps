@@ -1174,8 +1174,8 @@ function setGraphData(graph) {
     }
     //put finishing touches on this graph.
     if (graph == 'Loot Sources') {
-        chart1.xAxis[0].tickInterval = 15;
-        chart1.xAxis[0].minorTickInterval = 15;
+        chart1.xAxis[0].tickInterval = 1;
+        chart1.xAxis[0].minorTickInterval = 1;
     }
     //remember what we had (de)selected, if desired.
     if (document.getElementById('rememberCB').checked) {
