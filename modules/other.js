@@ -281,7 +281,7 @@ function PrestigeRaid() {
 	debug("Beginning Prestige Raiding...");
     }
     
-    if (game.options.menu.repeatUntil.enabled != 2)
+    /*if (game.options.menu.repeatUntil.enabled != 2)
         game.options.menu.repeatUntil.enabled = 2;
                 
     if (game.global.preMapsActive){ 
@@ -318,7 +318,7 @@ function PrestigeRaid() {
         prestraid = false;
         prestraidon = false;
         mapbought = false;
-    }
+    }*/
     //attempt to buy the desired map and run it until all prestige is gotten
     //if can't afford, buy the highest map possible.
     
