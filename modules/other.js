@@ -314,6 +314,7 @@ function PrestigeRaid() {
             if (getPageSetting('AutoMaps') == 0) {
                 autoTrimpSettings["AutoMaps"].value = 1;
                 mapbought = false;
+                //way better would be to calculate costs without going to map screen to avoid trimp death. TODO
                 debug("Failed to prestige raid. Looks like you can't afford to..");
             }
             return;
@@ -344,7 +345,146 @@ function plusPrestige(delta) {
         document.getElementById("sizeAdvMapsRange").value = 9;
         document.getElementById('advPerfectCheckbox').checked = false;
         updateMapCost();
-        }
+}
+
+/*function updateMapCost(getValue){
+	var mapLevel =  parseInt(document.getElementById("mapLevelInput").value, 10);
+	var baseCost = 0;
+	if (mapLevel > game.global.world || mapLevel < 6 || isNaN(mapLevel)) return;
+	//Sliders: 27 total * 0.74 = ~20
+	baseCost += getMapSliderValue("size");
+	baseCost += getMapSliderValue("loot");
+	baseCost += getMapSliderValue("difficulty");
+	baseCost *= (game.global.world >= 60) ? 0.74 : 1;
+	//Special Modifier
+	var specialModifier = getSpecialModifierSetting();
+	if (specialModifier != "0"){
+		baseCost += mapSpecialModifierConfig[specialModifier].costIncrease;
+	}
+	//Perfect Checkbox
+	if (checkPerfectChecked()){
+		baseCost += 6;
+	}
+	//Extra Levels
+	var extraLevels = getExtraMapLevels();
+	if (extraLevels > 0){
+		baseCost += (10 * extraLevels);
+	}
+	baseCost += mapLevel;
+	baseCost = Math.floor((((baseCost / 150) * (Math.pow(1.14, baseCost - 1))) * mapLevel * 2) * Math.pow((1.03 + (mapLevel / 50000)), mapLevel));
+	if (document.getElementById("biomeAdvMapsSelect").value != "Random") baseCost *= 2;
+	if (getValue) return baseCost;
+	document.getElementById("mapCostFragmentCost").innerHTML = prettify(baseCost);
+}
+ var mapSpecialModifierConfig = {
+	fa: {
+		name: "Fast Attacks",
+		unlocksAt: 60,
+		get description(){
+			var text = "All attacks in this map happen 100ms faster.";
+			if (game.talents.hyperspeed2.purchased) text += " <span style='color: red'>Does not stack with Hyperspeed II</span>";
+			return text;
+		},
+		costIncrease: 7,
+		abv: "FA"
+	},
+	lc: {
+		name: "Large Cache",
+		unlocksAt: 60,
+		description: "Earn 20 seconds of production for either food, wood, or metal at random each time you complete this map.",
+		costIncrease: 7,
+		cache: true,
+		onCompletion: function (){
+			cacheReward("random", 20, this.name);
+		},
+		abv: "LC"
+	},
+	ssc: {
+		name: "Small Savory Cache",
+		unlocksAt: 85,
+		description: "Earn 10 seconds of food production each time you complete this map.",
+		costIncrease: 10,
+		cache: true,
+		onCompletion: function () {
+			cacheReward("food", 10, this.name);
+		},
+		abv: "SSC"
+	},
+	swc: {
+		name: "Small Wooden Cache",
+		unlocksAt: 85,
+		description: "Earn 10 seconds of wood production each time you complete this map.",
+		costIncrease: 10,
+		cache: true,
+		onCompletion: function () {
+			cacheReward("wood", 10, this.name);
+		},
+		abv: "SWC"
+	},
+	smc: {
+		name: "Small Metal Cache",
+		unlocksAt: 85,
+		description: "Earn 10 seconds of metal production each time you complete this map.",
+		costIncrease: 10,
+		cache: true,
+		onCompletion: function () {
+			cacheReward("metal", 10, this.name);
+		},
+		abv: "SMC"
+	},
+	p: {
+		name: "Prestigious",
+		unlocksAt: 135,
+		description: "This map can hold two different equipment prestige upgrades, if two are available.",
+		costIncrease: 10,
+		abv: "P"
+	},
+	hc: {
+		name: "Huge Cache",
+		unlocksAt: 160,
+		description: "Earn 40 seconds of production for either food, wood, or metal at random each time you complete this map.",
+		costIncrease: 14,
+		cache: true,
+		onCompletion: function () {
+			cacheReward("random", 40, this.name);
+		},
+		abv: "HC"
+	},
+	lsc: {
+		name: "Large Savory Cache",
+		unlocksAt: 185,
+		description: "Earn 20 seconds of food production each time you complete this map.",
+		costIncrease: 18,
+		cache: true,
+		onCompletion: function () {
+			cacheReward("food", 20, this.name);
+		},
+		abv: "LSC"
+	},
+	lwc: {
+		name: "Large Wooden Cache",
+		unlocksAt: 185,
+		description: "Earn 20 seconds of wood production each time you complete this map.",
+		costIncrease: 18,
+		cache: true,
+		onCompletion: function () {
+			cacheReward("wood", 20, this.name);
+		},
+		abv: "LWC"
+	},
+	lmc: {
+		name: "Large Metal Cache",
+		unlocksAt: 185,
+		description: "Earn 20 seconds of metal production each time you complete this map.",
+		costIncrease: 18,
+		cache: true,
+		onCompletion: function () {
+			cacheReward("metal", 20, this.name);
+		},
+		abv: "LMC"
+	}
+};
+ **/
 
 function calcPrestige() {
     var max=1;

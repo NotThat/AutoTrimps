@@ -212,12 +212,13 @@ function mainLoop() {
     
     
     
-    if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding (other.js)
-    if (getPageSetting('BWraid')==true){setTimeout(BWraiding(), 3000);} //BW Raiding (other.js)
+
     if (getPageSetting('AutoAllocatePerks')==2) lootdump(); //Loot Dumping (other.js)
     if (getPageSetting('BuyUpgradesNew') != 0) buyUpgrades();    //"Buy Upgrades"       (upgrades.js)
     
     if (getPageSetting('PRaidingZoneStart') >0) PrestigeRaid(); //Prestige Raiding NT (other.js). need to buy upgrades before running this
+    if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding (other.js)
+    if (getPageSetting('BWraid')==true){setTimeout(BWraiding(), 3000);} //BW Raiding (other.js)
     
     var agu = getPageSetting('AutoGoldenUpgrades');
     if (agu && agu!='Off') autoGoldenUpgradesAT(agu);    //"Golden Upgrades"     (other.js)
