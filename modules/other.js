@@ -222,7 +222,7 @@ function PrestigeRaid() {
             else if(lastDigitZone == 5)
                 wantPrestigeUpTo = currZone + 6;
             else
-                wantPrestigeUpTo = currZone;
+                wantPrestigeUpTo = currZone - lastDigitZone + 5;
         }
         else {//PAggro == 1
             if(lastDigitZone == 0)
@@ -247,7 +247,7 @@ function PrestigeRaid() {
         }
         else{ //xx6-xx9
             if(PAggro == 0){
-                wantPrestigeUpTo = currZone;
+                wantPrestigeUpTo = currZone - lastDigitZone + 5;
             }
             else {
                 wantPrestigeUpTo = currZone - lastDigitZone + 15;
