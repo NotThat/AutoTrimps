@@ -56,10 +56,10 @@ $graphFooter.innerHTML += '\
 <div style="flex:0 2 3.5vw;"><input style="width:100%;min-width: 40px;" id="deleteSpecificTextBox"></div>\
 <div style="flex:auto; margin-left: 0.5vw;"><button onclick="deleteSpecific(); drawGraph();">Delete Specific Portal</button></div>\
 <div style="flex:0 100 5%;"></div>\
-<div style="flex:auto;"><button  onclick="GraphsImportExportTooltip(\'ExportGraphs\', null, \'update\')" onmouseover=\'tooltip(\"Tips\", \"customText\", event, \"Export Graph Database will make a backup of all the graph data to a text string.<b>DISCLAIMER:</b> Takes quite a long time to generate.\")\' onmouseout=\'tooltip(\"hide\")\'>Export your Graph Database</button></div>\
-<div style="float:right; margin-right: 0.5vw;"><button onclick="addGraphNoteLabel()">Add Note/Label</button></div>\
+//<div style="flex:auto;"><button  onclick="GraphsImportExportTooltip(\'ExportGraphs\', null, \'update\')" onmouseover=\'tooltip(\"Tips\", \"customText\", event, \"Export Graph Database will make a backup of all the graph data to a text string.<b>DISCLAIMER:</b> Takes quite a long time to generate.\")\' onmouseout=\'tooltip(\"hide\")\'>Export your Graph Database</button></div>\
+//<div style="float:right; margin-right: 0.5vw;"><button onclick="addGraphNoteLabel()">Add Note/Label</button></div>\
 <div style="float:right; margin-right: 0.5vw;"><button onclick="toggleSpecificGraphs()">Invert Selection</button></div>\
-<div style="float:right; margin-right: 1vw;"><button onclick="toggleAllGraphs()">All Off/On</button></div>';
+<div style="float:right; margin-right: 2vw;"><button onclick="toggleAllGraphs()">All Off/On</button></div>';
 //TODO: make the overall hover tooltip better and seperate individual help into each button tooltip.
 document.getElementById("graphFooterLine2").innerHTML += '\
 <span style="float: left;" onmouseover=\'tooltip(\"Tips\", \"customText\", event, \"You can zoom by dragging a box around an area. You can turn portals off by clicking them on the legend. Quickly view the last portal by clicking it off, then Invert Selection. Or by clicking All Off, then clicking the portal on. To delete a portal, Type its portal number in the box and press Delete Specific. Using negative numbers in the Delete Specific box will KEEP that many portals (starting counting backwards from the current one), ie: if you have Portals 1000-1015, typing -10 will keep 1005-1015. There is a browser data storage limitation of 10MB, so do not exceed 20 portals-worth of data.\")\' onmouseout=\'tooltip(\"hide\")\'>Tips: Hover for usage tips.</span>\
@@ -1008,10 +1008,11 @@ function setGraphData(graph) {
         case 'Fluffy XP':
             graphData = allPurposeGraph('fluffy',true,"number");
             title = 'Fluffy XP (Lifetime Total)';
-            xTitle = 'Zone (starts at 300)';
+            xTitle = 'Zone';
             yTitle = 'Fluffy XP';
             yType = 'Linear';
-            xminFloor = 300;
+            //xminFloor = 300;
+            xminFloor = 1;
             break;
         case 'Fluffy XP PerHour':
             var currentPortal = -1;
@@ -1051,7 +1052,7 @@ function setGraphData(graph) {
                 currentZone = allSaveData[i].world;
             }
             title = 'Fluffy XP/Hour (Cumulative)';
-            xTitle = 'Zone (starts at 300)';
+            xTitle = 'Zone';
             yTitle = 'Fluffy XP/Hour';
             yType = 'Linear';
             //xminFloor = 300;
