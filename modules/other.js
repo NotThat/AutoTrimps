@@ -184,7 +184,8 @@ function PrestigeRaid() {
     if (StartZone == -1 || currZone < StartZone || prestigeRaidMaxSoFar == currZone || PRaidMax <= 0)
         return;
     
-    prestigeRaidMaxSoFar = currZone; //first time we're prestige raiding in this zone, only run attempt to raid once per zone
+    //return this after debugging
+    //prestigeRaidMaxSoFar = currZone; //first time we're prestige raiding in this zone, only run attempt to raid once per zone
     
     var empowerment = getEmpowerment();
     var lastDigitZone = currZone % 10;
