@@ -277,6 +277,7 @@ function PrestigeRaid() {
     
     if(havePrestigeUpTo >= wantPrestigeUpTo){
         debug("have all the prestige levels that we want. exiting.", "general", "");
+        autoTrimpSettings["AutoMaps"].value = 1;
         return;
     }
     
