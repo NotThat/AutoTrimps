@@ -694,7 +694,7 @@ function setGraphData(graph) {
             yType = 'datetime';
             formatter =  function () {
                 var ser = this.series;
-                return '<span style="color:' + ser.color + '" >‚óè</span> ' +
+                return '<span style="color:' + ser.color + '" >‚ó?</span> ' +
                         ser.name + ': <b>' +
                         Highcharts.dateFormat('%H:%M:%S', this.y) + '</b><br>';
 
@@ -826,7 +826,7 @@ function setGraphData(graph) {
             yType = 'datetime';
             formatter =  function () {
                 var ser = this.series;
-                return '<span style="color:' + ser.color + '" >‚óè</span> ' +
+                return '<span style="color:' + ser.color + '" >‚ó?</span> ' +
                         ser.name + ': <b>' +
                         Highcharts.dateFormat('%H:%M:%S', this.y) + '</b><br>';
 
@@ -844,7 +844,7 @@ function setGraphData(graph) {
             yType = 'datetime';
             formatter =  function () {
                 var ser = this.series;
-                return '<span style="color:' + ser.color + '" >‚óè</span> ' +
+                return '<span style="color:' + ser.color + '" >‚ó?</span> ' +
                         ser.name + ': <b>' +
                         Highcharts.dateFormat('%H:%M:%S', this.y) + '</b><br>';
 
@@ -1054,7 +1054,8 @@ function setGraphData(graph) {
             xTitle = 'Zone (starts at 300)';
             yTitle = 'Fluffy XP/Hour';
             yType = 'Linear';
-            xminFloor = 300;
+            //xminFloor = 300;
+            xminFloor = 1;
             break;
         case 'OverkillCells':
             var currentPortal = -1;
@@ -1151,7 +1152,7 @@ function setGraphData(graph) {
     //default formatter used (can define a decimal precision, and a suffix)
     formatter = formatter || function () {
         var ser = this.series;
-        return '<span style="color:' + ser.color + '" >‚óè</span> ' +
+        return '<span style="color:' + ser.color + '" >‚ó?</span> ' +
                 ser.name + ': <b>' +
                 Highcharts.numberFormat(this.y, precision,'.', ',') + valueSuffix + '</b><br>';
     };
