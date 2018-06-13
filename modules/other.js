@@ -33,7 +33,7 @@ function autoGoldenUpgradesAT(setting) {
     //Default: True = Always get 60% void by skipping the 12% upgrade then buying 14%/16%
     var goldStrat = getPageSetting('goldStrat');
     //Try to achieve 60% Void    
-    if (setting == "Void" && goldStrat == "Max then Helium") {
+    if (setting == "Void" && (goldStrat == "Max then Helium" || goldStrat == "Zone")) {
       var nextVoidAmt = game.goldenUpgrades.Void.nextAmt().toFixed(2);
       if (nextVoidAmt == 0.12)   //skip the 6th void upgrade
         setting = "Helium";
