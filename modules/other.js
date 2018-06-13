@@ -264,7 +264,7 @@ function PrestigeRaid() {
     if (wantPrestigeUpTo > currZone + PRaidMax)
         wantPrestigeUpTo = currZone + PRaidMax; //dont go above user defined max
     
-    //get currently owned prestige level
+    //check currently owned prestige levels
     var havePrestigeUpTo = calcPrestige();
     
     debug("StartZone = " + StartZone, "general", "");
@@ -280,7 +280,9 @@ function PrestigeRaid() {
         return;
     }
     
-    /*if (getPageSetting('AutoMaps') == 1)
+    //attempt to buy the desired map and run it until all prestige is gotten
+    //if can't afford, buy the highest map possible.
+    if (getPageSetting('AutoMaps') == 1)
         autoTrimpSettings["AutoMaps"].value = 0;
     
     if (!game.global.preMapsActive && !game.global.mapsActive) { 
@@ -294,7 +296,7 @@ function PrestigeRaid() {
         game.options.menu.repeatUntil.enabled = 2;
                 
     if (game.global.preMapsActive){ 
-        plusPres(); //sets the map sliders before buying the map for prestige
+        plusPrestige(wantPrestigeUpTo-havePrestigeUpTo); //sets the map sliders before buying the map for prestige
         if ((updateMapCost(true) <= game.resources.fragments.owned)) {
             buyMap();
             mapbought = true;
@@ -312,29 +314,26 @@ function PrestigeRaid() {
         selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id);
         runMap();
     }
-    if (!prestraid && !failpraid && !game.global.repeatMap) {
+    if (!game.global.repeatMap) {
         repeatClicked();
-        debug("...Successfully prestiged!");
     }
-    prestraid = true;
-    prestraidon = false;
     mapbought = false;
-    if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive && prestraid && !failpraid) {
+    if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive) {
         autoTrimpSettings["AutoMaps"].value = 1;
         debug("Turning AutoMaps back on");
     }
-    if (prestraid == true && game.global.world !== getPageSetting('Praidingzone')) {
-        prestraid = false;
-        prestraidon = false;
-        mapbought = false;
-    }*/
-    //attempt to buy the desired map and run it until all prestige is gotten
-    //if can't afford, buy the highest map possible.
-    
-
-    
-
 }
+
+function plusPrestige(delta) {
+        document.getElementById("biomeAdvMapsSelect").value = "Random";
+        document.getElementById('advExtraLevelSelect').value = delta; //returns delta map for all prestige
+        document.getElementById('advSpecialSelect').value = "p";
+        document.getElementById("lootAdvMapsRange").value = 0;
+        document.getElementById("difficultyAdvMapsRange").value = 9;
+        document.getElementById("sizeAdvMapsRange").value = 9;
+        document.getElementById('advPerfectCheckbox').checked = false;
+        updateMapCost();
+        }
 
 function calcPrestige() {
     var max=1;
