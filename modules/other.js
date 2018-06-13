@@ -302,7 +302,7 @@ function PrestigeRaid() {
             mapbought = true;
         }
         else if ((updateMapCost(true) > game.resources.fragments.owned)) {
-            if (getPageSetting('AutoMaps') == 0 && !prestraid) {
+            if (getPageSetting('AutoMaps') == 0) {
                 autoTrimpSettings["AutoMaps"].value = 1;
                 mapbought = false;
                 debug("Failed to prestige raid. Looks like you can't afford to..");
