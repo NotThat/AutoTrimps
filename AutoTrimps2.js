@@ -8,7 +8,8 @@
 // @include      *kongregate.com/games/GreenSatellite/trimps
 // @grant        none
 // ==/UserScript==
-var ATversion = '2.1.6.9b-genbtc-4-2-2018 + KFrowde + Zeker0';
+//var ATversion = '2.1.6.9b-genbtc-4-2-2018 + KFrowde + Zeker0';
+var ATversion = 'hi mom!';
 
 ////////////////////////////////////////////////////////////////////////////////
 //Main Loader Initialize Function (loads first, load everything else)///////////
@@ -62,9 +63,10 @@ function initializeAutoTrimps() {
 
 var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
-changelogList.push({date: "05/06/2018", version: "v2.2.2", description: "Fixed map at zone. Updated calcs. Praiding should work for everyone now. BW raiding still being tested, but should work. Ratios being tested, finding optimum coord and carp. Any bugs, please let me know, thanks. ", isNew: true});
-changelogList.push({date: "05/06/2018", version: "v2.2.1", description: "Updated Heirloom calc, should be 4.8 ready. Ratios will be updated soon. ", isNew: true});
-changelogList.push({date: "28/05/2018", version: "v2.2", description: "Added single use prestige raiding, BW raiding, looting II dump, amals are now calcd properly. ", isNew: true});
+changelogList.push({date: "13/06/2018", version: "v0.1", description: "War was beginning ", isNew: true});
+//changelogList.push({date: "05/06/2018", version: "v2.2.2", description: "Fixed map at zone. Updated calcs. Praiding should work for everyone now. BW raiding still being tested, but should work. Ratios being tested, finding optimum coord and carp. Any bugs, please let me know, thanks. ", isNew: true});
+//changelogList.push({date: "05/06/2018", version: "v2.2.1", description: "Updated Heirloom calc, should be 4.8 ready. Ratios will be updated soon. ", isNew: true});
+//changelogList.push({date: "28/05/2018", version: "v2.2", description: "Added single use prestige raiding, BW raiding, looting II dump, amals are now calcd properly. ", isNew: true});
 //changelogList.push({date: "4/2", version: "v2.1.6.9b", description: "Import Export, Modules Load code Improvements. Multiple Buttons/Settings Were Combined. AutoPerks code was changed but still functions the same, except for a new algorithm that reduces the time to allocate for high helium players to near-instantaneous. Please test new algo with MODULES[\"perks\"].useAlgo2=true; .You can also clear all perks then allocate and have it work now.  AutoMaps no longer considered as being in Lead challenge during Chall^2. ", isNew: true});
 //changelogList.push({date: "3/23", version: "v2.1.6.9", description: "Game's <u>Map at Zone</u> can be used with AT now, to run maps forever. AutoMaps setting was combined with RunUniqueMaps (variable has changed from boolean false,true to a value 0,1,2). Settings file has been migrated as such. New: Map SpecialMod is sort of working, at least. Geneticist Infinity bugfix. New AGU Settings for 60% Void (fixed). Many Graphs fixes. AutoMaps changes. Equipment Cap, see README at <a target='#' href='https://github.com/genbtc/AutoTrimps/blob/gh-pages/README.md'>GitHub</a> DarkTheme fix. Scientists Fix. Zek450 Perks Preset Changed. Ongoing Development...", isNew: false});
 
