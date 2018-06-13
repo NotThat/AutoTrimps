@@ -178,6 +178,7 @@ function PrestigeRaid() {
     Debug(startZone);
     Debug(PAggro);
     Debug(PraidMax);
+    Debug("hello PrestigeRaid", "general", "");
 }
 
 function Praiding() {
