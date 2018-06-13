@@ -281,6 +281,7 @@ function PrestigeRaid() {
         return;
     }
     
+    debug("havePrestigeUpTo < wantPrestigeUpTo apparently");
     //attempt to buy the desired map and run it until all prestige is gotten
     //if can't afford, buy the highest map possible.
     if (getPageSetting('AutoMaps') == 1)
