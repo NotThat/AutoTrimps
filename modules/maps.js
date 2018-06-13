@@ -156,12 +156,20 @@ function autoMap() {
     //START CALCULATING DAMAGES:
     var AutoStance = getPageSetting('AutoStance');
     //calculate crits (baseDamage was calced in function autoStance)    this is a weighted average of nonCrit + Crit. (somewhere in the middle)
-    if (getPlayerCritChance() > 1) {
+    
+    
+    /*if (getPlayerCritChance() > 1) {
     ourBaseDamage = (baseDamage * (1 - getPlayerCritChance()) + (baseDamage * getPlayerCritChance() * getPlayerCritDamageMult() * additionalCritMulti));
     }
     else {
     ourBaseDamage = (baseDamage * (1 - getPlayerCritChance()) + (baseDamage * getPlayerCritChance() * getPlayerCritDamageMult()));
-    }
+    }*/
+    
+    var critChance = getPlayerCritChance();
+    var normalCritChance = (critChance > 1 ? critChance - 1 : critChance);
+    var orangeCritChance = (critChance > 2 ? critChance - 2 : 0);
+    ourBaseDamage = baseDamage * (1 + (normalCritChance + 5 * orangeCritChance) * getPlayerCritDamageMult());
+    
     //calculate with map bonus
     var mapbonusmulti = 1 + (0.20 * game.global.mapBonus);
     //(autostance2 has mapbonusmulti built in)
@@ -233,8 +241,9 @@ function autoMap() {
     const FORMATION_MOD_1 = game.upgrades.Dominance.done ? 2 : 1;
     //asks if we can survive x number of hits in either D stance or X stance.
     enoughHealth = (baseHealth / FORMATION_MOD_1 > customVars.numHitsSurvived * (enemyDamage - baseBlock / FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock / FORMATION_MOD_1 : enemyDamage * pierceMod));
-    enoughDamage = (ourBaseDamage * customVars.enoughDamageCutoff > enemyHealth);
-    debug("hello! " +getEmpowerment() + " wind:" + game.empowerments.Wind.currentDebuffPower + "poison: " + game.empowerments.Poison.currentDebuffPower + " ice: " + game.empowerments.Ice.currentDebuffPower, "general", "");
+    enoughDamage = (ourBaseDamage * customVars.enoughDamageCutoff * (getEmpowerment() == "Poison" ? 100 : 1) > enemyHealth);
+    //debug("hello! " +getEmpowerment() + " wind:" + game.empowerments.Wind.currentDebuffPower + "poison: " + game.empowerments.Poison.currentDebuffPower + " ice: " + game.empowerments.Ice.currentDebuffPower, "general", "");
+    debug(getEmpowerment() == "Poison", "general", "");
     //console.log(getEmpowerment() == "Poison");
 
     //remove this in the meantime until it works for everyone.
