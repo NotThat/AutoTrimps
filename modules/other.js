@@ -331,7 +331,7 @@ function PrestigeRaid() {
     debug("empowerment = " + empowerment, "general", "");
     
     var equipment = game.equipment["Dagger"];
-    debug("game.upgrades[Dagger].prestiges = " + equipment.prestiges, "general", "");
+    debug("game.upgrades[Dagger].prestiges = " + equipment.prestige, "general", "");
 }
 
 function calcPrestige() {
