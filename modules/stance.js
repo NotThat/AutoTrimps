@@ -557,6 +557,10 @@ function autoStance3() {
             return;
         }
         else if (game.global.world >= windstackzone) {
+            debug("enemy.corrupted = " + enemy.corrupted, "general", "");
+            debug("getCurrentEnemy(1).mutation = " + getCurrentEnemy(1).mutation, "general", "");
+            debug("enemy.corrupted = " + enemy.corrupted, "general", "");
+            
             setFormation(4);
             return;
         }
