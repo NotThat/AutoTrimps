@@ -170,6 +170,16 @@ function findLastBionic() {
 
 //Praiding
 
+function PrestigeRaid() {
+    var startZone = getPageSetting('PRaidingZoneStart');
+    var PAggro = getPageSetting('PAggression');
+    var PraidMax = getPageSetting('PRaidingMaxZones');
+    
+    Debug(startZone);
+    Debug(PAggro);
+    Debug(PraidMax);
+}
+
 function Praiding() {
    	        if (game.global.world == getPageSetting('Praidingzone') && !prestraid && !failpraid) {
 	        prestraidon = true; 

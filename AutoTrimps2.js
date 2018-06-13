@@ -209,6 +209,9 @@ function mainLoop() {
     //EXECUTE CORE LOGIC
     if (getPageSetting('ExitSpireCell') >0) exitSpireCell(); //"Exit Spire After Cell" (other.js)
     //if (getPageSetting('loomprotect') == true) protectloom(); //"Exit Spire After Cell" (other.js)
+    if (getPageSetting('PRaidingZoneStart') >0) PrestigeRaid(); //Prestige Raiding NT (other.js)
+    
+    
     if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding (other.js)
     if (getPageSetting('BWraid')==true){setTimeout(BWraiding(), 3000);} //BW Raiding (other.js)
     if (getPageSetting('AutoAllocatePerks')==2) lootdump(); //Loot Dumping (other.js)

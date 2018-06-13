@@ -360,9 +360,9 @@ function initializeAllSettings() {
     createSetting('AdvMapSpecialModifier', 'Map Special Modifier', '<b>EXPERIMENTAL.</b> Attempt to select the BEST map special attacks mod. With this on, this will replace the normal behavior. If bugs, please report as this will become more default soon.', 'boolean', false, null, 'Maps');
     
     //function createSetting(id, name, description, type, defaultValue, list, container) {
-    createSetting('PRaidingZoneStart', 'Map Raiding Start', 'Starting this zone, raid maps for prestige. -1 or 0 for never.', 'value', -1, null, 'Maps');
-    createSetting('PAggression', ['Prestige mode: Light', 'Prestige mode: Aggressive'], 'How aggressively should AT chase after prestige. Higher costs more fragments.', 'multitoggle', 1, null, 'Maps');
-    createSetting('PRaidingMaxZoones', 'Max Extra Zones', 'Hard caps maximum extra Zones AT should ever buy', 'value', 10, null, 'Maps');
+    createSetting('PRaidingZoneStart', 'Map Raiding Start', 'Starting this zone, begin raiding higher maps for prestige. -1 for never.', 'value', -1, null, 'Maps');
+    createSetting('PAggression', ['Prestige mode: Light', 'Prestige mode: Aggressive'], 'How aggressively should AT chase after prestige. Aggressive costs more fragments.', 'multitoggle', 1, null, 'Maps');
+    createSetting('PRaidingMaxZones', 'Max Extra Zones', 'Hard caps maximum extra Zones AT should ever buy chasing prestige', 'value', 10, null, 'Maps');
 
 
 
