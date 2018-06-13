@@ -243,14 +243,14 @@ function PrestigeRaid() {
             if(PAggro == 0)
                 wantPrestigeUpTo = currZone + 1;
             else
-                wantPrestigeUpTo = currZone + 3;
+                wantPrestigeUpTo = currZone + 5;
         }
         else{ //xx6-xx9
             if(PAggro == 0){
                 wantPrestigeUpTo = currZone;
             }
             else {
-                wantPrestigeUpTo = currZone - lastDigitZone + 13;
+                wantPrestigeUpTo = currZone - lastDigitZone + 15;
             }
         }
     }
@@ -264,14 +264,78 @@ function PrestigeRaid() {
     if (wantPrestigeUpTo > currZone + PRaidMax)
         wantPrestigeUpTo = currZone + PRaidMax; //dont go above user defined max
     
+    //get currently owned prestige level
+    var havePrestigeUpTo = calcPrestige();
+    if(havePrestigeUpTo >= wantPrestigeUpTo){
+        debug("have all the prestige levels that we want. exiting.", "general", "");
+        return;
+    }
     
+    if (getPageSetting('AutoMaps') == 1)
+        autoTrimpSettings["AutoMaps"].value = 0;
+    
+    if (!game.global.preMapsActive && !game.global.mapsActive) { 
+        mapsClicked();
+        if (!game.global.preMapsActive) 
+            mapsClicked();
+	debug("Beginning Prestige Raiding...");
+    }
+    
+    if (game.options.menu.repeatUntil.enabled != 2)
+        game.options.menu.repeatUntil.enabled = 2;
+                
+    if (game.global.preMapsActive){ 
+        plusPres(); //sets the map sliders before buying the map for prestige
+        if ((updateMapCost(true) <= game.resources.fragments.owned)) {
+            buyMap();
+            mapbought = true;
+        }
+        else if ((updateMapCost(true) > game.resources.fragments.owned)) {
+            if (getPageSetting('AutoMaps') == 0 && !prestraid) {
+                autoTrimpSettings["AutoMaps"].value = 1;
+                mapbought = false;
+                debug("Failed to prestige raid. Looks like you can't afford to..");
+            }
+            return;
+        }
+    }
+    if (mapbought == true) {
+        selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id);
+        runMap();
+    }
+    if (!prestraid && !failpraid && !game.global.repeatMap) {
+        repeatClicked();
+        debug("...Successfully prestiged!");
+    }
+    prestraid = true;
+    prestraidon = false;
+    mapbought = false;
+    if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive && prestraid && !failpraid) {
+        autoTrimpSettings["AutoMaps"].value = 1;
+        debug("Turning AutoMaps back on");
+    }
+    if (prestraid == true && game.global.world !== getPageSetting('Praidingzone')) {
+        prestraid = false;
+        prestraidon = false;
+        mapbought = false;
+    }
+    //attempt to buy the desired map and run it until all prestige is gotten
+    //if can't afford, buy the highest map possible.
     
     debug("StartZone = " + StartZone, "general", "");
     debug("PAggro = " + PAggro, "general", "");
     debug("PRaidMax = " + PRaidMax, "general", "");
     debug("currZone = " + currZone, "general", "");
+    debug("havePrestigeUpTo = " + havePrestigeUpTo, "general", "");
     debug("wantPrestigeUpTo = " + wantPrestigeUpTo, "general", "");
     debug("empowerment = " + empowerment, "general", "");
+    
+    var equipment = game.equipment["Dagger"];
+    debug("game.upgrades[Dagger].prestiges = " + equipment, "general", "");
+}
+
+function calcPrestige() {
+    return 5;
 }
 
 function Praiding() {
