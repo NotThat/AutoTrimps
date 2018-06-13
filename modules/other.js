@@ -266,6 +266,15 @@ function PrestigeRaid() {
     
     //get currently owned prestige level
     var havePrestigeUpTo = calcPrestige();
+    
+    debug("StartZone = " + StartZone, "general", "");
+    debug("PAggro = " + PAggro, "general", "");
+    debug("PRaidMax = " + PRaidMax, "general", "");
+    debug("currZone = " + currZone, "general", "");
+    debug("havePrestigeUpTo = " + havePrestigeUpTo, "general", "");
+    debug("wantPrestigeUpTo = " + wantPrestigeUpTo, "general", "");
+    debug("empowerment = " + empowerment, "general", "");
+    
     if(havePrestigeUpTo >= wantPrestigeUpTo){
         debug("have all the prestige levels that we want. exiting.", "general", "");
         return;
@@ -322,13 +331,7 @@ function PrestigeRaid() {
     //attempt to buy the desired map and run it until all prestige is gotten
     //if can't afford, buy the highest map possible.
     
-    debug("StartZone = " + StartZone, "general", "");
-    debug("PAggro = " + PAggro, "general", "");
-    debug("PRaidMax = " + PRaidMax, "general", "");
-    debug("currZone = " + currZone, "general", "");
-    debug("havePrestigeUpTo = " + havePrestigeUpTo, "general", "");
-    debug("wantPrestigeUpTo = " + wantPrestigeUpTo, "general", "");
-    debug("empowerment = " + empowerment, "general", "");
+
     
 
 }
