@@ -542,9 +542,7 @@ function autoStanceCheck(enemyCrit) {
 
 function autoStance3() {
       //get back to a baseline of no stance (X)
-      debug("enemy.corrupted = " + getCurrentEnemy(1).corrupted, "general", "");
-      debug("getCurrentEnemy(1).mutation = " + getCurrentEnemy(1).mutation, "general", "");
-      debug("enemy.corrupted = " + getCurrentEnemy(1).corrupted, "general", "");
+      
       calcBaseDamageinX();
       //no need to continue
       if (game.global.gridArray.length === 0) return;
@@ -560,9 +558,12 @@ function autoStance3() {
             return;
         }
         else if (game.global.world >= windstackzone) {
-
-            
-            setFormation(4);
+            //debug("enemy.corrupted = " + getCurrentEnemy(1).corrupted, "general", "");
+            //debug(getCurrentEnemy(1).mutation, "general", ""); // = Corruption (healthy?)
+            if(getCurrentEnemy(1).corrupted == "corruptBleed")
+                setFormation(2);
+            else       
+                setFormation(4);
             return;
         }
     }
