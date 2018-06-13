@@ -63,7 +63,7 @@ $graphFooter.innerHTML += '\
 //TODO: make the overall hover tooltip better and seperate individual help into each button tooltip.
 document.getElementById("graphFooterLine2").innerHTML += '\
 <span style="float: left;" onmouseover=\'tooltip(\"Tips\", \"customText\", event, \"You can zoom by dragging a box around an area. You can turn portals off by clicking them on the legend. Quickly view the last portal by clicking it off, then Invert Selection. Or by clicking All Off, then clicking the portal on. To delete a portal, Type its portal number in the box and press Delete Specific. Using negative numbers in the Delete Specific box will KEEP that many portals (starting counting backwards from the current one), ie: if you have Portals 1000-1015, typing -10 will keep 1005-1015. There is a browser data storage limitation of 10MB, so do not exceed 20 portals-worth of data.\")\' onmouseout=\'tooltip(\"hide\")\'>Tips: Hover for usage tips.</span>\
-<input style="height: 20px; float: right; margin-right: 0.5vw;" type="checkbox" id="rememberCB">\
+<input style="height: 20px; float: right; margin-right: 0.5vw;" type="checkbox" id="rememberCB" checked="true">\
 <span style="float: right; margin-right: 0.5vw;">Try to Remember Which Portals are Selected when switching between Graphs:</span>\
 <input onclick="toggleDarkGraphs()" style="height: 20px; float: right; margin-right: 0.5vw;" type="checkbox" id="blackCB">\
 <span style="float: right; margin-right: 0.5vw;">Black Graphs:</span>';
