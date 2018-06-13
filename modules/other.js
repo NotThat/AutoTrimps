@@ -265,7 +265,7 @@ function PrestigeRaid() {
         wantPrestigeUpTo = currZone + PRaidMax; //dont go above user defined max
     
     //get currently owned prestige level
-    var havePrestigeUpTo = calcPrestige();
+    var havePrestigeUpTo = calcPrestige(currZone);
     if(havePrestigeUpTo >= wantPrestigeUpTo){
         debug("have all the prestige levels that we want. exiting.", "general", "");
         return;
@@ -330,12 +330,93 @@ function PrestigeRaid() {
     debug("wantPrestigeUpTo = " + wantPrestigeUpTo, "general", "");
     debug("empowerment = " + empowerment, "general", "");
     
-    var equipment = game.equipment["Dagger"];
-    debug("game.upgrades[Dagger].prestiges = " + equipment.prestige, "general", "");
+
 }
 
-function calcPrestige() {
-    return 5;
+function calcPrestige(currZone) {
+    var max=1;
+    var tmp;
+    var equipmentPrestigeLevel;
+    
+    equipmentPrestigeLevel = game.equipment["Shield"].prestige;
+    debug("game.equipment[Shield].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+1;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Dagger"].prestige;
+    debug("game.equipment[Dagger].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+1;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Boots"].prestige;
+    debug("game.equipment[Boots].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+1;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Mace"].prestige;
+    debug("game.equipment[Mace].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+2;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Helmet"].prestige;
+    debug("game.equipment[Helmet].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+2;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Polearm"].prestige;
+    debug("game.equipment[Polearm].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+3;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Pants"].prestige;
+    debug("game.equipment[Pants].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+3;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Battleaxe"].prestige;
+    debug("game.equipment[Battleaxe].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+4;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Shoulderguards"].prestige;
+    debug("game.equipment[Shoulderguards].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+4;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Greatsword"].prestige;
+    debug("game.equipment[Greatsword].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+5;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Breastplate"].prestige;
+    debug("game.equipment[Breastplate].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+5;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Arbalest"].prestige;
+    debug("game.equipment[Arbalest].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+5;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Gambeson"].prestige;
+    debug("game.equipment[Gambeson].prestige = " + equipmentPrestigeLevel, "general", "");
+    tmp = equipmentPrestigeLevel/2*10-10+5;
+    if (tmp>max)
+        max=tmp;
+    
+    return max;
 }
 
 function Praiding() {
