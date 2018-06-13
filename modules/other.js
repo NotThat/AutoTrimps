@@ -187,8 +187,9 @@ function PrestigeRaid() {
     }
     
     //this stops sitting in map selection screen with auto maps disabled
-    if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive) {
+    if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive && startedMap) {
         autoTrimpSettings["AutoMaps"].value = 1;
+        startedMap = false;
         debug("Turning AutoMaps back on");
     }
     
@@ -283,7 +284,7 @@ function PrestigeRaid() {
     
     if(havePrestigeUpTo >= wantPrestigeUpTo){
         debug("have all the prestige levels that we want. exiting.", "general", "");
-        autoTrimpSettings["AutoMaps"].value = 1;
+        //autoTrimpSettings["AutoMaps"].value = 1;
         return;
     }
     
@@ -321,6 +322,7 @@ function PrestigeRaid() {
     if (mapbought == true) {
         selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id);
         runMap();
+        startedMap = true;
     }
     if (!game.global.repeatMap) {
         repeatClicked();
