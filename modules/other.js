@@ -271,7 +271,7 @@ function PrestigeRaid() {
         return;
     }
     
-    if (getPageSetting('AutoMaps') == 1)
+    /*if (getPageSetting('AutoMaps') == 1)
         autoTrimpSettings["AutoMaps"].value = 0;
     
     if (!game.global.preMapsActive && !game.global.mapsActive) { 
@@ -281,7 +281,7 @@ function PrestigeRaid() {
 	debug("Beginning Prestige Raiding...");
     }
     
-    /*if (game.options.menu.repeatUntil.enabled != 2)
+    if (game.options.menu.repeatUntil.enabled != 2)
         game.options.menu.repeatUntil.enabled = 2;
                 
     if (game.global.preMapsActive){ 
@@ -331,7 +331,7 @@ function PrestigeRaid() {
     debug("empowerment = " + empowerment, "general", "");
     
     var equipment = game.equipment["Dagger"];
-    debug("game.upgrades[Dagger].prestiges = " + equipment, "general", "");
+    debug("game.upgrades[Dagger].prestiges = " + equipment.prestiges, "general", "");
 }
 
 function calcPrestige() {
