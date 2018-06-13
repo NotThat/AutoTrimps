@@ -234,7 +234,8 @@ function autoMap() {
     //asks if we can survive x number of hits in either D stance or X stance.
     enoughHealth = (baseHealth / FORMATION_MOD_1 > customVars.numHitsSurvived * (enemyDamage - baseBlock / FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock / FORMATION_MOD_1 : enemyDamage * pierceMod));
     enoughDamage = (ourBaseDamage * customVars.enoughDamageCutoff > enemyHealth);
-    console.log("hello" + ourBaseDamage);
+    debug("hello! " +getEmpowerment() + " wind:" + game.empowerments.Wind.currentDebuffPower + "poison: " + game.empowerments.Poison.currentDebuffPower + " ice: " + game.empowerments.Ice.currentDebuffPower, "general", "");
+    //console.log(getEmpowerment() == "Poison");
 
     //remove this in the meantime until it works for everyone.
     /*     if (!wantToScry) {
