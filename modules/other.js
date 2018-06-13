@@ -190,7 +190,7 @@ function PrestigeRaid() {
     if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive && startedMap) {
         autoTrimpSettings["AutoMaps"].value = 1;
         startedMap = false;
-        debug("Turning AutoMaps back on");
+        debug("Turning AutoMaps back on. startedMap off.");
     }
     
     if (StartZone == -1 || currZone < StartZone || prestigeRaidMaxSoFar == currZone || PRaidMax <= 0)
@@ -323,6 +323,7 @@ function PrestigeRaid() {
         selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id);
         runMap();
         startedMap = true;
+        debug("startedMap on");
     }
     if (!game.global.repeatMap) {
         repeatClicked();
