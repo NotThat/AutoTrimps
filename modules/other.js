@@ -274,13 +274,13 @@ function PrestigeRaid() {
     //check currently owned prestige levels
     var havePrestigeUpTo = calcPrestige();
     
-    debug("StartZone = " + StartZone, "general", "");
-    debug("PAggro = " + PAggro, "general", "");
-    debug("PRaidMax = " + PRaidMax, "general", "");
+    //debug("StartZone = " + StartZone, "general", "");
+    ///debug("PAggro = " + PAggro, "general", "");
+    //debug("PRaidMax = " + PRaidMax, "general", "");
     debug("currZone = " + currZone, "general", "");
+    debug("empowerment = " + empowerment, "general", "");
     debug("havePrestigeUpTo = " + havePrestigeUpTo, "general", "");
     debug("wantPrestigeUpTo = " + wantPrestigeUpTo, "general", "");
-    debug("empowerment = " + empowerment, "general", "");
     
     if(havePrestigeUpTo >= wantPrestigeUpTo){
         debug("have all the prestige levels that we want. exiting.", "general", "");
