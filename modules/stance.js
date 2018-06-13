@@ -560,6 +560,8 @@ function autoStance3() {
         else if (game.global.world >= windstackzone) {
             //debug("enemy.corrupted = " + getCurrentEnemy(1).corrupted, "general", "");
             //debug(getCurrentEnemy(1).mutation, "general", ""); // = Corruption (healthy?)
+            
+            //dont windstack vs sharp enemies
             if(getCurrentEnemy(1).corrupted == "corruptBleed")
                 setFormation(2);
             else       

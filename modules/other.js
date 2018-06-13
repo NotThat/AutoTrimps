@@ -139,9 +139,10 @@ function exitSpireCell() {
         endSpire();
 }
 
+//sets map sliders for the map purchase
 function plusPres() {
         document.getElementById("biomeAdvMapsSelect").value = "Random";
-        document.getElementById('advExtraLevelSelect').value = plusMapToRun(game.global.world);
+        document.getElementById('advExtraLevelSelect').value = plusMapToRun(game.global.world); //returns delta map for all prestige
         document.getElementById('advSpecialSelect').value = "p";
         document.getElementById("lootAdvMapsRange").value = 0;
         document.getElementById("difficultyAdvMapsRange").value = 9;
@@ -187,7 +188,7 @@ function Praiding() {
                     game.options.menu.repeatUntil.enabled = 2;
                 }
                 if (game.global.preMapsActive && !prestraid && !failpraid) { 
-                plusPres();
+                plusPres(); //sets the map sliders before buying the map for prestige
                 if ((updateMapCost(true) <= game.resources.fragments.owned)) {
                     buyMap();
                     failpraid = false;
