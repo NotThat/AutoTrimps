@@ -199,7 +199,7 @@ function PrestigeRaid() {
         if(lastDigitZone <= 5 && lastDigitZone > 0){ //xx1-xx5
             wantPrestigeUpTo = currZone - lastDigitZone + 5; //here aggressive is same as light because poison zones are coming up
         }
-        else if (lastDigitZoone > 5){ //xx6-xx9
+        else if (lastDigitZone > 5){ //xx6-xx9
             if(PAggro == 0){
                 wantPrestigeUpTo = currZone - lastDigitZone + 11
             }
