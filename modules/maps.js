@@ -515,10 +515,10 @@ function autoMap() {
         var voidArray = [];
         //values are easiest to hardest. (hardest has the highest value)
         var prefixlist = {
-            'Deadly': 10,
-            'Heinous': 11,
-            'Poisonous': 20,
-            'Destructive': 30
+            'Destructive': 3,
+            'Deadly': 100,
+            'Heinous': 110,
+            'Poisonous': 200
         };
         var prefixkeys = Object.keys(prefixlist);
         var suffixlist = {
