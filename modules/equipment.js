@@ -299,8 +299,8 @@ function autoLevelEquipment() {
         (baseHealth/FORMATION_MOD_1 > numHits * (enemyDamage - baseBlock/FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock/FORMATION_MOD_1 : enemyDamage * pierceMod)) &&
         (!(valid_min && valid_max) || (baseHealth/2 > numHitsScry * (enemyDamage - baseBlock/2 > 0 ? enemyDamage - baseBlock/2 : enemyDamage * pierceMod)));
     //debug("equipment module: enemy damage = " + enemyDamage.toPrecision(3) + " current health: " + game.global.soldierHealth.toPrecision(3) + " game.global.soldierHealth/max " + (game.global.soldierHealth/game.global.soldierHealthMax).toPrecision(3));
-    if(game.global.soldierHealth < 0.15*enemyDamage && game.global.soldierHealth > 1000){ //lets try buying more health if current health < 15% enemy attack, but not if 0 because we're dead
-        debug("current health = " + (game.global.soldierHealth/game.global.soldierHealthMax).toPrecision(3) + " buying health");
+    if(game.global.soldierHealth < 0.35*enemyDamage && game.global.soldierHealth > 1000){ //lets try buying more health if current health < 35% enemy attack, but not if 0 because we're dead
+        debug("current health/enemy attack = " + (game.global.soldierHealth/enemyDamage).toPrecision(3) + " buying health");
         enoughHealthE = false;
     }
     
