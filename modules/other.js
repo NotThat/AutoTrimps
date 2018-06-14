@@ -709,49 +709,49 @@ function calcPrestige() {
     /*equipmentPrestigeLevel = game.equipment["Shield"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
     if (tmp>max)
-        max=tmp;
+        max=tmp;*/
     
     equipmentPrestigeLevel = game.equipment["Dagger"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
     if (tmp>max)
-        max=tmp;*/
+        max=tmp;
     
     equipmentPrestigeLevel = game.equipment["Boots"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
     if (tmp>max)
         max=tmp;
     
-    /*equipmentPrestigeLevel = game.equipment["Mace"].prestige;
+    equipmentPrestigeLevel = game.equipment["Mace"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+2;
     if (tmp>max)
-        max=tmp;*/
+        max=tmp;
     
     equipmentPrestigeLevel = game.equipment["Helmet"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+2;
     if (tmp>max)
         max=tmp;
     
-    /*equipmentPrestigeLevel = game.equipment["Polearm"].prestige;
+    equipmentPrestigeLevel = game.equipment["Polearm"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+3;
     if (tmp>max)
-        max=tmp;*/
+        max=tmp;
     
     equipmentPrestigeLevel = game.equipment["Pants"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+3;
     if (tmp>max)
         max=tmp;
     
-    /*equipmentPrestigeLevel = game.equipment["Battleaxe"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+4;
-    if (tmp>max)
-        max=tmp;*/
-    
-    equipmentPrestigeLevel = game.equipment["Shoulderguards"].prestige;
+    equipmentPrestigeLevel = game.equipment["Battleaxe"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+4;
     if (tmp>max)
         max=tmp;
     
-    /*equipmentPrestigeLevel = game.equipment["Greatsword"].prestige;
+    /*equipmentPrestigeLevel = game.equipment["Shoulderguards"].prestige;
+    tmp = equipmentPrestigeLevel/2*10-10+4;
+    if (tmp>max)
+        max=tmp;
+    
+    equipmentPrestigeLevel = game.equipment["Greatsword"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+5;
     if (tmp>max)
         max=tmp;
@@ -759,12 +759,12 @@ function calcPrestige() {
     equipmentPrestigeLevel = game.equipment["Breastplate"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+5;
     if (tmp>max)
-        max=tmp;
+        max=tmp;*/
     
     equipmentPrestigeLevel = game.equipment["Arbalest"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+5;
     if (tmp>max)
-        max=tmp;*/
+        max=tmp;
     
     equipmentPrestigeLevel = game.equipment["Gambeson"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+5;
