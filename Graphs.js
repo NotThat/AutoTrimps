@@ -922,6 +922,7 @@ function setGraphData(graph) {
             xTitle = 'Zone';
             yTitle = 'Population / Army Size';
             yType = 'Linear';
+            yminFloor = 1;
             break;
         case 'GigaStations':
             graphData = allPurposeGraph('gigas',true,"number");
