@@ -290,7 +290,7 @@ function PrestigeRaid() {
                 debug("map level " + (currZone+extraLevels), "general", "");
 
                 foundSuitableMap = true;
-                i = -1;
+                break;
             }
         }
     else {
@@ -333,7 +333,7 @@ function PrestigeRaid() {
                 debug("map level " + (currZone+extraLevels), "general", "");
 
                 foundSuitableMap = true;
-                i = maxDesiredLevel+1;
+                break;
             }
         }
     }

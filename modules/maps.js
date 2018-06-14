@@ -544,7 +544,8 @@ function autoMap() {
         }
         //sort the array (harder/highvalue last):
         var voidArraySorted = voidArray.sort(function(a, b) {
-            return a.sortByDiff - b.sortByDiff;
+            return b.sortByDiff - a.sortByDiff; //i want destructives first for health purchase
+            //return a.sortByDiff - b.sortByDiff;
         });
         for (var map in voidArraySorted) {
             var theMap = voidArraySorted[map];
