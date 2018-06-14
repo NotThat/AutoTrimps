@@ -215,6 +215,9 @@ function PrestigeRaid() {
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
     findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo); //the zone the alg decided to raid up to
     
+    if(minDesiredLevel < havePrestigeUpTo + 1)
+        minDesiredLevel = havePrestigeUpTo + 1;
+    
     debug("currZone = " + currZone, "general", "");
     debug("empowerment = " + getEmpowerment(), "general", "");
     debug("maxDesiredLevel = " + maxDesiredLevel, "general", "");
@@ -225,8 +228,6 @@ function PrestigeRaid() {
         debug("have all the prestige levels that we want. exiting.", "general", "");
         return;
     }
-    if(minDesiredLevel < havePrestigeUpTo + 1)
-        minDesiredLevel = havePrestigeUpTo + 1;
     
     var fragments = game.resources.fragments.owned; //our available fragments
     
