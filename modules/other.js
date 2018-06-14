@@ -451,6 +451,8 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
     
     if (maxDesiredLevel > currZone + PRaidMax)
         maxDesiredLevel = currZone + PRaidMax; //dont go above user defined max
+    if(lastDigitZone <= 5 && minDesiredLevel < currZone) //always want to keep prestige at least upto current zone
+        minDesiredLevel = currZone;
     if (minDesiredLevel > maxDesiredLevel)
         minDesiredLevel = maxDesiredLevel;
 }
