@@ -910,6 +910,13 @@ function setGraphData(graph) {
             yTitle = 'Coordination';
             yType = 'Linear';
             break;
+        case 'Army Size to Population Ratio':
+            graphData = allPurposeGraph('coord',true,"number");
+            title = 'Army Size to Population Ratio';
+            xTitle = 'Zone';
+            yTitle = 'Ratio';
+            yType = 'Linear';
+            break;
         case 'GigaStations':
             graphData = allPurposeGraph('gigas',true,"number");
             title = 'Gigastation History';
