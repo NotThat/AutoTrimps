@@ -438,7 +438,7 @@ function initializeAllSettings() {
 //Heirloom Settings
     createSetting('AutoHeirloomsNew', ['AutoHeirlooms Off', 'AutoHeirlooms 1', 'AutoHeirlooms 2'], 'Use Autoheirlooms 2. It will keep heirlooms on portal. ', 'multitoggle', 0, null, 'Heirlooms');
     createSetting('AutoUpgradeHeirlooms', 'Auto Upgrade Heirlooms', 'Automatically buys the upgrades the script advises for the Equipped shield and staff, until we are out of nullifium.', 'boolean', false, null, 'Heirlooms');
-    createSetting('dontCarryJunkHeirlooms', 'Carry Extra Heirlooms', 'Will carry/not carry extra heirlooms in bags. Useful for maximizing available Nu', 'boolean', true, null, 'Heirlooms');
+    createSetting('dontCarryJunkHeirlooms', 'Dont Carry Extra Heirlooms', 'Will carry/not carry extra heirlooms in bags. Useful for maximizing available Nu. Green = do not carry. Red = carry', 'boolean', true, null, 'Heirlooms');
 
 //Golden Upgrade Strategies:
     createSetting('AutoGoldenUpgrades', 'AutoGoldenUpgrades', 'IMPORTANT SETTING. Automatically Buy the specified Golden Upgrades as they become available. Faster than vanilla. <b>NOTE:</b> Void setting unlocks more settings: goldStrat, goldAlternating, goldZone and goldNoBattle. <b>New:</b> Void also has a \\"Max then Helium\\" setting so you can get the perfect 60% Voids then Helium. More buttons will become visible when you make selections.', 'dropdown', 'Void', ["Off", "Helium", "Battle", "Void"], 'Golden');
