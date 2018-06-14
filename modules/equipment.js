@@ -298,6 +298,8 @@ function autoLevelEquipment() {
     enoughHealthE = !(doVoids && voidCheckPercent > 0) &&
         (baseHealth/FORMATION_MOD_1 > numHits * (enemyDamage - baseBlock/FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock/FORMATION_MOD_1 : enemyDamage * pierceMod)) &&
         (!(valid_min && valid_max) || (baseHealth/2 > numHitsScry * (enemyDamage - baseBlock/2 > 0 ? enemyDamage - baseBlock/2 : enemyDamage * pierceMod)));
+    debug("equipment module: enemy damage = " + enemyDamage + " current health: " + game.global.soldierHealth + " game.global.soldierHealth/max " + (game.global.soldierHealth/game.global.soldierHealthMax));
+    
     enoughDamageE = (baseDamage * MODULES["equipment"].enoughDamageCutoff > enemyHealth);
     if (!enoughHealthE && MODULES["equipment"].equipHealthDebugMessage)
         debug("Equipment module thought there was not enough health","equips");
