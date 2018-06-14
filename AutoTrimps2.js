@@ -232,6 +232,9 @@ function mainLoop() {
     //if (getPageSetting('GeneticistTimer') >= 0) autoBreedTimer(); //"Geneticist Timer" / "Auto Breed Timer"     (autobreedtimer.js)
     if (autoTrimpSettings.AutoPortal.selected != "Off") autoPortal();   //"Auto Portal" (hidden until level 40) (portal.js)
     debug("ratio log10: " + Math.log10(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend()));
+    debug(game.resources.trimps.realMax());
+    debug(game.resources.trimps.getCurrentSend());
+    debug(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend());
     
     
     
