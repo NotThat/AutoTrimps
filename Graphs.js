@@ -356,6 +356,12 @@ function pushData() {
     //helium/hour % of totalHE, and currentRun/totalLifetime HE
     var getPercent = (game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned)))*100;
     var lifetime = (game.resources.helium.owned / (game.global.totalHeliumEarned-game.resources.helium.owned))*100;
+    
+    //parse similarly to display in game. main digit is E number
+    var realMaxArmy = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();
+    var flr = Math.floor(Math.log10(realMaxArmy));
+    var frac = realMaxArmy/Math.pow(10, flr-2)/1000;
+    var resultForGraph = flr+frac;
 
     allSaveData.push({
         totalPortals: game.global.totalPortals,
@@ -382,7 +388,7 @@ function pushData() {
         magmamancers: game.jobs.Magmamancer.owned,
         fluffy: game.global.fluffyExp,
         nursery: game.buildings.Nursery.purchased,
-        armySize: Math.log10(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend())
+        armySize: resultForGraph
     });
     //only keep 15 portals worth of runs to prevent filling storage
     clearData(15);
