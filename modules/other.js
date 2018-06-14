@@ -198,7 +198,7 @@ function PrestigeRaid() {
     if (StartZone == -1 || currZone < StartZone || prestigeRaidMaxSoFar == currZone || PRaidMax <= 0)
         return;
     
-    prestigeRaidMaxSoFar = currZone; //first time we're prestige raiding in this zone, only run attempt to raid once per zone
+    prestigeRaidMaxSoFar = currZone; //first time we're prestige raiding in this zone, only attempt to raid once per zone
     
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
     findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo); //the zone the alg decided to raid up to
