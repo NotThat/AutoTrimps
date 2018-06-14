@@ -438,7 +438,7 @@ function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, 
     baseCost += (perfect ? 6 : 0);
     baseCost += 10 * extraLevels;
     baseCost += baseLevel;
-    baseCost = Math.Floor((((baseCost / 150) * (Math.pow(1.14, baseCost  - 1))) * baseLevel  * 2) * Math.pow((1.03 + (baseLevel / 50000)), baseLevel))* (type == "Random" ? 1 : 2);
+    baseCost = Math.floor((((baseCost / 150) * (Math.pow(1.14, baseCost  - 1))) * baseLevel  * 2) * Math.pow((1.03 + (baseLevel / 50000)), baseLevel))* (type == "Random" ? 1 : 2);
     return baseCost;
 }
 
