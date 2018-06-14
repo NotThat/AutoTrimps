@@ -66,7 +66,8 @@ function worthOfHeirlooms2(){
 //For the purposes of carrying, rarity trumps all of the stat evaluations. Empty mod slots are valued at the average value of the best missing mod.
 //NEW:
 function autoHeirlooms2() {
-    if(!heirloomsShown && game.global.heirloomsExtra.length > 0){
+    //if(!heirloomsShown && game.global.heirloomsExtra.length > 0){
+    if(!heirloomsShown){
         //PART 1: start by dropping ALL carried heirlooms
         var originalLength = game.global.heirloomsCarried.length;
         for(var index=0; index < originalLength; index++) {

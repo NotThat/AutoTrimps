@@ -235,7 +235,7 @@ function mainLoop() {
     var dontCarryJunk=getPageSetting('dontCarryJunkHeirlooms');
         debug("dontCarry = " + dontCarryJunk);
         
-        autoHeirlooms2();
+    //autoHeirlooms2();
     
     if (getPageSetting('TrapTrimps') && game.global.trapBuildAllowed && game.global.trapBuildToggled == false) toggleAutoTrap(); //"Trap Trimps"
     if (aWholeNewWorld && getPageSetting('AutoRoboTrimp')) autoRoboTrimp();   //"AutoRoboTrimp" (other.js)
