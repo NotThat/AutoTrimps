@@ -234,8 +234,7 @@ function PrestigeRaid() {
         
         if(fragments >= cost){
             debug("found suitable map", "general", "");
-            debug("cost " + cost, "general", "");
-            debug("we have " + fragments + " fragments", "general", "");
+            debug("cost " + cost.toPrecision(2) + " out of " + fragments.toPrecision(2) + " available fragments.", "general", "");
             debug("map level " + (currZone+extraLevels), "general", "");
             
             foundSuitableMap = true;
