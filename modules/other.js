@@ -483,7 +483,9 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
                 minDesiredLevel = currZone + 1; //+1 level is still fine, just dont get xx6
             }
             else{ //xx6-xx9
-                maxDesiredLevel = currZone - lastDigitZone + 13;
+                maxDesiredLevel = currZone - lastDigitZone + 15;
+                if(maxDesiredLevel > currZone + 7)
+                    maxDesiredLevel = currZone+7;
                 minDesiredLevel = currZone - lastDigitZone + 11;
             }
         }
