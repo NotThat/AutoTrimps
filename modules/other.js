@@ -361,8 +361,8 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
                 minDesiredLevel = currZone + 6;
             }
             else{
-                maxDesiredLevel = currZone;
-                minDesiredLevel = currZone;
+                maxDesiredLevel = currZone - lastDigitZone + 5;
+                minDesiredLevel = currZone - lastDigitZone + 5;
             }
         }
         else {//PAggro == 1
@@ -401,8 +401,8 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
         }
         else{ //xx6-xx9
             if(PAggro == 0){ //dont want anything
-                maxDesiredLevel = currZone;
-                minDesiredLevel = currZone;
+                maxDesiredLevel = currZone - lastDigitZone + 5;
+                minDesiredLevel = currZone - lastDigitZone + 5;
             }
             else {
                 maxDesiredLevel = currZone - lastDigitZone + 15;
