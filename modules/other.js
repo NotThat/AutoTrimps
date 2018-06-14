@@ -253,7 +253,7 @@ function PrestigeRaid() {
                 cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
             }
         }
-        if (cost/fragments > 1 && i == minDesiredLevel){//last attempt to buy a map
+        if (cost/fragments > 1 && (i == minDesiredLevel || (currZone % 10 == 5 && getEmpowerment() == "Poison"))){//last attempt to buy a map. also do this on xx5 poison zones
             debug("last attempt to buy map");
             sizeSlider=0;
             diffSlider=0;
@@ -407,7 +407,7 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
                 minDesiredLevel = currZone + 1; //+1 level is still fine, just dont get xx6
             }
             else{ //xx6-xx9
-                maxDesiredLevel = currZone - lastDigitZone + 15;
+                maxDesiredLevel = currZone - lastDigitZone + 13;
                 minDesiredLevel = currZone - lastDigitZone + 11;
             }
         }
