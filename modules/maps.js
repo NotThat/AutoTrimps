@@ -407,7 +407,7 @@ function autoMap() {
     if (getPageSetting('DynamicSiphonology') || shouldFarmLowerZone) {
         for (siphlvl; siphlvl < maxlvl; siphlvl++) {
             //experimental
-            break;
+            //break;
             //check HP vs damage and find how many siphonology levels we need.
             var maphp = getEnemyMaxHealth(siphlvl) * 1.1; // 1.1 mod is for all maps (taken out of the function)
             var cpthlth = getCorruptScale("health") / 2; //get corrupted health mod
