@@ -245,6 +245,13 @@ function PrestigeRaid() {
             perfect=true;
             type="Garden";
             cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+            //just in case..
+            if (cost/fragments > 1){
+                lootSlider = 0;
+                perfect = false;
+                type="Random";
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+            }
         }
         if (cost/fragments > 1 && i == minDesiredLevel){//last attempt to buy a map
             debug("last attempt to buy map");
@@ -340,6 +347,7 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
     
     //are we in an active spire? if so we always want +5 map levels
     if(currZone % 100 == 0 && currZone >= getPageSetting('IgnoreSpiresUntil')){
+        debug("active spire mode");
         maxDesiredLevel = currZone + 5;
         minDesiredLevel = currZone + 1;
     }
@@ -420,9 +428,9 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
             }
         }
         else{ //xx6-xx9
-            if(PAggro == 0){ //dont want anything
-                maxDesiredLevel = currZone - lastDigitZone + 5;
-                minDesiredLevel = currZone - lastDigitZone + 5;
+            if(PAggro == 0){ 
+                maxDesiredLevel = currZone - lastDigitZone + 11;
+                minDesiredLevel = currZone - lastDigitZone + 11;
             }
             else {
                 maxDesiredLevel = currZone - lastDigitZone + 15;
