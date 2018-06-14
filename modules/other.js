@@ -9,6 +9,8 @@ var prestraidon = false;
 var cost = (updateMapCost(true));
 var mapbought = false;
 var prestigeRaidMaxSoFar = 0;
+var maxDesiredLevel;
+var minDesiredLevel;
 //Activate Robo Trimp (will activate on the first zone after liquification)
 function autoRoboTrimp() {
     //exit if the cooldown is active, or we havent unlocked robotrimp.
@@ -198,99 +200,57 @@ function PrestigeRaid() {
     
     prestigeRaidMaxSoFar = currZone; //first time we're prestige raiding in this zone, only run attempt to raid once per zone
     
-    var empowerment = getEmpowerment();
-    var lastDigitZone = currZone % 10;
-    var wantPrestigeUpTo; //the zone the alg decided to raid up to
-    //there are 7 cases: poison/wind/ice (each 2 cases depending on zones xx1-xx5 or xx6-x10), and 7th case for no empowerment before zone 236.
-    if (empowerment == "Ice"){
-        if(lastDigitZone <= 5 && lastDigitZone > 0){ //xx1-xx5
-            wantPrestigeUpTo = currZone - lastDigitZone + 5; //here aggressive is same as light because poison zones are coming up
-        }
-        else if (lastDigitZone > 5){ //xx6-xx9
-            if(PAggro == 0){
-                wantPrestigeUpTo = currZone - lastDigitZone + 11
-            }
-            else{ //PAggro == 1
-                wantPrestigeUpTo = currZone - lastDigitZone + 13
-            }
-        }
-        else { //xx0
-            if(PAggro == 0){
-                wantPrestigeUpTo = currZone + 1;
-            }
-            else
-                wantPrestigeUpTo = currZone + 3;
-        }
-    }
-    else if (empowerment == "Poison"){
-        if(PAggro == 0){ //low aggro poison is fairly straightforward; get to last poison zone and farm 5 or 6 zones higher
-            if(lastDigitZone == 0)
-                wantPrestigeUpTo = currZone + 5;
-            else if(lastDigitZone == 5)
-                wantPrestigeUpTo = currZone + 6;
-            else
-                wantPrestigeUpTo = currZone - lastDigitZone + 5;
-        }
-        else {//PAggro == 1
-            if(lastDigitZone == 0)
-                wantPrestigeUpTo = currZone + 5; //most available
-            else if(lastDigitZone == 5)
-                wantPrestigeUpTo = currZone + 10; //most available
-            else if(lastDigitZone < 5)
-                wantPrestigeUpTo = currZone - lastDigitZone + 5;
-            else //xx6-xx9
-                wantPrestigeUpTo = currZone - lastDigitZone + 15;
-        }
-    }
-    else if (empowerment == "Wind"){
-        if(lastDigitZone <= 5 && lastDigitZone > 0){ //xx1-xx5, fairly conservative because ice is coming up
-            wantPrestigeUpTo = currZone - lastDigitZone + 5;
-        }
-        else if (lastDigitZone == 0){
-            if(PAggro == 0)
-                wantPrestigeUpTo = currZone + 1;
-            else
-                wantPrestigeUpTo = currZone + 5;
-        }
-        else{ //xx6-xx9
-            if(PAggro == 0){
-                wantPrestigeUpTo = currZone - lastDigitZone + 5;
-            }
-            else {
-                wantPrestigeUpTo = currZone - lastDigitZone + 15;
-            }
-        }
-    }
-    else{ //no empowerment, pre 236
-        if (lastDigitZone <= 5)
-            wantPrestigeUpTo = currZone - lastDigitZone + 5;
-        else
-            wantPrestigeUpTo = currZone - lastDigitZone + 15;
-    }
+    var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
+    findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo); //the zone the alg decided to raid up to
     
-    if (wantPrestigeUpTo > currZone + PRaidMax)
-        wantPrestigeUpTo = currZone + PRaidMax; //dont go above user defined max
-    
-    //check currently owned prestige levels
-    var havePrestigeUpTo = calcPrestige();
-    
-    //debug("StartZone = " + StartZone, "general", "");
-    ///debug("PAggro = " + PAggro, "general", "");
-    //debug("PRaidMax = " + PRaidMax, "general", "");
     debug("currZone = " + currZone, "general", "");
-    debug("empowerment = " + empowerment, "general", "");
+    debug("empowerment = " + getEmpowerment(), "general", "");
+    debug("maxDesiredLevel = " + maxDesiredLevel, "general", "");
+    debug("minDesiredLevel = " + minDesiredLevel, "general", "");
     debug("havePrestigeUpTo = " + havePrestigeUpTo, "general", "");
-    debug("wantPrestigeUpTo = " + wantPrestigeUpTo, "general", "");
-    
-    if(havePrestigeUpTo >= wantPrestigeUpTo){
+
+    if(havePrestigeUpTo >= maxDesiredLevel){
         debug("have all the prestige levels that we want. exiting.", "general", "");
-        //autoTrimpSettings["AutoMaps"].value = 1;
+        return;
+    }
+    if(minDesiredLevel < havePrestigeUpTo + 1)
+        minDesiredLevel = havePrestigeUpTo + 1;
+    
+    var fragments = game.resources.fragments.owned; //our available fragments
+    
+    //find highest map level we can afford
+    var foundSuitableMap = false;
+    for(i = maxDesiredLevel; i >= minDesiredLevel; i--){
+        baseLevel = currZone;
+        sizeSlider=9;
+        diffSlider=9;
+        lootSlider=0;
+        specialMod="Prestigious";
+        perfect=false;
+        extraLevels = i-currZone;
+        type="Random";
+                 //calcMapCost(currZone,   0-9,       0-9,        0-9,        "Prestigious"/"FA"/"LMC"/"", boolean, 0-10, "Random"/other){ 
+        var cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+        
+        if(fragments >= cost){
+            debug("found suitable map", "general", "");
+            debug("cost " + cost, "general", "");
+            debug("we have " + fragments + " fragments", "general", "");
+            debug("map level " + (currZone+extraLevels), "general", "");
+            
+            foundSuitableMap = true;
+            i = -1;
+        }
+    }
+    
+    if (!foundSuitableMap){
+        debug("could not find suitable map.");
+        debug("cheapest map level " + (currZone+extraLevels) + "  would cost " + cost + " fragments");
+        debug("exiting.");
         return;
     }
     
-    debug("havePrestigeUpTo < wantPrestigeUpTo apparently");
     //attempt to buy the desired map and run it until all prestige is gotten
-    //if can't afford, buy the highest map possible.
     if (getPageSetting('AutoMaps') == 1)
         autoTrimpSettings["AutoMaps"].value = 0;
     
@@ -298,14 +258,30 @@ function PrestigeRaid() {
         mapsClicked();
         if (!game.global.preMapsActive) 
             mapsClicked();
-	debug("Beginning Prestige Raiding...");
+	debug("Entered map screeen");
     }
     
     if (game.options.menu.repeatUntil.enabled != 2)
         game.options.menu.repeatUntil.enabled = 2;
                 
     if (game.global.preMapsActive){ 
-        plusPrestige(wantPrestigeUpTo-currZone); //sets the map sliders before buying the map for prestige
+        //sets the map sliders before buying the map for prestige
+        document.getElementById("biomeAdvMapsSelect").value = type;
+        document.getElementById('advExtraLevelSelect').value = extraLevels; //returns delta map for all prestige
+        if(specialMod == "Prestigious")
+            document.getElementById('advSpecialSelect').value = "p"; 
+        if(specialMod == "FA")
+            document.getElementById('advSpecialSelect').value = "fa"; 
+        if(specialMod == "LMC")
+            document.getElementById('advSpecialSelect').value = "lmc"; 
+        else
+            document.getElementById('advSpecialSelect').value = "0"; 
+        document.getElementById("lootAdvMapsRange").value = lootSlider;
+        document.getElementById("difficultyAdvMapsRange").value = diffSlider;
+        document.getElementById("sizeAdvMapsRange").value = sizeSlider;
+        document.getElementById('advPerfectCheckbox').checked = perfect;
+        updateMapCost();        
+        
         if ((updateMapCost(true) <= game.resources.fragments.owned)) {
             buyMap();
             mapbought = true;
@@ -314,8 +290,8 @@ function PrestigeRaid() {
             if (getPageSetting('AutoMaps') == 0) {
                 autoTrimpSettings["AutoMaps"].value = 1;
                 mapbought = false;
-                //way better would be to calculate costs without going to map screen to avoid trimp death. TODO
-                debug("Failed to prestige raid. Looks like you can't afford to..");
+                debug("Failed to prestige raid. We can't afford the map.");
+                debug("Expected map level " + (currZone+extraLevels) + " is " + cost + " and we have " + fragments + " frags.");
             }
             return;
         }
@@ -334,6 +310,136 @@ function PrestigeRaid() {
         autoTrimpSettings["AutoMaps"].value = 1;
         debug("Turning AutoMaps back on");
     }
+}
+
+function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
+    var ret;
+    var empowerment = getEmpowerment();
+    var lastDigitZone = currZone % 10;
+    
+    //are we in an active spire? if so we always want +5 map levels
+    if(currZone % 100 == 0 && currZone >= getPageSetting('IgnoreSpiresUntil')){
+        maxDesiredLevel = currZone + 5;
+        minDesiredLevel = currZone + 1;
+    }
+    //there are 7 cases: poison/wind/ice (each 2 cases depending on zones xx1-xx5 or xx6-x10), and 7th case for no empowerment before zone 236.
+    else if (empowerment == "Ice"){
+        if(lastDigitZone <= 5 && lastDigitZone > 0){ //xx1-xx5 here aggressive is same as light because poison zones are coming up
+            maxDesiredLevel = currZone - lastDigitZone + 5; 
+            minDesiredLevel = currZone - lastDigitZone + 1; 
+        }
+        else if (lastDigitZone > 5){ //xx6-xx9
+            if(PAggro == 0){
+                maxDesiredLevel = currZone - lastDigitZone + 11;
+                minDesiredLevel = currZone - lastDigitZone + 11;
+            }
+            else{ //PAggro == 1
+                maxDesiredLevel = currZone - lastDigitZone + 13;
+                minDesiredLevel = currZone - lastDigitZone + 11;
+            }
+        }
+        else { //xx0
+            if(PAggro == 0){
+                maxDesiredLevel = currZone + 1;
+                minDesiredLevel = currZone + 1;
+            }
+            else{
+                maxDesiredLevel = currZone + 3;
+                minDesiredLevel = currZone + 1;
+            }
+        }
+    }
+    else if (empowerment == "Poison"){
+        if(PAggro == 0){ //low aggro poison is fairly straightforward; get to last poison zone and farm 5 or 6 zones higher
+            if(lastDigitZone == 0){
+                maxDesiredLevel = currZone + 5;
+                minDesiredLevel = currZone + 1;
+            }
+            else if(lastDigitZone == 5){
+                maxDesiredLevel = currZone + 6;
+                minDesiredLevel = currZone + 6;
+            }
+            else{
+                maxDesiredLevel = currZone;
+                minDesiredLevel = currZone;
+            }
+        }
+        else {//PAggro == 1
+            if(lastDigitZone == 0){
+                maxDesiredLevel = currZone + 5; //most available
+                minDesiredLevel = currZone + 1;
+            }
+            else if(lastDigitZone == 5){
+                maxDesiredLevel = currZone + 10; //most available
+                minDesiredLevel = currZone + 6;
+            }
+            else if(lastDigitZone < 5){
+                maxDesiredLevel = currZone - lastDigitZone + 5;
+                minDesiredLevel = currZone + 1; //+1 level is still fine, just dont get xx6
+            }
+            else{ //xx6-xx9
+                maxDesiredLevel = currZone - lastDigitZone + 15;
+                minDesiredLevel = currZone - lastDigitZone + 11;
+            }
+        }
+    }
+    else if (empowerment == "Wind"){
+        if(lastDigitZone <= 5 && lastDigitZone > 0){ //xx1-xx5, fairly conservative because ice is coming up
+            maxDesiredLevel = currZone - lastDigitZone + 5;
+            minDesiredLevel = currZone - lastDigitZone + 1;
+        }
+        else if (lastDigitZone == 0){
+            if(PAggro == 0){
+                maxDesiredLevel = currZone + 1;
+                minDesiredLevel = currZone + 1;
+            }
+            else{
+                maxDesiredLevel = currZone + 5;
+                minDesiredLevel = currZone + 1;
+            }
+        }
+        else{ //xx6-xx9
+            if(PAggro == 0){ //dont want anything
+                maxDesiredLevel = currZone;
+                minDesiredLevel = currZone;
+            }
+            else {
+                maxDesiredLevel = currZone - lastDigitZone + 15;
+                minDesiredLevel = currZone - lastDigitZone + 11;
+            }
+        }
+    }
+    else{ //no empowerment, pre 236
+        if (lastDigitZone <= 5){
+            maxDesiredLevel = currZone - lastDigitZone + 5;
+            minDesiredLevel = currZone + 1;
+        }
+        else{
+            maxDesiredLevel = currZone - lastDigitZone + 15;
+            minDesiredLevel = currZone - lastDigitZone + 11;
+        }
+    }
+    
+    if (maxDesiredLevel > currZone + PRaidMax)
+        maxDesiredLevel = currZone + PRaidMax; //dont go above user defined max
+    if (minDesiredLevel > maxDesiredLevel)
+        minDesiredLevel = maxDesiredLevel;
+}
+
+function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type){
+    var baseCost = sizeSlider + diffSlider + lootSlider;
+    baseCost = baseCost * (baseLevel >= 60 ? 0.74 : 1);
+    if(specialMod == "Prestigious")
+        baseCost += 10;
+    if(specialMod == "FA")
+        baseCost += 7;
+    if(specialMod == "LMC")
+        baseCost += 18;
+    baseCost += (perfect ? 6 : 0);
+    baseCost += 10 * extraLevels;
+    baseCost += baseLevel;
+    baseCost = Math.Floor((((baseCost / 150) * (Math.pow(1.14, baseCost  - 1))) * baseLevel  * 2) * Math.pow((1.03 + (baseLevel / 50000)), baseLevel))* (type == "Random" ? 1 : 2);
+    return baseCost;
 }
 
 function plusPrestige(delta) {
