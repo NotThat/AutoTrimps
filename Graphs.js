@@ -917,7 +917,7 @@ function setGraphData(graph) {
             yType = 'Linear';
             break;
         case 'Army Ratio':
-            graphData = allPurposeGraph('armySize',true,"string");
+            graphData = allPurposeGraph('armySize',true,"number");
             title = 'Army Size to Population Ratio';
             xTitle = 'Zone';
             yTitle = 'Population / Army Size';
