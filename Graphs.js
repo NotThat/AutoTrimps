@@ -382,7 +382,7 @@ function pushData() {
         magmamancers: game.jobs.Magmamancer.owned,
         fluffy: game.global.fluffyExp,
         nursery: game.buildings.Nursery.purchased,
-        armySize: game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend()
+        armySize: Math.log10(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend())
     });
     //only keep 15 portals worth of runs to prevent filling storage
     clearData(15);
@@ -914,7 +914,7 @@ function setGraphData(graph) {
             graphData = allPurposeGraph('armySize',true,"number");
             title = 'Army Size to Population Ratio';
             xTitle = 'Zone';
-            yTitle = 'Ratio';
+            yTitle = 'Population / Army Size';
             yType = 'Linear';
             break;
         case 'GigaStations':
