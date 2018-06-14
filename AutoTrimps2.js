@@ -231,7 +231,7 @@ function mainLoop() {
     getPageSetting('AutoMaps') > 0 ? autoMap() : updateAutoMapsStatus(); //"Auto Maps"      (automaps.js)
     //if (getPageSetting('GeneticistTimer') >= 0) autoBreedTimer(); //"Geneticist Timer" / "Auto Breed Timer"     (autobreedtimer.js)
     if (autoTrimpSettings.AutoPortal.selected != "Off") autoPortal();   //"Auto Portal" (hidden until level 40) (portal.js)
-    //debug("ratio: " + (game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend()).toExponential(3));
+    debug("ratio log10: " + Math.log10(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend()));
     
     
     
