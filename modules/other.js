@@ -179,12 +179,12 @@ function PrestigeRaid() {
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
     var currZone = game.global.world;
     
-    debug("addbreedTimerInsideText.innerHTML = " + addbreedTimerInsideText.innerHTML);
-    //getMaxTrimps()
-    //getBreedTime
-    debug("game.resources.trimps.realMax() = " + game.resources.trimps.realMax());
-    debug("trimps.owned = " + trimps.owned);
-    debug("game.resources.trimps.owned = " + game.resources.trimps.owned);
+    //debug("addbreedTimerInsideText.innerHTML = " + addbreedTimerInsideText.innerHTML);
+    //debug("game.resources.trimps.realMax() = " + game.resources.trimps.realMax());
+    //debug("game.resources.trimps.owned = " + game.resources.trimps.owned);
+    debug("missing trimps = " + (game.resources.trimps.realMax()-game.resources.trimps.owned));
+    var missing = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? true : false);
+    debug("missing trimps = " + missing);
     
     if (PRaidMax > 10){
         PRaidMax = 10;
