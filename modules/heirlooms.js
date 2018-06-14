@@ -57,7 +57,13 @@ function worthOfHeirlooms2(){
     */
 }
 
-//Automatically evaluate and carry the best heirlooms, and recommend upgrades for equipped items. AutoHeirlooms will only change carried items when the heirlooms window is not open. Carried items will be compared and swapped with the types that are already carried. If a carry spot is empty, it will be filled with the best shield (if available). Evaluation is based ONLY on the following mods (listed in order of priority, high to low): Void Map Drop Chance/Trimp Attack, Crit Chance/Crit Damage, Miner Efficiency/Metal Drop, Gem Drop/Dragimp Efficiency, Farmer/Lumberjack Efficiency. For the purposes of carrying, rarity trumps all of the stat evaluations. Empty mod slots are valued at the average value of the best missing mod.
+//Automatically evaluate and carry the best heirlooms, and recommend upgrades for equipped items. 
+//AutoHeirlooms will only change carried items when the heirlooms window is not open. 
+//Carried items will be compared and swapped with the types that are already carried. 
+//If a carry spot is empty, it will be filled with the best shield (if available). 
+//Evaluation is based ONLY on the following mods (listed in order of priority, high to low): Void Map Drop Chance/Trimp Attack, 
+//Crit Chance/Crit Damage, Miner Efficiency/Metal Drop, Gem Drop/Dragimp Efficiency, Farmer/Lumberjack Efficiency. 
+//For the purposes of carrying, rarity trumps all of the stat evaluations. Empty mod slots are valued at the average value of the best missing mod.
 //NEW:
 function autoHeirlooms2() {
     if(!heirloomsShown && game.global.heirloomsExtra.length > 0){
@@ -77,6 +83,9 @@ function autoHeirlooms2() {
                 index--; originalLength--;  //stop index-skipping/re-ordering (idk how else to do it).
             }
         }
+        
+        //dont want to carry anything
+        var dontCarryJunk=true;
         worthOfHeirlooms2();
         //now start by re-filling any empty carried slots with the most highly evaluated heirlooms
         //Alternates EQUALLY between Shield and Staff, putting the best ones of each.
@@ -87,13 +96,15 @@ function autoHeirlooms2() {
             if (worth2["Shield"].length > 0){
                 var carryshield = worth2["Shield"].shift();
                 selectHeirloom(carryshield.index, 'heirloomsExtra');
-                carryHeirloom();
+                if (!dontCarryJunk)
+                    carryHeirloom();
             }
             worthOfHeirlooms2();
             if (worth2["Staff"].length > 0){
                 var carrystaff = worth2["Staff"].shift();
                 selectHeirloom(carrystaff.index, 'heirloomsExtra');
-                carryHeirloom();
+                if (!dontCarryJunk)
+                    carryHeirloom();
             }
         }
         worthOfHeirlooms();
@@ -114,7 +125,8 @@ function autoHeirlooms2() {
                     selectHeirloom(carried, 'heirloomsCarried');
                     stopCarryHeirloom();
                     selectHeirloom(index, 'heirloomsExtra');
-                    carryHeirloom();
+                    if (!dontCarryJunk)
+                        carryHeirloom();
                     worthOfHeirlooms();
                 }
                 //do nothing if the carried thing was protected.
