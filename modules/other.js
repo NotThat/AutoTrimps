@@ -179,12 +179,6 @@ function PrestigeRaid() {
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
     var currZone = game.global.world;
     
-    //debug("addbreedTimerInsideText.innerHTML = " + addbreedTimerInsideText.innerHTML);
-    //debug("game.resources.trimps.realMax() = " + game.resources.trimps.realMax());
-    //debug("game.resources.trimps.owned = " + game.resources.trimps.owned);
-    debug("missing trimps = " + (game.resources.trimps.realMax()-game.resources.trimps.owned));
-    var missing = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? true : false);
-    debug("missing trimps = " + missing);
     
     if (PRaidMax > 10){
         PRaidMax = 10;
@@ -204,6 +198,17 @@ function PrestigeRaid() {
     
     if (StartZone == -1 || currZone < StartZone || prestigeRaidMaxSoFar == currZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0)
         return;
+    
+    //debug("addbreedTimerInsideText.innerHTML = " + addbreedTimerInsideText.innerHTML);
+    var armyReady = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? false : true);
+    if(!armyReady){  //may as well stay in the world until army ready. may not be true for some dailies
+        if (getEmpowerment() == "Poison"){
+            if(currZone % 10 != 5 && currZone % 10 != 0) //in poison xx0 and xx5, we are willing to sit and wait in map screen to be sure not to miss our last poison zone
+                return;
+        }
+        else //ice/wind/no empowerment always stay in world if army isnt ready
+            return;
+    }
     
     prestigeRaidMaxSoFar = currZone; //first time we're prestige raiding in this zone, only attempt to raid once per zone
     
