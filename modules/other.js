@@ -11,6 +11,7 @@ var mapbought = false;
 var prestigeRaidMaxSoFar = 0;
 var maxDesiredLevel;
 var minDesiredLevel;
+var scaleUp; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
 //Activate Robo Trimp (will activate on the first zone after liquification)
 function autoRoboTrimp() {
     //exit if the cooldown is active, or we havent unlocked robotrimp.
@@ -178,8 +179,6 @@ function PrestigeRaid() {
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
     var currZone = game.global.world;
-    var scaleUp = false; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
-    
     
     if (PRaidMax > 10){
         PRaidMax = 10;
@@ -234,62 +233,107 @@ function PrestigeRaid() {
     //find highest map level we can afford
     var foundSuitableMap = false;
     var cost
-    for(i = maxDesiredLevel; i >= minDesiredLevel; i--){
-        baseLevel = currZone;
-        sizeSlider=9;
-        diffSlider=9;
-        lootSlider=0;
-        specialMod="Prestigious";
-        perfect=false;
-        extraLevels = i-currZone;
-        type="Random";
-             //calcMapCost(currZone,   0-9,       0-9,        0-9,        "Prestigious"/"FA"/"LMC"/"", boolean, 0-10, "Random"/other){ 
-        cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-        
-        if (cost/fragments < 3 && cost/fragments > 1){ //can almost afford, lets get it
-            debug("loosening map");
-            diffSlider = 5;
+    if (!scaleUp)
+        for(i = maxDesiredLevel; i >= minDesiredLevel; i--){
+            baseLevel = currZone;
+            sizeSlider=9;
+            diffSlider=9;
+            lootSlider=0;
+            specialMod="Prestigious";
+            perfect=false;
+            extraLevels = i-currZone;
+            type="Random";
+                 //calcMapCost(currZone,   0-9,       0-9,        0-9,        "Prestigious"/"FA"/"LMC"/"", boolean, 0-10, "Random"/other){ 
             cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-            if (cost/fragments > 1){ //can almost afford, lets get it
-                debug("loosening further");
-                specialMod = "";
+
+            if (cost/fragments < 3 && cost/fragments > 1){ //can almost afford, lets get it
+                debug("loosening map");
+                diffSlider = 5;
                 cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-            }
-        }
-        else if (cost/fragments < 0.01){ //can easily affordd
-            debug("maximizing map");
-            lootSlider=9;
-            perfect=true;
-            type="Garden";
-            cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-            //just in case..
-            if (cost/fragments > 1){
-                lootSlider = 0;
-                perfect = false;
-                type="Random";
-                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-            }
-        }
-        if (cost/fragments > 1 && (i == minDesiredLevel || (currZone % 10 == 5 && getEmpowerment() == "Poison"))){//last attempt to buy a map. also do this on xx5 poison zones
-            debug("last attempt to buy map");
-            diffSlider=0;
-            cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-            if (cost/fragments > 1){
-                sizeSlider=0;
-                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-                if (cost/fragments > 1){
-                    specialMod="";
+                if (cost/fragments > 1){ //can almost afford, lets get it
+                    debug("loosening further");
+                    specialMod = "";
                     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
                 }
             }
+            else if (cost/fragments < 0.01){ //can easily affordd
+                debug("maximizing map");
+                lootSlider=9;
+                perfect=true;
+                type="Garden";
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                //just in case..
+                if (cost/fragments > 1){
+                    lootSlider = 0;
+                    perfect = false;
+                    type="Random";
+                    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                }
+            }
+            if (cost/fragments > 1 && (i == minDesiredLevel || (currZone % 10 == 5 && getEmpowerment() == "Poison"))){//last attempt to buy a map. also do this on xx5 poison zones
+                debug("last attempt to buy map");
+                diffSlider=0;
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                if (cost/fragments > 1){
+                    sizeSlider=0;
+                    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                    if (cost/fragments > 1){
+                        specialMod="";
+                        cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                    }
+                }
+            }
+            if(fragments >= cost){
+                debug("found suitable map", "general", "");
+                debug("cost " + cost.toPrecision(3) + " out of " + fragments.toPrecision(3) + " available fragments.", "general", "");
+                debug("map level " + (currZone+extraLevels), "general", "");
+
+                foundSuitableMap = true;
+                i = -1;
+            }
         }
-        if(fragments >= cost){
-            debug("found suitable map", "general", "");
-            debug("cost " + cost.toPrecision(3) + " out of " + fragments.toPrecision(3) + " available fragments.", "general", "");
-            debug("map level " + (currZone+extraLevels), "general", "");
-            
-            foundSuitableMap = true;
-            i = -1;
+    else {
+        for(i = minDesiredLevel; i <= maxDesiredLevel; i++){
+            baseLevel = currZone;
+            sizeSlider=9;
+            diffSlider=9;
+            lootSlider=0;
+            specialMod="Prestigious";
+            perfect=false;
+            extraLevels = i-currZone;
+            type="Random";
+
+            cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+            if (cost/fragments < 3 && cost/fragments > 1){ //can almost afford, lets get it
+                debug("loosening map");
+                diffSlider = 7;
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                if (cost/fragments > 1){ //can almost afford, lets get it
+                    debug("loosening further");
+                    specialMod = "";
+                    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                }
+            }
+            else if (cost/fragments < 0.02){ //can easily afford
+                debug("maximizing map");
+                lootSlider=9;
+                perfect=true;
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                //just in case..
+                if (cost/fragments > 1){
+                    lootSlider = 0;
+                    perfect = false;
+                    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                }
+            }
+            if(fragments >= cost){
+                debug("found suitable map", "general", "");
+                debug("cost " + cost.toPrecision(3) + " out of " + fragments.toPrecision(3) + " available fragments.", "general", "");
+                debug("map level " + (currZone+extraLevels), "general", "");
+
+                foundSuitableMap = true;
+                i = maxDesiredLevel+1;
+            }
         }
     }
     
@@ -297,6 +341,7 @@ function PrestigeRaid() {
         debug("could not find suitable map.");
         debug("cheapest map level " + (currZone+extraLevels) + "  would cost " + cost + " fragments");
         debug("exiting.");
+        scaleUp = false;
         return;
     }
     
@@ -361,12 +406,19 @@ function PrestigeRaid() {
         startedMap = false;
         debug("Turning AutoMaps back on");
     }
+    
+    if(scaleUp)
+    {
+        prestigeRaidMaxSoFar = currZone -1;
+    }
 }
 
 function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
     var ret;
     var empowerment = getEmpowerment();
     var lastDigitZone = currZone % 10;
+    
+    scaleUp = false; //by default, we want to buy the highest level map and just run that one map for prestige
     
     //are we in an active spire? if so we always want +5 map levels
     if(currZone % 100 == 0 && currZone >= getPageSetting('IgnoreSpiresUntil')){
@@ -386,6 +438,7 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
                 minDesiredLevel = currZone - lastDigitZone + 11;
             }
             else{ //PAggro == 1
+                scaleUp = true; //special case, we want to run xx1 then xx2 then xx3 for faster clear
                 maxDesiredLevel = currZone - lastDigitZone + 13;
                 minDesiredLevel = currZone - lastDigitZone + 11;
             }
