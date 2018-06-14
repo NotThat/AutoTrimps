@@ -301,13 +301,15 @@ function autoLevelEquipment() {
     //debug("equipment module: enemy damage = " + enemyDamage.toPrecision(3) + " current health: " + game.global.soldierHealth.toPrecision(3) + " game.global.soldierHealth/max " + (game.global.soldierHealth/game.global.soldierHealthMax).toPrecision(3));
     if(game.global.soldierHealth < 0.65*enemyDamage && game.global.soldierHealth > 1000){ //lets try buying more health if current health < 35% enemy attack, but not if 0 because we're dead
         debug("current health/enemy attack = " + (game.global.soldierHealth/enemyDamage).toPrecision(3) + " buying health");
-        numTab(3);
+        enoughHealthE = false;
+        //buyArmor()
+        /*numTab(3);
         buyEquipment('Boots');
         buyEquipment('Helmet');
         buyEquipment('Pants');
         buyEquipment('Shoulderguards');
         buyEquipment('Breastplate')
-        buyEquipment('Gambeson')
+        buyEquipment('Gambeson')*/
     }
     
     enoughDamageE = (baseDamage * MODULES["equipment"].enoughDamageCutoff > enemyHealth);

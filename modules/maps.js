@@ -245,13 +245,15 @@ function autoMap() {
     //asks if we can survive x number of hits in either D stance or X stance.
     enoughHealth = (baseHealth / FORMATION_MOD_1 > customVars.numHitsSurvived * (enemyDamage - baseBlock / FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock / FORMATION_MOD_1 : enemyDamage * pierceMod));
     if(game.global.soldierHealth < 0.65*enemyDamage && game.global.soldierHealth > 1000){ //lets try buying more health if current health < 35% enemy attack, but not if 0 because we're dead)
-        numTab(3);
+        enoughHealth=false;
+        //buyArmor()
+        /*numTab(3);
         buyEquipment('Boots');
         buyEquipment('Helmet');
         buyEquipment('Pants');
         buyEquipment('Shoulderguards');
         buyEquipment('Breastplate')
-        buyEquipment('Gambeson')
+        buyEquipment('Gambeson')*/
     }
     enoughDamage = (ourBaseDamage * customVars.enoughDamageCutoff > enemyHealth);
     //debug("hello! " +getEmpowerment() + " wind:" + game.empowerments.Wind.currentDebuffPower + "poison: " + game.empowerments.Poison.currentDebuffPower + " ice: " + game.empowerments.Ice.currentDebuffPower, "general", "");
