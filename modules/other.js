@@ -184,6 +184,7 @@ function PrestigeRaid() {
     //getBreedTime
     debug("game.resources.trimps.realMax() = " + game.resources.trimps.realMax());
     debug("trimps.owned = " + trimps.owned);
+    debug("game.resources.trimps.owned = " + game.resources.trimps.owned);
     
     if (PRaidMax > 10){
         PRaidMax = 10;
