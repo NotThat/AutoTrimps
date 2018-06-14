@@ -220,6 +220,7 @@ function PrestigeRaid() {
     
     //find highest map level we can afford
     var foundSuitableMap = false;
+    var cost
     for(i = maxDesiredLevel; i >= minDesiredLevel; i--){
         baseLevel = currZone;
         sizeSlider=9;
@@ -229,12 +230,32 @@ function PrestigeRaid() {
         perfect=false;
         extraLevels = i-currZone;
         type="Random";
-                 //calcMapCost(currZone,   0-9,       0-9,        0-9,        "Prestigious"/"FA"/"LMC"/"", boolean, 0-10, "Random"/other){ 
-        var cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+             //calcMapCost(currZone,   0-9,       0-9,        0-9,        "Prestigious"/"FA"/"LMC"/"", boolean, 0-10, "Random"/other){ 
+        cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
         
+        if (cost/fragments < 3 && cost/fragments > 1){ //can almost afford, lets get it
+            debug("loosening map");
+            specialMod = "";
+            diffSlider = 5;
+            cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+        }
+        else if (cost/fragments < 0.01){ //can easily affordd
+            debug("maximizing map");
+            lootSlider=9;
+            perfect=true;
+            type="Garden";
+            cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+        }
+        if (cost/fragments > 1 && i == minDesiredLevel){//last attempt to buy a map
+            debug("last attempt to buy map");
+            sizeSlider=0;
+            diffSlider=0;
+            specialMod="";
+            cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+        }
         if(fragments >= cost){
             debug("found suitable map", "general", "");
-            debug("cost " + cost.toPrecision(2) + " out of " + fragments.toPrecision(2) + " available fragments.", "general", "");
+            debug("cost " + cost.toPrecision(3) + " out of " + fragments.toPrecision(3) + " available fragments.", "general", "");
             debug("map level " + (currZone+extraLevels), "general", "");
             
             foundSuitableMap = true;
@@ -269,12 +290,12 @@ function PrestigeRaid() {
         document.getElementById('advExtraLevelSelect').value = extraLevels; //returns delta map for all prestige
         if(specialMod == "Prestigious")
             document.getElementById('advSpecialSelect').value = "p"; 
-        /*else if(specialMod == "FA")
+        else if(specialMod == "FA")
             document.getElementById('advSpecialSelect').value = "fa"; 
         else if(specialMod == "LMC")
             document.getElementById('advSpecialSelect').value = "lmc"; 
         else
-            document.getElementById('advSpecialSelect').value = "0";*/
+            document.getElementById('advSpecialSelect').value = "0";
         document.getElementById("lootAdvMapsRange").value = lootSlider;
         document.getElementById("difficultyAdvMapsRange").value = diffSlider;
         document.getElementById("sizeAdvMapsRange").value = sizeSlider;
