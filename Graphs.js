@@ -381,7 +381,8 @@ function pushData() {
         magmite: game.global.magmite,
         magmamancers: game.jobs.Magmamancer.owned,
         fluffy: game.global.fluffyExp,
-        nursery: game.buildings.Nursery.purchased
+        nursery: game.buildings.Nursery.purchased,
+        armySize: game.resources.trimps.maxSoldiers
     });
     //only keep 15 portals worth of runs to prevent filling storage
     clearData(15);

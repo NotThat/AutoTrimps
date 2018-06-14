@@ -21,7 +21,7 @@ function safeSetItems(name,data) {
     }
 }
 //This can be edited to point to your own Github Repository URL.
-var basepath = 'https://Zorn192.github.io/AutoTrimps/';
+var basepath = 'https://notthat.github.io/AutoTrimps/';
 var script = document.createElement('script');
 script.id = 'AutoTrimps-Graphs';
 script.src = basepath + 'Graphs.js';
