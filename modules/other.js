@@ -180,6 +180,9 @@ function PrestigeRaid() {
     var currZone = game.global.world;
     
     debug("addbreedTimerInsideText.innerHTML = " + addbreedTimerInsideText.innerHTML);
+    //getMaxTrimps()
+    //getBreedTime
+    debug("getBreedTime() = " + getBreedTime());
     
     if (PRaidMax > 10){
         PRaidMax = 10;
