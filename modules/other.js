@@ -195,7 +195,7 @@ function PrestigeRaid() {
         debug("Turning AutoMaps back on. startedMap off.");
     }
     
-    if (StartZone == -1 || currZone < StartZone || prestigeRaidMaxSoFar == currZone || PRaidMax <= 0)
+    if (StartZone == -1 || currZone < StartZone || prestigeRaidMaxSoFar == currZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0)
         return;
     
     prestigeRaidMaxSoFar = currZone; //first time we're prestige raiding in this zone, only attempt to raid once per zone
@@ -270,12 +270,12 @@ function PrestigeRaid() {
         document.getElementById('advExtraLevelSelect').value = extraLevels; //returns delta map for all prestige
         if(specialMod == "Prestigious")
             document.getElementById('advSpecialSelect').value = "p"; 
-        if(specialMod == "FA")
+        /*else if(specialMod == "FA")
             document.getElementById('advSpecialSelect').value = "fa"; 
-        if(specialMod == "LMC")
+        else if(specialMod == "LMC")
             document.getElementById('advSpecialSelect').value = "lmc"; 
         else
-            document.getElementById('advSpecialSelect').value = "0"; 
+            document.getElementById('advSpecialSelect').value = "0";*/
         document.getElementById("lootAdvMapsRange").value = lootSlider;
         document.getElementById("difficultyAdvMapsRange").value = diffSlider;
         document.getElementById("sizeAdvMapsRange").value = sizeSlider;
@@ -306,8 +306,9 @@ function PrestigeRaid() {
         repeatClicked();
     }
     mapbought = false;
-    if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive) {
+    if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive && startedMap) {
         autoTrimpSettings["AutoMaps"].value = 1;
+        startedMap = false;
         debug("Turning AutoMaps back on");
     }
 }
@@ -597,7 +598,7 @@ function calcPrestige() {
     var tmp;
     var equipmentPrestigeLevel;
     
-    equipmentPrestigeLevel = game.equipment["Shield"].prestige;
+    /*equipmentPrestigeLevel = game.equipment["Shield"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
     if (tmp>max)
         max=tmp;
@@ -605,44 +606,44 @@ function calcPrestige() {
     equipmentPrestigeLevel = game.equipment["Dagger"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
     if (tmp>max)
-        max=tmp;
+        max=tmp;*/
     
     equipmentPrestigeLevel = game.equipment["Boots"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
     if (tmp>max)
         max=tmp;
     
-    equipmentPrestigeLevel = game.equipment["Mace"].prestige;
+    /*equipmentPrestigeLevel = game.equipment["Mace"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+2;
     if (tmp>max)
-        max=tmp;
+        max=tmp;*/
     
     equipmentPrestigeLevel = game.equipment["Helmet"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+2;
     if (tmp>max)
         max=tmp;
     
-    equipmentPrestigeLevel = game.equipment["Polearm"].prestige;
+    /*equipmentPrestigeLevel = game.equipment["Polearm"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+3;
     if (tmp>max)
-        max=tmp;
+        max=tmp;*/
     
     equipmentPrestigeLevel = game.equipment["Pants"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+3;
     if (tmp>max)
         max=tmp;
     
-    equipmentPrestigeLevel = game.equipment["Battleaxe"].prestige;
+    /*equipmentPrestigeLevel = game.equipment["Battleaxe"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+4;
     if (tmp>max)
-        max=tmp;
+        max=tmp;*/
     
     equipmentPrestigeLevel = game.equipment["Shoulderguards"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+4;
     if (tmp>max)
         max=tmp;
     
-    equipmentPrestigeLevel = game.equipment["Greatsword"].prestige;
+    /*equipmentPrestigeLevel = game.equipment["Greatsword"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+5;
     if (tmp>max)
         max=tmp;
@@ -655,7 +656,7 @@ function calcPrestige() {
     equipmentPrestigeLevel = game.equipment["Arbalest"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+5;
     if (tmp>max)
-        max=tmp;
+        max=tmp;*/
     
     equipmentPrestigeLevel = game.equipment["Gambeson"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+5;
