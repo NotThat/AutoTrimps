@@ -917,12 +917,13 @@ function setGraphData(graph) {
             yType = 'Linear';
             break;
         case 'Army Ratio':
-            graphData = allPurposeGraph('armySize',true,"number");
+            graphData = allPurposeGraph('armySize',true,"string");
             title = 'Army Size to Population Ratio';
             xTitle = 'Zone';
             yTitle = 'Population / Army Size';
             yType = 'Linear';
             yminFloor = 1;
+            precision = 3;
             break;
         case 'GigaStations':
             graphData = allPurposeGraph('gigas',true,"number");
