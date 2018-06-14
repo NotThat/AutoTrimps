@@ -85,7 +85,9 @@ function autoHeirlooms2() {
         }
         
         //dont want to carry anything
-        var dontCarryJunk=true;
+        //dontCarryJunkHeirlooms
+        var dontCarryJunk=getPageSetting('dontCarryJunkHeirlooms');
+        debug("dontCarry = " + dontCarryJunk);
         worthOfHeirlooms2();
         //now start by re-filling any empty carried slots with the most highly evaluated heirlooms
         //Alternates EQUALLY between Shield and Staff, putting the best ones of each.
