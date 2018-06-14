@@ -178,6 +178,7 @@ function PrestigeRaid() {
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
     var currZone = game.global.world;
+    var scaleUp = false; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
     
     
     if (PRaidMax > 10){
@@ -206,7 +207,7 @@ function PrestigeRaid() {
             if(currZone % 10 != 5 && currZone % 10 != 0) //in poison xx0 and xx5, we are willing to sit and wait in map screen to be sure not to miss our last poison zone
                 return;
         }
-        else //ice/wind/no empowerment always stay in world if army isnt ready
+        else //ice/wind/no empowerment: always stay in world if army isnt ready
             return;
     }
     
@@ -247,9 +248,13 @@ function PrestigeRaid() {
         
         if (cost/fragments < 3 && cost/fragments > 1){ //can almost afford, lets get it
             debug("loosening map");
-            specialMod = "";
             diffSlider = 5;
             cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+            if (cost/fragments > 1){ //can almost afford, lets get it
+                debug("loosening further");
+                specialMod = "";
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+            }
         }
         else if (cost/fragments < 0.01){ //can easily affordd
             debug("maximizing map");
@@ -267,10 +272,16 @@ function PrestigeRaid() {
         }
         if (cost/fragments > 1 && (i == minDesiredLevel || (currZone % 10 == 5 && getEmpowerment() == "Poison"))){//last attempt to buy a map. also do this on xx5 poison zones
             debug("last attempt to buy map");
-            sizeSlider=0;
             diffSlider=0;
-            specialMod="";
             cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+            if (cost/fragments > 1){
+                sizeSlider=0;
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                if (cost/fragments > 1){
+                    specialMod="";
+                    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                }
+            }
         }
         if(fragments >= cost){
             debug("found suitable map", "general", "");
@@ -435,7 +446,7 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
                 minDesiredLevel = currZone + 1;
             }
             else{
-                maxDesiredLevel = currZone + 5;
+                maxDesiredLevel = currZone + 1;
                 minDesiredLevel = currZone + 1;
             }
         }
@@ -445,7 +456,7 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
                 minDesiredLevel = currZone - lastDigitZone + 11;
             }
             else {
-                maxDesiredLevel = currZone - lastDigitZone + 15;
+                maxDesiredLevel = currZone - lastDigitZone + 11;
                 minDesiredLevel = currZone - lastDigitZone + 11;
             }
         }

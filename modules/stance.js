@@ -562,7 +562,7 @@ function autoStance3() {
             //debug(getCurrentEnemy(1).mutation, "general", ""); // = Corruption (healthy?)
             
             //dont windstack vs sharp enemies
-            if(getCurrentEnemy(1).corrupted == "corruptBleed")
+            if(getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed")
                 setFormation(2);
             else       
                 setFormation(4);

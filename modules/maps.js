@@ -1,6 +1,6 @@
 MODULES["maps"] = {};
 //These can be changed (in the console) if you know what you're doing:
-MODULES["maps"].enoughDamageCutoff = 8; //above this the game will do maps for map bonus stacks
+MODULES["maps"].enoughDamageCutoff = 6; //above this the game will do maps for map bonus stacks
 MODULES["maps"].farmingCutoff = 16; //above this the game will farm.
 MODULES["maps"].numHitsSurvived = 8; //survive X hits in D stance or not enough Health.
 MODULES["maps"].LeadfarmingCutoff = 10; //lead has its own farmingCutoff
@@ -171,7 +171,7 @@ function autoMap() {
     ourBaseDamage = baseDamage * (1 + (normalCritChance + 5 * orangeCritChance) * getPlayerCritDamageMult());
     
     //add damage multiplier for poison zones
-    ourBaseDamage = ourBaseDamage * (getEmpowerment() == "Poison" ? 100 : 1);
+    ourBaseDamage = ourBaseDamage * (getEmpowerment() == "Poison" ? 30 : 1);
     
     //calculate with map bonus
     var mapbonusmulti = 1 + (0.20 * game.global.mapBonus);
