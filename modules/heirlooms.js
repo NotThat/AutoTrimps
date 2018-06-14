@@ -91,20 +91,20 @@ function autoHeirlooms2() {
         //Alternates EQUALLY between Shield and Staff, putting the best ones of each.
         //PART 3:
         while ((game.global.heirloomsCarried.length < game.global.maxCarriedHeirlooms) && game.global.heirloomsExtra.length > 0){
+            if(dontCarryJunk)
+                break;
             //re-evaluate their worth (needed to refresh the worth array since we for sure re-arranged everything.)
             worthOfHeirlooms2();
             if (worth2["Shield"].length > 0){
                 var carryshield = worth2["Shield"].shift();
                 selectHeirloom(carryshield.index, 'heirloomsExtra');
-                if (!dontCarryJunk)
-                    carryHeirloom();
+                carryHeirloom();
             }
             worthOfHeirlooms2();
             if (worth2["Staff"].length > 0){
                 var carrystaff = worth2["Staff"].shift();
                 selectHeirloom(carrystaff.index, 'heirloomsExtra');
-                if (!dontCarryJunk)
-                    carryHeirloom();
+                carryHeirloom();
             }
         }
         worthOfHeirlooms();
@@ -114,6 +114,8 @@ function autoHeirlooms2() {
         //PART 4:
         //Check each carried heirloom....
         for(var carried in game.global.heirloomsCarried) {
+            if(dontCarryJunk)
+                break;
             var theLoom = game.global.heirloomsCarried[carried];
             //... against the Opposite type
             var opposite = {"Shield":"Staff", "Staff":"Shield"};
@@ -125,8 +127,7 @@ function autoHeirlooms2() {
                     selectHeirloom(carried, 'heirloomsCarried');
                     stopCarryHeirloom();
                     selectHeirloom(index, 'heirloomsExtra');
-                    if (!dontCarryJunk)
-                        carryHeirloom();
+                    carryHeirloom();
                     worthOfHeirlooms();
                 }
                 //do nothing if the carried thing was protected.
