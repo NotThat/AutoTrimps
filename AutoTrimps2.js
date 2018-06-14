@@ -231,14 +231,14 @@ function mainLoop() {
     getPageSetting('AutoMaps') > 0 ? autoMap() : updateAutoMapsStatus(); //"Auto Maps"      (automaps.js)
     //if (getPageSetting('GeneticistTimer') >= 0) autoBreedTimer(); //"Geneticist Timer" / "Auto Breed Timer"     (autobreedtimer.js)
     if (autoTrimpSettings.AutoPortal.selected != "Off") autoPortal();   //"Auto Portal" (hidden until level 40) (portal.js)
-    var realMaxArmy = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();
-    var flr = Math.floor(Math.log10(realMaxArmy));
-    var frac = realMaxArmy/Math.pow(10, flr-2)/1000;
-    var resultForGraph = flr+frac;
-    debug("ratio log10: " + Math.log10(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend()));
-    debug("flr = " + flr);
-    debug("frac = " + frac);
-    debug("final = " + resultForGraph);
+    //var realMaxArmy = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();
+    //var flr = Math.floor(Math.log10(realMaxArmy));
+    //var frac = realMaxArmy/Math.pow(10, flr-2)/1000;
+    //var resultForGraph = flr+frac;
+    //debug("ratio log10: " + Math.log10(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend()));
+    //debug("flr = " + flr);
+    //debug("frac = " + frac);
+    //debug("final = " + resultForGraph);
     //debug(game.resources.trimps.realMax());
     //debug(game.resources.trimps.getCurrentSend());
     //debug(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend());
