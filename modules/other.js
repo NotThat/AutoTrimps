@@ -11,6 +11,7 @@ var mapbought = false;
 var prestigeRaidMaxSoFar = 0;
 var maxDesiredLevel;
 var minDesiredLevel;
+var currZone;
 var scaleUp; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
 //Activate Robo Trimp (will activate on the first zone after liquification)
 function autoRoboTrimp() {
@@ -182,7 +183,6 @@ function PrestigeRaid() {
     var StartZone = getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid. -1 to ignore
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
-    var currZone;
             
     if(!game.global.mapsActive)
         currZone = game.global.world; //this points to map level when we're inside a map
