@@ -184,6 +184,8 @@ function PrestigeRaid() {
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
     var currZone = game.global.world;
     
+    debug("prestigeRaidMaxSoFar " + prestigeRaidMaxSoFar);
+    
     if (PRaidMax > 10){
         PRaidMax = 10;
         setPageSetting('PRaidingMaxZones', 10);
