@@ -263,7 +263,11 @@ function autoLevelEquipment() {
     //Take Spire as a special case.
     var spirecheck = isActiveSpireAT();
     if (spirecheck) {
-        var exitcell = getPageSetting('ExitSpireCell');
+        var exitcell;
+        if(game.global.challengeActive == "Daily")
+            exitcell = getPageSetting('ExitSpireCellDailyC2');
+        else
+            exitcell = getPageSetting('ExitSpireCell');
         var cell = (!game.global.mapsActive && !game.global.preMapsActive) ? game.global.lastClearedCell : 50;
         if (exitcell > 1)
             cell = exitcell;
