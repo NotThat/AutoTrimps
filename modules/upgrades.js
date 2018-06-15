@@ -15,7 +15,7 @@ function buyUpgrades() {
             //debug("popArmyRatio = " + popArmyRatio);
             //debug("popArmyRatioAfter = " + popArmyRatioAfter);
             if (popArmyRatioAfter <= 1001){
-                debug("disallowing coords purchase!");
+                debug("Skipping coordination to preserve Amalgamator!");
                 buyCoords = false;
             }
         }
