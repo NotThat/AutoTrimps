@@ -12,7 +12,7 @@ var prestigeRaidMaxSoFar = 0;
 var maxDesiredLevel;
 var minDesiredLevel;
 var currZone = 0;
-var scaleUp; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
+var scaleUp = false; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
 //Activate Robo Trimp (will activate on the first zone after liquification)
 function autoRoboTrimp() {
     //exit if the cooldown is active, or we havent unlocked robotrimp.
@@ -186,8 +186,6 @@ function PrestigeRaid() {
             
     if(!game.global.mapsActive)
         currZone = game.global.world; //this points to map level when we're inside a map
-    
-    currZone = 1;
     
     debug("game.global.mapsActive " + game.global.mapsActive);
     debug("game.global.world " + game.global.world);
@@ -436,6 +434,7 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
     var lastDigitZone = currZone % 10;
     
     scaleUp = false; //by default, we want to buy the highest level map and just run that one map for prestige
+    
     
     //are we in an active spire? if so we always want +5 map levels
     if(currZone % 100 == 0 && currZone >= getPageSetting('IgnoreSpiresUntil')){
