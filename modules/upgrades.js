@@ -6,7 +6,8 @@ function buyUpgrades() {
     for (var upgrade in upgradeList) {
         var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();
             
-            debug("game.portal.Carpentry.modifier = " + game.portal.Carpentry.modifier);
+            debug("game.portal.Coordinated.level = " + game.portal.Coordinated.level);
+            debug("game.portal.Coordinated = " + game.portal.Coordinated);
             debug("popArmyRatio = " + popArmyRatio);
         upgrade = upgradeList[upgrade];
         var gameUpgrade = game.upgrades[upgrade];
