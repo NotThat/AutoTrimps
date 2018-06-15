@@ -182,7 +182,10 @@ function PrestigeRaid() {
     var StartZone = getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid. -1 to ignore
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
-    var currZone = game.global.world;
+    var currZone;
+            
+    if(!game.global.mapsActive)
+        currZone = game.global.world; //this points to map level when we're inside a map
     
     debug("prestigeRaidMaxSoFar " + prestigeRaidMaxSoFar);
     
