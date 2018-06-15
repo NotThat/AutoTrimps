@@ -191,8 +191,8 @@ function PrestigeRaid() {
     
     debug("game.global.mapsActive " + game.global.mapsActive);
     debug("game.global.world " + game.global.world);
-    
     debug("prestigeRaidMaxSoFar " + prestigeRaidMaxSoFar);
+    debug("scaleUp = " + scaleUp);
     
     if (PRaidMax > 10){
         PRaidMax = 10;
