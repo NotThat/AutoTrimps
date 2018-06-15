@@ -503,7 +503,7 @@ function autoMap() {
                     }
                 }
                 //Bionic Before Spire - mandates preReq of UniqueMaps. run Bionics before spire to farm.
-                if (getPageSetting('RunBionicBeforeSpire') && (game.global.world == 200) && theMap.name.includes('Bionic Wonderland')) {
+                /*if (getPageSetting('RunBionicBeforeSpire') && (game.global.world == 200) && theMap.name.includes('Bionic Wonderland')) {
                     //this is how to check if a bionic is green or not.
                     var bionicnumber = 1 + ((theMap.level - 125) / 15);
                     //if numbers match, map is green, so run it. (do the pre-requisite bionics one at a time in order)
@@ -515,7 +515,7 @@ function autoMap() {
                         selectedMap = theMap.id;
                         break;
                     }
-                } //TODO Spire II+??
+                }*/ //TODO Spire II+??
                 //other unique maps here
             }
         }

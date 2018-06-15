@@ -265,10 +265,14 @@ function buyBuildings() {
         var resomod = Math.pow(1 - game.portal.Resourceful.modifier, game.portal.Resourceful.level); //need to apply the resourceful mod when comparing anything other than building vs building.
         //buy nurseries irrelevant of warpstations (after we unlock them) - if we have enough extra gems that its not going to impact anything. note:(we will be limited by wood anyway - might use a lot of extra wood)
         var buyWithExtraGems = (!game.buildings.Warpstation.locked && nursCost * resomod < nwr * game.resources.gems.owned);
-        if ((maxNursery > game.buildings.Nursery.owned || maxNursery == -1) &&
+        //do not buy nurseries in Ice zones
+        var noIce = getPageSetting('NoNurseriesIce');
+        var stopBuyNurseries = noIce && (getEmpowerment() == "Ice");
+        if ((maxNursery > game.buildings.Nursery.owned || maxNursery == -1) && !stopBuyNurseries &&
             (buyWithExtraGems ||
              ((nursCost < nwr * warpCost || game.buildings.Warpstation.locked) &&
               (nursCost < nwr * collCost || game.buildings.Collector.locked || !game.buildings.Warpstation.locked)))) {
+              debug("stopBuyNurseries = " + stopBuyNurseries);
                safeBuyBuilding('Nursery');
         }
     }
