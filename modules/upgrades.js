@@ -4,6 +4,10 @@ var upgradeList = ['Miners', 'Scientists', 'Coordination', 'Speedminer', 'Speedl
 //Buys all available non-equip upgrades listed in var upgradeList
 function buyUpgrades() {
     for (var upgrade in upgradeList) {
+        var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();
+            
+            debug("game.portal.Carpentry.modifier = " + game.portal.Carpentry.modifier);
+            debug("popArmyRatio = " + popArmyRatio);
         upgrade = upgradeList[upgrade];
         var gameUpgrade = game.upgrades[upgrade];
         var available = (gameUpgrade.allowed > gameUpgrade.done && canAffordTwoLevel(gameUpgrade));
@@ -18,7 +22,14 @@ function buyUpgrades() {
         //Main logics:
         if (!available) continue;
         if (game.upgrades.Scientists.done < game.upgrades.Scientists.allowed && upgrade != 'Scientists') continue;
-        buyUpgrade(upgrade, true, true);
+        
+        if (upgrade == 'Coordination'){
+            //need to make sure next coordination wont fire amalgamator
+            
+            buyUpgrade(upgrade, true, true);
+        }
+        else
+            buyUpgrade(upgrade, true, true);
         debug('Upgraded ' + upgrade, "upgrades", "*upload2");
     //loop again.
     }
