@@ -255,7 +255,12 @@ function autoMap() {
         buyEquipment('Breastplate')
         buyEquipment('Gambeson')*/
     }
-    enoughDamage = (ourBaseDamage * customVars.enoughDamageCutoff > enemyHealth);
+    
+    var windstackzone = getPageSetting('WindStackingMin');
+    var mult = 1;
+    if (getEmpowerment() == "Wind" && game.global.world >= windstackzone)
+        mult = 4; //in windstacking zones, wait much longer before doing maps for damage
+    enoughDamage = (ourBaseDamage * customVars.enoughDamageCutoff * mult > enemyHealth);
     //debug("hello! " +getEmpowerment() + " wind:" + game.empowerments.Wind.currentDebuffPower + "poison: " + game.empowerments.Poison.currentDebuffPower + " ice: " + game.empowerments.Ice.currentDebuffPower, "general", "");
     //debug(getEmpowerment() == "Poison", "general", "");
     //console.log(getEmpowerment() == "Poison");
