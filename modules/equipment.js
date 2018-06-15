@@ -290,13 +290,9 @@ function autoLevelEquipment() {
     
     //chilled
     if (getEmpowerment() == "Ice"){
-        //game.empowerments.Ice.getCombatModifier()
-        //game.empowerments.Ice.currentDebuffPower
-        debug("game.empowerments.Ice.getCombatModifier() " + game.empowerments.Ice.getCombatModifier());
-        debug("game.empowerments.Ice.currentDebuffPower " + game.empowerments.Ice.currentDebuffPower);
-        var IceDmgModifier = game.empowerments.Ice.getCombatModifier() * game.empowerments.Ice.currentDebuffPower;
-        debug("IceDmgModifier " + IceDmgModifier);
-        
+        //debug("game.empowerments.Ice.currentDebuffPower " + game.empowerments.Ice.currentDebuffPower);
+        //debug("game.empowerments.Ice.getCombatModifier() " + game.empowerments.Ice.getCombatModifier());
+        enemyDamage *= game.empowerments.Ice.getCombatModifier();
     }
     var pierceMod = (game.global.brokenPlanet && !game.global.mapsActive) ? getPierceAmt() : 0;
     //change name to make sure these are local to the function

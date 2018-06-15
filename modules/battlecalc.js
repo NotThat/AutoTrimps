@@ -402,6 +402,12 @@ function calcBadGuyDmg(enemy,attack,daily,maxormin,disableFlucts) {
     if (game.global.usingShriek) {
         number *= game.mapUnlocks.roboTrimp.getShriekValue();
     }
+    
+    if (getEmpowerment() == "Ice"){
+        //debug("game.empowerments.Ice.currentDebuffPower " + game.empowerments.Ice.currentDebuffPower);
+        //debug("game.empowerments.Ice.getCombatModifier() " + game.empowerments.Ice.getCombatModifier());
+        number *= game.empowerments.Ice.getCombatModifier();
+    }
 
     if (!disableFlucts) {
         if (minFluct > 1) minFluct = 1;
