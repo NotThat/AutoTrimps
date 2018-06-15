@@ -287,6 +287,17 @@ function autoLevelEquipment() {
         enemyDamage *= 2.5;
         enemyHealth *= 7;
     }
+    
+    //chilled
+    if (getEmpowerment() == "Ice"){
+        //game.empowerments.Ice.getCombatModifier()
+        //game.empowerments.Ice.currentDebuffPower
+        debug("game.empowerments.Ice.getCombatModifier() " + game.empowerments.Ice.getCombatModifier());
+        debug("game.empowerments.Ice.currentDebuffPower " + game.empowerments.Ice.currentDebuffPower);
+        var IceDmgModifier = game.empowerments.Ice.getCombatModifier() * game.empowerments.Ice.currentDebuffPower;
+        debug("IceDmgModifier " + IceDmgModifier);
+        
+    }
     var pierceMod = (game.global.brokenPlanet && !game.global.mapsActive) ? getPierceAmt() : 0;
     //change name to make sure these are local to the function
     var enoughHealthE,enoughDamageE;
@@ -319,9 +330,9 @@ function autoLevelEquipment() {
         buyEquipment('Breastplate')
         buyEquipment('Gambeson')*/
     }
-    else if (game.global.soldierHealth > 1.65*enemyDamage && game.global.soldierHealth > 1000){
+    else if (game.global.soldierHealth > 1.65*enemyDamage && game.global.soldierHealth > 1000 && !first){
         debug("enough health");
-        first = false;
+        first = true;
         enoughHealthE = false;
     }
     

@@ -272,7 +272,6 @@ function buyBuildings() {
             (buyWithExtraGems ||
              ((nursCost < nwr * warpCost || game.buildings.Warpstation.locked) &&
               (nursCost < nwr * collCost || game.buildings.Collector.locked || !game.buildings.Warpstation.locked)))) {
-              debug("stopBuyNurseries = " + stopBuyNurseries);
                safeBuyBuilding('Nursery');
         }
     }
