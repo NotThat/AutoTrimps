@@ -140,10 +140,10 @@ function isActiveSpireAT() {
 //Exits the Spire after completing the specified cell.
 function exitSpireCell() {
     if(game.global.challengeActive == "Daily"){
-        if(isActiveSpireAT() && game.global.lastClearedCell >= getPageSetting('ExitSpireCellDailyC2')-1)
+        if(isActiveSpireAT() && game.global.lastClearedCell >= getPageSetting('ExitSpireCellDailyC2')-1 && getPageSetting('ExitSpireCellDailyC2') > 0)
             endSpire();
     }
-    else if(isActiveSpireAT() && game.global.lastClearedCell >= getPageSetting('ExitSpireCell')-1)
+    else if(isActiveSpireAT() && game.global.lastClearedCell >= getPageSetting('ExitSpireCell')-1 && getPageSetting('ExitSpireCell') > 0)
         endSpire();
 }
 
