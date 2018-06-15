@@ -490,6 +490,7 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
                 minDesiredLevel = currZone + 1; //+1 level is still fine, just dont get xx6
             }
             else{ //xx6-xx9
+                scaleUp = true; //special case, we want to run xx1 then xx2 then xx3 for faster clear
                 maxDesiredLevel = currZone - lastDigitZone + 15;
                 if(maxDesiredLevel > currZone + 7)
                     maxDesiredLevel = currZone+7;
