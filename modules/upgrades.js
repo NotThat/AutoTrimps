@@ -7,18 +7,18 @@ function buyUpgrades() {
     if (getPageSetting('BuyUpgradesNew') != 2){ //skip this calculation if AT isnt allowed to buy coords
         var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();    
         var buyCoords = true;
-        //if(popArmyRatio < 1250 ){ //skip this calculation unless we're dangerously close to losing amalgamator
+        if(popArmyRatio < 1250 ){ //skip this calculation unless we're dangerously close to losing amalgamator
             var coordinatedLevel = game.portal.Coordinated.level;
             var coordinationMult = 1+0.25*Math.pow(0.98, coordinatedLevel);
             var currentSendAfter = game.resources.trimps.getCurrentSend()*coordinationMult;
             var popArmyRatioAfter = game.resources.trimps.realMax()/currentSendAfter;
-            debug("popArmyRatio = " + popArmyRatio);
-            debug("popArmyRatioAfter = " + popArmyRatioAfter);
-            if (popArmyRatioAfter < 1000){
+            //debug("popArmyRatio = " + popArmyRatio);
+            //debug("popArmyRatioAfter = " + popArmyRatioAfter);
+            if (popArmyRatioAfter <= 1001){
                 debug("disallowing coords purchase!");
                 buyCoords = false;
             }
-        //}
+        }
     }
     
     for (var upgrade in upgradeList) {
