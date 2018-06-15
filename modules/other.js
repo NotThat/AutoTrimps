@@ -12,7 +12,8 @@ var prestigeRaidMaxSoFar = 0;
 var maxDesiredLevel;
 var minDesiredLevel;
 var currZone = 0;
-var debugging = true;
+//var debugging = true;
+var debugging = false;
 var scaleUp = false; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
 //Activate Robo Trimp (will activate on the first zone after liquification)
 function autoRoboTrimp() {
