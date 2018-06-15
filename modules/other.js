@@ -491,6 +491,7 @@ function findDesiredMapLevel(currZone, PRaidMax, PAggro, havePrestigeUpTo){
             }
             else{ //xx6-xx9
                 scaleUp = true; //special case, we want to run xx1 then xx2 then xx3 for faster clear
+                debug("hello " + currZone);
                 maxDesiredLevel = currZone - lastDigitZone + 15;
                 if(maxDesiredLevel > currZone + 7)
                     maxDesiredLevel = currZone+7;
