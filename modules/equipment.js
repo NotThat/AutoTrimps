@@ -319,7 +319,7 @@ function autoLevelEquipment() {
         buyEquipment('Breastplate')
         buyEquipment('Gambeson')*/
     }
-    else if (game.global.soldierHealth > 1.65*enemyDamage && game.global.soldierHealth > 1000)){
+    else if (game.global.soldierHealth > 1.65*enemyDamage && game.global.soldierHealth > 1000){
         debug("enough health");
         first = false;
         enoughHealthE = false;
