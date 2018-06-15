@@ -187,6 +187,9 @@ function PrestigeRaid() {
     if(!game.global.mapsActive)
         currZone = game.global.world; //this points to map level when we're inside a map
     
+    debug("game.global.mapsActive " + game.global.mapsActive);
+    debug("game.global.world " + game.global.world);
+    
     debug("prestigeRaidMaxSoFar " + prestigeRaidMaxSoFar);
     
     if (PRaidMax > 10){
