@@ -217,6 +217,8 @@ function PrestigeRaid() {
     
     if(minDesiredLevel < havePrestigeUpTo + 1)
         minDesiredLevel = havePrestigeUpTo + 1;
+    if(minDesiredLevel > maxDesiredLevel)
+        minDesiredLevel = maxDesiredLevel;
     
     debug("currZone = " + currZone, "general", "");
     debug("empowerment = " + getEmpowerment(), "general", "");
