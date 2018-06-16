@@ -169,7 +169,6 @@ function calcDmg(){
     updateAutoMapsStatus(); //refresh the UI status (10x per second)
 }
 
-
 //AutoMap - function originally created by Belaith (in 1971)
 //anything/everything to do with maps.
 function autoMap() {
@@ -303,8 +302,6 @@ function autoMap() {
         }
     }
 
-
-    
     //
     //BEGIN AUTOMAPS DECISIONS:
     //variables for doing maps
@@ -878,7 +875,6 @@ function updateAutoMapsStatus(get) {
     var status;
     var minSp = getPageSetting('MinutestoFarmBeforeSpire');
     if (getPageSetting('AutoMaps') == 0) status = 'Off';
-    
     else if (presRaiding) status = 'Prestige Raiding';
     else if (BWRaidingStatus) status = 'BW Raiding';
     else if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) status = 'Out of Map Credits';
@@ -940,7 +936,7 @@ function PrestigeRaid() {
         setPageSetting('PRaidingMaxZones', 0);
     }
     
-    if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0)
+    if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0)
         return 0;
     
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
@@ -1079,7 +1075,7 @@ function PrestigeRaid() {
         return 0;
     }
     
-    presRaiding = true; //for UI display purposes
+    presRaiding = true; //update UI
     updateAutoMapsStatus();
     
     if (!game.global.preMapsActive && !game.global.mapsActive) { 
@@ -1154,7 +1150,6 @@ function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
     var lastDigitZone = currWorldZone % 10;
     
     scaleUp = false; //by default, we want to buy the highest level map and just run that one map for prestige
-    
     
     //are we in an active spire? if so we always want +5 map levels
     if(currWorldZone % 100 == 0 && currWorldZone >= getPageSetting('IgnoreSpiresUntil')){
@@ -1298,8 +1293,6 @@ function plusPrestige(delta) {
         document.getElementById('advPerfectCheckbox').checked = false;
         updateMapCost();
 }
-
-
 
 
 //New Code for Map Special Mods dropdown. (only the first dropdown for now)
