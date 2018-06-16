@@ -182,7 +182,7 @@ function calcDmg(){
 //AutoMap - function originally created by Belaith (in 1971)
 //anything/everything to do with maps.
 function autoMap() {
-    if(!game.global.mapsActive)
+    if(!game.global.mapsActive &&  !game.global.preMapsActive)
         currWorldZone = game.global.world; //game.global.world will point to our map level when we're inside map. keep a record of the actual world zone.
     
     //allow script to handle abandoning
@@ -1000,6 +1000,7 @@ function PrestigeRaid() {
         selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id); //the map we just created
     }
     else{ //we have a map with prestige available in our map list
+        debug("selecting map " + map);
         selectMap(map);
     }
     
@@ -1089,8 +1090,11 @@ function findMap(level){
             }
         }
     }    
-    if (bestSoFar>-1)
+    if (bestSoFar>-1){
+        debug("findmap: found map " + theMap + " level " + bestSoFar);
         return theMap;
+    }
+    debug("findMap: no map found");
     return -1;
 }
 
