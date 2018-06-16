@@ -996,7 +996,7 @@ function PrestigeRaid() {
             return false;
         }
         else{
-            debug("premaps");
+            debug("premaps game.global.mapsActive=" + game.global.mapsActive + " game.global.preMapsActive=" +game.global.preMapsActive);
             selectMap(map);
         }
     }
