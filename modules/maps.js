@@ -886,12 +886,12 @@ function updateAutoMapsStatus(get) {
     else if (stackingTox) status = 'Getting Tox Stacks';
     else if (needToVoid && !doVoids && game.global.totalVoidMaps > 0) status = 'Prepping for Voids';
     else if (doVoids && voidCheckPercent > 0) status = 'Farming to do Voids: ' + voidCheckPercent + '%';
-    else if (shouldFarm && !doVoids) status = 'Farming: ' + HDratio.toFixed(4) + 'x';
+    else if (shouldFarm && !doVoids) status = 'Farming: ' + HDratio.toFixed(2) + 'x';
     else if (scryerStuck) status = 'Scryer Got Stuck, Farming';
     else if (!enoughHealth && !enoughDamage) status = 'Want Health & Damage';
-    else if (!enoughDamage) status = 'Want ' + HDratio.toFixed(4) + 'x &nbspmore damage';
+    else if (!enoughDamage) status = 'Want ' + HDratio.toFixed(2) + 'x &nbspmore damage';
     else if (!enoughHealth) status = 'Want more health';
-    else if (enoughHealth && enoughDamage) status = 'Advancing';
+    else if (enoughHealth && enoughDamage) status = 'Advancing Ratio = ' + HDratio;
 
     if (skippedPrestige) // Show skipping prestiges
         status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b>';
