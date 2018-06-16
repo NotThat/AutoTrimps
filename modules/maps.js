@@ -65,11 +65,10 @@ var cost;
 
 var maxDesiredLevel;
 var minDesiredLevel;
-var mapbought = false;
 //var debugging = true;
 var debugging = false;
 var currWorldZone = 1;
-var scaleUp = false; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
+var scaleUp; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
 //Activate Robo Trimp (will activate on the first zone after liquification)
 
 function calcDmg(){
@@ -233,7 +232,7 @@ function autoMap() {
     if (game.global.totalVoidMaps == 0 || !needToVoid)
         doVoids = false;
     
-    calcDmg();
+    calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
     
     //if dont have army ready, dont enter map screen unless its last poison zone, and/or we need to do void maps
     if(!needToVoid){
@@ -248,7 +247,7 @@ function autoMap() {
         }
     }
     
-    if (getPageSetting('PRaidingZoneStart') >0) {//Prestige Raiding NT. need to buy upgrades before running this, so adding 1000ms delay
+    if (getPageSetting('PRaidingZoneStart') >0) {//Prestige Raiding. need to buy upgrades before running this, so adding 1000ms delay
         setTimeout({},1000);
         if(!PrestigeRaid()) //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
             return; 
@@ -925,6 +924,7 @@ function updateAutoMapsStatus(get) {
     }
 }
 
+//returns true when done
 function PrestigeRaid() {
     var StartZone = getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid. -1 to ignore
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
@@ -946,21 +946,19 @@ function PrestigeRaid() {
     }
     
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
-        mapbought = false;
-        startedMap = false
         presRaiding = false; //update UI
         updateAutoMapsStatus(); //UI
-        return true; //prestigeRaid is out of work, allow autoMaps to continue 
+        return true; 
     }
     
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
-    findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo); //decide which level we want to raid to
+    findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo); //decide which level we want to raid up to
 
     if(havePrestigeUpTo >= maxDesiredLevel){
         debug("have all the prestige levels that we want. exiting.", "general", "");
         presRaiding = false; //update UI
         updateAutoMapsStatus(); //UI
-        return true; //prestigeRaid is out of work, allow autoMaps to continue 
+        return true; 
     }
     
     debug("currWorldZone = " + currWorldZone, "general", "");
@@ -972,14 +970,13 @@ function PrestigeRaid() {
     //Let's see if we already own a map of suitable level
     var map = findMap(minDesiredLevel);
     if(map == -1){ //do not own a high enough map, try to make one if we can afford it
-        //find highest map level we can afford
+        //find best match match map we can afford
         var foundSuitableMap = decideMapParams(scaleUp);
 
         if (!foundSuitableMap){
             debug("could not find suitable map.");
             debug("cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments");
             debug("exiting.");
-            scaleUp = false;
             presRaiding = false; //update UI
             updateAutoMapsStatus(); //UI
             return true;
@@ -1000,8 +997,7 @@ function PrestigeRaid() {
         selectMap(map);
     
     runMap();
-    startedMap = true;
-    debug("startedMap on");
+    debug("started Map");
     
     presRaiding = true; //update UI
     updateAutoMapsStatus(); //UI
