@@ -61,142 +61,8 @@ var currWorldZone = 1;
 var scaleUp = false; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
 //Activate Robo Trimp (will activate on the first zone after liquification)
 
-//AutoMap - function originally created by Belaith (in 1971)
-//anything/everything to do with maps.
-function autoMap() {
-    var customVars = MODULES["maps"];
-    
-    if(!game.global.mapsActive)
-        currWorldZone = game.global.world; //game.global.world will point to our map level when we're inside map. keep a record of the actual world zone.
-    
-    //allow script to handle abandoning
-    // if(game.options.menu.alwaysAbandon.enabled == 1) toggleSetting('alwaysAbandon');
-    //if we are prestige mapping, force equip first mode
-    var prestige = autoTrimpSettings.Prestige.selected;
-    if (prestige != "Off" && game.options.menu.mapLoot.enabled != 1) toggleSetting('mapLoot');
-    //Control in-map right-side-buttons for people who can't control themselves. If you wish to use these buttons manually, turn off autoMaps temporarily.
-    if (game.options.menu.repeatUntil.enabled == 2) toggleSetting('repeatUntil');
-    if (game.options.menu.exitTo.enabled != 0) toggleSetting('exitTo');
-    if (game.options.menu.repeatVoids.enabled != 0) toggleSetting('repeatVoids');
-    //exit and do nothing if we are prior to zone 6 (maps haven't been unlocked):
-    if (!game.global.mapsUnlocked || !(baseDamage > 0)) { //if we have no damage, why bother running anything? (this fixes weird bugs)
-        enoughDamage = true;
-        enoughHealth = true;
-        shouldFarm = false;
-        updateAutoMapsStatus(); //refresh the UI status (10x per second)
-        return;
-    }
-    
-
-    
-    //if we are in mapology and we have no credits, exit
-    if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) {
-        updateAutoMapsStatus();
-        return;
-    }
-    
-    var challSQ = game.global.runningChallengeSquared;
-    //advanced "Extra Zones" dropdown
-    var extraMapLevels = getPageSetting('AdvMapSpecialModifier') ? getExtraMapLevels() : 0;
-    //FIND VOID MAPS LEVEL:
-    var voidMapLevelSetting = getPageSetting('VoidMaps');
-    //Add your daily zone mod onto the void maps level
-    var dailyVoidMod = getPageSetting('AutoFinishDailyNew');
-    if ((game.global.challengeActive == "Daily") && (getPageSetting('AutoFinishDailyNew') != 999) && (getPageSetting('DailyVoidMod'))) {
-        (voidMapLevelSetting += dailyVoidMod);
-    }
-    //decimal void maps are possible, using string function to avoid false float precision (0.29999999992). javascript can compare ints to strings anyway.
-    var voidMapLevelSettingZone = (voidMapLevelSetting + "").split(".")[0];
-    var voidMapLevelSettingMap = (voidMapLevelSetting + "").split(".")[1];
-    if (voidMapLevelSettingMap === undefined || (game.global.challengeActive == 'Lead' && !challSQ))
-        voidMapLevelSettingMap = 90;
-    if (voidMapLevelSettingMap.length == 1) voidMapLevelSettingMap += "0"; //entering 187.70 becomes 187.7, this will bring it back to 187.70
-    var voidsuntil = getPageSetting('RunNewVoidsUntilNew');
-    needToVoid = voidMapLevelSetting > 0 && game.global.totalVoidMaps > 0 && game.global.lastClearedCell + 1 >= voidMapLevelSettingMap &&
-        (game.global.world == voidMapLevelSettingZone ||
-            (game.global.world >= voidMapLevelSettingZone && getPageSetting('RunNewVoidsUntilNew') != 0 && (voidsuntil == -1 || game.global.world <= (voidsuntil + voidMapLevelSettingZone))));
-    if (game.global.totalVoidMaps == 0 || !needToVoid)
-        doVoids = false;
-    
-    //if dont have army ready, dont enter map screen unless its last poison zone, and/or we need to do void maps
-    if(!needToVoid){
-        var armyReady = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? false : true);
-        if(!armyReady){  //may as well stay in the world until army ready. may not be true for some dailies
-            if (getEmpowerment() == "Poison"){
-                if(currWorldZone % 10 != 5 && currWorldZone % 10 != 0) //in poison xx0 and xx5, we are willing to sit and wait in map screen to be sure not to miss our last poison zone
-                    return;
-            }
-            else //ice/wind/no empowerment: always stay in world if army isnt ready
-                return;
-        }
-    }
-    
-    if (getPageSetting('PRaidingZoneStart') >0) {//Prestige Raiding NT. need to buy upgrades before running this, so adding 1000ms delay
-        setTimeout({},1000);
-        
-        var tmp=1;
-        while(tmp==1){
-            tmp=PrestigeRaid();
-        }
-    }
-    if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding
-    if (getPageSetting('BWraid')==true){setTimeout(BWraiding(), 3000);} //BW Raiding
-
-    //NEW KFrowde + Sliverz This has several issues: 1 - Buys fuckloads of maps, 2 - enters a BW map instead of the one that you want
-    //Set up vars
-    var plusMapVoidLastZone;
-    var plusMapVoid = (voidMapLevelSetting > 0) && (game.global.totalVoidMaps > 0) && (game.global.world == voidMapLevelSettingZone); //Sanity check
-    var plusMapVoidInput = getPageSetting('PlusMapVoidToggle')
-    //Check that you should do this, check you've enabled it between the correct values, check that it hasn't already run this zone
-    if ((plusMapVoid) && (plusMapVoidInput > 0 && plusMapVoidInput <= 10) && (plusMapVoidLastZone === null || plusMapVoidLastZone !== game.global.world)) {
-        document.getElementById("biomeAdvMapsSelect").value = "Random";
-        document.getElementById('advExtraLevelSelect').value = plusMapVoidInput;
-        document.getElementById('advSpecialSelect').value = "p";
-        document.getElementById("lootAdvMapsRange").value = 0;
-        document.getElementById("difficultyAdvMapsRange").value = 9;
-        document.getElementById("sizeAdvMapsRange").value = 9;
-        document.getElementById('advPerfectCheckbox').checked = false;
-        updateMapCost();
-        buyMap();
-        selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length - 1].id);
-        runMap();
-        plusMapVoidLastZone = game.global.world; //This should have stopped it from looping
-    }
-
-    // if force prestige, check if we are behind any first
-    if ((getPageSetting('ForcePresZ') >= 0) && ((game.global.world + extraMapLevels) >= getPageSetting('ForcePresZ'))) {
-        const prestigeList = ['Supershield', 'Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest', 'Bootboost', 'Hellishmet', 'Pantastic', 'Smoldershoulder', 'Bestplate', 'GambesOP'];
-        needPrestige = prestigeList.some(pres => game.mapUnlocks[pres].last <= (game.global.world + extraMapLevels) - 5);
-    } else
-        //calculate if we are behind on unlocking prestiges
-        needPrestige = prestige != "Off" && game.mapUnlocks[prestige] && game.mapUnlocks[prestige].last <= (game.global.world + extraMapLevels) - 5 && game.global.challengeActive != "Frugal";
-    //dont need prestige if we are caught up, and have (2) unbought prestiges:
-    skippedPrestige = false;
-    if (needPrestige && (getPageSetting('PrestigeSkip1_2') == 1 || getPageSetting('PrestigeSkip1_2') == 2)) {
-        var prestigeList = ['Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest', 'Bootboost', 'Hellishmet', 'Pantastic', 'Smoldershoulder', 'Bestplate', 'GambesOP'];
-        var numUnbought = 0;
-        for (var i in prestigeList) {
-            var p = prestigeList[i];
-            if (game.upgrades[p].allowed - game.upgrades[p].done > 0)
-                numUnbought++;
-        }
-        if (numUnbought >= customVars.SkipNumUnboughtPrestiges) {
-            needPrestige = false;
-            skippedPrestige = true;
-        }
-    }
-    // Don't need prestige if there aren't many weapon prestiges left
-    if ((needPrestige || skippedPrestige) && (getPageSetting('PrestigeSkip1_2') == 1 || getPageSetting('PrestigeSkip1_2') == 3)) {
-        const prestigeList = ['Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest'];
-        const numLeft = prestigeList.filter(pres => game.mapUnlocks[pres].last <= (game.global.world + extraMapLevels) - 5);
-        const shouldSkip = numLeft <= customVars.UnearnedPrestigesRequired;
-        if (shouldSkip != skippedPrestige) { // not both conditions are met / is met but not already skipped: unskip it / do skip it
-            needPrestige = !needPrestige;
-            skippedPrestige = !skippedPrestige;
-        }
-    }
-
-    //START CALCULATING DAMAGES:
+function calcDmg(){
+        //START CALCULATING DAMAGES:
     var AutoStance = getPageSetting('AutoStance');
     
     //calculate crits (baseDamage was calced in function autoStance)    this is a weighted average of nonCrit + Crit. (somewhere in the middle)
@@ -301,6 +167,148 @@ function autoMap() {
     //Health:Damage ratio: (status)
     HDratio = enemyHealth / ourBaseDamage;
     updateAutoMapsStatus(); //refresh the UI status (10x per second)
+}
+
+
+//AutoMap - function originally created by Belaith (in 1971)
+//anything/everything to do with maps.
+function autoMap() {
+    var customVars = MODULES["maps"];
+    
+    if(!game.global.mapsActive)
+        currWorldZone = game.global.world; //game.global.world will point to our map level when we're inside map. keep a record of the actual world zone.
+    
+    //allow script to handle abandoning
+    // if(game.options.menu.alwaysAbandon.enabled == 1) toggleSetting('alwaysAbandon');
+    //if we are prestige mapping, force equip first mode
+    var prestige = autoTrimpSettings.Prestige.selected;
+    if (prestige != "Off" && game.options.menu.mapLoot.enabled != 1) toggleSetting('mapLoot');
+    //Control in-map right-side-buttons for people who can't control themselves. If you wish to use these buttons manually, turn off autoMaps temporarily.
+    if (game.options.menu.repeatUntil.enabled == 2) toggleSetting('repeatUntil');
+    if (game.options.menu.exitTo.enabled != 0) toggleSetting('exitTo');
+    if (game.options.menu.repeatVoids.enabled != 0) toggleSetting('repeatVoids');
+    //exit and do nothing if we are prior to zone 6 (maps haven't been unlocked):
+    if (!game.global.mapsUnlocked || !(baseDamage > 0)) { //if we have no damage, why bother running anything? (this fixes weird bugs)
+        enoughDamage = true;
+        enoughHealth = true;
+        shouldFarm = false;
+        updateAutoMapsStatus(); //refresh the UI status (10x per second)
+        return;
+    }
+    
+
+    
+    //if we are in mapology and we have no credits, exit
+    if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) {
+        updateAutoMapsStatus();
+        return;
+    }
+    
+    var challSQ = game.global.runningChallengeSquared;
+    //advanced "Extra Zones" dropdown
+    var extraMapLevels = getPageSetting('AdvMapSpecialModifier') ? getExtraMapLevels() : 0;
+    //FIND VOID MAPS LEVEL:
+    var voidMapLevelSetting = getPageSetting('VoidMaps');
+    //Add your daily zone mod onto the void maps level
+    var dailyVoidMod = getPageSetting('AutoFinishDailyNew');
+    if ((game.global.challengeActive == "Daily") && (getPageSetting('AutoFinishDailyNew') != 999) && (getPageSetting('DailyVoidMod'))) {
+        (voidMapLevelSetting += dailyVoidMod);
+    }
+    //decimal void maps are possible, using string function to avoid false float precision (0.29999999992). javascript can compare ints to strings anyway.
+    var voidMapLevelSettingZone = (voidMapLevelSetting + "").split(".")[0];
+    var voidMapLevelSettingMap = (voidMapLevelSetting + "").split(".")[1];
+    if (voidMapLevelSettingMap === undefined || (game.global.challengeActive == 'Lead' && !challSQ))
+        voidMapLevelSettingMap = 90;
+    if (voidMapLevelSettingMap.length == 1) voidMapLevelSettingMap += "0"; //entering 187.70 becomes 187.7, this will bring it back to 187.70
+    var voidsuntil = getPageSetting('RunNewVoidsUntilNew');
+    needToVoid = voidMapLevelSetting > 0 && game.global.totalVoidMaps > 0 && game.global.lastClearedCell + 1 >= voidMapLevelSettingMap &&
+        (game.global.world == voidMapLevelSettingZone ||
+            (game.global.world >= voidMapLevelSettingZone && getPageSetting('RunNewVoidsUntilNew') != 0 && (voidsuntil == -1 || game.global.world <= (voidsuntil + voidMapLevelSettingZone))));
+    if (game.global.totalVoidMaps == 0 || !needToVoid)
+        doVoids = false;
+    
+    calcDmg();
+    
+    //if dont have army ready, dont enter map screen unless its last poison zone, and/or we need to do void maps
+    if(!needToVoid){
+        var armyReady = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? false : true);
+        if(!armyReady){  //may as well stay in the world until army ready. may not be true for some dailies
+            if (getEmpowerment() == "Poison"){
+                if(currWorldZone % 10 != 5 && currWorldZone % 10 != 0) //in poison xx0 and xx5, we are willing to sit and wait in map screen to be sure not to miss our last poison zone
+                    return;
+            }
+            else //ice/wind/no empowerment: always stay in world if army isnt ready
+                return;
+        }
+    }
+    
+    if (getPageSetting('PRaidingZoneStart') >0) {//Prestige Raiding NT. need to buy upgrades before running this, so adding 1000ms delay
+        setTimeout({},1000);
+        
+        var tmp=1;
+        while(tmp==1){
+            tmp=PrestigeRaid();
+        }
+    }
+    if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding
+    if (getPageSetting('BWraid')==true){setTimeout(BWraiding(), 3000);} //BW Raiding
+
+    //NEW KFrowde + Sliverz This has several issues: 1 - Buys fuckloads of maps, 2 - enters a BW map instead of the one that you want
+    //Set up vars
+    var plusMapVoidLastZone;
+    var plusMapVoid = (voidMapLevelSetting > 0) && (game.global.totalVoidMaps > 0) && (game.global.world == voidMapLevelSettingZone); //Sanity check
+    var plusMapVoidInput = getPageSetting('PlusMapVoidToggle')
+    //Check that you should do this, check you've enabled it between the correct values, check that it hasn't already run this zone
+    if ((plusMapVoid) && (plusMapVoidInput > 0 && plusMapVoidInput <= 10) && (plusMapVoidLastZone === null || plusMapVoidLastZone !== game.global.world)) {
+        document.getElementById("biomeAdvMapsSelect").value = "Random";
+        document.getElementById('advExtraLevelSelect').value = plusMapVoidInput;
+        document.getElementById('advSpecialSelect').value = "p";
+        document.getElementById("lootAdvMapsRange").value = 0;
+        document.getElementById("difficultyAdvMapsRange").value = 9;
+        document.getElementById("sizeAdvMapsRange").value = 9;
+        document.getElementById('advPerfectCheckbox').checked = false;
+        updateMapCost();
+        buyMap();
+        selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length - 1].id);
+        runMap();
+        plusMapVoidLastZone = game.global.world; //This should have stopped it from looping
+    }
+
+    // if force prestige, check if we are behind any first
+    if ((getPageSetting('ForcePresZ') >= 0) && ((game.global.world + extraMapLevels) >= getPageSetting('ForcePresZ'))) {
+        const prestigeList = ['Supershield', 'Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest', 'Bootboost', 'Hellishmet', 'Pantastic', 'Smoldershoulder', 'Bestplate', 'GambesOP'];
+        needPrestige = prestigeList.some(pres => game.mapUnlocks[pres].last <= (game.global.world + extraMapLevels) - 5);
+    } else
+        //calculate if we are behind on unlocking prestiges
+        needPrestige = prestige != "Off" && game.mapUnlocks[prestige] && game.mapUnlocks[prestige].last <= (game.global.world + extraMapLevels) - 5 && game.global.challengeActive != "Frugal";
+    //dont need prestige if we are caught up, and have (2) unbought prestiges:
+    skippedPrestige = false;
+    if (needPrestige && (getPageSetting('PrestigeSkip1_2') == 1 || getPageSetting('PrestigeSkip1_2') == 2)) {
+        var prestigeList = ['Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest', 'Bootboost', 'Hellishmet', 'Pantastic', 'Smoldershoulder', 'Bestplate', 'GambesOP'];
+        var numUnbought = 0;
+        for (var i in prestigeList) {
+            var p = prestigeList[i];
+            if (game.upgrades[p].allowed - game.upgrades[p].done > 0)
+                numUnbought++;
+        }
+        if (numUnbought >= customVars.SkipNumUnboughtPrestiges) {
+            needPrestige = false;
+            skippedPrestige = true;
+        }
+    }
+    // Don't need prestige if there aren't many weapon prestiges left
+    if ((needPrestige || skippedPrestige) && (getPageSetting('PrestigeSkip1_2') == 1 || getPageSetting('PrestigeSkip1_2') == 3)) {
+        const prestigeList = ['Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest'];
+        const numLeft = prestigeList.filter(pres => game.mapUnlocks[pres].last <= (game.global.world + extraMapLevels) - 5);
+        const shouldSkip = numLeft <= customVars.UnearnedPrestigesRequired;
+        if (shouldSkip != skippedPrestige) { // not both conditions are met / is met but not already skipped: unskip it / do skip it
+            needPrestige = !needPrestige;
+            skippedPrestige = !skippedPrestige;
+        }
+    }
+
+
+    
     //
     //BEGIN AUTOMAPS DECISIONS:
     //variables for doing maps
