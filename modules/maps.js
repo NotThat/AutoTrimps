@@ -250,8 +250,7 @@ function autoMap() {
     
     if (getPageSetting('PRaidingZoneStart') >0) {//Prestige Raiding NT. need to buy upgrades before running this, so adding 1000ms delay
         setTimeout({},1000);
-        var tmp=PrestigeRaid();
-        if (tmp != 2) //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
+        if(!PrestigeRaid()) //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
             return; 
     }
     if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding
@@ -949,7 +948,9 @@ function PrestigeRaid() {
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
         mapbought = false;
         startedMap = false
-        return 2; //prestigeRaid is out of work, allow autoMaps to continue 
+        presRaiding = false; //update UI
+        updateAutoMapsStatus(); //UI
+        return true; //prestigeRaid is out of work, allow autoMaps to continue 
     }
     
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
@@ -957,7 +958,9 @@ function PrestigeRaid() {
 
     if(havePrestigeUpTo >= maxDesiredLevel){
         debug("have all the prestige levels that we want. exiting.", "general", "");
-        return 2; //prestigeRaid is out of work, allow autoMaps to continue 
+        presRaiding = false; //update UI
+        updateAutoMapsStatus(); //UI
+        return true; //prestigeRaid is out of work, allow autoMaps to continue 
     }
     
     debug("currWorldZone = " + currWorldZone, "general", "");
@@ -977,14 +980,18 @@ function PrestigeRaid() {
             debug("cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments");
             debug("exiting.");
             scaleUp = false;
-            return 2;
+            presRaiding = false; //update UI
+            updateAutoMapsStatus(); //UI
+            return true;
         }
         
         //lets create the map
         var flag = createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
         if (!flag){
             debug("error in creating map process");
-            return 2;
+            presRaiding = false; //update UI
+            updateAutoMapsStatus(); //UI
+            return true;
         }
         
         selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id);
@@ -1006,15 +1013,15 @@ function PrestigeRaid() {
     if(scaleUp)
     {
         if(minDesiredLevel != maxDesiredLevel)
-            return 1; //we're not done yet
-        else
-            return 1;
+            return false; //we're not done yet
+        else{
+            presRaiding = false; //update UI
+            updateAutoMapsStatus(); //UI
+            return true;
+        }
     }
     
-    presRaiding = false; //update UI
-    updateAutoMapsStatus(); //UI
-    
-    return 1;
+    return true;
 }
 
 function createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect){
@@ -1068,7 +1075,7 @@ function findMap(level){
             if(game.global.mapsOwnedArray[map].level >= bestSoFar && game.global.mapsOwnedArray[map].level >= level){
                 theMap = game.global.mapsOwnedArray[map];
                 bestSoFar = game.global.mapsOwnedArray[map].level;
-                debug("map is " + theMap + "game.global.mapsOwnedArray[map] " + game.global.mapsOwnedArray[map] + "game.global.mapsOwnedArray[map].level " +game.global.mapsOwnedArray[map].level + " game.global.mapsOwnedArray[map].noRecycle" + game.global.mapsOwnedArray[map].noRecycle);
+                //debug("map is " + theMap + "game.global.mapsOwnedArray[map] " + game.global.mapsOwnedArray[map] + "game.global.mapsOwnedArray[map].level " +game.global.mapsOwnedArray[map].level + " game.global.mapsOwnedArray[map].noRecycle" + game.global.mapsOwnedArray[map].noRecycle);
             }
         }
     }    
