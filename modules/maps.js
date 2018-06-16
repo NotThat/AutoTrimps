@@ -869,7 +869,7 @@ function updateAutoMapsStatus(get) {
     if (getPageSetting('AutoMaps') == 0) status = 'Off';
     
     else if (presRaiding) status = 'Prestige Raiding';
-    else if (BWRaiding) status = 'BW Raiding';
+    else if (BWRaidingStatus) status = 'BW Raiding';
     else if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) status = 'Out of Map Credits';
     else if (preSpireFarming) {
         var secs = Math.floor(60 - (spireTime * 60) % 60).toFixed(0)
