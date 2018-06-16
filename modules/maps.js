@@ -131,7 +131,12 @@ function autoMap() {
         }
     }
     
-    if (getPageSetting('PRaidingZoneStart') >0) {setTimeout(PrestigeRaid(), 1000);} //Prestige Raiding NT. need to buy upgrades before running this, so adding 1000ms delay
+    if (getPageSetting('PRaidingZoneStart') >0) {//Prestige Raiding NT. need to buy upgrades before running this, so adding 1000ms delay
+        var tmp=1;
+        while(tmp==1){
+            setTimeout(tmp=PrestigeRaid(), 1000);
+        }
+    }
     if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding
     if (getPageSetting('BWraid')==true){setTimeout(BWraiding(), 3000);} //BW Raiding
 
@@ -931,7 +936,7 @@ function PrestigeRaid() {
     }
     
     if (StartZone == -1 || currWorldZone < StartZone || prestigeRaidMaxSoFar == currWorldZone || PRaidMax <= 0)
-        return;
+        return 0;
     
     prestigeRaidMaxSoFar = currWorldZone; //first time we're prestige raiding in this zone, only attempt to raid once per zone
     
@@ -951,7 +956,7 @@ function PrestigeRaid() {
 
     if(havePrestigeUpTo >= maxDesiredLevel){
         debug("have all the prestige levels that we want. exiting.", "general", "");
-        return;
+        return 0;
     }
     
     var fragments = game.resources.fragments.owned; //our available fragments
@@ -1068,10 +1073,11 @@ function PrestigeRaid() {
         debug("cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments");
         debug("exiting.");
         scaleUp = false;
-        return;
+        return 0;
     }
     
     presRaiding = true; //for UI display purposes
+    updateAutoMapsStatus();
     
     if (!game.global.preMapsActive && !game.global.mapsActive) { 
         mapsClicked();
@@ -1109,7 +1115,7 @@ function PrestigeRaid() {
             mapbought = false;
             debug("Failed to prestige raid. We can't afford the map.");
             debug("Expected map level " + (currWorldZone+extraLevels) + " is " + cost + " and we have " + fragments + " frags.");
-            return;
+            return 0;
         }
     }
     if (mapbought == true) {
@@ -1129,10 +1135,15 @@ function PrestigeRaid() {
     
     if(scaleUp)
     {
-        prestigeRaidMaxSoFar = currWorldZone -1;
+        if(minDesiredLevel != maxDesiredLevel)
+            return 1; //we're not done yet
+        else
+            return 0;
     }
     
-    presRaiding = false; //UI purposes
+    presRaiding = false; //update UI
+    updateAutoMapsStatus();
+    return 0;
 }
 
 function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
@@ -1207,7 +1218,6 @@ function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
             }
             else{ //xx6-xx9
                 scaleUp = true; //special case, we want to run xx1 then xx2 then xx3 for faster clear
-                debug("hello " + currWorldZone);
                 maxDesiredLevel = currWorldZone - lastDigitZone + 15;
                 if(maxDesiredLevel > currWorldZone + 7)
                     maxDesiredLevel = currWorldZone+7;
