@@ -132,9 +132,11 @@ function autoMap() {
     }
     
     if (getPageSetting('PRaidingZoneStart') >0) {//Prestige Raiding NT. need to buy upgrades before running this, so adding 1000ms delay
+        setTimeout({},1000);
+        
         var tmp=1;
         while(tmp==1){
-            setTimeout(tmp=PrestigeRaid(), 1000);
+            tmp=PrestigeRaid();
         }
     }
     if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding
@@ -1142,7 +1144,6 @@ function PrestigeRaid() {
     }
     
     presRaiding = false; //update UI
-    updateAutoMapsStatus();
     return 0;
 }
 
