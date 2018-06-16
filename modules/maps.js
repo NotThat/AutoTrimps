@@ -250,11 +250,9 @@ function autoMap() {
     
     if (getPageSetting('PRaidingZoneStart') >0) {//Prestige Raiding NT. need to buy upgrades before running this, so adding 1000ms delay
         setTimeout({},1000);
-        
-        var tmp=1;
-        while(tmp==1){
-            tmp=PrestigeRaid();
-        }
+        var tmp=PrestigeRaid();
+        if (tmp != 2) //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
+            return; 
     }
     if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding
     if (getPageSetting('BWraid')==true){setTimeout(BWraiding(), 3000);} //BW Raiding
@@ -951,7 +949,7 @@ function PrestigeRaid() {
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
         mapbought = false;
         startedMap = false
-        return 0;
+        return 2; //prestigeRaid is out of work, allow autoMaps to continue 
     }
     
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
@@ -959,7 +957,7 @@ function PrestigeRaid() {
 
     if(havePrestigeUpTo >= maxDesiredLevel){
         debug("have all the prestige levels that we want. exiting.", "general", "");
-        return 0;
+        return 2; //prestigeRaid is out of work, allow autoMaps to continue 
     }
     
     debug("currWorldZone = " + currWorldZone, "general", "");
@@ -979,14 +977,14 @@ function PrestigeRaid() {
             debug("cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments");
             debug("exiting.");
             scaleUp = false;
-            return 0;
+            return 2;
         }
         
         //lets create the map
         var flag = createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
         if (!flag){
             debug("error in creating map process");
-            return 0;
+            return 2;
         }
         
         selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id);
@@ -1010,13 +1008,13 @@ function PrestigeRaid() {
         if(minDesiredLevel != maxDesiredLevel)
             return 1; //we're not done yet
         else
-            return 0;
+            return 1;
     }
     
     presRaiding = false; //update UI
     updateAutoMapsStatus(); //UI
     
-    return 0;
+    return 1;
 }
 
 function createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect){
