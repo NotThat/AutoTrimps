@@ -467,13 +467,14 @@ function autoMap() {
             if (game.global.mapsOwnedArray[map].level == siphlvl)
                 siphonMap = map;
         }
+        debug("map is " + map + "game.global.mapsOwnedArray[map] " + game.global.mapsOwnedArray[map] + "game.global.mapsOwnedArray[map].level " +game.global.mapsOwnedArray[map].level + " game.global.mapsOwnedArray[map].noRecycle" + game.global.mapsOwnedArray[map].noRecycle);
     }
-    
     
     //Organize a list of the sorted map's levels and their index in the mapOwnedarray
     var keysSorted = Object.keys(obj).sort(function(a, b) {
         return obj[b] - obj[a];
     });
+    
     //if there are no non-unique maps, there will be nothing in keysSorted, so set to create a map
     var highestMap;
     if (keysSorted[0])
@@ -937,8 +938,8 @@ function PrestigeRaid() {
     }
     
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
-        //mapbought = false;
-        //startedMap = false
+        mapbought = false;
+        startedMap = false
         return 0;
     }
     
