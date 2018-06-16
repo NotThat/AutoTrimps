@@ -1000,7 +1000,7 @@ function PrestigeRaid() {
         selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id); //the map we just created
     }
     else{ //we have a map with prestige available in our map list
-        debug("selecting map " + map);
+        debug("selecting map " + map.id);
         selectMap(map.id);
     }
     
@@ -1082,10 +1082,12 @@ function findMap(level){
     var bestSoFar = -1;
     var theMap;
     for (var map in game.global.mapsOwnedArray) {
-        if (!game.global.mapsOwnedArray[map].noRecycle) { //not a unique map
-            if(game.global.mapsOwnedArray[map].level >= bestSoFar && game.global.mapsOwnedArray[map].level >= level){
-                theMap = game.global.mapsOwnedArray[map];
-                bestSoFar = game.global.mapsOwnedArray[map].level;
+        //if (!game.global.mapsOwnedArray[map].noRecycle) { //not a unique map
+        if (!map.noRecycle) { //not a unique map
+            //if(game.global.mapsOwnedArray[map].level >= bestSoFar && game.global.mapsOwnedArray[map].level >= level){
+            if(map.level >= bestSoFar && map.level >= level){
+                theMap = map;
+                bestSoFar = map.level;
                 //debug("map is " + theMap + "game.global.mapsOwnedArray[map] " + game.global.mapsOwnedArray[map] + "game.global.mapsOwnedArray[map].level " +game.global.mapsOwnedArray[map].level + " game.global.mapsOwnedArray[map].noRecycle" + game.global.mapsOwnedArray[map].noRecycle);
             }
         }
