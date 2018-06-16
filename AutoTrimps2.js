@@ -213,10 +213,6 @@ function mainLoop() {
     if (getPageSetting('AutoAllocatePerks')==2) lootdump(); //Loot Dumping (other.js)
     if (getPageSetting('BuyUpgradesNew') != 0) buyUpgrades();    //"Buy Upgrades"       (upgrades.js)
 
-    if (getPageSetting('PRaidingZoneStart') >0) {setTimeout(PrestigeRaid(), 1000);} //Prestige Raiding NT (other.js). need to buy upgrades before running this, so adding 1000ms delay
-    if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding (other.js)
-    if (getPageSetting('BWraid')==true){setTimeout(BWraiding(), 3000);} //BW Raiding (other.js)    
-    
     var agu = getPageSetting('AutoGoldenUpgrades');
     if (agu && agu!='Off') autoGoldenUpgradesAT(agu);    //"Golden Upgrades"     (other.js)
     if (getPageSetting('BuyBuildingsNew')===0);                                            //"Buy Neither"              (Buildings.js)
@@ -228,23 +224,11 @@ function mainLoop() {
       else if (getPageSetting('BuyJobsNew')==2) buyJobs();                              //"Manual Worker Ratios"     (")
     if (getPageSetting('ManualGather2')<=1) manualLabor();  //"Auto Gather/Build"       (gather.js)
       else if (getPageSetting('ManualGather2')==2) manualLabor2();  //"Auto Gather/Build #2"  (")
+      
     getPageSetting('AutoMaps') > 0 ? autoMap() : updateAutoMapsStatus(); //"Auto Maps"      (automaps.js)
+    //
     //if (getPageSetting('GeneticistTimer') >= 0) autoBreedTimer(); //"Geneticist Timer" / "Auto Breed Timer"     (autobreedtimer.js)
     if (autoTrimpSettings.AutoPortal.selected != "Off") autoPortal();   //"Auto Portal" (hidden until level 40) (portal.js)
-    //var realMaxArmy = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();
-    //var flr = Math.floor(Math.log10(realMaxArmy));
-    //var frac = realMaxArmy/Math.pow(10, flr-2)/1000;
-    //var resultForGraph = flr+frac;
-    //debug("ratio log10: " + Math.log10(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend()));
-    //debug("flr = " + flr);
-    //debug("frac = " + frac);
-    //debug("final = " + resultForGraph);
-    //debug(game.resources.trimps.realMax());
-    //debug(game.resources.trimps.getCurrentSend());
-    //debug(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend());
-
-    
-    
     
     if (getPageSetting('TrapTrimps') && game.global.trapBuildAllowed && game.global.trapBuildToggled == false) toggleAutoTrap(); //"Trap Trimps"
     if (aWholeNewWorld && getPageSetting('AutoRoboTrimp')) autoRoboTrimp();   //"AutoRoboTrimp" (other.js)

@@ -1,6 +1,7 @@
 MODULES["maps"] = {};
 //These can be changed (in the console) if you know what you're doing:
 MODULES["maps"].enoughDamageCutoff = 6; //above this the game will do maps for map bonus stacks
+MODULES["maps"].poisonMult = 30; //how much bonus damage to treat poison zones as giving us
 MODULES["maps"].farmingCutoff = 16; //above this the game will farm.
 MODULES["maps"].numHitsSurvived = 8; //survive X hits in D stance or not enough Health.
 MODULES["maps"].LeadfarmingCutoff = 10; //lead has its own farmingCutoff
@@ -31,6 +32,8 @@ MODULES["maps"].maxMapBonusAfterZ = MODULES["maps"].maxMapBonus; //Max Map Bonus
 //Initialize Global Vars (dont mess with these ones, nothing good can come from it).
 var stackingTox = false;
 var doVoids = false;
+var presRaiding = false;
+var BWRaiding = false;
 var needToVoid = false;
 var plusMapVoid = false;
 var needPrestige = false;
@@ -48,12 +51,24 @@ var spireMapBonusFarming = false;
 var spireTime = 0;
 var doMaxMapBonus = false;
 var vanillaMapatZone = false;
-var additionalCritMulti = (getPlayerCritChance() > 2) ? 25 : 5;
+var prestigeRaidMaxSoFar = 0;
+var maxDesiredLevel;
+var minDesiredLevel;
+var mapbought = false;
+//var debugging = true;
+var debugging = false;
+var currWorldZone = 1;
+var scaleUp = false; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
+//Activate Robo Trimp (will activate on the first zone after liquification)
 
 //AutoMap - function originally created by Belaith (in 1971)
 //anything/everything to do with maps.
 function autoMap() {
     var customVars = MODULES["maps"];
+    
+    if(!game.global.mapsActive)
+        currWorldZone = game.global.world; //game.global.world will point to our map level when we're inside map. keep a record of the actual world zone.
+    
     //allow script to handle abandoning
     // if(game.options.menu.alwaysAbandon.enabled == 1) toggleSetting('alwaysAbandon');
     //if we are prestige mapping, force equip first mode
@@ -71,11 +86,15 @@ function autoMap() {
         updateAutoMapsStatus(); //refresh the UI status (10x per second)
         return;
     }
+    
+
+    
     //if we are in mapology and we have no credits, exit
     if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) {
         updateAutoMapsStatus();
         return;
     }
+    
     var challSQ = game.global.runningChallengeSquared;
     //advanced "Extra Zones" dropdown
     var extraMapLevels = getPageSetting('AdvMapSpecialModifier') ? getExtraMapLevels() : 0;
@@ -98,10 +117,27 @@ function autoMap() {
             (game.global.world >= voidMapLevelSettingZone && getPageSetting('RunNewVoidsUntilNew') != 0 && (voidsuntil == -1 || game.global.world <= (voidsuntil + voidMapLevelSettingZone))));
     if (game.global.totalVoidMaps == 0 || !needToVoid)
         doVoids = false;
+    
+    //if dont have army ready, dont enter map screen unless its last poison zone, and/or we need to do void maps
+    if(!needToVoid){
+        var armyReady = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? false : true);
+        if(!armyReady){  //may as well stay in the world until army ready. may not be true for some dailies
+            if (getEmpowerment() == "Poison"){
+                if(currWorldZone % 10 != 5 && currWorldZone % 10 != 0) //in poison xx0 and xx5, we are willing to sit and wait in map screen to be sure not to miss our last poison zone
+                    return;
+            }
+            else //ice/wind/no empowerment: always stay in world if army isnt ready
+                return;
+        }
+    }
+    
+    if (getPageSetting('PRaidingZoneStart') >0) {setTimeout(PrestigeRaid(), 1000);} //Prestige Raiding NT. need to buy upgrades before running this, so adding 1000ms delay
+    if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding
+    if (getPageSetting('BWraid')==true){setTimeout(BWraiding(), 3000);} //BW Raiding
 
     //NEW KFrowde + Sliverz This has several issues: 1 - Buys fuckloads of maps, 2 - enters a BW map instead of the one that you want
     //Set up vars
-    var plusMapVoidLastZone
+    var plusMapVoidLastZone;
     var plusMapVoid = (voidMapLevelSetting > 0) && (game.global.totalVoidMaps > 0) && (game.global.world == voidMapLevelSettingZone); //Sanity check
     var plusMapVoidInput = getPageSetting('PlusMapVoidToggle')
     //Check that you should do this, check you've enabled it between the correct values, check that it hasn't already run this zone
@@ -155,23 +191,15 @@ function autoMap() {
 
     //START CALCULATING DAMAGES:
     var AutoStance = getPageSetting('AutoStance');
+    
     //calculate crits (baseDamage was calced in function autoStance)    this is a weighted average of nonCrit + Crit. (somewhere in the middle)
-    
-    
-    /*if (getPlayerCritChance() > 1) {
-    ourBaseDamage = (baseDamage * (1 - getPlayerCritChance()) + (baseDamage * getPlayerCritChance() * getPlayerCritDamageMult() * additionalCritMulti));
-    }
-    else {
-    ourBaseDamage = (baseDamage * (1 - getPlayerCritChance()) + (baseDamage * getPlayerCritChance() * getPlayerCritDamageMult()));
-    }*/
-    
     var critChance = getPlayerCritChance();
     var normalCritChance = (critChance > 1 ? critChance - 1 : critChance);
     var orangeCritChance = (critChance > 2 ? critChance - 2 : 0);
     ourBaseDamage = baseDamage * (1 + (normalCritChance + 5 * orangeCritChance) * getPlayerCritDamageMult());
     
     //add damage multiplier for poison zones
-    ourBaseDamage = ourBaseDamage * (getEmpowerment() == "Poison" ? 30 : 1);
+    ourBaseDamage = ourBaseDamage * (getEmpowerment() == "Poison" ? customVars.poisonMult : 1); //30 by default
     
     //calculate with map bonus
     var mapbonusmulti = 1 + (0.20 * game.global.mapBonus);
@@ -183,17 +211,17 @@ function autoMap() {
     var enemyDamage;
     var enemyHealth;
     if (AutoStance <= 1) {
-        enemyDamage = getEnemyMaxAttack(game.global.world + 1, 50, 'Snimp', 1.2);
+        enemyDamage = getEnemyMaxAttack(currWorldZone, 50, 'Snimp', 1.2);
         enemyDamage = calcDailyAttackMod(enemyDamage); //daily mods: badStrength,badMapStrength,bloodthirst
     } else {
-        enemyDamage = calcBadGuyDmg(null, getEnemyMaxAttack(game.global.world + 1, 50, 'Snimp', 1.0), true, true); //(enemy,attack,daily,maxormin,[disableFlucts])
+        enemyDamage = calcBadGuyDmg(null, getEnemyMaxAttack(currWorldZone, 50, 'Snimp', 1.0), true, true); //(enemy,attack,daily,maxormin,[disableFlucts])
     }
-    enemyHealth = getEnemyMaxHealth(game.global.world + 1, 50);
+    enemyHealth = getEnemyMaxHealth(currWorldZone, 50);
     if (game.global.challengeActive == "Toxicity") {
         enemyHealth *= 2;
     }
     //Corruption Zone Proportionality Farming Calculator:
-    var corrupt = game.global.world >= mutations.Corruption.start(true);
+    var corrupt = currWorldZone >= mutations.Corruption.start(true);
     if (getPageSetting('CorruptionCalc') && corrupt) {
         var cptnum = getCorruptedCellsNum(); //count corrupted cells
         var cpthlth = getCorruptScale("health"); //get corrupted health mod
@@ -220,18 +248,18 @@ function autoMap() {
             enemyDamage *= (1 + (game.challenges.Lead.stacks * 0.04));
         enemyHealth *= (1 + (game.challenges.Lead.stacks * 0.04));
         //if the zone is odd:   (skip the +2 calc for the last level.
-        if (game.global.world % 2 == 1 && game.global.world != 179) {
+        if (currWorldZone % 2 == 1 && currWorldZone != 179) {
             //calculate for the next level in advance (since we only farm on odd, and evens are very tough)
             if (AutoStance <= 1) {
-                enemyDamage = getEnemyMaxAttack(game.global.world + 1, 99, 'Snimp', 1.2);
+                enemyDamage = getEnemyMaxAttack(currWorldZone + 1, 99, 'Snimp', 1.2);
                 enemyDamage = calcDailyAttackMod(enemyDamage); //daily mods: badStrength,badMapStrength,bloodthirst
             } else {
-                enemyDamage = calcBadGuyDmg(null, getEnemyMaxAttack(game.global.world + 1, 99, 'Snimp', 1.0), true, true); //(enemy,attack,daily,maxormin,[disableFlucts])
+                enemyDamage = calcBadGuyDmg(null, getEnemyMaxAttack(currWorldZone + 1, 99, 'Snimp', 1.0), true, true); //(enemy,attack,daily,maxormin,[disableFlucts])
             }
             enemyDamage *= (1 + (100 * 0.04));
             ourBaseDamage /= 1.5; //subtract the odd-zone bonus.
         }
-        if (game.global.world == 179) {
+        if (currWorldZone == 179) {
             ourBaseDamage *= mapbonusmulti;
         }
         //let people disable this if they want.
@@ -239,6 +267,7 @@ function autoMap() {
             shouldFarm = enemyHealth > (ourBaseDamage * customVars.LeadfarmingCutoff);
         }
     }
+    //does not take corrupted void maps into consideration?
     //Enough Health and Damage calculations:
     var pierceMod = (game.global.brokenPlanet && !game.global.mapsActive) ? getPierceAmt() : 0;
     const FORMATION_MOD_1 = game.upgrades.Dominance.done ? 2 : 1;
@@ -258,34 +287,14 @@ function autoMap() {
     
     var windstackzone = getPageSetting('WindStackingMin');
     var mult = 1;
-    if (getEmpowerment() == "Wind" && game.global.world >= windstackzone)
+    if (getEmpowerment() == "Wind" && currWorldZone >= windstackzone)
         mult = 4; //in windstacking zones, wait much longer before doing maps for damage
     enoughDamage = (ourBaseDamage * customVars.enoughDamageCutoff * mult > enemyHealth);
-    //debug("hello! " +getEmpowerment() + " wind:" + game.empowerments.Wind.currentDebuffPower + "poison: " + game.empowerments.Poison.currentDebuffPower + " ice: " + game.empowerments.Ice.currentDebuffPower, "general", "");
-    //debug(getEmpowerment() == "Poison", "general", "");
-    //console.log(getEmpowerment() == "Poison");
-
-    //remove this in the meantime until it works for everyone.
-    /*     if (!wantToScry) {
-            //enough health if we can survive 8 hits in D stance (health/2 and block/2)
-            enoughHealth = (baseHealth/2 > 8 * (enemyDamage - baseBlock/2 > 0 ? enemyDamage - baseBlock/2 : enemyDamage * pierceMod));
-            //enough damage if we can one-shot the enemy in D (ourBaseDamage*4)
-            enoughDamage = (ourBaseDamage * 4) > enemyHealth;
-            scryerStuck = false;
-        } else {
-            //enough health if we can pass all the tests in autostance2 under the best of the worst conditions.
-            //enough damage if we can one-shot the enemy in S (ourBaseDamage/2)
-            var result = autoStanceCheck(true);
-            enoughHealth = result[0];
-            enoughDamage = result[1];
-            scryerStuck = !enoughHealth;
-        } */
 
     //Health:Damage ratio: (status)
     HDratio = enemyHealth / ourBaseDamage;
     updateAutoMapsStatus(); //refresh the UI status (10x per second)
-
-
+    //
     //BEGIN AUTOMAPS DECISIONS:
     //variables for doing maps
     var selectedMap = "world";
@@ -384,6 +393,8 @@ function autoMap() {
         shouldDoMaps = true;
         shouldDoWatchMaps = true;
     }
+    
+    
     //Farm X Minutes Before Spire:
     var shouldDoSpireMaps = false;
     preSpireFarming = (isActiveSpireAT()) && (spireTime = (new Date().getTime() - game.global.zoneStarted) / 1000 / 60) < getPageSetting('MinutestoFarmBeforeSpire');
@@ -392,6 +403,7 @@ function autoMap() {
         shouldDoMaps = true;
         shouldDoSpireMaps = true;
     }
+    
     //Run a single map to get nurseries when 1. it's still locked,
     // 2. blacksmithery is purchased,
     // but not when 3A. home detector is purchased, or 3B. we don't need nurseries
@@ -402,6 +414,7 @@ function autoMap() {
         shouldDoMaps = true;
         shouldDoWatchMaps = true; //TODO coding: this is overloaded - not ideal.
     }
+    
     //MaxMapBonusAfterZone (idea from awnv)
     var maxMapBonusZ = getPageSetting('MaxMapBonusAfterZone');
     doMaxMapBonus = (maxMapBonusZ >= 0 && game.global.mapBonus < customVars.maxMapBonusAfterZ && game.global.world >= maxMapBonusZ);
@@ -447,6 +460,8 @@ function autoMap() {
                 siphonMap = map;
         }
     }
+    
+    
     //Organize a list of the sorted map's levels and their index in the mapOwnedarray
     var keysSorted = Object.keys(obj).sort(function(a, b) {
         return obj[b] - obj[a];
@@ -613,6 +628,7 @@ function autoMap() {
             break;
         }
     }
+    
     //MAPS CREATION pt1:
     //map if we don't have health/dmg or we need to clear void maps or if we are prestige mapping, and our set item has a new prestige available
     if (shouldDoMaps || doVoids || needPrestige) {
@@ -647,6 +663,7 @@ function autoMap() {
             mapsClicked();
         return; //exit
     }
+    
     //REPEAT BUTTON:
     //Repeat Button Management (inside a map):
     if (!game.global.preMapsActive && game.global.mapsActive) {
@@ -691,6 +708,7 @@ function autoMap() {
                 mapsClicked(true);
             }
         }
+        
         //FORCE EXIT WORLD->MAPS
         //clicks the maps button, once or twice (inside the world):
     } else if (!game.global.preMapsActive && !game.global.mapsActive) {
@@ -849,6 +867,9 @@ function updateAutoMapsStatus(get) {
     var status;
     var minSp = getPageSetting('MinutestoFarmBeforeSpire');
     if (getPageSetting('AutoMaps') == 0) status = 'Off';
+    
+    else if (presRaiding) status = 'Prestige Raiding';
+    else if (BWRaiding) status = 'BW Raiding';
     else if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) status = 'Out of Map Credits';
     else if (preSpireFarming) {
         var secs = Math.floor(60 - (spireTime * 60) % 60).toFixed(0)
@@ -887,6 +908,390 @@ function updateAutoMapsStatus(get) {
         document.getElementById('hiderStatus').innerHTML = hiderStatus;
     }
 }
+
+function PrestigeRaid() {
+    var StartZone = getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid. -1 to ignore
+    var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
+    var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
+            
+    if(debugging){
+        debug("game.global.mapsActive " + game.global.mapsActive);
+        debug("game.global.world " + game.global.world);
+        debug("prestigeRaidMaxSoFar " + prestigeRaidMaxSoFar);
+        debug("scaleUp = " + scaleUp);
+    }
+    
+    if (PRaidMax > 10){
+        PRaidMax = 10;
+        setPageSetting('PRaidingMaxZones', 10);
+    }
+    if (PRaidMax < 0){
+        PRaidMax = 0;
+        setPageSetting('PRaidingMaxZones', 0);
+    }
+    
+    if (StartZone == -1 || currWorldZone < StartZone || prestigeRaidMaxSoFar == currWorldZone || PRaidMax <= 0)
+        return;
+    
+    prestigeRaidMaxSoFar = currWorldZone; //first time we're prestige raiding in this zone, only attempt to raid once per zone
+    
+    var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
+    findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo); //the zone the alg decided to raid up to
+    
+    if(minDesiredLevel < havePrestigeUpTo + 1)
+        minDesiredLevel = havePrestigeUpTo + 1;
+    if(minDesiredLevel > maxDesiredLevel)
+        minDesiredLevel = maxDesiredLevel;
+    
+    debug("currWorldZone = " + currWorldZone, "general", "");
+    debug("empowerment = " + getEmpowerment(), "general", "");
+    debug("maxDesiredLevel = " + maxDesiredLevel, "general", "");
+    debug("minDesiredLevel = " + minDesiredLevel, "general", "");
+    debug("havePrestigeUpTo = " + havePrestigeUpTo, "general", "");
+
+    if(havePrestigeUpTo >= maxDesiredLevel){
+        debug("have all the prestige levels that we want. exiting.", "general", "");
+        return;
+    }
+    
+    var fragments = game.resources.fragments.owned; //our available fragments
+    
+    //find highest map level we can afford
+    var foundSuitableMap = false;
+    var cost
+    if (!scaleUp)
+        for(i = maxDesiredLevel; i >= minDesiredLevel; i--){
+            baseLevel = currWorldZone;
+            sizeSlider=9;
+            diffSlider=9;
+            lootSlider=0;
+            specialMod="Prestigious";
+            perfect=false;
+            extraLevels = i-currWorldZone;
+            type="Random";
+                 //calcMapCost(currWorldZone,   0-9,       0-9,        0-9,        "Prestigious"/"FA"/"LMC"/"", boolean, 0-10, "Random"/other){ 
+            cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+
+            if (cost/fragments < 3 && cost/fragments > 1){ //can almost afford, lets get it
+                debug("loosening map");
+                diffSlider = 5;
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                if (cost/fragments > 1){ //can almost afford, lets get it
+                    debug("loosening further");
+                    specialMod = "";
+                    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                }
+            }
+            else if (cost/fragments < 0.01){ //can easily affordd
+                debug("maximizing map");
+                lootSlider=9;
+                perfect=true;
+                type="Garden";
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                //just in case..
+                if (cost/fragments > 1){
+                    lootSlider = 0;
+                    perfect = false;
+                    type="Random";
+                    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                }
+            }
+            if (cost/fragments > 1 && (i == minDesiredLevel || (currWorldZone % 10 == 5 && getEmpowerment() == "Poison"))){//last attempt to buy a map. also do this on xx5 poison zones
+                debug("last attempt to buy map");
+                diffSlider=0;
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                if (cost/fragments > 1){
+                    sizeSlider=0;
+                    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                    if (cost/fragments > 1){
+                        specialMod="";
+                        cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                    }
+                }
+            }
+            if(fragments >= cost){
+                debug("found suitable map", "general", "");
+                debug("cost " + cost.toPrecision(3) + " out of " + fragments.toPrecision(3) + " available fragments.", "general", "");
+                debug("map level " + (currWorldZone+extraLevels), "general", "");
+
+                foundSuitableMap = true;
+                break;
+            }
+        }
+    else {
+        for(i = minDesiredLevel; i <= maxDesiredLevel; i++){
+            baseLevel = currWorldZone;
+            sizeSlider=9;
+            diffSlider=9;
+            lootSlider=0;
+            specialMod="Prestigious";
+            perfect=false;
+            extraLevels = i-currWorldZone;
+            type="Random";
+
+            cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+            if (cost/fragments < 3 && cost/fragments > 1){ //can almost afford, lets get it
+                debug("loosening map");
+                diffSlider = 7;
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                if (cost/fragments > 1){ //can almost afford, lets get it
+                    debug("loosening further");
+                    specialMod = "";
+                    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                }
+            }
+            else if (cost/fragments < 0.02){ //can easily afford
+                debug("maximizing map");
+                lootSlider=9;
+                perfect=true;
+                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                //just in case..
+                if (cost/fragments > 1){
+                    lootSlider = 0;
+                    perfect = false;
+                    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+                }
+            }
+            if(fragments >= cost){
+                debug("found suitable map", "general", "");
+                debug("cost " + cost.toPrecision(3) + " out of " + fragments.toPrecision(3) + " available fragments.", "general", "");
+                debug("map level " + (currWorldZone+extraLevels), "general", "");
+
+                foundSuitableMap = true;
+                break;
+            }
+        }
+    }
+    
+    if (!foundSuitableMap){
+        debug("could not find suitable map.");
+        debug("cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments");
+        debug("exiting.");
+        scaleUp = false;
+        return;
+    }
+    
+    //attempt to buy the desired map and run it until all prestige is gotten
+    if (getPageSetting('AutoMaps') == 1)
+        autoTrimpSettings["AutoMaps"].value = 0;
+    
+    if (!game.global.preMapsActive && !game.global.mapsActive) { 
+        mapsClicked();
+        if (!game.global.preMapsActive) 
+            mapsClicked();
+	debug("Entered map screeen");
+    }
+    
+    if (game.options.menu.repeatUntil.enabled != 2)
+        game.options.menu.repeatUntil.enabled = 2;
+                
+    if (game.global.preMapsActive){ 
+        //sets the map sliders before buying the map for prestige
+        document.getElementById("biomeAdvMapsSelect").value = type;
+        document.getElementById('advExtraLevelSelect').value = extraLevels; //returns delta map for all prestige
+        if(specialMod == "Prestigious")
+            document.getElementById('advSpecialSelect').value = "p"; 
+        else if(specialMod == "FA")
+            document.getElementById('advSpecialSelect').value = "fa"; 
+        else if(specialMod == "LMC")
+            document.getElementById('advSpecialSelect').value = "lmc"; 
+        else
+            document.getElementById('advSpecialSelect').value = "0";
+        document.getElementById("lootAdvMapsRange").value = lootSlider;
+        document.getElementById("difficultyAdvMapsRange").value = diffSlider;
+        document.getElementById("sizeAdvMapsRange").value = sizeSlider;
+        document.getElementById('advPerfectCheckbox').checked = perfect;
+        updateMapCost();        
+        
+        if ((updateMapCost(true) <= game.resources.fragments.owned)) {
+            buyMap();
+            mapbought = true;
+        }
+        else if ((updateMapCost(true) > game.resources.fragments.owned)) {
+            if (getPageSetting('AutoMaps') == 0) {
+                autoTrimpSettings["AutoMaps"].value = 1;
+                mapbought = false;
+                debug("Failed to prestige raid. We can't afford the map.");
+                debug("Expected map level " + (currWorldZone+extraLevels) + " is " + cost + " and we have " + fragments + " frags.");
+            }
+            return;
+        }
+    }
+    if (mapbought == true) {
+        selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id);
+        runMap();
+        startedMap = true;
+        debug("startedMap on");
+    }
+    if (!game.global.repeatMap) {
+        repeatClicked();
+    }
+    mapbought = false;
+    if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive && startedMap) {
+        autoTrimpSettings["AutoMaps"].value = 1;
+        startedMap = false;
+        debug("Turning AutoMaps back on");
+    }
+    
+    if(scaleUp)
+    {
+        prestigeRaidMaxSoFar = currWorldZone -1;
+    }
+}
+
+function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
+    var ret;
+    var empowerment = getEmpowerment();
+    var lastDigitZone = currWorldZone % 10;
+    
+    scaleUp = false; //by default, we want to buy the highest level map and just run that one map for prestige
+    
+    
+    //are we in an active spire? if so we always want +5 map levels
+    if(currWorldZone % 100 == 0 && currWorldZone >= getPageSetting('IgnoreSpiresUntil')){
+        debug("active spire mode");
+        maxDesiredLevel = currWorldZone + 5;
+        minDesiredLevel = currWorldZone + 1;
+    }
+    //there are 7 cases: poison/wind/ice (each 2 cases depending on zones xx1-xx5 or xx6-x10), and 7th case for no empowerment before zone 236.
+    else if (empowerment == "Ice"){
+        if(lastDigitZone <= 5 && lastDigitZone > 0){ //xx1-xx5 here aggressive is same as light because poison zones are coming up
+            maxDesiredLevel = currWorldZone - lastDigitZone + 5; 
+            minDesiredLevel = currWorldZone - lastDigitZone + 1; 
+        }
+        else if (lastDigitZone > 5){ //xx6-xx9
+            if(PAggro == 0){
+                maxDesiredLevel = currWorldZone - lastDigitZone + 11;
+                minDesiredLevel = currWorldZone - lastDigitZone + 11;
+            }
+            else{ //PAggro == 1
+                scaleUp = true; //special case, we want to run xx1 then xx2 then xx3 for faster clear
+                maxDesiredLevel = currWorldZone - lastDigitZone + 13;
+                minDesiredLevel = currWorldZone - lastDigitZone + 11;
+            }
+        }
+        else { //xx0
+            if(PAggro == 0){
+                maxDesiredLevel = currWorldZone + 1;
+                minDesiredLevel = currWorldZone + 1;
+            }
+            else{
+                maxDesiredLevel = currWorldZone + 3;
+                minDesiredLevel = currWorldZone + 1;
+            }
+        }
+    }
+    else if (empowerment == "Poison"){
+        if(PAggro == 0){ //low aggro poison is fairly straightforward; get to last poison zone and farm 5 or 6 zones higher
+            if(lastDigitZone == 0){
+                maxDesiredLevel = currWorldZone + 5;
+                minDesiredLevel = currWorldZone + 1;
+            }
+            else if(lastDigitZone == 5){
+                maxDesiredLevel = currWorldZone + 6;
+                minDesiredLevel = currWorldZone + 6;
+            }
+            else{
+                maxDesiredLevel = currWorldZone - lastDigitZone + 5;
+                minDesiredLevel = currWorldZone - lastDigitZone + 5;
+            }
+        }
+        else {//PAggro == 1
+            if(lastDigitZone == 0){
+                maxDesiredLevel = currWorldZone + 5; //most available
+                minDesiredLevel = currWorldZone + 1;
+            }
+            else if(lastDigitZone == 5){
+                maxDesiredLevel = currWorldZone + 10; //most available
+                minDesiredLevel = currWorldZone + 6;
+            }
+            else if(lastDigitZone < 5){
+                maxDesiredLevel = currWorldZone - lastDigitZone + 5;
+                minDesiredLevel = currWorldZone + 1; //+1 level is still fine, just dont get xx6
+            }
+            else{ //xx6-xx9
+                scaleUp = true; //special case, we want to run xx1 then xx2 then xx3 for faster clear
+                debug("hello " + currWorldZone);
+                maxDesiredLevel = currWorldZone - lastDigitZone + 15;
+                if(maxDesiredLevel > currWorldZone + 7)
+                    maxDesiredLevel = currWorldZone+7;
+                minDesiredLevel = currWorldZone - lastDigitZone + 11;
+            }
+        }
+    }
+    else if (empowerment == "Wind"){
+        if(lastDigitZone <= 5 && lastDigitZone > 0){ //xx1-xx5, fairly conservative because ice is coming up
+            maxDesiredLevel = currWorldZone - lastDigitZone + 5;
+            minDesiredLevel = currWorldZone - lastDigitZone + 1;
+        }
+        else if (lastDigitZone == 0){
+            if(PAggro == 0){
+                maxDesiredLevel = currWorldZone + 1;
+                minDesiredLevel = currWorldZone + 1;
+            }
+            else{
+                maxDesiredLevel = currWorldZone + 1;
+                minDesiredLevel = currWorldZone + 1;
+            }
+        }
+        else{ //xx6-xx9
+            if(PAggro == 0){ 
+                maxDesiredLevel = currWorldZone - lastDigitZone + 11;
+                minDesiredLevel = currWorldZone - lastDigitZone + 11;
+            }
+            else {
+                maxDesiredLevel = currWorldZone - lastDigitZone + 11;
+                minDesiredLevel = currWorldZone - lastDigitZone + 11;
+            }
+        }
+    }
+    else{ //no empowerment, pre 236
+        if (lastDigitZone <= 5){
+            maxDesiredLevel = currWorldZone - lastDigitZone + 5;
+            minDesiredLevel = currWorldZone + 1;
+        }
+        else{
+            maxDesiredLevel = currWorldZone - lastDigitZone + 15;
+            minDesiredLevel = currWorldZone - lastDigitZone + 11;
+        }
+    }
+    
+    if (maxDesiredLevel > currWorldZone + PRaidMax)
+        maxDesiredLevel = currWorldZone + PRaidMax; //dont go above user defined max
+    if(lastDigitZone <= 5 && minDesiredLevel < currWorldZone) //always want to keep prestige at least upto current zone
+        minDesiredLevel = currWorldZone;
+    if (minDesiredLevel > maxDesiredLevel)
+        minDesiredLevel = maxDesiredLevel;
+}
+
+function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type){
+    var baseCost = sizeSlider + diffSlider + lootSlider;
+    baseCost = baseCost * (baseLevel >= 60 ? 0.74 : 1);
+    if(specialMod == "Prestigious")
+        baseCost += 10;
+    if(specialMod == "FA")
+        baseCost += 7;
+    if(specialMod == "LMC")
+        baseCost += 18;
+    baseCost += (perfect ? 6 : 0);
+    baseCost += 10 * extraLevels;
+    baseCost += baseLevel;
+    baseCost = Math.floor((((baseCost / 150) * (Math.pow(1.14, baseCost  - 1))) * baseLevel  * 2) * Math.pow((1.03 + (baseLevel / 50000)), baseLevel))* (type == "Random" ? 1 : 2);
+    return baseCost;
+}
+
+function plusPrestige(delta) {
+        document.getElementById("biomeAdvMapsSelect").value = "Random";
+        document.getElementById('advExtraLevelSelect').value = delta; //returns delta map for all prestige
+        document.getElementById('advSpecialSelect').value = "p";
+        document.getElementById("lootAdvMapsRange").value = 0;
+        document.getElementById("difficultyAdvMapsRange").value = 9;
+        document.getElementById("sizeAdvMapsRange").value = 9;
+        document.getElementById('advPerfectCheckbox').checked = false;
+        updateMapCost();
+}
+
+
 
 
 //New Code for Map Special Mods dropdown. (only the first dropdown for now)
@@ -971,8 +1376,8 @@ function testMapSpecialModController() {
 
 function mapTimeEstimater() {
     //Check our graph history and - Estimate = The zone should take around this long in milliseconds.
-    var thiszone = lookUpZoneData(game.global.world);
-    var lastzone = lookUpZoneData(game.global.world - 1);
+    var thiszone = lookUpZoneData(currWorldZone);
+    var lastzone = lookUpZoneData(currWorldZone - 1);
     if (thiszone && lastzone)
         mapTimeEstimate = thiszone.currentTime - lastzone.currentTime;
     else
