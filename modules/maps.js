@@ -936,8 +936,11 @@ function PrestigeRaid() {
         setPageSetting('PRaidingMaxZones', 0);
     }
     
-    if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0)
+    if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
+        mapbought = false;
+        startedMap = false
         return 0;
+    }
     
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
     findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo); //the zone the alg decided to raid up to
