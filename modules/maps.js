@@ -176,7 +176,7 @@ function calcDmg(){
 
     //Health:Damage ratio: (status)
     HDratio = enemyHealth / ourBaseDamage;
-    updateAutoMapsStatus(); //refresh the UI status (10x per second)
+    updateAutoMapsStatus("", ""); //refresh the UI status (10x per second)
 }
 
 //AutoMap - function originally created by Belaith (in 1971)
@@ -199,13 +199,13 @@ function autoMap() {
         enoughDamage = true;
         enoughHealth = true;
         shouldFarm = false;
-        updateAutoMapsStatus(); //refresh the UI status (10x per second)
+        updateAutoMapsStatus("", ""); //refresh the UI status (10x per second)
         return;
     }
     
     //if we are in mapology and we have no credits, exit
     if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) {
-        updateAutoMapsStatus();
+        updateAutoMapsStatus("", "");
         return;
     }
     
@@ -946,7 +946,7 @@ function PrestigeRaid() {
     
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
         presRaiding = false; //update UI
-        updateAutoMapsStatus(); //UI
+        updateAutoMapsStatus("", ""); //UI
         return true; 
     }
     
@@ -956,7 +956,7 @@ function PrestigeRaid() {
     if(havePrestigeUpTo >= maxDesiredLevel){
         debug("have all the prestige levels that we want. exiting.", "general", "");
         presRaiding = false; //update UI
-        updateAutoMapsStatus(); //UI
+        updateAutoMapsStatus("", ""); //UI
         return true; 
     }
     
@@ -984,7 +984,7 @@ function PrestigeRaid() {
             debug("Cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments.");
             debug("Exiting.");
             presRaiding = false; //update UI
-            updateAutoMapsStatus(); //UI
+            updateAutoMapsStatus("", ""); //UI
             return true;
         }
         
@@ -993,7 +993,7 @@ function PrestigeRaid() {
         if (!flag){
             debug("error in creating map process");
             presRaiding = false; //update UI
-            updateAutoMapsStatus(); //UI
+            updateAutoMapsStatus("", ""); //UI
             return true;
         }
         debug("Map created.");
@@ -1012,7 +1012,7 @@ function PrestigeRaid() {
     debug("started Map");
     
     presRaiding = true; //update UI
-    updateAutoMapsStatus(); //UI
+    updateAutoMapsStatus("", ""); //UI
 
     if (!game.global.repeatMap) {
         repeatClicked();
@@ -1022,12 +1022,12 @@ function PrestigeRaid() {
     {
         if(minDesiredLevel != maxDesiredLevel){
             presRaiding = true; //update UI
-            updateAutoMapsStatus(); //UI
+            updateAutoMapsStatus("", ""); //UI
             return false; //we're not done yet
         }
         else{
             presRaiding = false; //update UI
-            updateAutoMapsStatus(); //UI
+            updateAutoMapsStatus("", ""); //UI
             return true;
         }
     }
