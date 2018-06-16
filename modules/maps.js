@@ -51,7 +51,6 @@ var spireMapBonusFarming = false;
 var spireTime = 0;
 var doMaxMapBonus = false;
 var vanillaMapatZone = false;
-var prestigeRaidMaxSoFar = 0;
 var maxDesiredLevel;
 var minDesiredLevel;
 var mapbought = false;
@@ -195,8 +194,6 @@ function autoMap() {
         updateAutoMapsStatus(); //refresh the UI status (10x per second)
         return;
     }
-    
-
     
     //if we are in mapology and we have no credits, exit
     if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) {
@@ -932,7 +929,6 @@ function PrestigeRaid() {
     if(debugging){
         debug("game.global.mapsActive " + game.global.mapsActive);
         debug("game.global.world " + game.global.world);
-        debug("prestigeRaidMaxSoFar " + prestigeRaidMaxSoFar);
         debug("scaleUp = " + scaleUp);
     }
     
@@ -945,10 +941,8 @@ function PrestigeRaid() {
         setPageSetting('PRaidingMaxZones', 0);
     }
     
-    if (StartZone == -1 || currWorldZone < StartZone || prestigeRaidMaxSoFar == currWorldZone || PRaidMax <= 0)
+    if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0)
         return 0;
-    
-    prestigeRaidMaxSoFar = currWorldZone; //first time we're prestige raiding in this zone, only attempt to raid once per zone
     
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
     findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo); //the zone the alg decided to raid up to
