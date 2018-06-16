@@ -932,7 +932,6 @@ function PrestigeRaid() {
     if(debugging){
         debug("game.global.mapsActive " + game.global.mapsActive);
         debug("game.global.world " + game.global.world);
-        debug("scaleUp = " + scaleUp);
     }
     
     if (PRaidMax > 10){
@@ -960,22 +959,25 @@ function PrestigeRaid() {
         return true; 
     }
     
-    debug("currWorldZone = " + currWorldZone, "general", "");
-    debug("empowerment = " + getEmpowerment(), "general", "");
-    debug("maxDesiredLevel = " + maxDesiredLevel, "general", "");
-    debug("minDesiredLevel = " + minDesiredLevel, "general", "");
-    debug("havePrestigeUpTo = " + havePrestigeUpTo, "general", "");
+    
+    //if (!game.global.preMapsActive && game.global.mapsActive) {
+    if (!game.global.mapsActive) {
+        debug("maxDesiredLevel = " + maxDesiredLevel, "general", "");
+        debug("minDesiredLevel = " + minDesiredLevel, "general", "");
+        debug("havePrestigeUpTo = " + havePrestigeUpTo, "general", "");
+    }
     
     //Let's see if we already own a map of suitable level
     var map = findMap(minDesiredLevel);
     if(map == -1){ //do not own a high enough map, try to make one if we can afford it
         //find best match match map we can afford
+        debug("Creating map...");
         var foundSuitableMap = decideMapParams(scaleUp);
 
         if (!foundSuitableMap){
-            debug("could not find suitable map.");
-            debug("cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments");
-            debug("exiting.");
+            debug("Could not create a suitable map.");
+            debug("Cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments.");
+            debug("Exiting.");
             presRaiding = false; //update UI
             updateAutoMapsStatus(); //UI
             return true;
@@ -989,7 +991,7 @@ function PrestigeRaid() {
             updateAutoMapsStatus(); //UI
             return true;
         }
-        
+        debug("Map created.");
         selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id); //the map we just created
     }
     else
