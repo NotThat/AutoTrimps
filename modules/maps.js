@@ -937,8 +937,8 @@ function PrestigeRaid() {
     }
     
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
-        mapbought = false;
-        startedMap = false
+        //mapbought = false;
+        //startedMap = false
         return 0;
     }
     
