@@ -1071,10 +1071,6 @@ function PrestigeRaid() {
         return;
     }
     
-    //attempt to buy the desired map and run it until all prestige is gotten
-    if (getPageSetting('AutoMaps') == 1)
-        autoTrimpSettings["AutoMaps"].value = 0;
-    
     if (!game.global.preMapsActive && !game.global.mapsActive) { 
         mapsClicked();
         if (!game.global.preMapsActive) 
@@ -1108,12 +1104,9 @@ function PrestigeRaid() {
             mapbought = true;
         }
         else if ((updateMapCost(true) > game.resources.fragments.owned)) {
-            if (getPageSetting('AutoMaps') == 0) {
-                autoTrimpSettings["AutoMaps"].value = 1;
-                mapbought = false;
-                debug("Failed to prestige raid. We can't afford the map.");
-                debug("Expected map level " + (currWorldZone+extraLevels) + " is " + cost + " and we have " + fragments + " frags.");
-            }
+            mapbought = false;
+            debug("Failed to prestige raid. We can't afford the map.");
+            debug("Expected map level " + (currWorldZone+extraLevels) + " is " + cost + " and we have " + fragments + " frags.");
             return;
         }
     }
@@ -1127,8 +1120,7 @@ function PrestigeRaid() {
         repeatClicked();
     }
     mapbought = false;
-    if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive && startedMap) {
-        autoTrimpSettings["AutoMaps"].value = 1;
+    if (game.global.preMapsActive && startedMap) {
         startedMap = false;
         debug("Turning AutoMaps back on");
     }
