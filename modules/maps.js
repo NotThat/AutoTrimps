@@ -959,8 +959,20 @@ function PrestigeRaid() {
         return true; 
     }
     
+    
+    if (!game.global.mapsActive && !game.global.preMapsActive) { //in world, get to map screen
+            debug("world");
+            mapsClicked();
+        }
+    else if (game.global.mapsActive){
+        debug("we are currently running a map! waiting... :(");
+        return false;
+    }
+    
     //Let's see if we already own a map of suitable level
     var map = findMap(minDesiredLevel);
+    //debug("premaps game.global.mapsActive=" + game.global.mapsActive + " game.global.preMapsActive=" +game.global.preMapsActive);
+    
     if(map == -1){ //do not own a high enough map, try to make one if we can afford it
         //find best match match map we can afford
         debug("Creating map...");
@@ -987,18 +999,7 @@ function PrestigeRaid() {
         selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id); //the map we just created
     }
     else{ //we have a map with prestige available in our map list
-        if (!game.global.mapsActive && !game.global.preMapsActive) { //in world, get to map screen
-            debug("world");
-            mapsClicked();
-        }
-        else if (game.global.mapsActive){
-            debug("we are currently running a map! waiting... :(");
-            return false;
-        }
-        else{
-            debug("premaps game.global.mapsActive=" + game.global.mapsActive + " game.global.preMapsActive=" +game.global.preMapsActive);
-            selectMap(map);
-        }
+        selectMap(map);
     }
     
     debug("maxDesiredLevel = " + maxDesiredLevel, "general", "");
