@@ -969,7 +969,7 @@ function PrestigeRaid() {
             debug("in a " + game.global.world + " level map. farming prestige.")
             updateAutoMapsStatus("", "Prestige Raiding."); //UI
         }
-        debug("we are currently running a map! waiting... :(");
+        debug("we are currently running a map! waiting... :( " + game.global.world);
         updateAutoMapsStatus("", "Finishing map."); //UI
         return false;
     }
