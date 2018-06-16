@@ -1001,7 +1001,7 @@ function PrestigeRaid() {
     }
     else{ //we have a map with prestige available in our map list
         debug("selecting map " + map);
-        selectMap(map);
+        selectMap(map.id);
     }
     
     debug("maxDesiredLevel = " + maxDesiredLevel, "general", "");
