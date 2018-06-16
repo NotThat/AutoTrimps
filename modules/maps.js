@@ -1066,14 +1066,14 @@ function findMap(level){
     for (var map in game.global.mapsOwnedArray) {
         if (!game.global.mapsOwnedArray[map].noRecycle) { //not a unique map
             if(game.global.mapsOwnedArray[map].level >= bestSoFar && game.global.mapsOwnedArray[map].level >= level){
-                map = game.global.mapsOwnedArray[map];
+                theMap = game.global.mapsOwnedArray[map];
                 bestSoFar = game.global.mapsOwnedArray[map].level;
+                debug("map is " + theMap + "game.global.mapsOwnedArray[map] " + game.global.mapsOwnedArray[map] + "game.global.mapsOwnedArray[map].level " +game.global.mapsOwnedArray[map].level + " game.global.mapsOwnedArray[map].noRecycle" + game.global.mapsOwnedArray[map].noRecycle);
             }
         }
-    }
-    debug("map is " + map + "game.global.mapsOwnedArray[map] " + game.global.mapsOwnedArray[map] + "game.global.mapsOwnedArray[map].level " +game.global.mapsOwnedArray[map].level + " game.global.mapsOwnedArray[map].noRecycle" + game.global.mapsOwnedArray[map].noRecycle);
+    }    
     if (bestSoFar>-1)
-        return map;
+        return theMap;
     return -1;
 }
 
