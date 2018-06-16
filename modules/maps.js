@@ -879,7 +879,7 @@ function autoMap() {
 //update the UI with stuff from automaps.
 function updateAutoMapsStatus(get, msg) {
     //automaps status
-    var status;
+    var status = "";
     var minSp = getPageSetting('MinutestoFarmBeforeSpire');
     if (msg!="") status = msg;
     else if (getPageSetting('AutoMaps') == 0) status = 'Off';
@@ -965,8 +965,12 @@ function PrestigeRaid() {
             mapsClicked();
         }
     else if (game.global.mapsActive){
+        if (game.global.world >=  minDesiredLevel){ //we are getting prestige
+            debug("in a " + game.global.world + " level map. farming prestige.")
+            updateAutoMapsStatus("", "Prestige Raiding."); //UI
+        }
         debug("we are currently running a map! waiting... :(");
-        updateAutoMapsStatus("", "Finishing map"); //UI
+        updateAutoMapsStatus("", "Finishing map."); //UI
         return false;
     }
     
@@ -1093,7 +1097,7 @@ function findMap(level){
         }
     }    
     if (bestSoFar>-1){
-        debug("findmap: found map " + theMap + " level " + bestSoFar);
+        //debug("findmap: found map " + theMap + " level " + bestSoFar);
         return theMap;
     }
     debug("findMap: no map found");
