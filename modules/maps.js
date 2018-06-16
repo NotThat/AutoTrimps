@@ -474,7 +474,6 @@ function autoMap() {
             if (game.global.mapsOwnedArray[map].level == siphlvl)
                 siphonMap = map;
         }
-        debug("map is " + map + "game.global.mapsOwnedArray[map] " + game.global.mapsOwnedArray[map] + "game.global.mapsOwnedArray[map].level " +game.global.mapsOwnedArray[map].level + " game.global.mapsOwnedArray[map].noRecycle" + game.global.mapsOwnedArray[map].noRecycle);
     }
     
     //Organize a list of the sorted map's levels and their index in the mapOwnedarray
@@ -991,7 +990,7 @@ function PrestigeRaid() {
             return true;
         }
         
-        selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id);
+        selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id); //the map we just created
     }
     else
         selectMap(map);
