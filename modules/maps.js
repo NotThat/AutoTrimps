@@ -961,11 +961,20 @@ function PrestigeRaid() {
     
     
     //if (!game.global.preMapsActive && game.global.mapsActive) {
-    if (!game.global.mapsActive) {
-        debug("maxDesiredLevel = " + maxDesiredLevel, "general", "");
-        debug("minDesiredLevel = " + minDesiredLevel, "general", "");
-        debug("havePrestigeUpTo = " + havePrestigeUpTo, "general", "");
+    if (!game.global.mapsActive && !game.global.preMapsActive) {
+        //debug("maxDesiredLevel = " + maxDesiredLevel, "general", "");
+        //debug("minDesiredLevel = " + minDesiredLevel, "general", "");
+        //debug("havePrestigeUpTo = " + havePrestigeUpTo, "general", "");
+        debug("world");
     }
+    if (game.global.mapsActive){
+        debug("maps");
+    }
+    else{
+        debug("premaps");
+    }
+    
+    
     
     //Let's see if we already own a map of suitable level
     var map = findMap(minDesiredLevel);
