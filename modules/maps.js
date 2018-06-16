@@ -877,11 +877,12 @@ function autoMap() {
 }
 
 //update the UI with stuff from automaps.
-function updateAutoMapsStatus(get) {
+function updateAutoMapsStatus(get, msg) {
     //automaps status
     var status;
     var minSp = getPageSetting('MinutestoFarmBeforeSpire');
-    if (getPageSetting('AutoMaps') == 0) status = 'Off';
+    if (msg!="") status = msg;
+    else if (getPageSetting('AutoMaps') == 0) status = 'Off';
     else if (presRaiding) status = 'Prestige Raiding';
     else if (BWRaidingStatus) status = 'BW Raiding';
     else if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) status = 'Out of Map Credits';
@@ -959,13 +960,13 @@ function PrestigeRaid() {
         return true; 
     }
     
-    
     if (!game.global.mapsActive && !game.global.preMapsActive) { //in world, get to map screen
             debug("world");
             mapsClicked();
         }
     else if (game.global.mapsActive){
         debug("we are currently running a map! waiting... :(");
+        updateAutoMapsStatus("", "Finishing map"); //UI
         return false;
     }
     
@@ -1018,8 +1019,11 @@ function PrestigeRaid() {
     
     if(scaleUp)
     {
-        if(minDesiredLevel != maxDesiredLevel)
+        if(minDesiredLevel != maxDesiredLevel){
+            presRaiding = true; //update UI
+            updateAutoMapsStatus(); //UI
             return false; //we're not done yet
+        }
         else{
             presRaiding = false; //update UI
             updateAutoMapsStatus(); //UI
