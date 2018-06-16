@@ -30,6 +30,7 @@ MODULES["maps"].maxMapBonusAfterZ = MODULES["maps"].maxMapBonus; //Max Map Bonus
 //- init as default value (10). user can set if they want.
 
 //Initialize Global Vars (dont mess with these ones, nothing good can come from it).
+var customVars = MODULES["maps"];
 var stackingTox = false;
 var doVoids = false;
 var presRaiding = false;
@@ -172,8 +173,6 @@ function calcDmg(){
 //AutoMap - function originally created by Belaith (in 1971)
 //anything/everything to do with maps.
 function autoMap() {
-    var customVars = MODULES["maps"];
-    
     if(!game.global.mapsActive)
         currWorldZone = game.global.world; //game.global.world will point to our map level when we're inside map. keep a record of the actual world zone.
     
