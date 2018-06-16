@@ -314,6 +314,7 @@ function plusMapToRun(zone) {
 //BWrmn
 //BWrmx
 function BWraiding() {
+    BWRaidingStatus = true; //for UI purposes
     if (!prestraidon && game.global.world == getPageSetting('BWraidingz') && !bwraided && !failbwraid && getPageSetting('BWraid')) {
         if (getPageSetting('AutoMaps') == 1 && game.global.world >= getPageSetting('BWraidingz') && !bwraided && !failbwraid) {
             autoTrimpSettings["AutoMaps"].value = 0;
@@ -367,6 +368,7 @@ function BWraiding() {
              bwraided = false;
              }
     
+    BWRaidingStatus = false; //for UI purposes
  }
 //AutoAllocate Looting II
 function lootdump() {

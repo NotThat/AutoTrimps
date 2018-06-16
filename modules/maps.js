@@ -33,7 +33,7 @@ MODULES["maps"].maxMapBonusAfterZ = MODULES["maps"].maxMapBonus; //Max Map Bonus
 var stackingTox = false;
 var doVoids = false;
 var presRaiding = false;
-var BWRaiding = false;
+var BWRaidingStatus = false;
 var needToVoid = false;
 var plusMapVoid = false;
 var needPrestige = false;
@@ -891,7 +891,7 @@ function updateAutoMapsStatus(get) {
     else if (!enoughHealth && !enoughDamage) status = 'Want Health & Damage';
     else if (!enoughDamage) status = 'Want ' + HDratio.toFixed(2) + 'x &nbspmore damage';
     else if (!enoughHealth) status = 'Want more health';
-    else if (enoughHealth && enoughDamage) status = 'Advancing Ratio = ' + HDratio;
+    else if (enoughHealth && enoughDamage) status = 'Ratio = ' + HDratio.toFixed(6) +' Advancing';
 
     if (skippedPrestige) // Show skipping prestiges
         status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b>';
@@ -1071,6 +1071,8 @@ function PrestigeRaid() {
         return;
     }
     
+    presRaiding = true; //for UI display purposes
+    
     if (!game.global.preMapsActive && !game.global.mapsActive) { 
         mapsClicked();
         if (!game.global.preMapsActive) 
@@ -1129,6 +1131,8 @@ function PrestigeRaid() {
     {
         prestigeRaidMaxSoFar = currWorldZone -1;
     }
+    
+    presRaiding = false; //UI purposes
 }
 
 function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
