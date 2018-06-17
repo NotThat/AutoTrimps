@@ -970,7 +970,6 @@ function PrestigeRaid() {
         }
         
         if (getCurrentMapObject().level >=  minDesiredLevel){ //if its higher level, we are getting prestige
-            debug("in a " + game.global.world + " level map. farming prestige.")
             updateAutoMapsStatus("", "Prestige Raiding."); //UI
         }
         else
@@ -990,7 +989,7 @@ function PrestigeRaid() {
             var foundSuitableMap = decideMapParams(minDesiredLevel, maxDesiredLevel, "Prestigious", false);
 
         if (!foundSuitableMap){
-            debug("Could not create a suitable map.");
+            debug("Could not create a suitable map. min " + minDesiredLevel + " max " + maxDesiredLevel + " currWorldZone " + currWorldZone + " extraLevels " + extraLevels);
             debug("Cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments.");
             debug("Exiting.");
             updateAutoMapsStatus("", "Can not afford map"); //UI
@@ -1010,20 +1009,15 @@ function PrestigeRaid() {
             updateAutoMapsStatus("", "Error in creating map"); //UI
             return true;
         }
-        debug("Map created.");
         selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id); //the map we just created
     }
     else{ //we have a map with prestige available in our map list
-        debug("selecting map " + map.id);
         selectMap(map.id);
     }
     
-    debug("maxDesiredLevel = " + maxDesiredLevel, "general", "");
-    debug("minDesiredLevel = " + minDesiredLevel, "general", "");
-    debug("havePrestigeUpTo = " + havePrestigeUpTo, "general", "");
+    debug("havePrestigeUpTo = " + havePrestigeUpTo + " | minDesiredLevel = " + minDesiredLevel + " | maxDesiredLevel = " + maxDesiredLevel, "general", "");
     
     runMap();
-    debug("started Map");
     
     updateAutoMapsStatus("", "Running map for prestige"); //UI
 
