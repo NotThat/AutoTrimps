@@ -256,6 +256,7 @@ function autoMap() {
         if(!PrestigeRaid()) //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
             return; 
     }
+    presRaiding = false;
     if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding
     if (getPageSetting('BWraid')==true){setTimeout(BWraiding(), 3000);} //BW Raiding
 
@@ -887,7 +888,7 @@ function updateAutoMapsStatus(get, msg) {
     var minSp = getPageSetting('MinutestoFarmBeforeSpire');
 
     if (getPageSetting('AutoMaps') == 0) status = 'Off';
-    else if (presRaiding) status = 'Prestige Raiding';
+    else if (presRaiding) status = msg;
     else if (BWRaidingStatus) status = 'BW Raiding';
     else if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) status = 'Out of Map Credits';
     else if (preSpireFarming) {
@@ -939,6 +940,7 @@ function PrestigeRaid() {
     var StartZone = getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid. -1 to ignore
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
+    presRaiding = true; //for message passing to UI
             
     if(debugging){
         debug("game.global.mapsActive " + game.global.mapsActive);
@@ -955,7 +957,6 @@ function PrestigeRaid() {
     }
     
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
-        presRaiding = false; //update UI
         updateAutoMapsStatus("", "Early PRaid Quit"); //UI
         return true; 
     }
@@ -965,7 +966,6 @@ function PrestigeRaid() {
 
     if(havePrestigeUpTo >= maxDesiredLevel){
         //debug("have all the prestige levels that we want. exiting.", "general", "");
-        presRaiding = false; //update UI
         updateAutoMapsStatus("", "Have all Prestige"); //UI
         return true; 
     }
@@ -1001,7 +1001,6 @@ function PrestigeRaid() {
             debug("Could not create a suitable map.");
             debug("Cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments.");
             debug("Exiting.");
-            presRaiding = false; //update UI
             updateAutoMapsStatus("", "Can not afford map"); //UI
             return true;
         }
@@ -1010,7 +1009,6 @@ function PrestigeRaid() {
         var flag = createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
         if (!flag){
             debug("error in creating map process");
-            presRaiding = false; //update UI
             updateAutoMapsStatus("", "Error in creating map"); //UI
             return true;
         }
@@ -1029,7 +1027,6 @@ function PrestigeRaid() {
     runMap();
     debug("started Map");
     
-    presRaiding = true; //update UI
     updateAutoMapsStatus("", "Running map for prestige"); //UI
 
     if (game.global.repeatMap) {//make sure repeat button is turned off
@@ -1039,12 +1036,10 @@ function PrestigeRaid() {
     if(scaleUp)
     {
         if(minDesiredLevel != maxDesiredLevel){
-            presRaiding = true; //update UI
             updateAutoMapsStatus("", "Progressing up"); //UI
             return false; //we're not done yet
         }
         else{
-            presRaiding = false; //update UI
             updateAutoMapsStatus("", "Prestige end"); //UI
             return false;
         }
