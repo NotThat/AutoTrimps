@@ -168,7 +168,7 @@ function calcPrestige() {
         var p = prestigeList[i];
         //if (game.upgrades[p].allowed - game.upgrades[p].done > 0)
         //  numUnbought++;
-        //debug("i=" + i + " prestigeList[i] = " + prestigeList[i] + " p = " + p + " allowed" + game.upgrades[p].allowed +  " done" + game.upgrades[p].done);
+        debug("i=" + i + " prestigeList[i] = " + prestigeList[i] + " p = " + p + " allowed" + game.upgrades[p].allowed +  " done" + game.upgrades[p].done);
         switch(prestigeList[i]){
             case "Dagadder":
                 slotModifier=1;
