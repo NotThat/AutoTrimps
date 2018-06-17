@@ -248,7 +248,6 @@ function autoMap() {
     }
     
     if (getPageSetting('PRaidingZoneStart') >0) {//Prestige Raiding. need to buy upgrades before running this, so adding 1000ms delay
-        //setTimeout({},1000);
         if(!PrestigeRaid()) //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
             return; 
     }
@@ -957,7 +956,7 @@ function PrestigeRaid() {
     findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo); //decide which level we want to raid up to
 
     if(havePrestigeUpTo >= maxDesiredLevel){
-        debug("have all the prestige levels that we want. exiting.", "general", "");
+        //debug("have all the prestige levels that we want. exiting.", "general", "");
         presRaiding = false; //update UI
         updateAutoMapsStatus("", "Have all Prestige"); //UI
         return true; 
@@ -972,7 +971,7 @@ function PrestigeRaid() {
             debug("in a " + game.global.world + " level map. farming prestige.")
             updateAutoMapsStatus("", "Prestige Raiding."); //UI
         }
-        debug("we are currently running a map! waiting... :( " + game.global.world + " getCurrentMapObject() = " + getCurrentMapObject().level);
+        //debug("we are currently running a map! waiting... :( " + game.global.world + " getCurrentMapObject() = " + getCurrentMapObject().level);
         updateAutoMapsStatus("", "Finishing map."); //UI
         return false;
     }
@@ -1035,11 +1034,11 @@ function PrestigeRaid() {
         else{
             presRaiding = false; //update UI
             updateAutoMapsStatus("", "Prestige end"); //UI
-            return true;
+            return false;
         }
     }
     
-    return true;
+    return false;
 }
 
 function createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect){
