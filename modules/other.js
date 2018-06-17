@@ -168,7 +168,7 @@ function calcPrestige() {
         var p = prestigeList[i];
         //if (game.upgrades[p].allowed - game.upgrades[p].done > 0)
         //  numUnbought++;
-        debug("i=" + i + " prestigeList[i] = " + prestigeList[i] + " p = " + p + " allowed" + game.upgrades[p].allowed +  " done" + game.upgrades[p].done);
+        debug("i=" + i + " prestigeList[i] = " + prestigeList[i] + " p = " + p + " allowed " + game.upgrades[p].allowed +  " done " + game.upgrades[p].done);
         switch(prestigeList[i]){
             case "Dagadder":
                 slotModifier=1;
@@ -194,15 +194,15 @@ function calcPrestige() {
             case "Smoldershoulder": 
                 slotModifier=4;
                 break;
-            /*case "Greatersword": //dont count as full prestige until we have gambes
-                slotModifier=5;
+            case "Greatersword": 
+                slotModifier=1; //dont count as full prestige until we have gambes
                 break;
             case "Bestplate": 
-                slotModifier=5;
+                slotModifier=1; //dont count as full prestige until we have gambes
                 break;
             case "Harmbalest": 
-                slotModifier=5;
-                break;*/
+                slotModifier=1; //dont count as full prestige until we have gambes
+                break;
             case "GambesOP": 
                 slotModifier=5;
                 break;
