@@ -312,7 +312,7 @@ function autoLevelEquipment() {
     //debug("equipment module: enemy damage = " + enemyDamage.toPrecision(3) + " current health: " + game.global.soldierHealth.toPrecision(3) + " game.global.soldierHealth/max " + (game.global.soldierHealth/game.global.soldierHealthMax).toPrecision(3));
     var first = true;
     var safetyNet = 0.65;
-    if(getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed")
+    if(!game.global.preMapsActive && (getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed"))
         safetyNet = 2.65;
     
     if(game.global.soldierHealth < safetyNet*enemyDamage && game.global.soldierHealth > 1000){ //lets try buying more health if current health < 35% enemy attack, but not if 0 because we're dead
