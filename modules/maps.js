@@ -248,7 +248,7 @@ function autoMap() {
     }
     
     if (getPageSetting('PRaidingZoneStart') >0) {//Prestige Raiding. need to buy upgrades before running this, so adding 1000ms delay
-        setTimeout({},1000);
+        //setTimeout({},1000);
         if(!PrestigeRaid()) //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
             return; 
     }
