@@ -167,6 +167,7 @@ function calcPrestige() {
         var p = prestigeList[i];
         if (game.upgrades[p].allowed - game.upgrades[p].done > 0)
                 numUnbought++;
+        debug("i=" + i + " prestigeList[i] = " + prestigeList[i] + " p = " + p + " allowed" + game.upgrades[p].allowed +  " done" + game.upgrades[p].done);
     }
     
     
@@ -177,7 +178,7 @@ function calcPrestige() {
     
     equipmentPrestigeLevel = game.equipment["Dagger"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
-    debug("unbought dagger?|?: allowed" + game.upgrades[1].allowed +  " done" + game.upgrades[1].done);
+    
     
     if (tmp>max)
         max=tmp;
