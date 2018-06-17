@@ -956,9 +956,6 @@ function PrestigeRaid() {
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
     findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo); //decide which level we want to raid up to
 
-    debug("havePrestigeUpTo = " + havePrestigeUpTo);
-    return true;
-
     if(havePrestigeUpTo >= maxDesiredLevel){
         debug("have all the prestige levels that we want. exiting.", "general", "");
         presRaiding = false; //update UI
