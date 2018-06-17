@@ -176,7 +176,7 @@ function calcDmg(){
 
     //Health:Damage ratio: (status)
     HDratio = enemyHealth / ourBaseDamage;
-    updateAutoMapsStatus("", ""); //refresh the UI status (10x per second)
+    updateAutoMapsStatus("", "HD Ratio"); //refresh the UI status (10x per second)
 }
 
 //AutoMap - function originally created by Belaith (in 1971)
@@ -199,13 +199,13 @@ function autoMap() {
         enoughDamage = true;
         enoughHealth = true;
         shouldFarm = false;
-        updateAutoMapsStatus("", ""); //refresh the UI status (10x per second)
+        updateAutoMapsStatus("", "0 Damage, waiting"); //refresh the UI status (10x per second)
         return;
     }
     
     //if we are in mapology and we have no credits, exit
     if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) {
-        updateAutoMapsStatus("", "");
+        updateAutoMapsStatus("", "No Map Credits");
         return;
     }
     
@@ -881,8 +881,8 @@ function updateAutoMapsStatus(get, msg) {
     //automaps status
     var status = "";
     var minSp = getPageSetting('MinutestoFarmBeforeSpire');
-    if (msg!="") status = msg;
-    else if (getPageSetting('AutoMaps') == 0) status = 'Off';
+
+    if (getPageSetting('AutoMaps') == 0) status = 'Off';
     else if (presRaiding) status = 'Prestige Raiding';
     else if (BWRaidingStatus) status = 'BW Raiding';
     else if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) status = 'Out of Map Credits';
@@ -907,6 +907,9 @@ function updateAutoMapsStatus(get, msg) {
     else if (!enoughDamage) status = 'Want ' + HDratio.toFixed(2) + 'x &nbspmore damage';
     else if (!enoughHealth) status = 'Want more health';
     else if (enoughHealth && enoughDamage) status = 'Ratio = ' + HDratio.toFixed(6) +' Advancing';
+    
+    if (status.length < 1)
+        status = msg;
 
     if (skippedPrestige) // Show skipping prestiges
         status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b>';
@@ -946,7 +949,7 @@ function PrestigeRaid() {
     
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
         presRaiding = false; //update UI
-        updateAutoMapsStatus("", ""); //UI
+        updateAutoMapsStatus("", "Early PRaid Quit"); //UI
         return true; 
     }
     
@@ -956,7 +959,7 @@ function PrestigeRaid() {
     if(havePrestigeUpTo >= maxDesiredLevel){
         debug("have all the prestige levels that we want. exiting.", "general", "");
         presRaiding = false; //update UI
-        updateAutoMapsStatus("", ""); //UI
+        updateAutoMapsStatus("", "Have all Prestige"); //UI
         return true; 
     }
     
@@ -988,7 +991,7 @@ function PrestigeRaid() {
             debug("Cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments.");
             debug("Exiting.");
             presRaiding = false; //update UI
-            updateAutoMapsStatus("", ""); //UI
+            updateAutoMapsStatus("", "Can not afford map"); //UI
             return true;
         }
         
@@ -997,7 +1000,7 @@ function PrestigeRaid() {
         if (!flag){
             debug("error in creating map process");
             presRaiding = false; //update UI
-            updateAutoMapsStatus("", ""); //UI
+            updateAutoMapsStatus("", "Error in creating map"); //UI
             return true;
         }
         debug("Map created.");
@@ -1016,7 +1019,7 @@ function PrestigeRaid() {
     debug("started Map");
     
     presRaiding = true; //update UI
-    updateAutoMapsStatus("", ""); //UI
+    updateAutoMapsStatus("", "Running map for prestige"); //UI
 
     if (!game.global.repeatMap) {
         repeatClicked();
@@ -1026,12 +1029,12 @@ function PrestigeRaid() {
     {
         if(minDesiredLevel != maxDesiredLevel){
             presRaiding = true; //update UI
-            updateAutoMapsStatus("", ""); //UI
+            updateAutoMapsStatus("", "Progressing up"); //UI
             return false; //we're not done yet
         }
         else{
             presRaiding = false; //update UI
-            updateAutoMapsStatus("", ""); //UI
+            updateAutoMapsStatus("", "Prestige end"); //UI
             return true;
         }
     }
