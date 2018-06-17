@@ -1105,16 +1105,13 @@ function findMap(level){
 }
 
 function decideMapParams(minLevel, maxLevel, special, cheap){
-    var start, end;
-
-    var fragments = game.resources.fragments.owned; //our available fragments
+    var fragments = game.resources.fragments.owned;
     baseLevel = currWorldZone;
     var sizeLast=0, diffLast=0, lootLast=0, specialModLast="", perfectLast=false, extraLevelsLast=minLevel-baseLevel, typeLast="Random";
     if (special == "LMC")
         specialModLast = "LMC";
     else specialModLast = "";
     
-    debug("entering decideMapParams minLevel " + minLevel + " maxLevel " + maxLevel + " special " + special);
     if(maxLevel < baseLevel) maxLevel = baseLevel;
     if(minLevel > maxLevel) minLevel = maxLevel;    
     
@@ -1125,7 +1122,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         sizeSlider = 0;
         diffSlider = 0;
         lootSlider = 0;
-        specialMod = special;
+        specialMod = "";
         extraLevels = minLevel-baseLevel;
         perfect = false;
         type = "Random";
@@ -1134,11 +1131,11 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
 
     //order of importance for prestigious maps (prestige mode):
     //size > prestigious > difficulty > perfect
-    //order of importance for LMC maps (for more damage):
+    //order of importance for LMC maps (map bonus/metal):
     //LMC (must have) > size  > difficulty > loot > perfect > Garden
     
     //iterate over all values in order of priority to find the best map we can afford.
-    //at all times the 'Last' variables hold values that we can afford.
+    //at all times the 'Last' variables hold affordable configuration.
     
     while(true){
         if(sizeLast+diffLast+lootLast < 27)
@@ -1220,13 +1217,12 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
     }
     
     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-    debug("Level = "+(baseLevel+extraLevels)+"|"+sizeSlider+"|"+diffSlider+"|"+lootSlider+"|"+specialMod+" perfect = "+perfect+ "|"+type);
     if(fragments >= cost){
-        debug("map level: " + (baseLevel+extraLevels) + " cost: " + cost.toPrecision(3) + " fragments out of " + fragments.toPrecision(3) + " available.", "general", "");
+        debug("Level = "+(baseLevel+extraLevels)+"|"+sizeSlider+"|"+diffSlider+"|"+lootSlider+"|"+specialMod+"|perfect="+perfect+ "|"+type+" cost: " + cost.toPrecision(3) + " / " + fragments.toPrecision(3) + " fragments.");
         return true;
     }
     
-    debug("did not find suitable map. start = " + start + " end = " + end);
+    debug("error: can't afford map level " + minLevel);
     return false;
 }
 
