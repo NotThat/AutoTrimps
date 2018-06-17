@@ -235,15 +235,17 @@ function autoMap() {
     calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
     
     //if dont have army ready, dont enter map screen unless its last poison zone, and/or we need to do void maps
-    if(!needToVoid){
-        var armyReady = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? false : true);
-        if(!armyReady){  //may as well stay in the world until army ready. may not be true for some dailies
-            if (getEmpowerment() == "Poison"){
-                if(currWorldZone % 10 != 5 && currWorldZone % 10 != 0) //in poison xx0 and xx5, we are willing to sit and wait in map screen to be sure not to miss our last poison zone
+    if(!needToVoid){ //dont need to void
+        if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
+            var armyReady = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? false : true);
+            if(!armyReady){  //and we dont have an army ready, may as well stay in the world until army ready. may not be true for some dailies
+                if (getEmpowerment() == "Poison"){
+                    if(currWorldZone % 10 != 5 && currWorldZone % 10 != 0) //in poison xx0 and xx5, we are willing to sit and wait in map screen to be sure not to miss our last poison zone
+                        return;
+                }
+                else //ice/wind/no empowerment: always stay in world if army isnt ready
                     return;
             }
-            else //ice/wind/no empowerment: always stay in world if army isnt ready
-                return;
         }
     }
     
