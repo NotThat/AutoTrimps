@@ -951,6 +951,7 @@ function PrestigeRaid() {
     
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
         updateAutoMapsStatus("", "Early PRaid Quit"); //UI
+        debug("StartZone " + StartZone + " currWorldZone " + currWorldZone + " PRaidMax " + PRaidMax + " getPageSetting('AutoMaps') "+ getPageSetting('AutoMaps'));
         return true; 
     }
     
@@ -968,7 +969,7 @@ function PrestigeRaid() {
             repeatClicked();
         }
         
-        if (game.global.world >=  minDesiredLevel){ //if its higher level, we are getting prestige
+        if (getCurrentMapObject().level >=  minDesiredLevel){ //if its higher level, we are getting prestige
             debug("in a " + game.global.world + " level map. farming prestige.")
             updateAutoMapsStatus("", "Prestige Raiding."); //UI
         }
