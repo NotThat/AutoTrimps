@@ -1220,7 +1220,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
     }
     
     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-    debug("baseLevel="+baseLevel+"sizeSlider="+sizeSlider+"diffSlider="+diffSlider+"lootSlider="+lootSlider+"specialMod="+specialMod+"perfect="+perfect+"extraLevels="+extraLevels+"type="+type);
+    debug("Level = "+(baseLevel+extraLevels)+"|"+sizeSlider+"|"+diffSlider+"|"+lootSlider+"|"+specialMod+" perfect = "+perfect+ "|"+type);
     if(fragments >= cost){
         debug("map level: " + (baseLevel+extraLevels) + " cost: " + cost.toPrecision(3) + " fragments out of " + fragments.toPrecision(3) + " available.", "general", "");
         return true;
