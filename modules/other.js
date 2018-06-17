@@ -173,16 +173,31 @@ function calcPrestige() {
             case "Dagadder":
                 slotModifier=1;
                 break;
+            case "Bootboost": 
+                slotModifier=1;
+                break;
             case "Megamace":
+                slotModifier=2;
+                break;
+            case "Hellishmet":
                 slotModifier=2;
                 break;
             case "Polierarm": 
                 slotModifier=3;
                 break;
+            case "Pantastic": 
+                slotModifier=3;
+                break;
             case "Axeidic": 
                 slotModifier=4;
                 break;
+            case "Smoldershoulder": 
+                slotModifier=4;
+                break;
             /*case "Greatersword": //dont count as full prestige until we have gambes
+                slotModifier=5;
+                break;
+            case "Bestplate": 
                 slotModifier=5;
                 break;
             case "Harmbalest": 
@@ -192,7 +207,7 @@ function calcPrestige() {
                 slotModifier=5;
                 break;
             default:
-                debug("calcPrestige default i " + i);
+                debug("calcPrestige default i " + i + " prestigeList[i] = " + prestigeList[i]);
         }
         debug("slotmodifier = " + slotModifier);
         tmp = game.upgrades[p].allowed/2*10-10+slotModifier;
