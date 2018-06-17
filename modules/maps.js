@@ -70,6 +70,7 @@ var debugging = false;
 var currWorldZone = 1;
 var scaleUp; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
 //Activate Robo Trimp (will activate on the first zone after liquification)
+var lastMsg; //stores last message, stops spam to console
 
 function calcDmg(){
         //START CALCULATING DAMAGES:
@@ -234,11 +235,11 @@ function autoMap() {
     
     calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
     
-    //if dont have army ready, dont enter map screen unless its last poison zone, and/or we need to do void maps
-    if(!needToVoid){ //dont need to void
+    //if dont have an army ready, dont enter map screen unless its last poison zone, and/or we need to do void maps
+    if(!needToVoid){ //if we dont need to voids
         if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
             var armyReady = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? false : true);
-            if(!armyReady){  //and we dont have an army ready, may as well stay in the world until army ready. may not be true for some dailies
+            if(!armyReady){  //and we dont have an army ready, then we may as well stay in the world until army ready. may not be true for some dailies
                 if (getEmpowerment() == "Poison"){
                     if(currWorldZone % 10 != 5 && currWorldZone % 10 != 0) //in poison xx0 and xx5, we are willing to sit and wait in map screen to be sure not to miss our last poison zone
                         return;
@@ -909,11 +910,14 @@ function updateAutoMapsStatus(get, msg) {
     else if (!enoughHealth) status = 'Want more health';
     else if (enoughHealth && enoughDamage) status = 'Ratio = ' + HDratio.toFixed(6) +' Advancing';
     
-    if (status.length < 1)
-        status = msg;
+    if(lastMsg != msg){
+        lastMsg = msg;
+        if (status.length < 1)
+            status = msg;
 
-    if (skippedPrestige) // Show skipping prestiges
-        status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b>';
+        if (skippedPrestige) // Show skipping prestiges
+            status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b>';
+    }
 
     //hider he/hr% status
     var getPercent = (game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned))) * 100;
