@@ -160,26 +160,57 @@ function calcPrestige() {
     var max=1;
     var tmp;
     var equipmentPrestigeLevel;
+    var slotModifier=0;
     
     var prestigeList = ['Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest', 'Bootboost', 'Hellishmet', 'Pantastic', 'Smoldershoulder', 'Bestplate', 'GambesOP'];
-    var numUnbought = 0;
+    //var numUnbought = 0;
     for (var i in prestigeList) {
         var p = prestigeList[i];
-        if (game.upgrades[p].allowed - game.upgrades[p].done > 0)
-                numUnbought++;
-        debug("i=" + i + " prestigeList[i] = " + prestigeList[i] + " p = " + p + " allowed" + game.upgrades[p].allowed +  " done" + game.upgrades[p].done);
+        //if (game.upgrades[p].allowed - game.upgrades[p].done > 0)
+        //  numUnbought++;
+        //debug("i=" + i + " prestigeList[i] = " + prestigeList[i] + " p = " + p + " allowed" + game.upgrades[p].allowed +  " done" + game.upgrades[p].done);
+        switch(prestigeList[i]){
+            case "Dagadder":
+                slotModifier=1;
+                break;
+            case "Megamace":
+                slotModifier=2;
+                break;
+            case "Polierarm": 
+                slotModifier=3;
+                break;
+            case "Axeidic": 
+                slotModifier=4;
+                break;
+            /*case "Greatersword": //dont count as full prestige until we have gambes
+                slotModifier=5;
+                break;
+            case "Harmbalest": 
+                slotModifier=5;
+                break;*/
+            case "GambesOP": 
+                slotModifier=5;
+                break;
+            default:
+                debug("calcPrestige default i " + i);
+        }
+        debug("slotmodifier = " + slowModifier);
+        tmp = game.upgrades[p].allowed/2*10-10+slotModifier;
+        debug("tmp = " + tmp);
+        if (tmp>max)
+            max=tmp;
     }
     
-    debug("game.upgrades[dagadder].allowed = " + game.upgrades['Dagadder'].allowed);
-    tmp = game.upgrades['Dagadder'].allowed/2*10-10+1;
-    debug("inferred tmp = " + tmp);
+    //debug("game.upgrades[dagadder].allowed = " + game.upgrades['Dagadder'].allowed);
+    //tmp = game.upgrades['Dagadder'].allowed/2*10-10+1;
+    //debug("inferred tmp = " + tmp);
     
     /*equipmentPrestigeLevel = game.equipment["Shield"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
     if (tmp>max)
         max=tmp;*/
     
-    equipmentPrestigeLevel = game.equipment["Dagger"].prestige;
+    /*equipmentPrestigeLevel = game.equipment["Dagger"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
     
     
@@ -214,7 +245,7 @@ function calcPrestige() {
     equipmentPrestigeLevel = game.equipment["Battleaxe"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+4;
     if (tmp>max)
-        max=tmp;
+        max=tmp;*/
     
     /*equipmentPrestigeLevel = game.equipment["Shoulderguards"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+4;
@@ -231,7 +262,7 @@ function calcPrestige() {
     if (tmp>max)
         max=tmp;*/
     
-    equipmentPrestigeLevel = game.equipment["Arbalest"].prestige;
+    /*equipmentPrestigeLevel = game.equipment["Arbalest"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+5;
     if (tmp>max)
         max=tmp;
@@ -239,7 +270,7 @@ function calcPrestige() {
     equipmentPrestigeLevel = game.equipment["Gambeson"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+5;
     if (tmp>max)
-        max=tmp;
+        max=tmp;*/
     
     return max;
 }
