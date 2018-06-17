@@ -170,6 +170,9 @@ function calcPrestige() {
         debug("i=" + i + " prestigeList[i] = " + prestigeList[i] + " p = " + p + " allowed" + game.upgrades[p].allowed +  " done" + game.upgrades[p].done);
     }
     
+    debug("game.upgrades[dagadder].allowed = " + game.upgrades['Dagadder'].allowed);
+    tmp = game.upgrades['Dagadder'].allowed/2*10-10+1;
+    debug("inferred tmp = " + tmp);
     
     /*equipmentPrestigeLevel = game.equipment["Shield"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
