@@ -987,9 +987,9 @@ function PrestigeRaid() {
             var foundSuitableMap = decideMapParams(minDesiredLevel, maxDesiredLevel, "Prestigious", false);
 
         if (!foundSuitableMap){
-            debug("Could not create a suitable map. min " + minDesiredLevel + " max " + maxDesiredLevel + " currWorldZone " + currWorldZone + " extraLevels " + extraLevels);
-            debug("Cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost.toPrecision(3) + " fragments.");
-            debug("Exiting.");
+            //debug("Could not create a suitable map. min " + minDesiredLevel + " max " + maxDesiredLevel + " currWorldZone " + currWorldZone + " extraLevels " + extraLevels);
+            //debug("Cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost.toPrecision(3) + " fragments.");
+            //debug("Exiting.");
             updateAutoMapsStatus("", "Can not afford map"); //UI
             return true;
         }
@@ -1118,7 +1118,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
     //function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod,     perfect,     extraLevels,     type){
     cost =      calcMapCost(minLevel, sizeLast,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast);
     if(cost > fragments){
-        debug("cant afford map level " + minLevel);
+        //debug("cant afford map level " + minLevel);
         sizeSlider = 0;
         diffSlider = 0;
         lootSlider = 0;
