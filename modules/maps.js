@@ -65,8 +65,6 @@ var cost;
 
 var maxDesiredLevel;
 var minDesiredLevel;
-//var debugging = true;
-var debugging = false;
 var currWorldZone = 1;
 var scaleUp; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
 //Activate Robo Trimp (will activate on the first zone after liquification)
@@ -941,17 +939,12 @@ function PrestigeRaid() {
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
     presRaiding = true; //for message passing to UI
-            
-    if(debugging){
-        debug("game.global.mapsActive " + game.global.mapsActive);
-        debug("game.global.world " + game.global.world);
-    }
     
     if (PRaidMax > 10){
         PRaidMax = 10;
         setPageSetting('PRaidingMaxZones', 10);
     }
-    if (PRaidMax < 0){
+    else if (PRaidMax < 0){
         PRaidMax = 0;
         setPageSetting('PRaidingMaxZones', 0);
     }
@@ -1081,12 +1074,14 @@ function createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeS
             buyMap();
             return true;
         }
-        else if ((updateMapCost(true) > game.resources.fragments.owned)) {
+        else {
             debug("Failed to prestige raid. We can't afford the map.");
             debug("Expected map level " + (currWorldZone+extraLevels) + " is " + cost + " and we have " + fragments + " frags.");
             return false;
         }
     }
+    else
+        debug("error: not in premap screen");
     return false;
 }
 
@@ -1113,83 +1108,107 @@ function findMap(level){
     return -1;
 }
 
-function decideMapParams(scaleUp){
-    var start, end, delta;
+function decideMapParams(minLevel, maxLevel, special){
+    var start, end;
+
     var fragments = game.resources.fragments.owned; //our available fragments
-    if (scaleUp){
-        start = minDesiredLevel;
-        end = maxDesiredLevel+1;
-        delta = 1;
+    baseLevel = currWorldZone;
+    var sizeLast=0, diffLast=0, lootLast=0, specialModLast="", perfectLast=false, extraLevelsLast=minLevel-baseLevel, typeLast="Random";
+    if (special == "LMC")
+        specialModLast = "LMC";
+    else specialModLast = "";
+    
+    debug("entering decideMapParams minLevel " + minLevel + " maxLevel " + maxLevel + " special " + special);
+    
+    //function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod,     perfect,     extraLevels,     type){
+    if(  calcMapCost(minLevel, sizeLast,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) > fragments){
+        debug("cant even afford worst map of level " + minLevel);
+        return false;
     }
-    else{
-        start = maxDesiredLevel;
-        end = minDesiredLevel-1;
-        delta = -1;
+    if(maxLevel < baseLevel) maxLevel = baseLevel;
+    if(minLevel > maxLevel) minLevel = maxLevel;
+    
+    //order of importance for prestigious maps (prestige mode):
+    //size > prestigious > difficulty > perfect
+    //order of importance for LMC maps (for more damage):
+    //LMC (must have) > size  > difficulty > perfect > Garden
+    
+    //iterate over all values in order of priority to find the best map we can afford.
+    //at all times the 'Last' variables hold values that we can afford.
+    
+    while(true){
+        if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, true, extraLevelsLast, typeLast) < fragments)
+            perfectLast = true;
+        else
+            perfectLast = false;
+        
+        for(diffEnum = 0; diffEnum <= 0; diffEnum++){
+            if(  calcMapCost(baseLevel, sizeLast,   diffEnum,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
+                diffLast = diffEnum;
+            else
+                break;
+            
+            if(special != "LMC"){ //LMC never skip. prestigious maybe skip
+                if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   "Prestigious", perfectLast, extraLevelsLast, typeLast) < fragments)
+                    specialModLast = "Prestigious";
+                else
+                    specialModLast = "";
+            }
+
+            for(sizeEnum = 0; sizeEnum <= 9; sizeEnum++){
+                if(  calcMapCost(baseLevel, sizeEnum,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
+                    sizeLast = sizeEnum;
+                else
+                    break;
+            }
+        }
+        
+        if(2 * calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments && special == "LMC")
+            typeLast = "Garden";
+        else
+            typeLast = "Random";
+        
+        sizeSlider = sizeLast;
+        diffSlider = diffLast;
+        lootSlider = lootLast;
+        specialMod = specialModLast;
+        perfect = perfectLast;
+        extraLevels = extraLevelsLast;
+        type = typeLast;
+        
+        if(extraLevelsLast+1 > maxLevel-baseLevel)
+            break;
+        
+        if(specialModLast == "LMC"){
+            if(calcMapCost(baseLevel, 0, 0, 0, "LMC", false, extraLevelsLast+1, "Random") < fragments){
+                sizeLast=0; diffLast=0; lootLast=0; specialModLast="LMC"; perfectLast=false; extraLevelsLast=extraLevelsLast+1, typeLast="Random";
+            }
+            else
+                break;
+        }
+        if(calcMapCost(baseLevel, 0, 0, 0, "", false, extraLevelsLast+1, "Random") < fragments){
+             sizeLast=0; diffLast=0; lootLast=0; specialModLast=""; perfectLast=false; extraLevelsLast=extraLevelsLast+1, typeLast="Random";
+        }
+        else
+            break;
+    
     }
     
-    for(i = start; i != end; i=i+delta){
-        baseLevel = currWorldZone;
-        sizeSlider=9;
-        diffSlider=9;
-        lootSlider=0;
-        specialMod="Prestigious";
-        perfect=false;
-        extraLevels = i-currWorldZone;
-        type="Random";
-             //calcMapCost(currWorldZone,   0-9,       0-9,        0-9,        "Prestigious"/"FA"/"LMC"/"", boolean, 0-10, "Random"/other){ 
-        cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+    debug("baseLevel="+baseLevel+"sizeSlider="+sizeSlider+"diffSlider="+diffSlider+"lootSlider="+lootSlider+"specialMod="+specialMod+"perfect="+perfect+"extraLevels="+extraLevels+"type="+type);
+    if(fragments >= cost){
+        debug("found suitable map", "general", "");
+        debug("cost " + cost.toPrecision(3) + " out of " + fragments.toPrecision(3) + " available fragments.", "general", "");
+        debug("map level " + (baseLevel+extraLevels), "general", "");
 
-        if (cost/fragments < 3 && cost/fragments > 1){ //can almost afford, lets get it
-            debug("loosening map");
-            diffSlider = 5;
-            cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-            if (cost/fragments > 1){ //can almost afford, lets get it
-                debug("loosening further");
-                specialMod = "";
-                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-            }
-        }
-        else if (cost/fragments < 0.01){ //can easily affordd
-            debug("maximizing map");
-            lootSlider=9;
-            perfect=true;
-            type="Garden";
-            cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-            //just in case..
-            if (cost/fragments > 1){
-                lootSlider = 0;
-                perfect = false;
-                type="Random";
-                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-            }
-        }
-        if (cost/fragments > 1 && (i == minDesiredLevel || (currWorldZone % 10 == 5 && getEmpowerment() == "Poison"))){//last attempt to buy a map. also do this on xx5 poison zones
-            debug("last attempt to buy map");
-            diffSlider=0;
-            cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-            if (cost/fragments > 1){
-                sizeSlider=0;
-                cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-                if (cost/fragments > 1){
-                    specialMod="";
-                    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
-                }
-            }
-        }
-        if(fragments >= cost){
-            debug("found suitable map", "general", "");
-            debug("cost " + cost.toPrecision(3) + " out of " + fragments.toPrecision(3) + " available fragments.", "general", "");
-            debug("map level " + (currWorldZone+extraLevels), "general", "");
-
-            return true;
-        }
+        return true;
     }
+    
     debug("did not find suitable map. start = " + start + " end = " + end + " scaleUp = " + scaleUp);
     return false;
 }
 
 function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
-    var ret;
     var empowerment = getEmpowerment();
     var lastDigitZone = currWorldZone % 10;
     
@@ -1197,7 +1216,7 @@ function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
     
     //are we in an active spire? if so we always want +5 map levels
     if(currWorldZone % 100 == 0 && currWorldZone >= getPageSetting('IgnoreSpiresUntil')){
-        debug("active spire mode");
+        //debug("active spire mode");
         maxDesiredLevel = currWorldZone + 5;
         minDesiredLevel = currWorldZone + 1;
     }
@@ -1311,7 +1330,6 @@ function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
         minDesiredLevel = havePrestigeUpTo + 1;
     if(minDesiredLevel > maxDesiredLevel)
         minDesiredLevel = maxDesiredLevel;
-    
 }
 
 function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type){
@@ -1319,10 +1337,10 @@ function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, 
     baseCost = baseCost * (baseLevel >= 60 ? 0.74 : 1);
     if(specialMod == "Prestigious")
         baseCost += 10;
-    if(specialMod == "FA")
-        baseCost += 7;
-    if(specialMod == "LMC")
+    else if(specialMod == "LMC")
         baseCost += 18;
+    else if(specialMod == "FA")
+        baseCost += 7;
     baseCost += (perfect ? 6 : 0);
     baseCost += 10 * extraLevels;
     baseCost += baseLevel;

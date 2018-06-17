@@ -143,10 +143,6 @@ function exitSpireCell() {
         endSpire();
 }
 
-
-    
-
-
 function findLastBionic() {
          for (var i = game.global.mapsOwnedArray.length -1; i>=0; i--) {
               if (game.global.mapsOwnedArray[i].location === "Bionic") {
@@ -155,20 +151,15 @@ function findLastBionic() {
               }
          }
 
-
 function calcPrestige() {
     var max=1;
     var tmp;
-    var equipmentPrestigeLevel;
     var slotModifier=0;
     
     var prestigeList = ['Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest', 'Bootboost', 'Hellishmet', 'Pantastic', 'Smoldershoulder', 'Bestplate', 'GambesOP'];
     //var numUnbought = 0;
     for (var i in prestigeList) {
         var p = prestigeList[i];
-        //if (game.upgrades[p].allowed - game.upgrades[p].done > 0)
-        //  numUnbought++;
-        //debug("i=" + i + " prestigeList[i] = " + prestigeList[i] + " p = " + p + " allowed " + game.upgrades[p].allowed +  " done " + game.upgrades[p].done);
         switch(prestigeList[i]){
             case "Dagadder":
                 slotModifier=1;
@@ -209,84 +200,11 @@ function calcPrestige() {
             default:
                 debug("calcPrestige default i " + i + " prestigeList[i] = " + prestigeList[i]);
         }
-        //debug("slotmodifier = " + slotModifier);
         tmp = (game.upgrades[p].allowed+1)/2*10-10+slotModifier;
-        //debug("tmp = " + tmp);
         if (tmp>max)
             max=tmp;
     }
-    
-    //debug("game.upgrades[dagadder].allowed = " + game.upgrades['Dagadder'].allowed);
-    //tmp = game.upgrades['Dagadder'].allowed/2*10-10+1;
-    //debug("inferred tmp = " + tmp);
-    
-    /*equipmentPrestigeLevel = game.equipment["Shield"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+1;
-    if (tmp>max)
-        max=tmp;*/
-    
-    /*equipmentPrestigeLevel = game.equipment["Dagger"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+1;
-    
-    
-    if (tmp>max)
-        max=tmp;
-    
-    equipmentPrestigeLevel = game.equipment["Boots"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+1;
-    if (tmp>max)
-        max=tmp;
-    
-    equipmentPrestigeLevel = game.equipment["Mace"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+2;
-    if (tmp>max)
-        max=tmp;
-    
-    equipmentPrestigeLevel = game.equipment["Helmet"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+2;
-    if (tmp>max)
-        max=tmp;
-    
-    equipmentPrestigeLevel = game.equipment["Polearm"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+3;
-    if (tmp>max)
-        max=tmp;
-    
-    equipmentPrestigeLevel = game.equipment["Pants"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+3;
-    if (tmp>max)
-        max=tmp;
-    
-    equipmentPrestigeLevel = game.equipment["Battleaxe"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+4;
-    if (tmp>max)
-        max=tmp;*/
-    
-    /*equipmentPrestigeLevel = game.equipment["Shoulderguards"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+4;
-    if (tmp>max)
-        max=tmp;
-    
-    equipmentPrestigeLevel = game.equipment["Greatsword"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+5;
-    if (tmp>max)
-        max=tmp;
-    
-    equipmentPrestigeLevel = game.equipment["Breastplate"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+5;
-    if (tmp>max)
-        max=tmp;*/
-    
-    /*equipmentPrestigeLevel = game.equipment["Arbalest"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+5;
-    if (tmp>max)
-        max=tmp;
-    
-    equipmentPrestigeLevel = game.equipment["Gambeson"].prestige;
-    tmp = equipmentPrestigeLevel/2*10-10+5;
-    if (tmp>max)
-        max=tmp;*/
-    
+
     return max;
 }
 
