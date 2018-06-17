@@ -210,7 +210,7 @@ function calcPrestige() {
                 debug("calcPrestige default i " + i + " prestigeList[i] = " + prestigeList[i]);
         }
         debug("slotmodifier = " + slotModifier);
-        tmp = game.upgrades[p].allowed/2*10-10+slotModifier;
+        tmp = (game.upgrades[p].allowed+1)/2*10-10+slotModifier;
         debug("tmp = " + tmp);
         if (tmp>max)
             max=tmp;
