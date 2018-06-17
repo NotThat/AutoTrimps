@@ -182,7 +182,7 @@ function calcDmg(){
 //anything/everything to do with maps.
 function autoMap() {
     //if((!game.global.mapsActive && !game.global.preMapsActive) || game.global.spireActive)
-        currWorldZone = game.global.world; //game.global.world will point to our map level when we're inside map. keep a record of the actual world zone. spires are a special case
+        currWorldZone = game.global.world;
     
     //debug("game.global.world = " + game.global.world);
     //game.global.spireActive 
@@ -950,8 +950,6 @@ function PrestigeRaid() {
     }
     
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
-        updateAutoMapsStatus("", "Early PRaid Quit"); //UI
-        debug("StartZone " + StartZone + " currWorldZone " + currWorldZone + " PRaidMax " + PRaidMax + " getPageSetting('AutoMaps') "+ getPageSetting('AutoMaps'));
         return true; 
     }
     
@@ -970,7 +968,7 @@ function PrestigeRaid() {
         }
         
         if (getCurrentMapObject().level >=  minDesiredLevel){ //if its higher level, we are getting prestige
-            updateAutoMapsStatus("", "Prestige Raiding."); //UI
+            updateAutoMapsStatus("", "Prestige Raiding"); //UI
         }
         else
             updateAutoMapsStatus("", "Finishing map."); //UI
@@ -990,7 +988,7 @@ function PrestigeRaid() {
 
         if (!foundSuitableMap){
             debug("Could not create a suitable map. min " + minDesiredLevel + " max " + maxDesiredLevel + " currWorldZone " + currWorldZone + " extraLevels " + extraLevels);
-            debug("Cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost + " fragments.");
+            debug("Cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost.toPrecision(3) + " fragments.");
             debug("Exiting.");
             updateAutoMapsStatus("", "Can not afford map"); //UI
             return true;
@@ -1103,7 +1101,6 @@ function findMap(level){
         //debug("findmap: found map " + theMap + " level " + bestSoFar);
         return theMap;
     }
-    debug("findMap: no map found");
     return -1;
 }
 
@@ -1118,15 +1115,23 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
     else specialModLast = "";
     
     debug("entering decideMapParams minLevel " + minLevel + " maxLevel " + maxLevel + " special " + special);
+    if(maxLevel < baseLevel) maxLevel = baseLevel;
+    if(minLevel > maxLevel) minLevel = maxLevel;    
     
     //function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod,     perfect,     extraLevels,     type){
-    if(  calcMapCost(minLevel, sizeLast,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) > fragments){
-        debug("cant even afford worst map of level " + minLevel);
+    cost =      calcMapCost(minLevel, sizeLast,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast);
+    if(cost > fragments){
+        debug("cant afford map level " + minLevel);
+        sizeSlider = 0;
+        diffSlider = 0;
+        lootSlider = 0;
+        specialMod = special;
+        extraLevels = minLevel-baseLevel;
+        perfect = false;
+        type = "Random";
         return false;
     }
-    if(maxLevel < baseLevel) maxLevel = baseLevel;
-    if(minLevel > maxLevel) minLevel = maxLevel;
-    
+
     //order of importance for prestigious maps (prestige mode):
     //size > prestigious > difficulty > perfect
     //order of importance for LMC maps (for more damage):
@@ -1221,7 +1226,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         return true;
     }
     
-    debug("did not find suitable map. start = " + start + " end = " + end + " scaleUp = " + scaleUp);
+    debug("did not find suitable map. start = " + start + " end = " + end);
     return false;
 }
 
