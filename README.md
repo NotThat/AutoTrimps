@@ -5,40 +5,6 @@
 <a href="https://discord.gg/0VbWe0dxB9kIfV2C"><img src="https://pbs.twimg.com/profile_images/568588143226413056/9Lwrixxj.png" width=48></a>
 Discord is a chat program. Come to talk about AutoTrimps, for help, or suggestions for new features : https://discord.gg/0VbWe0dxB9kIfV2C (same one as zininzinin)
 
-## Current Version (full changes below) - Ongoing Development!
-- Too many to list
-- This version has beta changes by Zek, forked from GenBTC + Kfro. Including Autostance 3, Update to Swiffy Overlay, and Merging of buttons. Please tell me about bugs on Discord
-
-Zek - New changes will be posted here^
-
-- Mar 24, BATTLECALC CHANGES:
-- BattleCalc.js - getBattleStats() updated for the stuff added to AutoStance 1 a while ago, Life,C2,StillRowing, Copied from game code.
-- Mar 24, EQUIPMENT CHANGES:
-- Equip.js - Now supports higher cap numbers such as 200. Lower cap for liquified and overkilled zones:
-- If a zone is liquified its 10% of your cap.
-- If its a quick zone that you might complete in under 25 seconds its also 10% of your cap (based on last zone).
-- hidden variable MODULES["equipment"].capDivisor = 10;   //number to divide your normal cap by
-- Spire is explicitly leveled to your full 100% cap.
-- Also above MaxMapBonusAfterZone the armor equip is leveled to full cap as well, as an attempt to get more Armor (working on it).
-- Sorry for any bugs or undocumenteds in the meantime.
-- Old Original Zeker450 AutoPerk Preset was changed 2 days ago without notice also. This is your notice That is now called #2, And there is a new one called #3 That it his latest change.
-- v2.1.6.5-stable - Mar 24, Set up <a href='https://genbtc.github.io/AutoTrimps-stable'>Stable Repository</a> for the faint of heart. Equipment changes, see README at <a href='https://github.com/genbtc/AutoTrimps/blob/gh-pages/README.md'>GitHub</a> and check commit history; Sorry for any breakages.
-- v2.1.6.9 - March 23, New: AutoMaps setting combined with RunUniqueMaps. Be advised, the variable has changed from boolean false,true to a value 0,1,2. Settings file has been migrated as such. New: Map SpecialMod is extremely beta and can break your game. Geneticist Infinity fixed. New AGU Settings for 60% Void. Graphs fixes. AutoMaps changes. Equipment level cap improvements.
-- v2.1.6.8 - March 22, Settings GUI, make better. Up/Down graph buttons. Warning notices on import/export. Internal code fixes, gameplay unchanged.
-- v2.1.6.7 - March 20, Moved all the Settings around on you :) Enjoy the new layout. Display Tab: EnhanceGrid + Go AFK Mode. Pinned AT Tab menu bar to top when scrolling.  Graph: Graph: FluffyXP . Continue Development on long TODO list...
-- v2.1.6.6 - March 13, Geneticist management changes. Equipment code improvements. scriptLoad improvements. attempt to track errors.
-- v2.1.6.5 - March 7, Save/Reload Profiles in Import/Export. Magmamancer graph. Magmite/Magma Spam disableable.
-- v2.1.6.4 - March 4, 2018 Basic Analytics are now being collected. Read about it in the tooltip of the new button on the Import/Export tab . Overkill Graph fixed for Liquification.  Setting Max Explorers to infinity as they are not that useless anymore. Update battlecalc for Fluffy & Ice on Autostance2.
-- v2.1.6.3 - March 3, 2018 AutoPerks: Capable/Curious/Cunning, BaseDamageCalc: C2,StillRowing,Strength in Health,Ice,Fluffy,Magmamancer - Fix bugs in autoperks around capable/fluffy allocating looting + more bugs
-- v2.1.6.2 - March 2, 2018
-- v2.1.6.1 - March 1, 2018
-- v2.1.6.0 - December 23, 2018
-- v2.1.5.7 - November 7,2017 = Merge in DerSkagg's GoldenUpgrades Mod (Pull request #90) (thanks Derskagg)
-- v2.1.5.6 - August 26, 2017 = Merge ALL of Unihedro branch back into genBTC branch. (thanks UniHedro)
-- v2.1.5.4 - August 26, 2017 = Added AutoDimGen + little fixes (FirenX)
-took a break
-- v2.1.5.3 - January 10, 2017 genbtc-1-10-2016+Modular (meant 2017 lol)
-
 ## Script Installation
 **Please backup your game via export before and during use to prevent losing your save due to corruption!**
 
