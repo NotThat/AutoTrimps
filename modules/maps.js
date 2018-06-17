@@ -990,10 +990,10 @@ function PrestigeRaid() {
         debug("Creating map...");
         if(maxDesiredLevel-havePrestigeUpTo>=8){
             debug("need to run " + (maxDesiredLevel-havePrestigeUpTo)+" maps levels higher, running +6 first");
-            var foundSuitableMap = decideMapParams(havePrestigeUpTo+6, havePrestigeUpTo+6, "Prestigious");
+            var foundSuitableMap = decideMapParams(havePrestigeUpTo+6, havePrestigeUpTo+6, "Prestigious", true);
         }
         else
-            var foundSuitableMap = decideMapParams(minDesiredLevel, maxDesiredLevel, "Prestigious");
+            var foundSuitableMap = decideMapParams(minDesiredLevel, maxDesiredLevel, "Prestigious", false);
 
         if (!foundSuitableMap){
             debug("Could not create a suitable map.");
@@ -1113,7 +1113,7 @@ function findMap(level){
     return -1;
 }
 
-function decideMapParams(minLevel, maxLevel, special){
+function decideMapParams(minLevel, maxLevel, special, cheap){
     var start, end;
 
     var fragments = game.resources.fragments.owned; //our available fragments
@@ -1177,9 +1177,15 @@ function decideMapParams(minLevel, maxLevel, special){
         diffSlider = diffLast;
         lootSlider = lootLast;
         specialMod = specialModLast;
-        perfect = perfectLast;
         extraLevels = extraLevelsLast;
-        type = typeLast;
+        if(!cheap){
+            perfect = perfectLast;
+            type = typeLast;
+        }
+        else{//for quick +6 maps we never wanna spend the frags for perfect/garden
+            perfect = false;
+            type = "Random";
+        }
         
         if(extraLevelsLast+1 > maxLevel-baseLevel)
             break;
