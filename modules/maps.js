@@ -963,34 +963,27 @@ function PrestigeRaid() {
         return true; 
     }
     
-    if (!game.global.mapsActive && !game.global.preMapsActive) { //in world, get to map screen
-            debug("world");
-            mapsClicked();
-        }
-    else if (game.global.mapsActive){
-        if (game.global.world >=  minDesiredLevel){ //we are getting prestige
-            debug("in a " + game.global.world + " level map. farming prestige.")
-            updateAutoMapsStatus("", "Prestige Raiding."); //UI
-        }
-        //debug("we are currently running a map! waiting... :( " + game.global.world + " getCurrentMapObject() = " + getCurrentMapObject().level);
-        updateAutoMapsStatus("", "Finishing map."); //UI
-        
+    if (game.global.mapsActive){ //if we are in a map
         if (game.global.repeatMap) {//make sure repeat button is turned off
             repeatClicked();
         }
+        
+        if (game.global.world >=  minDesiredLevel){ //if its higher level, we are getting prestige
+            debug("in a " + game.global.world + " level map. farming prestige.")
+            updateAutoMapsStatus("", "Prestige Raiding."); //UI
+        }
+        else
+            updateAutoMapsStatus("", "Finishing map."); //UI
         return false;
     }
     
     //Let's see if we already own a map of suitable level
     var map = findMap(minDesiredLevel);
-    //debug("premaps game.global.mapsActive=" + game.global.mapsActive + " game.global.preMapsActive=" +game.global.preMapsActive);
-    
     if(map == -1){ //do not own a high enough map, try to make one if we can afford it
-        //find best match match map we can afford
-        debug("Creating map...");
+        //find best match map we can afford
         if(maxDesiredLevel-havePrestigeUpTo>=8){
             debug("need to run " + (maxDesiredLevel-havePrestigeUpTo)+" maps levels higher, running +6 first");
-            var foundSuitableMap = decideMapParams(havePrestigeUpTo+6, havePrestigeUpTo+6, "Prestigious", true);
+            var foundSuitableMap = decideMapParams(havePrestigeUpTo+6, havePrestigeUpTo+6, "Prestigious", true); //get dagger first for speed before going max level map
         }
         else
             var foundSuitableMap = decideMapParams(minDesiredLevel, maxDesiredLevel, "Prestigious", false);
@@ -1002,7 +995,14 @@ function PrestigeRaid() {
             updateAutoMapsStatus("", "Can not afford map"); //UI
             return true;
         }
-        
+    }
+    
+    if (!game.global.mapsActive && !game.global.preMapsActive) { //in world, get to map screen
+        debug("world");
+        mapsClicked();
+    }
+
+    if(map == -1){        
         //lets create the map
         var flag = createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
         if (!flag){
