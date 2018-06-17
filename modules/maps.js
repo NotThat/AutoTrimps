@@ -999,7 +999,6 @@ function PrestigeRaid() {
     }
     
     if (!game.global.mapsActive && !game.global.preMapsActive) { //in world, get to map screen
-        debug("world");
         mapsClicked();
     }
 
@@ -1224,10 +1223,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
     debug("baseLevel="+baseLevel+"sizeSlider="+sizeSlider+"diffSlider="+diffSlider+"lootSlider="+lootSlider+"specialMod="+specialMod+"perfect="+perfect+"extraLevels="+extraLevels+"type="+type);
     if(fragments >= cost){
-        debug("found suitable map", "general", "");
-        debug("cost " + cost.toPrecision(3) + " out of " + fragments.toPrecision(3) + " available fragments.", "general", "");
-        debug("map level " + (baseLevel+extraLevels), "general", "");
-
+        debug("map level: " + (baseLevel+extraLevels) + " cost: " + cost.toPrecision(3) + " fragments out of " + fragments.toPrecision(3) + " available.", "general", "");
         return true;
     }
     
