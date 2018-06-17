@@ -183,9 +183,11 @@ function calcDmg(){
 //AutoMap - function originally created by Belaith (in 1971)
 //anything/everything to do with maps.
 function autoMap() {
-    if(!game.global.mapsActive &&  !game.global.preMapsActive)
-        currWorldZone = game.global.world; //game.global.world will point to our map level when we're inside map. keep a record of the actual world zone.
+    if((!game.global.mapsActive && !game.global.preMapsActive) || game.global.spireActive)
+        currWorldZone = game.global.world; //game.global.world will point to our map level when we're inside map. keep a record of the actual world zone. spires are a special case
     
+    debug("game.global.world = " + game.global.world);
+    //game.global.spireActive
     //allow script to handle abandoning
     // if(game.options.menu.alwaysAbandon.enabled == 1) toggleSetting('alwaysAbandon');
     //if we are prestige mapping, force equip first mode
