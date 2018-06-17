@@ -1136,35 +1136,46 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
     //order of importance for prestigious maps (prestige mode):
     //size > prestigious > difficulty > perfect
     //order of importance for LMC maps (for more damage):
-    //LMC (must have) > size  > difficulty > perfect > Garden
+    //LMC (must have) > size  > difficulty > loot > perfect > Garden
     
     //iterate over all values in order of priority to find the best map we can afford.
     //at all times the 'Last' variables hold values that we can afford.
     
     while(true){
-        if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, true, extraLevelsLast, typeLast) < fragments)
-            perfectLast = true;
-        else
-            perfectLast = false;
-        
-        for(diffEnum = 0; diffEnum <= 0; diffEnum++){
-            if(  calcMapCost(baseLevel, sizeLast,   diffEnum,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
-                diffLast = diffEnum;
+        if(sizeLast+diffLast+lootLast < 27)
+            perfectLast=false;
+        else{
+            if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, true, extraLevelsLast, typeLast) < fragments)
+                perfectLast = true;
             else
-                break;
+                perfectLast = false;
+        }
+        
+        for(lootEnum = 0; lootEnum <= 9; lootEnum++){
+            if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootEnum,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
+                lootLast = lootEnum;
+            else
+                break;            
             
-            if(special != "LMC"){ //LMC never skip. prestigious maybe skip
-                if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   "Prestigious", perfectLast, extraLevelsLast, typeLast) < fragments)
-                    specialModLast = "Prestigious";
-                else
-                    specialModLast = "";
-            }
-
-            for(sizeEnum = 0; sizeEnum <= 9; sizeEnum++){
-                if(  calcMapCost(baseLevel, sizeEnum,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
-                    sizeLast = sizeEnum;
+            for(diffEnum = 0; diffEnum <= 9; diffEnum++){
+                if(  calcMapCost(baseLevel, sizeLast,   diffEnum,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
+                    diffLast = diffEnum;
                 else
                     break;
+
+                if(special != "LMC"){ //LMC never skip. prestigious maybe skip
+                    if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   "Prestigious", perfectLast, extraLevelsLast, typeLast) < fragments)
+                        specialModLast = "Prestigious";
+                    else
+                        specialModLast = "";
+                }
+
+                for(sizeEnum = 0; sizeEnum <= 9; sizeEnum++){
+                    if(  calcMapCost(baseLevel, sizeEnum,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
+                        sizeLast = sizeEnum;
+                    else
+                        break;
+                }
             }
         }
         
@@ -1185,6 +1196,10 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         else{//for quick +6 maps we never wanna spend the frags for perfect/garden
             perfect = false;
             type = "Random";
+        }
+        if(specialMod != "LMC"){
+            perfect = false;
+            lootSlider = 0;
         }
         
         if(extraLevelsLast+1 > maxLevel-baseLevel)
