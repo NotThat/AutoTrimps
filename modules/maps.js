@@ -988,7 +988,12 @@ function PrestigeRaid() {
     if(map == -1){ //do not own a high enough map, try to make one if we can afford it
         //find best match match map we can afford
         debug("Creating map...");
-        var foundSuitableMap = decideMapParams(scaleUp);
+        if(maxDesiredLevel-havePrestigeUpTo>=8){
+            debug("need to run " + (maxDesiredLevel-havePrestigeUpTo)+" maps levels higher, running +6 first");
+            var foundSuitableMap = decideMapParams(havePrestigeUpTo+6, havePrestigeUpTo+6, "Prestigious");
+        }
+        else
+            var foundSuitableMap = decideMapParams(minDesiredLevel, maxDesiredLevel, "Prestigious");
 
         if (!foundSuitableMap){
             debug("Could not create a suitable map.");
