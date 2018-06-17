@@ -981,6 +981,10 @@ function PrestigeRaid() {
         }
         //debug("we are currently running a map! waiting... :( " + game.global.world + " getCurrentMapObject() = " + getCurrentMapObject().level);
         updateAutoMapsStatus("", "Finishing map."); //UI
+        
+        if (game.global.repeatMap) {//make sure repeat button is turned off
+            repeatClicked();
+        }
         return false;
     }
     
@@ -1028,7 +1032,7 @@ function PrestigeRaid() {
     presRaiding = true; //update UI
     updateAutoMapsStatus("", "Running map for prestige"); //UI
 
-    if (!game.global.repeatMap) {
+    if (game.global.repeatMap) {//make sure repeat button is turned off
         repeatClicked();
     }
     
