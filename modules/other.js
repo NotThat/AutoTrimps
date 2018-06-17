@@ -161,6 +161,15 @@ function calcPrestige() {
     var tmp;
     var equipmentPrestigeLevel;
     
+    var prestigeList = ['Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest', 'Bootboost', 'Hellishmet', 'Pantastic', 'Smoldershoulder', 'Bestplate', 'GambesOP'];
+    var numUnbought = 0;
+    for (var i in prestigeList) {
+        var p = prestigeList[i];
+        if (game.upgrades[p].allowed - game.upgrades[p].done > 0)
+                numUnbought++;
+    }
+    
+    
     /*equipmentPrestigeLevel = game.equipment["Shield"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
     if (tmp>max)
@@ -168,6 +177,8 @@ function calcPrestige() {
     
     equipmentPrestigeLevel = game.equipment["Dagger"].prestige;
     tmp = equipmentPrestigeLevel/2*10-10+1;
+    debug("unbought dagger?|?: allowed" + game.upgrades[1].allowed +  " done" + game.upgrades[1].done);
+    
     if (tmp>max)
         max=tmp;
     

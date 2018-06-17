@@ -22,7 +22,6 @@ function buyUpgrades() {
     }
     
     for (var upgrade in upgradeList) {
-        
         upgrade = upgradeList[upgrade];
         var gameUpgrade = game.upgrades[upgrade];
         var available = (gameUpgrade.allowed > gameUpgrade.done && canAffordTwoLevel(gameUpgrade));
