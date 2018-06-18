@@ -216,8 +216,7 @@ function autoMap() {
     }
     
     var challSQ = game.global.runningChallengeSquared;
-    //advanced "Extra Zones" dropdown
-    var extraMapLevels = getPageSetting('AdvMapSpecialModifier') ? getExtraMapLevels() : 0;
+    var extraMapLevels = 0;
     //FIND VOID MAPS LEVEL:
     var voidMapLevelSetting = getPageSetting('VoidMaps');
     //Add your daily zone mod onto the void maps level
@@ -643,114 +642,26 @@ function autoMap() {
     } else if (game.global.preMapsActive) {
         if (selectedMap == "world") {
             mapsClicked(); //go back
-        } else if (selectedMap == "create") { //here is where the fun begins
-            var $mapLevelInput = document.getElementById("mapLevelInput");
-            $mapLevelInput.value = needPrestige ? game.global.world : siphlvl;
-            //choose spire level 199 or 200
-            if (preSpireFarming && MODULES["maps"].SpireFarm199Maps)
-                $mapLevelInput.value = game.talents.mapLoot.purchased ? game.global.world - 1 : game.global.world;
-            var decrement; //['size','diff','loot']
-            var tier; //taken from MODULES vars at the top of this file.
-            //instead of normal map locations, use Plentiful (Gardens) if the Decay challenge has been completed. (for +25% better loot)
-            var useGardens = (customVars.preferGardens && game.global.decayDone);
-            if (game.global.world >= customVars.MapTierZone[0]) {
-                //Zone 72+ (old: 9/9/9 Metal):
-                tier = customVars.MapTier0Sliders;
-                decrement = [];
-            } else if (game.global.world >= customVars.MapTierZone[1]) {
-                //Zone 47-72 (old: 9/9/4 Metal):
-                tier = customVars.MapTier1Sliders;
-                decrement = ['loot'];
-            } else if (game.global.world >= customVars.MapTierZone[2]) {
-                //Zone 16-47 (old: 9/9/0 Random):
-                tier = customVars.MapTier2Sliders;
-                decrement = ['loot'];
-            } else {
-                //Zone 6-16 (old: 9/0/0 Random):
-                tier = customVars.MapTier3Sliders;
-                decrement = ['diff', 'loot'];
+        } else if (selectedMap == "create") { 
+            
+            if((customVars.preferGardens && game.global.decayDone) && (shouldFarm || !enoughDamage || !enoughHealth))
+                type = "Plentiful";
+            else
+                type = "Random";  
+            if(game.global.challengeActive == 'Metal')
+                type = "Mountain";
+            
+            var lvl = (needPrestige ? game.global.world : siphlvl);
+            var flag = decideMapParams(lvl, lvl, type, false)
+            var flag2 = createAMap(lvl, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
+            if(!flag || !flag2){
+                debug("Can't afford map with parameters. level: " + lvl + " type: " + type);
+                debug("error in creating map process. Can't afford it? Running existing map instead.");
+                selectedMap = game.global.mapsOwnedArray[highestMap].id;
             }
-            //NEW: start all maps off on 9/9/9 sliders and decrement from there.
-            sizeAdvMapsRange.value = tier[0];
-            adjustMap('size', tier[0]);
-            difficultyAdvMapsRange.value = tier[1];
-            adjustMap('difficulty', tier[1]);
-            lootAdvMapsRange.value = tier[2];
-            adjustMap('loot', tier[2]);
-            biomeAdvMapsSelect.value = useGardens ? "Plentiful" : tier[3];
-            //recalculate cost.
-            updateMapCost();
-            //if we are "Farming" for resources, make sure it's Plentiful OR metal (and always aim for lowest difficulty)
-            if (shouldFarm || !enoughDamage || !enoughHealth || game.global.challengeActive == 'Metal') {
-                biomeAdvMapsSelect.value = useGardens ? "Plentiful" : "Mountain";
-                updateMapCost();
-            }
-            //set up various priorities for various situations
-            if (updateMapCost(true) > game.resources.fragments.owned) {
-                if (needPrestige && !enoughDamage) decrement.push('diff');
-                if (shouldFarm) decrement.push('size');
-            }
-
-            //Decrement 1 - use priorities first:
-            //if we STILL cant afford the map, lower the loot slider (less loot)
-            while (decrement.indexOf('loot') > -1 && lootAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
-                lootAdvMapsRange.value -= 1;
-            }
-            //default: if we can't afford the map:
-            //Put a priority on small size, and increase the difficulty? for high Helium that just wants prestige = yes.
-            //Really just trying to prevent prestige mapping from getting stuck
-            while (decrement.indexOf('diff') > -1 && difficultyAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
-                difficultyAdvMapsRange.value -= 1;
-            }
-            //if we still cant afford the map, lower the size slider (make it larger) (doesn't matter much for farming.)
-            while (decrement.indexOf('size') > -1 && sizeAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
-                sizeAdvMapsRange.value -= 1;
-            }
-            //Decrement 2 - if its still too expensive:
-            //if we STILL cant afford the map, lower the loot slider (less loot)
-            while (lootAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
-                lootAdvMapsRange.value -= 1;
-            }
-            //default: if we can't afford the map:
-            //Put a priority on small size, and increase the difficulty? for high Helium that just wants prestige = yes.
-            //Really just trying to prevent prestige mapping from getting stuck
-            while (difficultyAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
-                difficultyAdvMapsRange.value -= 1;
-            }
-            //if we still cant afford the map, lower the size slider (make it larger) (doesn't matter much for farming.)
-            while (sizeAdvMapsRange.value > 0 && updateMapCost(true) > game.resources.fragments.owned) {
-                sizeAdvMapsRange.value -= 1;
-            }
-
-            //run the Advanced Special Modifier script, bring
-            if (getPageSetting('AdvMapSpecialModifier'))
-                testMapSpecialModController();
-
-            //if we can't afford the map we designed, pick our highest existing map
-            //TODO Debug Output the mods we made.
-            var maplvlpicked = parseInt($mapLevelInput.value) + (getPageSetting('AdvMapSpecialModifier') ? getExtraMapLevels() : 0);
-            if (updateMapCost(true) > game.resources.fragments.owned) {
-                selectMap(game.global.mapsOwnedArray[highestMap].id);
-                debug("Can't afford the map we designed, #" + maplvlpicked, "maps", '*crying2');
-                debug("...selected our highest map instead # " + game.global.mapsOwnedArray[highestMap].id + " Level: " + game.global.mapsOwnedArray[highestMap].level, "maps", '*happy2');
-                runMap();
-                lastMapWeWereIn = getCurrentMapObject();
-                //if we can afford it, buy it and run it:
-            } else {
-                debug("Buying a Map, level: #" + maplvlpicked, "maps", 'th-large');
-                var result = buyMap(); //here is where we buy it
-                if (result == -2) {
-                    debug("Too many maps, recycling now: ", "maps", 'th-large');
-                    recycleBelow(true);
-                    debug("Retrying, Buying a Map, level: #" + maplvlpicked, "maps", 'th-large');
-                    buyMap();
-                }
-                selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id); //the map we just created
-                runMap();
-                
-            }
-            //if we already have a map picked, run it
-        } else {
+            else{
+                selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id; //the map we just created
+            } 
             selectMap(selectedMap);
             var themapobj = game.global.mapsOwnedArray[getMapIndex(selectedMap)];
             var levelText = " Level: " + themapobj.level;
@@ -882,7 +793,7 @@ function PrestigeRaid() {
 
     if(map == -1){        
         //lets create the map
-        var flag = createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
+        var flag = createAMap(currWorldZone, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
         if (!flag){
             debug("error in creating map process");
             updateAutoMapsStatus("", "Error in creating map"); //UI
@@ -919,7 +830,7 @@ function PrestigeRaid() {
     return false;
 }
 
-function createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect){
+function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect){
     if (!game.global.preMapsActive && !game.global.mapsActive) { 
         mapsClicked();
         if (!game.global.preMapsActive) 
@@ -931,6 +842,10 @@ function createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeS
         game.options.menu.repeatUntil.enabled = 2;
                 
     if (game.global.preMapsActive){ 
+        document.getElementById("mapLevelInput").value = baseLevel;
+        if (baseLevel != currWorldZone)
+            extraLevels = 0;
+        
         //sets the map sliders before buying the map for prestige
         document.getElementById("biomeAdvMapsSelect").value = type;
         document.getElementById('advExtraLevelSelect').value = extraLevels; //returns delta map for all prestige
@@ -949,7 +864,13 @@ function createAMap(type, extraLevels, specialMod, lootSlider, diffSlider, sizeS
         updateMapCost();        
         
         if ((updateMapCost(true) <= game.resources.fragments.owned)) {
-            buyMap();
+            var result = buyMap();
+            if (result == -2) {
+                    debug("Too many maps, recycling now: ", "maps", 'th-large');
+                    recycleBelow(true);
+                    debug("Retrying, Buying a Map, level: #" + (baseLevel+extraLevels), "maps", 'th-large');
+                    buyMap();
+                }
             return true;
         }
         else {
@@ -1257,87 +1178,6 @@ function plusPrestige(delta) {
         updateMapCost();
 }
 
-
-//New Code for Map Special Mods dropdown. (only the first dropdown for now)
-//
-//PLAN:
-//1. lmc when you can afford it, or cycle down the list sequentially until one can be afforded.
-//2. prestigious when you need prestiges,
-//NEW IDEA:
-//+lmc when you need more lvls in your eq
-//+perfect sliders when you can afford it
-//  another valid idea is burn out all your frags on perfect nearthe end i guess
-//Automaps: Map Special Modifier Selector Decider Magical Action Taker
-//TODO: a priority list? Which is more important, perfect slide, LMC or the +x value?
-
-MODULES["maps"].advSpecialMapMod_numZones = 3; //The default amount of +x zones you try to skip and work backwards from there. (if its too hard you will fail the map there is no dmg check only cost yet)
-var advExtraMapLevels = 0;
-
-function testMapSpecialModController() {
-    //var mapSpecialMods = ["Fast Attacks", "Large Cache", "Small Savory Cache", "Small Wooden Cache", "Small Metal Cache", "Prestigious", "Huge Cache", "Large Savory Cache", "Large Wooden Cache", "Large Metal Cache"];
-    var mapSpecialMods = [];
-    Object.keys(mapSpecialModifierConfig).forEach(function(key) {
-        var elem = mapSpecialModifierConfig[key];
-        if ((game.global.highestLevelCleared + 1) >= elem.unlocksAt)
-            mapSpecialMods.push(elem.name);
-    });
-    if (mapSpecialMods.length < 1)
-        return; //nothing to do.
-    //try to use the highest one we have.
-    var maxIndex = mapSpecialMods.length;
-    var $advSpecialMod = document.getElementById('advSpecialSelect');
-    if (!$advSpecialMod)
-        return;
-    if (game.global.highestLevelCleared >= 59) {
-        if (needPrestige)
-            maxIndex = 6;
-        //Set the special mod to some max.
-        $advSpecialMod.selectedIndex = maxIndex;
-        if ($advSpecialMod.selectedIndex == 0)
-            return;
-        //Check Hyperspeed 2 or Fast Attacks
-        if (!needPrestige && game.talents.hyperspeed2.purchased && (game.global.world > Math.floor((game.global.highestLevelCleared + 1) * 0.5)))
-            $advSpecialMod.selectedIndex = 1;
-        else if (needPrestige)
-            $advSpecialMod.selectedIndex = 0;
-        if (game.global.mapExtraBonus != "fa" && $advSpecialMod.selectedIndex == 1);
-        //map frag cost is stored in: document.getElementById("mapCostFragmentCost").innerHTML
-        var mc = updateMapCost(true);
-        var my = game.resources.fragments.owned;
-        var pct = mc / my * 100;
-        while ($advSpecialMod.selectedIndex > 0 && mc > my) {
-            $advSpecialMod.selectedIndex -= 1;
-        }
-        var mc = updateMapCost(true);
-        var my = game.resources.fragments.owned;
-        var pct = mc / my * 100;
-        if ($advSpecialMod.value != "0") //if its 0 it fails {
-            console.log("Set the map special modifier to: " + mapSpecialModifierConfig[$advSpecialMod.value].name + ". Cost: " + pct.toFixed(2) + "% of your fragments.");
-    }
-    //TODO:
-    var specialMod = getSpecialModifierSetting(); //either 0 or the abbreviation/property of mapSpecialModifierConfig
-    var perfectAllowed = (game.global.highestLevelCleared >= 109); //levels are 109 and 209 for Perfect sliders and Extra Levels
-    var perfectChecked = checkPerfectChecked(); //Perfect Checkboxes
-    var $advPerfect = document.getElementById('advPerfectCheckbox');
-    var extraMapLevels = getPageSetting('AdvMapSpecialModifier') ? getExtraMapLevels() : 0; //Extra Levels
-
-    //Set the extra level to max ( 3 )
-    var extraAllowed = (game.global.highestLevelCleared >= 209);
-    if (extraAllowed) {
-        var $advExtraLevel = document.getElementById('advExtraMapLevelselect');
-        if (!$advExtraLevel)
-            return;
-        var maplvlpicked = document.getElementById("mapLevelInput").value;
-        if (maplvlpicked == game.global.world) //then the +x zones dropdown is open.
-            $advExtraLevel.selectedIndex = MODULES["maps"].advSpecialMapMod_numZones;
-        else
-            $advExtraLevel.selectedIndex = 0;
-        while ($advExtraLevel.selectedIndex > 0 && (updateMapCost(true) > game.resources.fragments.owned)) {
-            $advExtraLevel.selectedIndex -= 1;
-        }
-    }
-}
-
 function mapTimeEstimater() {
     //Check our graph history and - Estimate = The zone should take around this long in milliseconds.
     var thiszone = lookUpZoneData(currWorldZone);
@@ -1349,7 +1189,7 @@ function mapTimeEstimater() {
     return mapTimeEstimate;
 }
 
-function behindOnPrestige(){
+function behindOnPrestige() {
     var havePrestigeUpTo = calcPrestige();
     var lastPrestigeZone;
     if (currWorldZone % 10 > 5)
