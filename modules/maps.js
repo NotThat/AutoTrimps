@@ -657,7 +657,7 @@ function autoMap() {
             if(!flag || !flag2){
                 debug("Can't afford map with parameters. level: " + lvl + " type: " + type);
                 debug("error in creating map process. Can't afford it? Running existing map instead.");
-                selectedMap = game.global.mapsOwnedArray[highestMap].id;
+                selectedMap = game.global.mapsOwnedArray[highestMap].id; //revert to highest existing map
             }
             else{
                 selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id; //the map we just created
@@ -907,7 +907,7 @@ function findMap(level){
 
 function decideMapParams(minLevel, maxLevel, special, cheap){
     var fragments = game.resources.fragments.owned;
-    baseLevel = currWorldZone;
+    baseLevel = Math.min(currWorldZone, maxLevel); //if maxLevel == currWorldZone that means extra levels is 0 and we are doing world zone map at the highest.
     var sizeLast=0, diffLast=0, lootLast=0, specialModLast="", perfectLast=false, extraLevelsLast=minLevel-baseLevel, typeLast="Random";
     if (special == "LMC")
         specialModLast = "LMC";
