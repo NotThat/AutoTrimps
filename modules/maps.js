@@ -978,7 +978,10 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
             perfectLast=false;
         else{
             if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, true, extraLevelsLast, typeLast) < fragments)
+            {
                 perfectLast = true;
+                ddebug("perf");
+            }
             else
                 perfectLast = false;
         }
@@ -1003,6 +1006,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         }
         if(specialMod != "LMC"){
             perfect = false;
+            ddebug("perf off");
             lootSlider = 0;
         }
         
