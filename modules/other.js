@@ -295,9 +295,6 @@ function plusMapToRun(zone) {
 function BWraiding() {
     BWRaidingStatus = true; //for UI purposes
     if (!prestraidon && game.global.world == getPageSetting('BWraidingz') && !bwraided && !failbwraid && getPageSetting('BWraid')) {
-        if (getPageSetting('AutoMaps') == 1 && game.global.world >= getPageSetting('BWraidingz') && !bwraided && !failbwraid) {
-            autoTrimpSettings["AutoMaps"].value = 0;
-        }
         if (!game.global.preMapsActive && !game.global.mapsActive && game.global.world >= getPageSetting('BWraidingz') && !bwraided && !failbwraid) { 
             mapsClicked();
  	    if (!game.global.switchToMaps) {
@@ -313,13 +310,11 @@ function BWraiding() {
 	debug("Beginning BW Raiding...");
         }
         else if (game.global.world >= getPageSetting('BWraidingz') && game.global.preMapsActive && !bwraided && !failbwraid) {
-                 if (getPageSetting('AutoMaps') == 0 && game.global.world >= getPageSetting('BWraidingz') && !bwraided) {
-                     autoTrimpSettings["AutoMaps"].value = 1;
-                     failbwraid = true;
-                     debug("Failed to BW raid. Looks like you don't have a BW to raid...");
-                     }
-                     return;
-        
+             if (!bwraided) {
+                 failbwraid = true;
+                 debug("Failed to BW raid. Looks like you don't have a BW to raid...");
+                 return;
+             }
         }
 	if (findLastBionic().level <= getPageSetting('BWraidingmax') && !bwraided && !failbwraid) {
         runMap();
@@ -334,15 +329,8 @@ function BWraiding() {
             bwraided = true;
             failbwraid = false;
             debug("...Successfully BW raided!");
-        if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive && game.global.world >= getPageSetting('BWraidingz') && bwraided && !failbwraid) {
-            autoTrimpSettings["AutoMaps"].value = 1;
-        }
     }
     }
-	else if (getPageSetting('AutoMaps') == 0 && game.global.preMapsActive && bwraided && !failbwraid) {
-             autoTrimpSettings["AutoMaps"].value = 1;
-	     debug("Turning AutoMaps back on");
-	}
 	     if (bwraided == true && game.global.world !== getPageSetting('BWraidingz')) {
              bwraided = false;
              }
