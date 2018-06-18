@@ -643,8 +643,9 @@ function autoMap() {
         if (selectedMap == "world") {
             mapsClicked(); //go back
         } else if (selectedMap == "create") { 
-            runMap(); //if this works that  means we were previous in the middle of a map... i think. stops from bugging if we left mid map
-            if (game.global.preMapsActive){ //if we're still in premaps screen that means we're not in the middle of a map
+           // runMap(); //if this works that  means we were previous in the middle of a map... i think. stops from bugging if we left mid map
+            //if (game.global.preMapsActive){ //if we're still in premaps screen that means we're not in the middle of a map
+            debug("selectedMap " + selectedMap);
                 var lvl = (needPrestige ? game.global.world : siphlvl);
                 var flag = decideMapParams(lvl, lvl, "LMC", !(shouldFarm || !enoughDamage || !enoughHealth)); //cheap or no cheap
                 var flag2 = createAMap(lvl, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
@@ -656,6 +657,7 @@ function autoMap() {
                 else{
                     selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id; //the map we just created
                 } 
+                debug("selectedMap " + selectedMap);
                 selectMap(selectedMap);
                 var themapobj = game.global.mapsOwnedArray[getMapIndex(selectedMap)];
                 var levelText = " Level: " + themapobj.level;
@@ -663,9 +665,9 @@ function autoMap() {
                 debug("Running selected " + selectedMap + voidorLevelText + " Name: " + themapobj.name, "maps", 'th-large');
                 runMap();
                 lastMapWeWereIn = getCurrentMapObject();
-            }
-            else
-                return;
+            //}
+            //else
+//                return;
         }
     }
 }
@@ -910,8 +912,6 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         specialModLast = "LMC";
     else specialModLast = "";
     
-    debug("cheap=" + cheap);
-    
     var mostExpensiveType;
     if (cheap)
         mostExpensiveType = "Random";
@@ -1008,7 +1008,6 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         }
         if(specialMod != "LMC"){
             perfect = false;
-            debug("perf off");
             lootSlider = 0;
         }
         
