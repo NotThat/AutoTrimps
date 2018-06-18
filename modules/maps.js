@@ -1206,8 +1206,11 @@ function behindOnPrestige() {
     var lastPrestigeZone;
     if (currWorldZone % 10 > 5)
         lastPrestigeZone = currWorldZone - (currWorldZone % 10) + 5;
+    else if (currWorldZone % 10 == 0)
+        lastPrestigeZone = currWorldZone-5;
     else
         lastPrestigeZone = currWorldZone;
+    
     if (havePrestigeUpTo < lastPrestigeZone)
         return true;
     else
