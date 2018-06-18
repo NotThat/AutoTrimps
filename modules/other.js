@@ -222,6 +222,8 @@ function BWraiding() {
             if (game.options.menu.repeatUntil.enabled != 2) {
                 game.options.menu.repeatUntil.enabled = 2; //repeat for all items
             }
+            if(getCurrentMapObject().location === "Bionic")
+                updateAutoMapsStatus("", "BW Raiding");
             return false;
         }
         
