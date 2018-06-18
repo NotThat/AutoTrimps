@@ -678,8 +678,8 @@ function updateAutoMapsStatus(get, msg) {
     var minSp = getPageSetting('MinutestoFarmBeforeSpire');
 
     if (getPageSetting('AutoMaps') == 0) status = 'Off';
-    else if (presRaiding) status = msg;
-    else if (BWRaidingStatus) status = 'BW Raiding';
+    else status = msg;
+    /*else if (BWRaidingStatus) status = 'BW Raiding';
     else if (game.global.challengeActive == "Mapology" && game.challenges.Mapology.credits < 1) status = 'Out of Map Credits';
     else if (preSpireFarming) {
         var secs = Math.floor(60 - (spireTime * 60) % 60).toFixed(0)
@@ -700,16 +700,15 @@ function updateAutoMapsStatus(get, msg) {
     else if (!enoughHealth && !enoughDamage) status = 'Want Health & Damage';
     else if (!enoughDamage) status = 'Want ' + HDratio.toFixed(2) + 'x &nbspmore damage';
     else if (!enoughHealth) status = 'Want more health';
-    else if (enoughHealth && enoughDamage) status = 'Ratio = ' + HDratio.toFixed(6) +' Advancing';
+    else if (enoughHealth && enoughDamage) status = 'Ratio = ' + HDratio.toFixed(6) +' Advancing';*/
     
-    if(lastMsg != msg){
+    /*if(lastMsg != msg){
         lastMsg = msg;
         if (status.length < 1)
-            status = msg;
+            status = msg;*/
 
-        if (skippedPrestige) // Show skipping prestiges
-            status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b>';
-    }
+    if (skippedPrestige) status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b>'; // Show skipping prestiges
+    //}
 
     //hider he/hr% status
     var getPercent = (game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned))) * 100;
