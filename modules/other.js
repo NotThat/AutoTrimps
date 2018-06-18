@@ -223,7 +223,7 @@ function BWraiding() {
                 game.options.menu.repeatUntil.enabled = 2; //repeat for all items
             }
             if(getCurrentMapObject().location === "Bionic")
-                updateAutoMapsStatus("", "BW Raiding");
+                //updateAutoMapsStatus("", "BW Raiding");
             return false;
         }
         
@@ -248,7 +248,7 @@ function BWraiding() {
         if (!game.global.repeatMap) {
             repeatClicked();
         }
-        updateAutoMapsStatus("", "BW Raiding");
+        //updateAutoMapsStatus("", "BW Raiding");
         return false;
 	
 	if (lastBionicMap.level > getPageSetting('BWraidingmax')) {
