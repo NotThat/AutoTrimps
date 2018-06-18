@@ -944,15 +944,6 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
     //at all times the 'Last' variables hold affordable configuration.
     
     while(true){
-        if(sizeLast+diffLast+lootLast < 27)
-            perfectLast=false;
-        else{
-            if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, true, extraLevelsLast, typeLast) < fragments)
-                perfectLast = true;
-            else
-                perfectLast = false;
-        }
-        
         for(lootEnum = 0; lootEnum <= 9; lootEnum++){
             if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootEnum,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
                 lootLast = lootEnum;
@@ -981,6 +972,15 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
             }
         }
         
+        if(sizeLast+diffLast+lootLast < 27)
+            perfectLast=false;
+        else{
+            if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, true, extraLevelsLast, typeLast) < fragments)
+                perfectLast = true;
+            else
+                perfectLast = false;
+        }
+        
         if(2 * calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments && special == "LMC")
             typeLast = mostExpensiveType;
         else
@@ -998,12 +998,10 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         else{//for quick +6 maps we never wanna spend the frags for perfect/garden
             perfect = false;
             type = "Random";
-            debug("perfect2=" + perfect);
         }
         if(specialMod != "LMC"){
             perfect = false;
             lootSlider = 0;
-            debug("perfect3=" + perfect);
         }
         
         if(extraLevelsLast+1 > maxLevel-baseLevel)
@@ -1023,8 +1021,6 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
             break;
     
     }
-    
-    debug("perfect5=" + perfect);
     
     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
     if(fragments >= cost){
