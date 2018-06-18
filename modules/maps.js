@@ -367,7 +367,8 @@ function autoMap() {
             obj[map] = game.global.mapsOwnedArray[map].level; //find map with correct level
             //Get matching map for our siphonology level
             //only accept LMC maps
-            if (game.global.mapsOwnedArray[map].level == siphlvl && game.global.mapsOwnedArray[map].bonus == "lmc")
+            //if (game.global.mapsOwnedArray[map].level == siphlvl && game.global.mapsOwnedArray[map].bonus == "lmc")
+            if (game.global.mapsOwnedArray[map].level == siphlvl)
                 siphonMap = map;
         }
     }
