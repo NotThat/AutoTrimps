@@ -170,7 +170,7 @@ function calcDmg(){
     updateAutoMapsStatus("", "HD Ratio"); //refresh the UI status (10x per second)
 }
 
-function fragIncome(){
+function fragCalc(){
     var fragIncome = 0;
     
     fragIncome = rewardResource("fragments", 1, currWorldZone-1, true);
