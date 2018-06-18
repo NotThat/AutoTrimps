@@ -980,7 +980,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
             if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, true, extraLevelsLast, typeLast) < fragments)
             {
                 perfectLast = true;
-                ddebug("perf");
+                debug("perf");
             }
             else
                 perfectLast = false;
