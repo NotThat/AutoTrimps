@@ -254,7 +254,7 @@ function autoMap() {
         }
     }
     
-    if (getPageSetting('PRaidingZoneStart') >0) {//Prestige Raiding. need to buy upgrades before running this, so adding 1000ms delay
+    if (getPageSetting('PRaidingZoneStart') >0) {
         if(!PrestigeRaid()) //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
             return; 
     }
@@ -977,10 +977,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
             perfectLast=false;
         else{
             if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, true, extraLevelsLast, typeLast) < fragments)
-            {
                 perfectLast = true;
-                debug("perf");
-            }
             else
                 perfectLast = false;
         }
@@ -1177,17 +1174,6 @@ function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, 
     baseCost += baseLevel;
     baseCost = Math.floor((((baseCost / 150) * (Math.pow(1.14, baseCost  - 1))) * baseLevel  * 2) * Math.pow((1.03 + (baseLevel / 50000)), baseLevel))* (type == "Random" ? 1 : 2);
     return baseCost;
-}
-
-function plusPrestige(delta) {
-        document.getElementById("biomeAdvMapsSelect").value = "Random";
-        document.getElementById('advExtraLevelSelect').value = delta; //returns delta map for all prestige
-        document.getElementById('advSpecialSelect').value = "p";
-        document.getElementById("lootAdvMapsRange").value = 0;
-        document.getElementById("difficultyAdvMapsRange").value = 9;
-        document.getElementById("sizeAdvMapsRange").value = 9;
-        document.getElementById('advPerfectCheckbox').checked = false;
-        updateMapCost();
 }
 
 function mapTimeEstimater() {
