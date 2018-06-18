@@ -644,15 +644,8 @@ function autoMap() {
             mapsClicked(); //go back
         } else if (selectedMap == "create") { 
             
-            if((customVars.preferGardens && game.global.decayDone) && (shouldFarm || !enoughDamage || !enoughHealth))
-                type = "Plentiful";
-            else
-                type = "Random";  
-            if(game.global.challengeActive == 'Metal')
-                type = "Mountain";
-            
             var lvl = (needPrestige ? game.global.world : siphlvl);
-            var flag = decideMapParams(lvl, lvl, type, false)
+            var flag = decideMapParams(lvl, lvl, "LMC", !(shouldFarm || !enoughDamage || !enoughHealth)); //cheap or no cheap
             var flag2 = createAMap(lvl, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
             if(!flag || !flag2){
                 debug("Can't afford map with parameters. level: " + lvl + " type: " + type);
@@ -913,6 +906,17 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         specialModLast = "LMC";
     else specialModLast = "";
     
+    var mostExpensiveType;
+    if (cheap)
+        mostExpensiveType = "Random";
+    else{
+        if(customVars.preferGardens && game.global.decayDone)
+            mostExpensiveType = "Plentiful";
+        else
+            mostExpensiveType = "Mountain";
+    }
+    
+    
     if(maxLevel < baseLevel) maxLevel = baseLevel;
     if(minLevel > maxLevel) minLevel = maxLevel;    
     
@@ -977,7 +981,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         }
         
         if(2 * calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments && special == "LMC")
-            typeLast = "Plentiful";
+            typeLast = mostExpensiveType;
         else
             typeLast = "Random";
         
