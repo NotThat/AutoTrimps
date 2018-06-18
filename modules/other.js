@@ -140,10 +140,12 @@ function exitSpireCell() {
         endSpire();
 }
 
-function findLastBionic() {
+function findLastBionic(maxLevel) {
     var highestBionicMap = -1;
-    for (var i = game.global.mapsOwnedArray.length-1; i>=0; i--) {
-        if (game.global.mapsOwnedArray[i].location === "Bionic") {
+    //for (var i = game.global.mapsOwnedArray.length-1; i>=0; i--) {
+    for (var i = 0; i<game.global.mapsOwnedArray.length; i++) {
+        if (game.global.mapsOwnedArray[i].location === "Bionic" && game.global.mapsOwnedArray[i].level <= maxLevel){
+            if(game.global.mapsOwnedArray[i].level > highestBionicMap.level)
             highestBionicMap = game.global.mapsOwnedArray[i];
         }
     }
@@ -230,24 +232,23 @@ function BWraiding() {
             }
         }
         
-        var lastBionicMap = findLastBionic();
+        var lastBionicMap = findLastBionic(getPageSetting('BWraidingmax'));
         if(!lastBionicMap){
             debug("could not find a bionic map to run.");
             return true;
         }
         
-	if (lastBionicMap.level <= getPageSetting('BWraidingmax')) {
-            selectMap(lastBionicMap.id);
-            runMap();
-            if (game.options.menu.repeatUntil.enabled != 2) {
-                game.options.menu.repeatUntil.enabled = 2; //repeat for all items
-            }
-            if (!game.global.repeatMap) {
-                repeatClicked();
-            }
-            updateAutoMapsStatus("", "BW Raiding");
-            return false;
-	}
+        selectMap(lastBionicMap.id);
+        runMap();
+        if (game.options.menu.repeatUntil.enabled != 2) {
+            game.options.menu.repeatUntil.enabled = 2; //repeat for all items
+        }
+        if (!game.global.repeatMap) {
+            repeatClicked();
+        }
+        updateAutoMapsStatus("", "BW Raiding");
+        return false;
+	
 	if (lastBionicMap.level > getPageSetting('BWraidingmax')) {
             debug("...Successfully BW raided!");
             return true;
