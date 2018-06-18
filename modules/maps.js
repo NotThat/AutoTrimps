@@ -260,7 +260,9 @@ function autoMap() {
     }
     presRaiding = false;
     //if (getPageSetting('Praidingzone') >0) Praiding(); //Prestige Raiding
-    if (getPageSetting('BWraid')==true){setTimeout(BWraiding(), 3000);} //BW Raiding
+    if (getPageSetting('BWraid')==true)
+        if(!BWraiding())
+            return; //BW Raiding
 
 
     needPrestige = behindOnPrestige(); //checks if we have uncollected prestiges
