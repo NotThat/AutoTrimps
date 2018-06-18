@@ -173,9 +173,11 @@ function calcDmg(){
 function fragCalc(){
     var fragIncome = 0;
     
-    fragIncome = rewardResource("fragments", 1, currWorldZone-1, true);
+    //for true, need to be currently in a map
+    //fragIncome = rewardResource("fragments", 1, currWorldZone-1, true);
+    fragIncome = 5;
     
-    debug("fragIncome = " + fragIncome);
+    //debug("fragIncome = " + fragIncome);
     return fragIncome;
 }
 
