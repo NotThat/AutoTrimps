@@ -906,6 +906,8 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         specialModLast = "LMC";
     else specialModLast = "";
     
+    debug("cheap=" + cheap);
+    
     var mostExpensiveType;
     if (cheap)
         mostExpensiveType = "Random";
@@ -915,7 +917,6 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         else
             mostExpensiveType = "Mountain";
     }
-    
     
     if(maxLevel < baseLevel) maxLevel = baseLevel;
     if(minLevel > maxLevel) minLevel = maxLevel;    
@@ -997,10 +998,12 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         else{//for quick +6 maps we never wanna spend the frags for perfect/garden
             perfect = false;
             type = "Random";
+            debug("perfect2=" + perfect);
         }
         if(specialMod != "LMC"){
             perfect = false;
             lootSlider = 0;
+            debug("perfect3=" + perfect);
         }
         
         if(extraLevelsLast+1 > maxLevel-baseLevel)
@@ -1020,6 +1023,8 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
             break;
     
     }
+    
+    debug("perfect5=" + perfect);
     
     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
     if(fragments >= cost){
