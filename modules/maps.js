@@ -745,6 +745,9 @@ function autoMap() {
                     debug("Retrying, Buying a Map, level: #" + maplvlpicked, "maps", 'th-large');
                     buyMap();
                 }
+                selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id); //the map we just created
+                runMap();
+                
             }
             //if we already have a map picked, run it
         } else {
@@ -976,7 +979,6 @@ function findMap(level){
         }
     }    
     if (bestSoFar>-1){
-        //debug("findmap: found map " + theMap + " level " + bestSoFar);
         return theMap;
     }
     return -1;
