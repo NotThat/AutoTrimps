@@ -148,7 +148,7 @@ function findLastBionic(maxLevel) {
             if(highestBionicMap == -1 || game.global.mapsOwnedArray[i].level > highestBionicMap.level)
             highestBionicMap = game.global.mapsOwnedArray[i];
         }
-    }
+    } 
     if (highestBionicMap == -1)
         return false;
     return highestBionicMap;
