@@ -643,6 +643,8 @@ function autoMap() {
         if (selectedMap == "world") {
             mapsClicked(); //go back
         } else if (selectedMap == "create") { 
+            runMap(); //if this works that  means we were previous in the middle of a map... i think. stops from bugging if we left mid map
+            
             
             var lvl = (needPrestige ? game.global.world : siphlvl);
             var flag = decideMapParams(lvl, lvl, "LMC", !(shouldFarm || !enoughDamage || !enoughHealth)); //cheap or no cheap
