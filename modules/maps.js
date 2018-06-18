@@ -1107,8 +1107,7 @@ function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
                 maxDesiredLevel = currWorldZone - lastDigitZone + 5;
                 minDesiredLevel = currWorldZone + 1; //+1 level is still fine, just dont get xx6
             }
-            else{ //xx6-xx9
-                scaleUp = true; //special case, we want to run xx1 then xx2 then xx3 for faster clear
+            else{ //xx6-xx9 special case, we want to run xx1 then xx2 then xx3 for faster clear
                 maxDesiredLevel = currWorldZone - lastDigitZone + 15;
                 if(maxDesiredLevel > currWorldZone + 7)
                     maxDesiredLevel = currWorldZone+7;
@@ -1155,6 +1154,10 @@ function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
     
     if (maxDesiredLevel > currWorldZone + PRaidMax)
         maxDesiredLevel = currWorldZone + PRaidMax; //dont go above user defined max
+    if(maxDesiredLevel % 10 == 0) //bring 540 down to 535 etc
+        maxDesiredLevel = maxDesiredLevel - 5;
+    else if (maxDesiredLevel % 10 > 5) //bring 536 down to 535 etc
+        maxDesiredLevel = maxDesiredLevel - maxDesiredLevel % 10 + 5;
     if(lastDigitZone <= 5 && minDesiredLevel < currWorldZone) //always want to keep prestige at least upto current zone
         minDesiredLevel = currWorldZone;
     if(minDesiredLevel < havePrestigeUpTo + 1)
