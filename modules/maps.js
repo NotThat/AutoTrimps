@@ -1006,7 +1006,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
         }
         if(specialMod != "LMC"){
             perfect = false;
-            ddebug("perf off");
+            debug("perf off");
             lootSlider = 0;
         }
         
