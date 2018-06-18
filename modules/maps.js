@@ -644,26 +644,28 @@ function autoMap() {
             mapsClicked(); //go back
         } else if (selectedMap == "create") { 
             runMap(); //if this works that  means we were previous in the middle of a map... i think. stops from bugging if we left mid map
-            
-            
-            var lvl = (needPrestige ? game.global.world : siphlvl);
-            var flag = decideMapParams(lvl, lvl, "LMC", !(shouldFarm || !enoughDamage || !enoughHealth)); //cheap or no cheap
-            var flag2 = createAMap(lvl, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
-            if(!flag || !flag2){
-                debug("Can't afford map with parameters. level: " + lvl + " type: " + type);
-                debug("error in creating map process. Can't afford it? Running existing map instead.");
-                selectedMap = game.global.mapsOwnedArray[highestMap].id; //revert to highest existing map
+            if (game.global.preMapsActive){ //if we're still in premaps screen that means we're not in the middle of a map
+                var lvl = (needPrestige ? game.global.world : siphlvl);
+                var flag = decideMapParams(lvl, lvl, "LMC", !(shouldFarm || !enoughDamage || !enoughHealth)); //cheap or no cheap
+                var flag2 = createAMap(lvl, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
+                if(!flag || !flag2){
+                    debug("Can't afford map with parameters. level: " + lvl + " type: " + type);
+                    debug("error in creating map process. Can't afford it? Running existing map instead.");
+                    selectedMap = game.global.mapsOwnedArray[highestMap].id; //revert to highest existing map
+                }
+                else{
+                    selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id; //the map we just created
+                } 
+                selectMap(selectedMap);
+                var themapobj = game.global.mapsOwnedArray[getMapIndex(selectedMap)];
+                var levelText = " Level: " + themapobj.level;
+                var voidorLevelText = themapobj.location == "Void" ? " Void: " : levelText;
+                debug("Running selected " + selectedMap + voidorLevelText + " Name: " + themapobj.name, "maps", 'th-large');
+                runMap();
+                lastMapWeWereIn = getCurrentMapObject();
             }
-            else{
-                selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id; //the map we just created
-            } 
-            selectMap(selectedMap);
-            var themapobj = game.global.mapsOwnedArray[getMapIndex(selectedMap)];
-            var levelText = " Level: " + themapobj.level;
-            var voidorLevelText = themapobj.location == "Void" ? " Void: " : levelText;
-            debug("Running selected " + selectedMap + voidorLevelText + " Name: " + themapobj.name, "maps", 'th-large');
-            runMap();
-            lastMapWeWereIn = getCurrentMapObject();
+            else
+                return;
         }
     }
 }
