@@ -23,7 +23,7 @@ MODULES["maps"].maxMapBonusAfterZ = MODULES["maps"].maxMapBonus; //Max Map Bonus
 //- init as default value (10). user can set if they want.
 
 //Initialize Global Vars (dont mess with these ones, nothing good can come from it).
-var customVars = MODULES["maps"];
+var customVars = MODULES["maps"]; 
 var doVoids = false;
 var presRaiding = false;
 var BWRaidingStatus = false;
