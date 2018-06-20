@@ -9,7 +9,7 @@
 // @grant        none
 // ==/UserScript==
 //var ATversion = '2.1.6.9b-genbtc-4-2-2018 + KFrowde + Zeker0';
-var ATversion = '0.1';
+var ATversion = '0.11';
 
 ////////////////////////////////////////////////////////////////////////////////
 //Main Loader Initialize Function (loads first, load everything else)///////////
