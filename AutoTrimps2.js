@@ -9,7 +9,7 @@
 // @grant        none
 // ==/UserScript==
 //var ATversion = '2.1.6.9b-genbtc-4-2-2018 + KFrowde + Zeker0';
-var ATversion = '2.1.7.1'; //when this changes the script will notify for saved settings change
+var ATversion = '2.1.7.1'; //when this increases it forces users setting update to newer version format
 
 ////////////////////////////////////////////////////////////////////////////////
 //Main Loader Initialize Function (loads first, load everything else)///////////
@@ -21,9 +21,6 @@ var atscript = document.getElementById('AutoTrimps-script')
   , modulepath = 'modules/'
   ;
     
-  //var atscript = null;
-  //var basepath = 'file:///D:/Mirc/NetBeans Projects/Trimps/public_html/Trimps.github.io/AutoTrimps/'
-  //var modulepath = 'modules/'
 //This should redirect the script to wherever its being mirrored from.
 if (atscript !== null) {
     basepath = atscript.src.replace(/AutoTrimps2\.js$/, '');
