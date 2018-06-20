@@ -3,10 +3,12 @@ MODULES["fight"] = {};
 MODULES["fight"].breedTimerCutoff1 = 2;
 MODULES["fight"].breedTimerCutoff2 = 0.5;
 MODULES["fight"].enableDebug = true;    //controls whether betterAutoFight2 is Spammy or not.
+var amalgamatorsCounter = 0;
 
 //selector function, called from main.
 var BAFsetting, oldBAFsetting;
 function ATselectAutoFight() {
+    //debug(" amalgamatorsCounter " + amalgamatorsCounter + " game.jobs.Amalgamator.owned" + game.jobs.Amalgamator.owned);
     BAFsetting = getPageSetting('BetterAutoFight');
     if (BAFsetting==1) betterAutoFight();        //"Better Auto Fight"  (autofight.js)
     else if (BAFsetting==2) betterAutoFight2();     //"Better Auto Fight2"  (")
@@ -15,6 +17,11 @@ function ATselectAutoFight() {
     else if (BAFsetting==0 && game.global.world == 1 && game.global.autoBattle && game.global.pauseFight) pauseFight();     //turn on autofight on lvl 1 if its off.
     else if (BAFsetting==0 && !game.global.autoBattle && game.global.soldierHealth == 0) betterAutoFight();   //use BAF as a backup for pre-Battle situations
     oldBAFsetting = BAFsetting;     //enables built-in autofight once when disabled
+    if(amalgamatorsCounter < game.jobs.Amalgamator.owned){ //we just got a new amalgamator. get back to fighting
+        amalgamatorsCounter = game.jobs.Amalgamator.owned;
+        debug("New Amalgamator. Sending army to fight.");
+        fightManual();
+    }
 }
 
 //old: Handles manual fighting automatically, in a different way.

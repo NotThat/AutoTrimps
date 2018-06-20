@@ -1,5 +1,7 @@
 //MODULES["upgrades"] = {};
 var upgradeList = ['Miners', 'Scientists', 'Coordination', 'Speedminer', 'Speedlumber', 'Speedfarming', 'Speedscience', 'Speedexplorer', 'Megaminer', 'Megalumber', 'Megafarming', 'Megascience', 'Efficiency', 'TrainTacular', 'Trainers', 'Explorers', 'Blockmaster', 'Battle', 'Bloodlust', 'Bounty', 'Egg', 'Anger', 'Formations', 'Dominance', 'Barrier', 'UberHut', 'UberHouse', 'UberMansion', 'UberHotel', 'UberResort', 'Trapstorm', 'Gigastation', 'Shieldblock', 'Potency', 'Magmamancers'];
+var haltAmalgamatorsOn = 0;
+var firstTime = true;
 
 //Buys all available non-equip upgrades listed in var upgradeList
 function buyUpgrades() {
@@ -18,6 +20,16 @@ function buyUpgrades() {
                 debug("Skipping coordination to preserve Amalgamator!");
                 buyCoords = false;
             }
+        }
+        var dontBuyStartZ = getPageSetting('NoCoordBuyStartZ');
+        
+        if (dontBuyStartZ > 0 && dontBuyStartZ <= game.global.world) { //if dontBuyStartZ is set and we've passed it
+            if(firstTime){
+                haltAmalgamatorsOn = game.jobs.Amalgamator.owned; //until we get +1 amalgamator, dont buy anymore coordinations
+                firstTime = false;
+            }
+            if (haltAmalgamatorsOn == game.jobs.Amalgamator.owned)
+                buyCoords = false;
         }
     }
     

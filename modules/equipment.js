@@ -8,7 +8,7 @@ MODULES["equipment"].alwaysLvl2 = true; //Always buys the 2nd level of equipment
 MODULES["equipment"].waitTill60 = true; // 'Skip Gear Level 58&59', 'Dont Buy Gear during level 58 and 59, wait till level 60, when cost drops down to 10%
 MODULES["equipment"].equipHealthDebugMessage = false;    //this repeats a message when you don't have enough health. set to false to stop the spam.
 
-var equipmentList = {
+var equipmentList = { 
     'Dagger': {
         Upgrade: 'Dagadder',
         Stat: 'attack',
@@ -290,10 +290,9 @@ function autoLevelEquipment() {
     
     //chilled
     if (getEmpowerment() == "Ice"){
-        //debug("game.empowerments.Ice.currentDebuffPower " + game.empowerments.Ice.currentDebuffPower);
-        //debug("game.empowerments.Ice.getCombatModifier() " + game.empowerments.Ice.getCombatModifier());
         enemyDamage *= game.empowerments.Ice.getCombatModifier();
     }
+    enemyDamage *= getCorruptScale("attack");
     var pierceMod = (game.global.brokenPlanet && !game.global.mapsActive) ? getPierceAmt() : 0;
     //change name to make sure these are local to the function
     var enoughHealthE,enoughDamageE;
@@ -311,9 +310,9 @@ function autoLevelEquipment() {
         (!(valid_min && valid_max) || (baseHealth/2 > numHitsScry * (enemyDamage - baseBlock/2 > 0 ? enemyDamage - baseBlock/2 : enemyDamage * pierceMod)));
     //debug("equipment module: enemy damage = " + enemyDamage.toPrecision(3) + " current health: " + game.global.soldierHealth.toPrecision(3) + " game.global.soldierHealth/max " + (game.global.soldierHealth/game.global.soldierHealthMax).toPrecision(3));
     var first = true;
-    var safetyNet = 0.65;
+    var safetyNet = 2.65;
     if(!game.global.preMapsActive && (getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed"))
-        safetyNet = 2.65;
+        safetyNet = 3.65;
     
     if(game.global.soldierHealth < safetyNet*enemyDamage && game.global.soldierHealth > 1000){ //lets try buying more health if current health < 35% enemy attack, but not if 0 because we're dead
         if (first){
@@ -322,13 +321,13 @@ function autoLevelEquipment() {
         }
         enoughHealthE = false;
         //buyArmor()
-        /*numTab(3);
-        buyEquipment('Boots');
-        buyEquipment('Helmet');
-        buyEquipment('Pants');
-        buyEquipment('Shoulderguards');
-        buyEquipment('Breastplate')
-        buyEquipment('Gambeson')*/
+        //numTab(3);
+        buyEquipment('Boots', false, true);
+        buyEquipment('Helmet', false, true);
+        buyEquipment('Pants', false, true);
+        buyEquipment('Shoulderguards', false, true);
+        buyEquipment('Breastplate', false, true);
+        buyEquipment('Gambeson', false, true);
     }
     else if (game.global.soldierHealth > (safetyNet+1)*enemyDamage && game.global.soldierHealth > 1000 && !first){
         debug("enough health");
