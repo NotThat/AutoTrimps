@@ -140,17 +140,31 @@ function exitSpireCell() {
         endSpire();
 }
 
-function findLastBionic(maxLevel) {
-    var highestBionicMap = -1;
-    //for (var i = game.global.mapsOwnedArray.length-1; i>=0; i--) {
-    for (var i = 0; i<game.global.mapsOwnedArray.length; i++) {
-        if (game.global.mapsOwnedArray[i].location === "Bionic" && game.global.mapsOwnedArray[i].level <= maxLevel){
-            if(highestBionicMap == -1 || game.global.mapsOwnedArray[i].level > highestBionicMap.level)
-            highestBionicMap = game.global.mapsOwnedArray[i];
+function findNextBionic(maxLevel) {
+    var highestBionicMap = null;
+
+    for (var map of game.global.mapsOwnedArray){
+        if (map.level > maxLevel || map.location !== "Bionic")
+            continue;
+        
+        if(highestBionicMap == null){
+            highestBionicMap = map;
+            continue;
         }
-    } 
-    if (highestBionicMap == -1)
+        
+        if (behindOnPrestige(highestBionicMap.level)){ //if we need prestiges from our map, only take a lower bionic if we need prestiges from it as well
+            if(map.level < highestBionicMap.level && behindOnPrestige(map.level))
+                highestBionicMap = map;
+        }
+        else if(map.level > highestBionicMap.level) {//we dont need anything from our bionic, so look for a higher one
+                highestBionicMap = map;
+        }
+    }
+        
+    if (highestBionicMap == null)
         return false;
+    if (highestBionicMap.level == maxLevel && !behindOnPrestige(highestBionicMap.level)) //if we already at max level and dont need gear, stop
+    	return false;
     return highestBionicMap;
 }
 
@@ -213,52 +227,52 @@ function calcPrestige() {
 
 //returns true when done
 function BWraiding() {
-    if (game.global.world == getPageSetting('BWraidingz') && getPageSetting('BWraid')) {
-        
-        if(game.global.mapsActive){ //already in a map
-            if (!game.global.repeatMap) {
-                repeatClicked();
-            }
-            if (game.options.menu.repeatUntil.enabled != 2) {
-                game.options.menu.repeatUntil.enabled = 2; //repeat for all items
-            }
-            if(getCurrentMapObject().location === "Bionic")
-                updateAutoMapsStatus("", "BW Raiding");
-            else
-                updateAutoMapsStatus("", "Finishing map");
-            return false;
-        }
-        
-        if (!game.global.preMapsActive) { 
+    if (!(game.global.world == getPageSetting('BWraidingz') && getPageSetting('BWraid')))
+        return true;
+    
+    //find the lowest bionic map that still has items for us
+    var nextBionicMap = findNextBionic(getPageSetting('BWraidingmax'));
+    if(!nextBionicMap){
+        //debug("could not find a bionic map to run. are you zone 125 yet?");
+        return true;
+    }
+    
+    if (!game.global.preMapsActive && !game.global.mapsActive) {  //if we are in world, get to map screen
+        mapsClicked();
+        if (!game.global.switchToMaps) {
             mapsClicked();
- 	    if (!game.global.switchToMaps) {
-                mapsClicked();
-            }
-        }
-        
-        var lastBionicMap = findLastBionic(getPageSetting('BWraidingmax'));
-        if(!lastBionicMap){
-            debug("could not find a bionic map to run.");
-            return true;
-        }
-        
-        selectMap(lastBionicMap.id);
-        runMap();
-        if (game.options.menu.repeatUntil.enabled != 2) {
-            game.options.menu.repeatUntil.enabled = 2; //repeat for all items
-        }
-        if (!game.global.repeatMap) {
-            repeatClicked();
-        }
-        updateAutoMapsStatus("", "BW Raiding");
-        return false;
-	
-	if (lastBionicMap.level > getPageSetting('BWraidingmax')) {
-            debug("...Successfully BW raided!");
-            return true;
         }
     }
-    return true;
+    
+    if(game.global.mapsActive){ //already in a map
+        if(nextBionicMap == getCurrentMapObject()){ //doing our BW map
+            if (!game.global.repeatMap) {
+                repeatClicked();
+            } 
+            while (game.options.menu.repeatUntil.enabled != 2) {
+                toggleSetting('repeatUntil'); //repeat for all items
+            }
+            updateAutoMapsStatus("", "BW Raiding");
+        }
+        else { //we're in another map
+            if (game.global.repeatMap) {
+                repeatClicked();
+            } 
+            updateAutoMapsStatus("", "Finishing map");
+        }
+        return false;
+    }
+
+    selectMap(nextBionicMap.id);
+    runMap();
+    if (!game.global.repeatMap) {
+        repeatClicked();
+    } 
+    while (game.options.menu.repeatUntil.enabled != 2) {
+        toggleSetting('repeatUntil'); //repeat for all items
+    }
+    updateAutoMapsStatus("", "BW Raiding");
+    return false;
  }
 
 //AutoAllocate Looting II

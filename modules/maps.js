@@ -57,12 +57,11 @@ var cost;
 var maxDesiredLevel;
 var minDesiredLevel;
 var currWorldZone = 1;
-var scaleUp; //if true, when minDesiredLevel = xx1 and we want to buy higher we will first run xx1 then xx2 until our desired level.
 //Activate Robo Trimp (will activate on the first zone after liquification)
 var lastMsg; //stores last message, stops spam to console
 
 function calcDmg(){
-        //START CALCULATING DAMAGES:
+    //START CALCULATING DAMAGES:
     var AutoStance = getPageSetting('AutoStance');
     
     //calculate crits (baseDamage was calced in function autoStance)    this is a weighted average of nonCrit + Crit. (somewhere in the middle)
@@ -184,6 +183,8 @@ function fragCalc(){
 //AutoMap - function originally created by Belaith (in 1971)
 //anything/everything to do with maps.
 function autoMap() {
+    
+    updateAutoMapsStatus("", "Advancing"); //default msg. any other trigger will override this later
     //if((!game.global.mapsActive && !game.global.preMapsActive) || game.global.spireActive)
         currWorldZone = game.global.world;
     
@@ -197,7 +198,7 @@ function autoMap() {
     var prestige = autoTrimpSettings.Prestige.selected;
     if (prestige != "Off" && game.options.menu.mapLoot.enabled != 1) toggleSetting('mapLoot');
     //Control in-map right-side-buttons for people who can't control themselves. If you wish to use these buttons manually, turn off autoMaps temporarily.
-    if (game.options.menu.repeatUntil.enabled == 2) toggleSetting('repeatUntil');
+    //if (game.options.menu.repeatUntil.enabled == 2) toggleSetting('repeatUntil');
     if (game.options.menu.exitTo.enabled != 0) toggleSetting('exitTo');
     if (game.options.menu.repeatVoids.enabled != 0) toggleSetting('repeatVoids');
     //exit and do nothing if we are prior to zone 6 (maps haven't been unlocked):
@@ -216,7 +217,6 @@ function autoMap() {
     }
     
     var challSQ = game.global.runningChallengeSquared;
-    var extraMapLevels = 0;
     //FIND VOID MAPS LEVEL:
     var voidMapLevelSetting = getPageSetting('VoidMaps');
     //Add your daily zone mod onto the void maps level
@@ -263,8 +263,7 @@ function autoMap() {
     if (getPageSetting('BWraid')==true)
         if(!BWraiding())
             return; //BW Raiding
-
-
+    
     needPrestige = behindOnPrestige(); //checks if we have uncollected prestiges
 
     //BEGIN AUTOMAPS DECISIONS:
@@ -343,7 +342,6 @@ function autoMap() {
     //Lower Farming Zone = Lowers the zone used during Farming mode. Starts 10 zones below current and Finds the minimum map level you can successfully one-shot
     var siphlvl = shouldFarmLowerZone ? game.global.world - 10 : game.global.world - game.portal.Siphonology.level;
     var maxlvl = game.talents.mapLoot.purchased ? game.global.world - 1 : game.global.world;
-    maxlvl += extraMapLevels; // extraMapLevels : advanced slider
     if (getPageSetting('DynamicSiphonology') || shouldFarmLowerZone) {
         for (siphlvl; siphlvl < maxlvl; siphlvl++) {
             //experimental
@@ -542,14 +540,16 @@ function autoMap() {
         if (selectedMap == "world") {
             //if preSpireFarming x minutes is true, switch over from wood maps to metal maps.
             if (preSpireFarming) {
+                updateAutoMapsStatus("", "Spire Farming");
                 var spiremaplvl = (game.talents.mapLoot.purchased && MODULES["maps"].SpireFarm199Maps) ? game.global.world - 1 : game.global.world;
                 if (game.global.mapsOwnedArray[highestMap].level >= spiremaplvl && game.global.mapsOwnedArray[highestMap].location == ((customVars.preferGardens && game.global.decayDone) ? 'Plentiful' : 'Mountain'))
                     selectedMap = game.global.mapsOwnedArray[highestMap].id;
                 else
                     selectedMap = "create";
                 //if needPrestige, TRY to find current level map as the highest level map we own.
-            } else if (needPrestige || (extraMapLevels > 0)) {
-                if ((game.global.world + extraMapLevels) == game.global.mapsOwnedArray[highestMap].level)
+            } else if (needPrestige) {
+                updateAutoMapsStatus("", "Prestige");
+                if (game.global.world == game.global.mapsOwnedArray[highestMap].level)
                     selectedMap = game.global.mapsOwnedArray[highestMap].id;
                 else
                     selectedMap = "create";
@@ -585,7 +585,7 @@ function autoMap() {
                 repeatClicked();
             }
             //if we aren't here for dmg/hp, and we see the prestige we are after on the last cell of this map, and it's the last one available, turn off repeat to avoid an extra map cycle
-            if (!shouldDoMaps && (game.global.mapGridArray[game.global.mapGridArray.length - 1].special == targetPrestige && game.mapUnlocks[targetPrestige].last >= (game.global.world + extraMapLevels - 9))) {
+            if (!shouldDoMaps && (game.global.mapGridArray[game.global.mapGridArray.length - 1].special == targetPrestige && game.mapUnlocks[targetPrestige].last >= (game.global.world - 9))) {
                 repeatClicked();
             }
             //turn off repeat maps if we doing Watch maps.
@@ -746,26 +746,28 @@ function PrestigeRaid() {
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
     findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo); //decide which level we want to raid up to
 
-    if(havePrestigeUpTo >= maxDesiredLevel){
-        //debug("have all the prestige levels that we want. exiting.", "general", "");
+    if(havePrestigeUpTo >= maxDesiredLevel) //have all the prestige levels that we want.
         return true; 
-    }
     
     if (game.global.mapsActive){ //if we are in a map
-        if (game.global.repeatMap) {//make sure repeat button is turned off
-            repeatClicked();
+        
+        //do we need prestige from this map?
+        var needPrestige = behindOnPrestige(getCurrentMapObject().level);
+        if(needPrestige){
+            updateAutoMapsStatus("", "Prestige Raid");
+        }
+        else{
+            if (game.global.repeatMap) {//make sure repeat button is turned off
+                repeatClicked();
+            }
+            updateAutoMapsStatus("", "Finishing Map");
         }
         
-        if (getCurrentMapObject().level >=  minDesiredLevel){ //if its higher level, we are getting prestige
-            //updateAutoMapsStatus("", "Prestige Raiding"); //UI
-        }
-        //else
-            //updateAutoMapsStatus("", "Finishing map."); //UI
         return false;
     }
     
     //Let's see if we already own a map of suitable level
-    var map = findMap(minDesiredLevel);
+    var map = findMap(minDesiredLevel); //ignores bionics and uniques
     if(map == -1){ //do not own a high enough map, try to make one if we can afford it
         //find best match map we can afford
         if(maxDesiredLevel-havePrestigeUpTo>=8){
@@ -779,16 +781,18 @@ function PrestigeRaid() {
             //debug("Could not create a suitable map. min " + minDesiredLevel + " max " + maxDesiredLevel + " currWorldZone " + currWorldZone + " extraLevels " + extraLevels);
             //debug("Cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost.toPrecision(3) + " fragments.");
             //debug("Exiting.");
-            //updateAutoMapsStatus("", "Can not afford map"); //UI
+            updateAutoMapsStatus("", "Need Fragments. Advancing."); //UI
             return true;
         }
+        debug("Level = "+(baseLevel+extraLevels)+"|"+sizeSlider+"|"+diffSlider+"|"+lootSlider+"|"+specialMod+"|perfect="+perfect+ "|"+type+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.");
+   
     }
-    
-    if (!game.global.mapsActive && !game.global.preMapsActive) { //in world, get to map screen
+
+    if (!game.global.preMapsActive) { //in world, get to map screen
         mapsClicked();
     }
 
-    if(map == -1){        
+    if(map == -1){
         //lets create the map
         var flag = createAMap(currWorldZone, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
         if (!flag){
@@ -806,22 +810,13 @@ function PrestigeRaid() {
     
     runMap();
     
-    //updateAutoMapsStatus("", "Running map for prestige"); //UI
+    updateAutoMapsStatus("", "Prestige Raid");
 
-    if (game.global.repeatMap) {//make sure repeat button is turned off
+    if (!game.global.repeatMap) {
         repeatClicked();
-    }
-    
-    if(scaleUp)
-    {
-        if(minDesiredLevel != maxDesiredLevel){
-            //updateAutoMapsStatus("", "Progressing up"); //UI
-            return false; //we're not done yet
-        }
-        else{
-            //updateAutoMapsStatus("", "Prestige end"); //UI
-            return false;
-        }
+    } 
+    while (game.options.menu.repeatUntil.enabled != 2) {
+        toggleSetting('repeatUntil'); //repeat for all items
     }
     
     return false;
@@ -835,8 +830,9 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
 	debug("Entered map screeen");
     }
     
-    if (game.options.menu.repeatUntil.enabled != 2)
-        game.options.menu.repeatUntil.enabled = 2;
+    while (game.options.menu.repeatUntil.enabled != 2) {
+        toggleSetting('repeatUntil'); //repeat for all items
+    }
                 
     if (game.global.preMapsActive){ 
         document.getElementById("mapLevelInput").value = baseLevel;
@@ -1026,7 +1022,6 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
     
     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
     if(fragments >= cost){
-        debug("Level = "+(baseLevel+extraLevels)+"|"+sizeSlider+"|"+diffSlider+"|"+lootSlider+"|"+specialMod+"|perfect="+perfect+ "|"+type+" cost: " + cost.toPrecision(3) + " / " + fragments.toPrecision(3) + " fragments.");
         return true;
     }
     
@@ -1037,8 +1032,6 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
 function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
     var empowerment = getEmpowerment();
     var lastDigitZone = currWorldZone % 10;
-    
-    scaleUp = false; //by default, we want to buy the highest level map and just run that one map for prestige
     
     //are we in an active spire? if so we always want +5 map levels
     if(currWorldZone % 100 == 0 && currWorldZone >= getPageSetting('IgnoreSpiresUntil')){
@@ -1058,7 +1051,6 @@ function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
                 minDesiredLevel = currWorldZone - lastDigitZone + 11;
             }
             else{ //PAggro == 1
-                scaleUp = true; //special case, we want to run xx1 then xx2 then xx3 for faster clear
                 maxDesiredLevel = currWorldZone - lastDigitZone + 13;
                 minDesiredLevel = currWorldZone - lastDigitZone + 11;
             }
@@ -1188,15 +1180,17 @@ function mapTimeEstimater() {
     return mapTimeEstimate;
 }
 
-function behindOnPrestige() {
+function behindOnPrestige(zone) {
     var havePrestigeUpTo = calcPrestige();
     var lastPrestigeZone;
-    if (currWorldZone % 10 > 5)
-        lastPrestigeZone = currWorldZone - (currWorldZone % 10) + 5;
-    else if (currWorldZone % 10 == 0)
-        lastPrestigeZone = currWorldZone-5;
+    if (zone == null)
+        zone = currWorldZone;
+    if (zone % 10 > 5)
+        lastPrestigeZone = zone - (zone % 10) + 5;
+    else if (zone % 10 == 0)
+        lastPrestigeZone = zone-5;
     else
-        lastPrestigeZone = currWorldZone;
+        lastPrestigeZone = zone;
     
     if (havePrestigeUpTo < lastPrestigeZone)
         return true;

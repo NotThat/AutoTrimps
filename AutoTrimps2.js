@@ -15,14 +15,20 @@ var ATversion = '0.1';
 //Main Loader Initialize Function (loads first, load everything else)///////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////
+
 var atscript = document.getElementById('AutoTrimps-script')
   , basepath = 'https://notthat.github.io/AutoTrimps/'
   , modulepath = 'modules/'
   ;
+    
+  //var atscript = null;
+  //var basepath = 'file:///D:/Mirc/NetBeans Projects/Trimps/public_html/Trimps.github.io/AutoTrimps/'
+  //var modulepath = 'modules/'
 //This should redirect the script to wherever its being mirrored from.
 if (atscript !== null) {
     basepath = atscript.src.replace(/AutoTrimps2\.js$/, '');
 }
+
 //This could potentially do something one day. like: read localhost url from tampermonkey.
 // AKA do certain things when matched on a certain url.
 //if (atscript.src.includes('localhost')) {;};
@@ -213,7 +219,7 @@ function mainLoop() {
 
     if (getPageSetting('AutoAllocatePerks')==2) lootdump(); //Loot Dumping (other.js)
     if (getPageSetting('BuyUpgradesNew') != 0) buyUpgrades();    //"Buy Upgrades"       (upgrades.js)
-
+    
     var agu = getPageSetting('AutoGoldenUpgrades');
     if (agu && agu!='Off') autoGoldenUpgradesAT(agu);    //"Golden Upgrades"     (other.js)
     if (getPageSetting('BuyBuildingsNew')===0);                                            //"Buy Neither"              (Buildings.js)
@@ -251,6 +257,7 @@ function mainLoop() {
     if (userscriptOn) userscripts();
     //
     //rinse, repeat, done
+    
     return;
 }
 

@@ -250,7 +250,9 @@ function buyJobs() {
         game.global.maxSplit = MODULES["jobs"].magmamancerRatio;
         buyJob('Magmamancer', true, true);
         postBuy2(old);
-        debug("Bought " + (firesomedudes/inverse) + ' Magmamancers. Total Owned: ' + game.jobs['Magmamancer'].owned, "magmite", "*users");
+        //debug("Bought " + (firesomedudes/inverse) + ' Magmamancers. Total Owned: ' + game.jobs['Magmamancer'].owned, "magmite", "*users");
+        //debug("Bought " + (firesomedudes/inverse) + ' Magmamancers.');
+        debug("Bought Magmamancers.");
         tierMagmamancers += 1;
     }
     else if (stacks2 < tierMagmamancers) {
