@@ -281,6 +281,8 @@ function mainCleanup() {
     if (currentworld == 1 && aWholeNewWorld) {
         lastHeliumZone = 0;
         zonePostpone = 0;
+        amalgamatorsCounter = 0;
+        firstTime = true;
         //for the dummies like me who always forget to turn automaps back on after portaling
         if(getPageSetting('AutoMaps')==1 && !game.upgrades.Battle.done && getPageSetting('AutoMaps') == 0)
             settingChanged("AutoMaps");
