@@ -69,9 +69,11 @@ function updateOldSettings(oldSettings) {
         debug("ATsettings: Migrating AutoMaps + RunUniqueMaps to new AutoMaps.");
         //migrate AutoMaps + RunUniqueMaps to new AutoMaps
         oldSettings['AutoMaps'].value = oldSettings['AutoMaps'].enabled ? 1 : 0;
-        if (!oldSettings['RunUniqueMaps'].enabled)
-            oldSettings['AutoMaps'].value++;
-        delete oldSettings['RunUniqueMaps'];
+        if(oldSettings['RunUniqueMaps'] !== undefined){
+            if (!oldSettings['RunUniqueMaps'].enabled)
+                oldSettings['AutoMaps'].value++;
+            delete oldSettings['RunUniqueMaps'];
+        }
     }
     //These settingsneed to be migrated here:
 /*
