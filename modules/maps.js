@@ -668,10 +668,16 @@ function updateAutoMapsStatus(get, msg) {
             (hours + 'h') : (mins + 'm:' + (secs >= 10 ? secs : ('0' + secs)) + 's');
         status = 'Farming for Spire ' + spiretimeStr + ' left';
     } else if (spireMapBonusFarming) status = 'Getting Spire Map Bonus';
-    else if (doVoids && voidCheckPercent == 0) status = 'Void Maps: ' + game.global.totalVoidMaps + ' remaining';
+    else if (doVoids && voidCheckPercent == 0) status = 'Remaining VMs: ' + game.global.totalVoidMaps;
     else if (skippedPrestige) status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b>'; // Show skipping prestiges
     else if (!(enoughHealth && enoughDamage)) status = 'Need Dmg/Health ';
-    status = status + " Ratio = " + HDratio.toExponential(4);
+    
+    var formattedRatio;
+    if(HDratio > 1e6 || HDratio < 1e-6)
+        formattedRatio = HDratio.toExponential(4);
+    else
+        formattedRatio = HDratio;
+    status = status + " Ratio = " + formattedRatio;
     /*
     else if (doMaxMapBonus) status = 'Max Map Bonus After Zone';
     else if (!game.global.mapsUnlocked) status = '&nbsp;';
@@ -765,8 +771,19 @@ function PrestigeRaid() {
             return true;
         }
         debug("Level = "+(baseLevel+extraLevels)+"|"+sizeSlider+"|"+diffSlider+"|"+lootSlider+"|"+specialMod+"|perfect="+perfect+ "|"+type+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.");
-   
     }
+
+    //if dont have an army ready, dont enter map screen unless its last poison zone
+    if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
+        var armyReady = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? false : true);
+        if(!armyReady){  //and we dont have an army ready, then we may as well stay in the world until army is ready. may not be true for some dailies
+            if (getEmpowerment() == "Poison"){
+                if(currWorldZone % 10 != 5 && currWorldZone % 10 != 0) //in poison xx0 and xx5, we are willing to sit and wait in map screen to be sure not to miss our last poison zone
+                    return false;
+            }
+        }
+    }
+    
 
     if (!game.global.preMapsActive) { //in world, get to map screen
         mapsClicked();
