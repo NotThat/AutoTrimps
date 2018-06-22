@@ -4,21 +4,15 @@ var coordBuyThreshold = 200;
 var allowBuyingCoords = true;
 var maxCoords = -1;
 
-function calcBaseDamageinX() {
+function calcBaseDamageinS() {
     //baseDamage
-    baseDamage = (getBattleStats("attack", false, true));
+    baseDamage = calculateDamageAT();
     //baseBlock
     baseBlock = game.global.soldierCurrentBlock;
     //baseHealth
     baseHealth = game.global.soldierHealthMax;
 
     //if (game.global.soldierHealth <= 0) return; //dont calculate stances when dead, cause the "current" numbers are not updated when dead.
-
-    //D stance
-    if (game.global.formation == 2)
-        baseDamage /= 4;
-    else if (game.global.formation != "0")
-        baseDamage *= 2;
 
     //B stance
     if (game.global.formation == 3)
@@ -31,13 +25,13 @@ function calcBaseDamageinX() {
         baseHealth /= 4;
     else if (game.global.formation != "0")
         baseHealth *= 2;
-    //S stance is accounted for (combination of all the above's else clauses)
 }
 
 //goes to battlecalc.js which came from Trimps "updates.js" line 1103
 function calcBaseDamageinX2() {
     //baseDamage
-    baseDamage = getBattleStats("attack", false, true);
+    //baseDamage = getBattleStats("attack", false, true);
+    //baseDamage = calcOurDmg(game.global.soldierCurrentAttack,true,true,true);
     //baseBlock
     baseBlock = getBattleStats("block");
     //baseHealth
@@ -48,7 +42,7 @@ function calcBaseDamageinX2() {
 //Automatically swap formations (stances) to avoid dying
 function autoStance() {
     //get back to a baseline of no stance (X)
-    calcBaseDamageinX();
+    calcBaseDamageinS();
     //no need to continue
     if (game.global.gridArray.length === 0) return;
     if (game.global.soldierHealth <= 0) return; //dont calculate stances when dead, cause the "current" numbers are not updated when dead.
@@ -141,11 +135,7 @@ function autoStance() {
     var dailyPlague = game.global.challengeActive == 'Daily' && (typeof game.global.dailyChallenge.plague !== 'undefined');
     var dailyBogged = game.global.challengeActive == 'Daily' && (typeof game.global.dailyChallenge.bogged !== 'undefined');
 
-    if (game.global.challengeActive == "Electricity" || game.global.challengeActive == "Mapocalypse") {
-        dDamage+= dHealth * game.global.radioStacks * 0.1;
-        xDamage+= xHealth * game.global.radioStacks * 0.1;
-        bDamage+= bHealth * game.global.radioStacks * 0.1;
-    } else if (drainChallenge) {
+    if (drainChallenge) {
         dDamage += dHealth/20;
         xDamage += xHealth/20;
         bDamage += bHealth/20;
@@ -241,7 +231,7 @@ function autoStance() {
 
 function autoStance2() {
     //get back to a baseline of no stance (X)
-    calcBaseDamageinX2();
+    calcBaseDamageinS();
     //no need to continue
     if (game.global.gridArray.length === 0) return true;
     if (game.global.soldierHealth <= 0) return; //dont calculate stances when dead, cause the "current" numbers are not updated when dead.
@@ -545,8 +535,7 @@ function autoStanceCheck(enemyCrit) {
 }
 
 function autoStance3() {
-    calcBaseDamageinX();
-    if (getPageSetting('AutoStance') == 0) return;
+    calcBaseDamageinS();
     if (!game.upgrades.Formations.done) return;
     allowBuyingCoords = false;
     if (game.global.gridArray.length === 0) return;
@@ -569,23 +558,8 @@ function autoStance3() {
             var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
             var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
             var nextCell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum + 1] : game.global.gridArray[cellNum + 1];
-            
-            var baseModifier = 1;
-            switch (game.global.formation){
-                case 0:
-                    baseModifier = 0.5;
-                    break;
-                case 2:
-                    baseModifier = 0.125;
-                    break;
-                case 4:
-                    baseModifier = 1;
-                    break;
-            }
 
-            //            our displayed damage  * min/max avg * crit modifier
-            var ourAvgDmg = calculateDamageAT() * 1.1         * calcCritModifier(getPlayerCritChance(), getPlayerCritDamageMult()); 
-            var ourAvgDmgS = ourAvgDmg * baseModifier;
+            var ourAvgDmgS = baseDamage;
             var ourAvgDmgD = ourAvgDmgS * 8;
             var ourAvgDmgX = ourAvgDmgS * 2;
 
@@ -630,9 +604,7 @@ function autoStance3() {
                 var missingStacksNext = 200-nextStartingStacks;
             }*/
 
-            setFormation(chosenFormation);
-            
-            
+            setFormation(chosenFormation); 
             
             //dont windstack vs sharp enemies. in filler runs go D vs dodge enemies as they are time inefficient
             if (getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed" || (getCurrentEnemy(1).corrupted == "corruptDodge" && !(game.global.runningChallengeSquared || game.global.challengeActive)))
@@ -641,17 +613,4 @@ function autoStance3() {
             //debug("missing: " + missingStacks + " game.global.formation:" + game.global.formation + " chosenFormation:"+chosenFormation + " S/X/D: "+expectedNumHitsS.toFixed(0)+"/"+expectedNumHitsX.toFixed(0)+"/"+expectedNumHitsD.toFixed(0));
         }
     }
-}
-
-function calcCritModifier(critChance, critDamage){
-    ret = 0;
-    if(critChance < 1){
-        reet = critChance * critDamage + 1-critChance;
-        return ret;
-    }
-    if(critChance <=2){
-        ret = 5*(critChance-1) + (2-critChance);
-        return ret;
-    }
-    return 5*calcCritModifier(critChance-1, critDamage);
 }

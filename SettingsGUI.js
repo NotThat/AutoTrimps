@@ -37,7 +37,9 @@ function automationMenuInit() {
     //create automaps status (in the world sidebar)
     newContainer = document.createElement("DIV");
     newContainer.setAttribute("style", "display: block; font-size: 1.1vw; text-align: center; background-color: rgba(0,0,0,0.3);");
-    newContainer.setAttribute("onmouseover", 'tooltip(\"Health to Damage ratio\", \"customText\", event, \"This status box displays the current mode Automaps is in. The number usually shown here during Farming or Want more Damage modes is the \'HDratio\' meaning EnemyHealth to YourDamage Ratio (in X stance). Above 16 will trigger farming, above 4 will trigger going for Map bonus up to 10 stacks.<p><b>enoughHealth: </b>\" + enoughHealth + \"<br><b>enoughDamage: </b>\" + enoughDamage +\"<br><b>shouldFarm: </b>\" + shouldFarm +\"<br><b>H:D ratio = </b>\" + HDratio + \"<br>\")');
+    //newContainer.setAttribute("onmouseover", 'tooltip(\"Health to Damage ratio\", \"customText\", event, \"ually shown here during Farming or Want more Damage modes is the \'HDratio\' meaning EnemyHealth to YourDamage Ratio (in X stance). Above 16 will trigger farming, above 4 will trigger going for Map bonus up to 10 stacks.<p><b>enoughHealth: </b>\" + enoughHealth + \"<br><b>enoughDamage: </b>\" + enoughDamage +\"<br><b>shouldFarm: </b>\" + shouldFarm +\"<br><b>H:D ratio = </b>\" + HDratio + \"<br>\")');
+    newContainer.setAttribute("onmouseover", 'tooltip(\"Health to Damage ratio\", \"customText\", event, \"When HD ratio goes above limit it will trigger mapping for up to 10 map bonus.<p><b>poisonMult: </b>\" + poisonMult + \"<br><b>windStackingMult: </b>\" + windStackingMult +\"<br><b>Base HD ratio limit: </b>\" + enoughDamageCutoff +\"<br><b>Threshhold = </b>\" + threshhold + \"<br><b>H:D ratio: </b>\" + HDratio +\"<br>")');
+    //ourBaseDamage * enoughDamageCutoff * windStackingMult * poisonMult / enemyHealth
     newContainer.setAttribute("onmouseout", 'tooltip("hide")');
     abutton = document.createElement("SPAN");
     abutton.id = 'autoMapStatus';

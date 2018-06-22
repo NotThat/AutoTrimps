@@ -59,7 +59,7 @@ function useScryerStance() {
 //If neither NEVER or FORCE, move on to assessing whether to MAYBE
 //First, calculate damage
     if (AutoStance<=1)
-        calcBaseDamageinX(); //calculate internal script variables normally processed by autostance.
+        calcBaseDamageinS(); //calculate internal script variables normally processed by autostance.
     else if (AutoStance>=2)
         calcBaseDamageinX2(); //calculate method #2
 //Decide whether it is oktoswitch (Suicide)

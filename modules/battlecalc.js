@@ -144,10 +144,6 @@ function getBattleStats(what,form,crit) {
         var mult = (1 - (game.challenges.Electricity.stacks * 0.1));
 		currentCalc *= mult;
     }
-    //DEPRECATED?radiostacks increases from "Electricity" || "Mapocalypse"
-    if (game.global.radioStacks > 0) {
-        currentCalc *= (1 - (game.global.radioStacks * 0.1));
-    }
     //Daily:
     if (game.global.challengeActive == "Daily"){
         var mult = 0;
@@ -249,9 +245,6 @@ function calcOurDmg(number,maxormin,disableStances,disableFlucts) { //number = b
     var maxFluct = -1;
     var minFluct = -1;
     //Situational Trimp damage increases
-    if (game.global.radioStacks > 0) {
-        number *= (1 - (game.global.radioStacks * 0.1));
-    }
     if (game.global.antiStacks > 0) {
         number *= ((game.global.antiStacks * game.portal.Anticipation.level * game.portal.Anticipation.modifier) + 1);
         updateAntiStacks();
@@ -305,9 +298,6 @@ function calcOurDmg(number,maxormin,disableStances,disableFlucts) { //number = b
     }
     if (game.jobs.Amalgamator.owned > 0){
         number *= game.jobs.Amalgamator.getDamageMult();
-    }
-    if (game.jobs.Amalgamator.owned > 0){
-        number *= game.jobs.Amalgamator.getHealthMult();
     }
     if (game.singleRunBonuses.sharpTrimps.owned) {
 		number *= 1.5;

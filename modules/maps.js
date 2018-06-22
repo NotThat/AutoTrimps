@@ -1,6 +1,6 @@
 MODULES["maps"] = {};
 //These can be changed (in the console) if you know what you're doing:
-MODULES["maps"].enoughDamageCutoff = 6; //above this the game will do maps for map bonus stacks
+
 MODULES["maps"].poisonMult = 30; //how much bonus damage to treat poison zones as giving us
 MODULES["maps"].farmingCutoff = 16; //above this the game will farm.
 MODULES["maps"].numHitsSurvived = 8; //survive X hits in D stance or not enough Health.
@@ -31,7 +31,6 @@ var needToVoid = false;
 var needPrestige = false;
 var skippedPrestige = false;
 var voidCheckPercent = 0;
-var HDratio = 0;
 var ourBaseDamage = 0;
 var ourBaseDamage2 = 0;
 var scryerStuck = false;
@@ -60,18 +59,12 @@ var currWorldZone = 1;
 //Activate Robo Trimp (will activate on the first zone after liquification)
 var lastMsg; //stores last message, stops spam to console
 
+
 function calcDmg(){
     //START CALCULATING DAMAGES:
-    var AutoStance = getPageSetting('AutoStance');
-    
-    //calculate crits (baseDamage was calced in function autoStance)    this is a weighted average of nonCrit + Crit. (somewhere in the middle)
-    var critChance = getPlayerCritChance();
-    var normalCritChance = (critChance > 1 ? critChance - 1 : critChance);
-    var orangeCritChance = (critChance > 2 ? critChance - 2 : 0);
-    ourBaseDamage = baseDamage * (1 + (normalCritChance + 5 * orangeCritChance) * getPlayerCritDamageMult());
-    
-    //add damage multiplier for poison zones
-    ourBaseDamage = ourBaseDamage * (getEmpowerment() == "Poison" ? customVars.poisonMult : 1); //30 by default
+    calcBaseDamageinS();
+        
+    ourBaseDamage = baseDamage*8; //automaps always looks at damage in D
     
     //calculate with map bonus
     var mapbonusmulti = 1 + (0.20 * game.global.mapBonus);
@@ -81,7 +74,6 @@ function calcDmg(){
 
     //get average enemyhealth and damage for the next zone, cell 50, snimp type and multiply it by a max range fluctuation of 1.2
     var enemyDamage;
-    var enemyHealth;
     if (AutoStance <= 1) {
         enemyDamage = getEnemyMaxAttack(currWorldZone, 50, 'Snimp', 1.2);
         enemyDamage = calcDailyAttackMod(enemyDamage); //daily mods: badStrength,badMapStrength,bloodthirst
@@ -158,33 +150,17 @@ function calcDmg(){
     }
     
     var windstackzone = getPageSetting('WindStackingMin');
-    var mult = 1;
-    //if (getEmpowerment() == "Wind" && currWorldZone >= windstackzone) //no getEmpowerment() inside maps?
+    
     if (currWorldZone >= windstackzone && (currWorldZone-241) % 15 <= 4)
-        mult = 4; //in windstacking zones, wait much longer before doing maps for damage
+        windStackingMult = 4; //in windstacking zones, wait much longer before doing maps for damage
+    else
+        windStackingMult = 1;
+    poisonMult = (getEmpowerment() == "Poison" ? customVars.poisonMult : 1);
+    enoughDamage = (ourBaseDamage * enoughDamageCutoff * windStackingMult * poisonMult > enemyHealth); //add damage multiplier for poison zones (30 by default)
+    threshhold = (poisonMult*windStackingMult*enoughDamageCutoff).toFixed(0);
+    //HDratio = baseDamage*8 * enoughDamageCutoff * windStackingMult * poisonMult / enemyHealth;
     
-    var baseModifier = 1;
-    switch (game.global.formation){
-        case 0:
-            baseModifier = 0.5;
-            break;
-        case 1:
-            baseModifier = 1;
-            break;
-        case 2:
-            baseModifier = 0.125;
-            break;
-        case 4:
-            baseModifier = 1;
-            break;
-    }
-    ourBaseDamage = ourBaseDamage * baseModifier;
-    
-    enoughDamage = (ourBaseDamage * customVars.enoughDamageCutoff * mult > enemyHealth);
-
-    //Health:Damage ratio: (status)
-    HDratio = enemyHealth / ourBaseDamage;
-    //updateAutoMapsStatus("", "HD Ratio"); //refresh the UI status (10x per second)
+    HDratio = (enemyHealth / ourBaseDamage).toExponential(4);
 }
 
 function fragCalc(){
@@ -305,6 +281,7 @@ function findVoidMap(){
 //anything/everything to do with maps.
 function autoMap() {
     
+    calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
     updateAutoMapsStatus("", "Advancing"); //default msg. any other trigger will override this later
     currWorldZone = game.global.world;
     
@@ -335,8 +312,6 @@ function autoMap() {
         updateAutoMapsStatus("", "No Map Credits");
         return;
     }
-    
-    calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
     
     if (getPageSetting('PRaidingZoneStart') >0)
         if(!PrestigeRaid()) //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
@@ -677,7 +652,7 @@ function updateAutoMapsStatus(get, msg) {
     if (msg === "" || msg === undefined || msg.length == 0) 
         status = "";
     else
-        status = msg;
+        status = msg+"<br>";
     
     if (preSpireFarming) {
         var secs = Math.floor(60 - (spireTime * 60) % 60).toFixed(0)
@@ -685,18 +660,18 @@ function updateAutoMapsStatus(get, msg) {
         var hours = minSp - (spireTime / 60).toFixed(2);
         var spiretimeStr = (spireTime >= 60) ?
             (hours + 'h') : (mins + 'm:' + (secs >= 10 ? secs : ('0' + secs)) + 's');
-        status = 'Farming for Spire ' + spiretimeStr + ' left';
-    } else if (spireMapBonusFarming) status = 'Getting Spire Map Bonus';
-    else if (doVoids && voidCheckPercent == 0) status = 'Remaining VMs: ' + game.global.totalVoidMaps;
-    else if (skippedPrestige) status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b>'; // Show skipping prestiges
-    else if (!(enoughHealth && enoughDamage)) status = 'Need Dmg/Health ';
+        status = 'Farming for Spire ' + spiretimeStr + ' left<br>';
+    } else if (spireMapBonusFarming) status = 'Getting Spire Map Bonus<br>';
+    else if (doVoids && voidCheckPercent == 0) status = 'Remaining VMs: ' + game.global.totalVoidMaps + "<br>";
+    else if (skippedPrestige) status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b><br>'; // Show skipping prestiges
+    else if (!(enoughHealth && enoughDamage)) status = 'Need Dmg/Health<br>';
     
     var formattedRatio;
     if(HDratio > 1e6 || HDratio < 1e-6)
-        formattedRatio = HDratio.toExponential(4);
+        formattedRatio = HDratio;
     else
-        formattedRatio = HDratio.toFixed(4);
-    status = status + " Ratio = " + formattedRatio;
+        formattedRatio = HDratio;
+    status = status + "Ratio = " + formattedRatio;
     /*
     else if (doMaxMapBonus) status = 'Max Map Bonus After Zone';
     else if (!game.global.mapsUnlocked) status = '&nbsp;';

@@ -171,6 +171,13 @@ var heirloomFlag = false;
 var heirloomCache = game.global.heirloomsExtra.length;
 var magmiteSpenderChanged = false;
 
+var enoughDamageCutoff = 6; //above this the game will do maps for map bonus stacks
+var windStackingMult=1; 
+var poisonMult=30;
+var enemyHealth=1;
+var threshhold=1;
+var HDratio = 0;
+
 ////////////////////////////////////////
 //Main LOGIC Loop///////////////////////
 ////////////////////////////////////////
@@ -242,7 +249,7 @@ function mainLoop() {
     if (getPageSetting('UseScryerStance'))  useScryerStance();  //"Use Scryer Stance"   (scryer.js)
     else if (getPageSetting('AutoStance')<=1) autoStance();     //"Auto Stance"       (stance.js)
     else if (getPageSetting('AutoStance')==2) autoStance2();    //"Auto Stance #2"         (")
-    else if (getPageSetting('AutoStance')==3) autoStance3();    //"Auto Stance #3"         (")                
+    else if (getPageSetting('AutoStance')==3) autoStance3();    //"Auto Stance #3"         (")
     if (getPageSetting('UseAutoGen')) autoGenerator();          //"Auto Generator ON" (magmite.js)
     ATselectAutoFight();  //  pick the right version of Fight/AutoFight/BetterAutoFight/BAF2 (fight.js)       
     var forcePrecZ = (getPageSetting('ForcePresZ')<0) || (game.global.world<getPageSetting('ForcePresZ'));

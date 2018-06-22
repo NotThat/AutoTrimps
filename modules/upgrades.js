@@ -20,7 +20,7 @@ function buyUpgrades() {
         }
         var dontBuyStartZ = getPageSetting('NoCoordBuyStartZ');
         
-        if(game.global.world >= getPageSetting('WindStackingMin') && getEmpowerment() != "Wind" && getPageSetting('AutoStance')==3){
+        if(game.global.world >= getPageSetting('WindStackingMin') && getEmpowerment() == "Wind" && getPageSetting('AutoStance')==3){
             if(!allowBuyingCoords){ //if autostance3 is on and we're in windstack zones, only buy coords if autostance3 allows it.
                 if(game.upgrades.Coordination.done < maxCoords)
                     buyCoords = true;
