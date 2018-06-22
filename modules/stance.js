@@ -553,10 +553,13 @@ function autoStance3() {
     if (game.global.soldierHealth <= 0) return; //dont calculate stances when dead, cause the "current" numbers are not updated when dead.
 
     var windstackzone = getPageSetting('WindStackingMin');
-
+    if(game.global.world<80)
+        allowBuyingCoords = true;
+    
     if(game.global.world>=80) {
-        if(getEmpowerment() != "Wind" || game.global.mapsActive || (windstackzone < 0) || (windstackzone >= game.global.world) || game.global.spireActive) {
-            allowBuyingCoords = true;
+        if(getEmpowerment() != "Wind" || game.global.mapsActive || (windstackzone < 0) || (game.global.world < windstackzone) || game.global.spireActive) {
+            if(!game.global.mapsActive) //going into a map is no reason to buy coordinations
+                allowBuyingCoords = true;
             setFormation(2);
             return;
         }
@@ -629,8 +632,10 @@ function autoStance3() {
 
             setFormation(chosenFormation);
             
-            //dont windstack vs sharp enemies
-            if (getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed")
+            
+            
+            //dont windstack vs sharp enemies. in filler runs go D vs dodge enemies as they are time inefficient
+            if (getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed" || (getCurrentEnemy(1).corrupted == "corruptDodge" && !(game.global.runningChallengeSquared || game.global.challengeActive)))
                 setFormation(2);
             
             //debug("missing: " + missingStacks + " game.global.formation:" + game.global.formation + " chosenFormation:"+chosenFormation + " S/X/D: "+expectedNumHitsS.toFixed(0)+"/"+expectedNumHitsX.toFixed(0)+"/"+expectedNumHitsD.toFixed(0));

@@ -20,14 +20,19 @@ function buyUpgrades() {
         }
         var dontBuyStartZ = getPageSetting('NoCoordBuyStartZ');
         
-        if(!allowBuyingCoords){ //if autostance3 is on and we're in windstack zones, only buy coords if autostance3 allows it.
-            if(game.upgrades.Coordination.done < maxCoords)
-                buyCoords = true;
-            else
-                buyCoords = false;
+        if(game.global.world >= getPageSetting('WindStackingMin') && getEmpowerment() != "Wind" && getPageSetting('AutoStance')==3){
+            if(!allowBuyingCoords){ //if autostance3 is on and we're in windstack zones, only buy coords if autostance3 allows it.
+                if(game.upgrades.Coordination.done < maxCoords)
+                    buyCoords = true;
+                else
+                    buyCoords = false;
+
+                if (game.global.world == 500) //always want all coords for spire4
+                    buyCoords = true;
+            }
             
-            if (game.global.world == 500) //always want all coords for spire4
-                buyCoords = true;
+            if(game.global.world - 241 % 15 == 0 && game.global.lastClearedCell == -1) //fix to stop upgrades() from instantly buying a coord in the first wind zone
+                buyCoords = false;
         }
         
         if (dontBuyStartZ > 0 && dontBuyStartZ <= game.global.world && getPageSetting('TillWeHaveAmalg') > 0) { //if dontBuyStartZ is set and we've passed it

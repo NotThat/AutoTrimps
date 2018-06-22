@@ -162,6 +162,24 @@ function calcDmg(){
     //if (getEmpowerment() == "Wind" && currWorldZone >= windstackzone) //no getEmpowerment() inside maps?
     if (currWorldZone >= windstackzone && (currWorldZone-241) % 15 <= 4)
         mult = 4; //in windstacking zones, wait much longer before doing maps for damage
+    
+    var baseModifier = 1;
+    switch (game.global.formation){
+        case 0:
+            baseModifier = 0.5;
+            break;
+        case 1:
+            baseModifier = 1;
+            break;
+        case 2:
+            baseModifier = 0.125;
+            break;
+        case 4:
+            baseModifier = 1;
+            break;
+    }
+    ourBaseDamage = ourBaseDamage * baseModifier;
+    
     enoughDamage = (ourBaseDamage * customVars.enoughDamageCutoff * mult > enemyHealth);
 
     //Health:Damage ratio: (status)

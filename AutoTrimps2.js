@@ -216,10 +216,10 @@ function mainLoop() {
     //if (getPageSetting('loomprotect') == true) protectloom(); //"Exit Spire After Cell" (other.js)
 
     if (getPageSetting('AutoAllocatePerks')==2) lootdump(); //Loot Dumping (other.js)
-    if (getPageSetting('BuyUpgradesNew') != 0) buyUpgrades();    //"Buy Upgrades"       (upgrades.js)
+    if (getPageSetting('BuyUpgradesNew') != 0) buyUpgrades();                                //"Buy Upgrades"       (upgrades.js)         
     
     var agu = getPageSetting('AutoGoldenUpgrades');
-    if (agu && agu!='Off') autoGoldenUpgradesAT(agu);    //"Golden Upgrades"     (other.js)
+    if (agu && agu!='Off') autoGoldenUpgradesAT(agu);                                       //"Golden Upgrades"     (other.js)
     if (getPageSetting('BuyBuildingsNew')===0);                                            //"Buy Neither"              (Buildings.js)
       else if (getPageSetting('BuyBuildingsNew')==1) { buyBuildings(); buyStorage(); }      //"Buy Buildings & Storage"  (")
       else if (getPageSetting('BuyBuildingsNew')==2) buyBuildings();                      //"Buy Buildings"            (")
@@ -242,9 +242,9 @@ function mainLoop() {
     if (getPageSetting('UseScryerStance'))  useScryerStance();  //"Use Scryer Stance"   (scryer.js)
     else if (getPageSetting('AutoStance')<=1) autoStance();     //"Auto Stance"       (stance.js)
     else if (getPageSetting('AutoStance')==2) autoStance2();    //"Auto Stance #2"         (")
-    else if (getPageSetting('AutoStance')==3) autoStance3();    //"Auto Stance #3"         (")
+    else if (getPageSetting('AutoStance')==3) autoStance3();    //"Auto Stance #3"         (")                
     if (getPageSetting('UseAutoGen')) autoGenerator();          //"Auto Generator ON" (magmite.js)
-    ATselectAutoFight();  //  pick the right version of Fight/AutoFight/BetterAutoFight/BAF2 (fight.js)
+    ATselectAutoFight();  //  pick the right version of Fight/AutoFight/BetterAutoFight/BAF2 (fight.js)       
     var forcePrecZ = (getPageSetting('ForcePresZ')<0) || (game.global.world<getPageSetting('ForcePresZ'));
     if (getPageSetting('DynamicPrestige2')>0 && forcePrecZ) prestigeChanging2(); //"Dynamic Prestige" (dynprestige.js)
     else autoTrimpSettings.Prestige.selected = document.getElementById('Prestige').value; //just make sure the UI setting and the internal setting are aligned.
