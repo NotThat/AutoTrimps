@@ -18,9 +18,11 @@ function ATselectAutoFight() {
     else if (BAFsetting==0 && !game.global.autoBattle && game.global.soldierHealth == 0) betterAutoFight();   //use BAF as a backup for pre-Battle situations
     oldBAFsetting = BAFsetting;     //enables built-in autofight once when disabled
     if(amalgamatorsCounter < game.jobs.Amalgamator.owned){ //we just got a new amalgamator. get back to fighting
+        if(amalgamatorsCounter > 0) { //dont do this the first time
+            debug("New Amalgamator. Sending army to fight.");
+            fightManual();
+        }
         amalgamatorsCounter = game.jobs.Amalgamator.owned;
-        debug("New Amalgamator. Sending army to fight.");
-        fightManual();
     }
 }
 

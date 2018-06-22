@@ -510,17 +510,18 @@ function autoMap() {
         return; //exit
     }
     
-    //if dont have an army ready, dont enter map screen unless its last poison zone, and/or we need to do void maps
-    if(!doVoids){ //if we dont need to voids
-        if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
-            var armyReady = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? false : true);
-            if(!armyReady){  //and we dont have an army ready, then we may as well stay in the world until army is ready. may not be true for some dailies
-                if (getEmpowerment() == "Poison"){
-                    if(currWorldZone % 10 != 5 && currWorldZone % 10 != 0) //in poison xx0 and xx5, we are willing to sit and wait in map screen to be sure not to miss our last poison zone
+    //this code prevents automaps from killing our army and going into map screen under certain conditions:    
+    if (game.global.soldierHealth > 1000){//if we have an army currently fighting
+        if(!doVoids){ //and we dont need to voids
+            if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
+                if (game.resources.trimps.owned < game.resources.trimps.realMax()){ //and we dont have another army ready, then we may as well stay in the world until another army is ready. may not be true for some dailies
+                    if (getEmpowerment() == "Poison"){
+                        if(currWorldZone % 10 != 5 && currWorldZone % 10 != 0) //in poison zones xx0 and xx5, we are willing to sit and wait in the map screen to be sure not to miss our last poison zone
+                            return;
+                    }
+                    else //ice/wind/no empowerment: always stay in world if army isnt ready
                         return;
                 }
-                else //ice/wind/no empowerment: always stay in world if army isnt ready
-                    return;
             }
         }
     }
@@ -638,7 +639,7 @@ function autoMap() {
                     selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id; //the map we just created
                 } 
             }
-            debug("selectedMap " + selectedMap);
+            //debug("selectedMap " + selectedMap);
             selectMap(selectedMap);
             var themapobj = game.global.mapsOwnedArray[getMapIndex(selectedMap)];
             var levelText = " Level: " + themapobj.level;
@@ -676,7 +677,7 @@ function updateAutoMapsStatus(get, msg) {
     if(HDratio > 1e6 || HDratio < 1e-6)
         formattedRatio = HDratio.toExponential(4);
     else
-        formattedRatio = HDratio;
+        formattedRatio = HDratio.toFixed(4);
     status = status + " Ratio = " + formattedRatio;
     /*
     else if (doMaxMapBonus) status = 'Max Map Bonus After Zone';
@@ -733,7 +734,6 @@ function PrestigeRaid() {
         return true; 
     
     if (game.global.mapsActive){ //if we are in a map
-        
         //do we need prestige from this map?
         var needPrestige = behindOnPrestige(getCurrentMapObject().level);
         if(needPrestige){
@@ -750,6 +750,22 @@ function PrestigeRaid() {
         }
         
         return false;
+    }
+    
+    //this code prevents automaps from killing our army and going into map screen under certain conditions:    
+    if (game.global.soldierHealth > 1000){//if we have an army currently fighting
+        if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
+            if (game.resources.trimps.owned < game.resources.trimps.realMax()){ //and we dont have another army ready, then we may as well stay in the world until another army is ready. may not be true for some dailies
+                if (getEmpowerment() == "Poison"){
+                    if(currWorldZone % 10 != 5 && currWorldZone % 10 != 0){ //in poison zones xx0 and xx5, we are willing to sit and wait in the map screen to be sure not to miss our last poison zone
+                        if(!doVoids)
+                            return false; //we'll want to keep revisiting prestigeRaid until something changes
+                        else //need to run void maps
+                            return true;
+                    }
+                }
+            }
+        }
     }
     
     //Let's see if we already own a map of suitable level
@@ -771,17 +787,6 @@ function PrestigeRaid() {
             return true;
         }
         debug("Level = "+(baseLevel+extraLevels)+"|"+sizeSlider+"|"+diffSlider+"|"+lootSlider+"|"+specialMod+"|perfect="+perfect+ "|"+type+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.");
-    }
-
-    //if dont have an army ready, dont enter map screen unless its last poison zone
-    if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
-        var armyReady = (game.resources.trimps.realMax()-game.resources.trimps.owned>0 ? false : true);
-        if(!armyReady){  //and we dont have an army ready, then we may as well stay in the world until army is ready. may not be true for some dailies
-            if (getEmpowerment() == "Poison"){
-                if(currWorldZone % 10 != 5 && currWorldZone % 10 != 0) //in poison xx0 and xx5, we are willing to sit and wait in map screen to be sure not to miss our last poison zone
-                    return false;
-            }
-        }
     }
     
 

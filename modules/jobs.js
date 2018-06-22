@@ -2,7 +2,7 @@ MODULES["jobs"] = {};
 //These can be changed (in the console) if you know what you're doing:
 MODULES["jobs"].scientistRatio = 25;        //ratio for scientists. (totalRatios / this)
 MODULES["jobs"].scientistRatio2 = 10;       //used for lowlevel and Watch challenge
-MODULES["jobs"].magmamancerRatio = 0.1;     //buys 10% of your gem resources per go.
+MODULES["jobs"].magmamancerRatio = 1;     //buys 100% of your gem resources per go.
 //Worker Ratios = [Farmer,Lumber,Miner]
 MODULES["jobs"].autoRatio6 = [1,12,12];
 MODULES["jobs"].autoRatio5 = [1,2,22];
@@ -232,7 +232,7 @@ function buyJobs() {
         var old = preBuy2();
         game.global.firing = false;
         game.global.buyAmt = 'Max';
-        game.global.maxSplit = MODULES["jobs"].magmamancerRatio;    // (10%)
+        game.global.maxSplit = MODULES["jobs"].magmamancerRatio;    // (100%)
         //fire dudes to make room.
         var firesomedudes = calculateMaxAfford(game.jobs['Magmamancer'], false, false, true);
         //fire (10x) as many workers as we need so "Max" (0.1) can work, because FreeWorkers are considered as part of the (10%) calc

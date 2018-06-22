@@ -1,4 +1,8 @@
 //MODULES["stance"] = {};
+var currentBadGuyNum;
+var coordBuyThreshold = 200;
+var allowBuyingCoords = true;
+var maxCoords = -1;
 
 function calcBaseDamageinX() {
     //baseDamage
@@ -541,32 +545,107 @@ function autoStanceCheck(enemyCrit) {
 }
 
 function autoStance3() {
-      //get back to a baseline of no stance (X)
-      
-      calcBaseDamageinX();
-      //no need to continue
-      if (game.global.gridArray.length === 0) return;
-      if (game.global.soldierHealth <= 0) return; //dont calculate stances when dead, cause the "current" numbers are not updated when dead.
-      if (getPageSetting('AutoStance') == 0) return;
-      if (!game.upgrades.Formations.done) return;
+    calcBaseDamageinX();
+    if (getPageSetting('AutoStance') == 0) return;
+    if (!game.upgrades.Formations.done) return;
+    allowBuyingCoords = false;
+    if (game.global.gridArray.length === 0) return;
+    if (game.global.soldierHealth <= 0) return; //dont calculate stances when dead, cause the "current" numbers are not updated when dead.
 
-      var windstackzone = getPageSetting('WindStackingMin');
+    var windstackzone = getPageSetting('WindStackingMin');
 
     if(game.global.world>=80) {
-        if( getEmpowerment() != "Wind" || game.global.mapsActive || game.empowerments.Wind.currentDebuffPower>=170 || (windstackzone < 0) || (windstackzone >= game.global.world) || game.global.spireActive) {
+        if(getEmpowerment() != "Wind" || game.global.mapsActive || (windstackzone < 0) || (windstackzone >= game.global.world) || game.global.spireActive) {
+            allowBuyingCoords = true;
             setFormation(2);
             return;
         }
         else if (game.global.world >= windstackzone) {
-            //debug("enemy.corrupted = " + getCurrentEnemy(1).corrupted, "general", "");
-            //debug(getCurrentEnemy(1).mutation, "general", ""); // = Corruption (healthy?)
+            allowBuyingCoords = false;
+
+            var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
+            var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
+            var nextCell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum + 1] : game.global.gridArray[cellNum + 1];
+            
+            var baseModifier = 1;
+            switch (game.global.formation){
+                case 0:
+                    baseModifier = 0.5;
+                    break;
+                case 2:
+                    baseModifier = 0.125;
+                    break;
+                case 4:
+                    baseModifier = 1;
+                    break;
+            }
+
+            //            our displayed damage  * min/max avg * crit modifier
+            var ourAvgDmg = calculateDamageAT() * 1.1         * calcCritModifier(getPlayerCritChance(), getPlayerCritDamageMult()); 
+            var ourAvgDmgS = ourAvgDmg * baseModifier;
+            var ourAvgDmgD = ourAvgDmgS * 8;
+            var ourAvgDmgX = ourAvgDmgS * 2;
+
+            var enemyHealth = cell.health;  //current health
+            //var enemyMaxHealth = cell.maxHealth; //in future can do some prediction with plaguebringer and expected minimum enemy max health of world zone
+            var missingStacks = 200-game.empowerments.Wind.currentDebuffPower;
+
+            var expectedNumHitsX = enemyHealth / ourAvgDmgX;
+            var expectedNumHitsD = enemyHealth / ourAvgDmgD;
+
+            var chosenFormation;
+
+           //setFormation('0'); //X
+           //setFormation(1);   //H
+           //setFormation(2);   //D
+           //setFormation(3);   //B
+           //setFormation(4);   //S
+            if(expectedNumHitsD > missingStacks)
+                chosenFormation = 2;
+            else if (expectedNumHitsX > missingStacks)
+                chosenFormation = '0';
+            else 
+                chosenFormation = 4;
+
+            if (chosenFormation == '0' && game.global.soldierHealth < 0.55 * game.global.soldierHealthMax){ //dont swap to X if it will kill/almost kill us
+                chosenFormation = 2;
+            }
+            
+            if(expectedNumHitsD > coordBuyThreshold && currentBadGuyNum != cellNum){ //if it takes more than this many hits in D, buy 1 coord. don't calc while dead
+                //debug(expectedNumHitsD.toFixed(1));
+                currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
+                allowBuyingCoords = true;
+                maxCoords = game.upgrades.Coordination.done + 1;
+            }
+            
+            /*//look ahead 1 cell -- sadly does not appear possible because enemy isnt generated until we're at his cell
+            if(nextCell !== undefined){
+                var nextPBDmg = nextCell.plaguebringer; //extra damage on next cell from PB
+                var pbHits = Math.ceil(nextCell.plagueHits); //extra wind stacks on next cell from PB
+                var nextStartingStacks = 1 + Math.ceil(game.empowerments.Wind.currentDebuffPower * getRetainModifier("Wind")) + pbHits;
+                var missingStacksNext = 200-nextStartingStacks;
+            }*/
+
+            setFormation(chosenFormation);
             
             //dont windstack vs sharp enemies
-            if(getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed")
+            if (getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed")
                 setFormation(2);
-            else       
-                setFormation(4);
-            return;
+            
+            //debug("missing: " + missingStacks + " game.global.formation:" + game.global.formation + " chosenFormation:"+chosenFormation + " S/X/D: "+expectedNumHitsS.toFixed(0)+"/"+expectedNumHitsX.toFixed(0)+"/"+expectedNumHitsD.toFixed(0));
         }
     }
+}
+
+function calcCritModifier(critChance, critDamage){
+    ret = 0;
+    if(critChance < 1){
+        reet = critChance * critDamage + 1-critChance;
+        return ret;
+    }
+    if(critChance <=2){
+        ret = 5*(critChance-1) + (2-critChance);
+        return ret;
+    }
+    return 5*calcCritModifier(critChance-1, critDamage);
 }

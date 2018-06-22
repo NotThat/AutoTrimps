@@ -1,11 +1,8 @@
 //MODULES["upgrades"] = {};
 var upgradeList = ['Miners', 'Scientists', 'Coordination', 'Speedminer', 'Speedlumber', 'Speedfarming', 'Speedscience', 'Speedexplorer', 'Megaminer', 'Megalumber', 'Megafarming', 'Megascience', 'Efficiency', 'TrainTacular', 'Trainers', 'Explorers', 'Blockmaster', 'Battle', 'Bloodlust', 'Bounty', 'Egg', 'Anger', 'Formations', 'Dominance', 'Barrier', 'UberHut', 'UberHouse', 'UberMansion', 'UberHotel', 'UberResort', 'Trapstorm', 'Gigastation', 'Shieldblock', 'Potency', 'Magmamancers'];
-var haltAmalgamatorsOn = 0;
-var firstTime = true;
 
 //Buys all available non-equip upgrades listed in var upgradeList
 function buyUpgrades() {
-
     if (getPageSetting('BuyUpgradesNew') != 2){ //skip this calculation if AT isnt allowed to buy coords
         var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();    
         var buyCoords = true;
@@ -23,15 +20,20 @@ function buyUpgrades() {
         }
         var dontBuyStartZ = getPageSetting('NoCoordBuyStartZ');
         
-        if (dontBuyStartZ > 0 && dontBuyStartZ <= game.global.world) { //if dontBuyStartZ is set and we've passed it
-            if(firstTime){
-                haltAmalgamatorsOn = game.jobs.Amalgamator.owned; //until we get +1 amalgamator, dont buy anymore coordinations
-                firstTime = false;
-            }
-            if (haltAmalgamatorsOn == game.jobs.Amalgamator.owned)
+        if(!allowBuyingCoords){ //if autostance3 is on and we're in windstack zones, only buy coords if autostance3 allows it.
+            if(game.upgrades.Coordination.done < maxCoords)
+                buyCoords = true;
+            else
+                buyCoords = false;
+        }
+        
+        if (dontBuyStartZ > 0 && dontBuyStartZ <= game.global.world && getPageSetting('TillWeHaveAmalg') > 0) { //if dontBuyStartZ is set and we've passed it
+            if (game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg'))
                 buyCoords = false;
         }
     }
+
+    
     
     for (var upgrade in upgradeList) {
         upgrade = upgradeList[upgrade];

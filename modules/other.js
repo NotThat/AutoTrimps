@@ -230,6 +230,9 @@ function BWraiding() {
     if (!(game.global.world == getPageSetting('BWraidingz') && getPageSetting('BWraid')))
         return true;
     
+    if (getPageSetting('BWraidDailyCOnly') && !(game.global.runningChallengeSquared || game.global.challengeActive)) //if BWraidDailyCOnly is set then only BW raid dduring dailes/challenges/c2
+        return true;
+    
     //find the lowest bionic map that still has items for us
     var nextBionicMap = findNextBionic(getPageSetting('BWraidingmax'));
     if(!nextBionicMap){
