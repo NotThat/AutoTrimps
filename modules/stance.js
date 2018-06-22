@@ -619,6 +619,7 @@ function autoStance3() {
             }
             
             /*//look ahead 1 cell -- sadly does not appear possible because enemy isnt generated until we're at his cell
+             * can be done by looking at ingame world grid div at least...
             if(nextCell !== undefined){
                 var nextPBDmg = nextCell.plaguebringer; //extra damage on next cell from PB
                 var pbHits = Math.ceil(nextCell.plagueHits); //extra wind stacks on next cell from PB

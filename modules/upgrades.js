@@ -25,6 +25,9 @@ function buyUpgrades() {
                 buyCoords = true;
             else
                 buyCoords = false;
+            
+            if (game.global.world == 500) //always want all coords for spire4
+                buyCoords = true;
         }
         
         if (dontBuyStartZ > 0 && dontBuyStartZ <= game.global.world && getPageSetting('TillWeHaveAmalg') > 0) { //if dontBuyStartZ is set and we've passed it
