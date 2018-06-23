@@ -596,7 +596,6 @@ function updateAutoMapsStatus(get, msg) {
     else if (!enoughDamage) status = 'Want ' + HDratio.toFixed(2) + 'x &nbspmore damage';
     else if (!enoughHealth) status = 'Want more health';
     */
-    debug("status " + status + " " + msg);
 
     if (getPageSetting('AutoMaps') == 0) status = 'Off';
 

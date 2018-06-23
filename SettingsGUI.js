@@ -364,7 +364,7 @@ function initializeAllSettings() {
     //function createSetting(id, name, description, type, defaultValue, list, container) {
     createSetting('PRaidingZoneStart', 'Map Raiding Start', 'Starting this zone, begin raiding higher maps for prestige. -1 for never.', 'value', -1, null, 'Maps');
     createSetting('PAggression', ['Prestige mode: Light', 'Prestige mode: Aggressive'], 'How aggressively should AT chase after prestige. Aggressive costs more fragments.', 'multitoggle', 1, null, 'Maps');
-    createSetting('PRaidingMaxZones', 'Max Extra Zones', 'Hard caps maximum extra Zones AT should ever buy chasing prestige', 'value', 10, null, 'Maps');
+    createSetting('PRaidingMaxZones', 'Max Extra Zones', 'Caps maximum extra Zones AT should ever buy chasing prestige. If BW Raid is enabled then will always attempt to prestige raid the highest possible before beginning BW raiding.', 'value', 10, null, 'Maps');
 
 
 
