@@ -609,7 +609,7 @@ function autoStance3() {
                 maxCoords = game.upgrades.Coordination.done + 1;
             }
             //consider trimpicide for max stacks
-            if(hiddenBreedTimer >= maxAnti && game.global.antiStacks < maxAnti && maxD > 20 && Math.min(stacks + expectedNumHitsD, 200) - Math.min(stacks*0.85 + expectedNumHitsD*(5+maxAnti)/(5+game.global.antiStacks), 200) < 20){ 
+            if(hiddenBreedTimer >= maxAnti && game.global.antiStacks < maxAnti && maxD > 30 && Math.min(stacks + expectedNumHitsD, 200) - Math.min(stacks*0.85 + expectedNumHitsD*(5+maxAnti)/(5+game.global.antiStacks), 200) < 20){ 
                 debug("Trimpiciding to get max stacks");
                 stackConservingTrimpicide();
                 return;
@@ -655,8 +655,9 @@ function autoStance3() {
     setFormation(chosenFormation); 
     
     //dont windstack vs sharp enemies. in filler runs go D vs dodge enemies as they are time inefficient
-    //if (getCurrentEnemy(1).corrupted == "healthyBleed")
-    if (getCurrentEnemy(1).corrupted == "corruptBleed" || (getCurrentEnemy(1).corrupted == "corruptDodge" && !(game.global.runningChallengeSquared || game.global.challengeActive)))
+    if (getCurrentEnemy(1).corrupted == "healthyBleed" && (chosenFormation == '0' || chosenFormation == 1))
+        setFormation(2);
+    else if (getCurrentEnemy(1).corrupted == "corruptBleed" || (getCurrentEnemy(1).corrupted == "corruptDodge" && !(game.global.runningChallengeSquared || game.global.challengeActive)))
         setFormation(2);
 }
 
@@ -669,6 +670,7 @@ function getTargetAntiStack(target, firstRun){
     if (game.global.antiStacks <= target && game.global.antiStacks > 0){
         debug("getTargetAntiStacks target="+target+" firstRun="+firstRun+" got called, but our stacks="+game.global.antiStacks+" are fine.");
         trimpicide = false;
+        switchToGAStep(oldGeneAssistIndexOfStep); //return to previous
         return;
     }
     
