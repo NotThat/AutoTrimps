@@ -18,30 +18,32 @@ function buyUpgrades() {
                 buyCoords = false;
             }
         }
+        
         var dontBuyStartZ = getPageSetting('NoCoordBuyStartZ');
-        
-        if(game.global.world >= getPageSetting('WindStackingMin') && getEmpowerment() == "Wind" && getPageSetting('AutoStance')==3){
-            if(!allowBuyingCoords){ //if autostance3 is on and we're in windstack zones, only buy coords if autostance3 allows it.
-                if(game.upgrades.Coordination.done < maxCoords)
-                    buyCoords = true;
-                else
-                    buyCoords = false;
-
-                if (game.global.world == 500) //always want all coords for spire4
-                    buyCoords = true;
-            }
-            
-            if(game.global.world - 241 % 15 == 0 && game.global.lastClearedCell == -1) //fix to stop upgrades() from instantly buying a coord in the first wind zone
-                buyCoords = false;
-        }
-        
         if (dontBuyStartZ > 0 && dontBuyStartZ <= game.global.world && getPageSetting('TillWeHaveAmalg') > 0) { //if dontBuyStartZ is set and we've passed it
             if (game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg'))
                 buyCoords = false;
         }
-    }
+        
+        if(getPageSetting('AutoStance')==3){
+            if(game.global.world >= windStackZone && windZone()){
+                if(!allowBuyingCoords){ //if autostance3 is on and we're in windstack zones, only buy coords if autostance3 allows it.
+                    if(game.upgrades.Coordination.done < maxCoords)
+                        buyCoords = true;
+                    else
+                        buyCoords = false;
 
-    
+                    if (game.global.world == 500) //always want all coords for spire4
+                        buyCoords = true;
+                }
+
+                if(game.global.lastClearedCell == -1 && (game.global.world % 10 == 6 || game.global.world % 10 == 1)) //fix to stop upgrades() from instantly buying a coord in the first wind zone
+                    buyCoords = false;
+            }
+            if(AutoMapsCoordOverride) //we dont want to farm maps for damage when we have unspent coordinations
+                buyCoords = true;
+        }
+    }
     
     for (var upgrade in upgradeList) {
         upgrade = upgradeList[upgrade];

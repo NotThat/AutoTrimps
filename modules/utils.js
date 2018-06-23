@@ -188,9 +188,13 @@ function debug(message, type, lootIcon) {
     var perks = getPageSetting('SpamPerks');
     var profiles = getPageSetting('SpamProfiles');
     var output = true;
+    var noclock = false;
     switch (type) {
         case null:
             break;
+        case "spam":
+            output = general;
+            noclock = true;
         case "general":
             output = general;
             break;
@@ -226,8 +230,12 @@ function debug(message, type, lootIcon) {
             break;            
     }
     if (output) {
-        if (enableDebug)
-            console.log(timeStamp() + ' ' + message);
+        if (enableDebug){
+            if(noclock)
+                console.log(message);
+            else
+                console.log(timeStamp() + ' ' + message);
+        }
         message2(message, "AutoTrimps", lootIcon, type);
     }
 }

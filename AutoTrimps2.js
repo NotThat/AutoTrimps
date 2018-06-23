@@ -149,6 +149,7 @@ var ATmoduleList = [];
 var bestBuilding;
 var scienceNeeded;
 var breedFire = false;
+var hiddenBreedTimer;
 
 var shouldFarm = false;
 var enoughDamage = true;
@@ -178,6 +179,8 @@ var enemyHealth=1;
 var threshhold=1;
 var HDratio = 0;
 
+var windStackZone;
+
 ////////////////////////////////////////
 //Main LOGIC Loop///////////////////////
 ////////////////////////////////////////
@@ -187,7 +190,8 @@ function mainLoop() {
     if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled || game.global.viewingUpgrades) return;
     ATrunning = true;
     if(game.options.menu.showFullBreed.enabled != 1) toggleSetting("showFullBreed");    //more detail
-    addbreedTimerInsideText.innerHTML = ((game.jobs.Amalgamator.owned > 0) ? Math.floor((new Date().getTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000)) + 's'; //add breed time for next army;
+    hiddenBreedTimer = ((game.jobs.Amalgamator.owned > 0) ? Math.floor((new Date().getTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000));
+    addbreedTimerInsideText.innerHTML = hiddenBreedTimer + 's'; //add breed time for next army;
     addToolTipToArmyCount(); //Add hidden tooltip for army count (SettingsGUI.js @ end)
     //Heirloom:
     if (mainCleanup() // Z1 new world

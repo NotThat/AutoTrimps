@@ -58,13 +58,20 @@ var minDesiredLevel;
 var currWorldZone = 1;
 //Activate Robo Trimp (will activate on the first zone after liquification)
 var lastMsg; //stores last message, stops spam to console
-
+var maxAnti = (game.talents.patience.purchased ? 45 : 30);
+var AutoMapsCoordOverride = false;
 
 function calcDmg(){
     //START CALCULATING DAMAGES:
     calcBaseDamageinS();
         
     ourBaseDamage = baseDamage*8; //automaps always looks at damage in D
+    
+    ourBaseDamage = ourBaseDamage / (game.unlocks.imps.Titimp ? 2 : 1); // *2 for titimp.
+    
+    //if we dont have max anticipation stacks, calculate as though we do. we dont want automap to kick in after autostance3 went through all the trouble of deliberately lowering our current anticipation stacks
+    if(game.global.antiStacks < maxAnti)
+        ourBaseDamage = ourBaseDamage / (1+0.2*game.global.antiStacks) * (1+0.2 * maxAnti);
     
     //calculate with map bonus
     var mapbonusmulti = 1 + (0.20 * game.global.mapBonus);
@@ -149,132 +156,21 @@ function calcDmg(){
         buyEquipment('Gambeson')*/
     }
     
-    var windstackzone = getPageSetting('WindStackingMin');
-    
-    if (currWorldZone >= windstackzone && (currWorldZone-241) % 15 <= 4)
-        windStackingMult = 4; //in windstacking zones, wait much longer before doing maps for damage
+    if (currWorldZone >= windStackZone && windZone() && getPageSetting('AutoStance')==3)
+        windStackingMult = 2.5; //in windstacking zones, wait much longer before doing maps for damage
     else
         windStackingMult = 1;
     poisonMult = (getEmpowerment() == "Poison" ? customVars.poisonMult : 1);
     enoughDamage = (ourBaseDamage * enoughDamageCutoff * windStackingMult * poisonMult > enemyHealth); //add damage multiplier for poison zones (30 by default)
     threshhold = (poisonMult*windStackingMult*enoughDamageCutoff).toFixed(0);
-    //HDratio = baseDamage*8 * enoughDamageCutoff * windStackingMult * poisonMult / enemyHealth;
     
-    HDratio = (enemyHealth / ourBaseDamage).toExponential(4);
-}
-
-function fragCalc(){
-    var fragIncome = 0;
-    
-    //for true, need to be currently in a map
-    //fragIncome = rewardResource("fragments", 1, currWorldZone-1, true);
-    fragIncome = 5;
-    
-    //debug("fragIncome = " + fragIncome);
-    return fragIncome;
-}
-
-function checkNeedToVoid(){
-    //FIND VOID MAPS LEVEL:
-    var voidMapLevelSetting = getPageSetting('VoidMaps');
-    //Add your daily zone mod onto the void maps level
-    var dailyVoidMod = getPageSetting('AutoFinishDailyNew');
-    if ((game.global.challengeActive == "Daily") && (getPageSetting('AutoFinishDailyNew') != 999) && (getPageSetting('DailyVoidMod'))) {
-        (voidMapLevelSetting += dailyVoidMod);
-    }
-    //decimal void maps are possible, using string function to avoid false float precision (0.29999999992). javascript can compare ints to strings anyway.
-    var voidMapLevelSettingZone = (voidMapLevelSetting + "").split(".")[0];
-    var voidMapLevelSettingMap = (voidMapLevelSetting + "").split(".")[1];
-    if (voidMapLevelSettingMap === undefined || (game.global.challengeActive == 'Lead'))
-        voidMapLevelSettingMap = 90;
-    if (voidMapLevelSettingMap.length == 1) voidMapLevelSettingMap += "0"; //entering 187.70 becomes 187.7, this will bring it back to 187.70
-    var voidsuntil = getPageSetting('RunNewVoidsUntilNew');
-    doVoids = voidMapLevelSetting > 0 && game.global.totalVoidMaps > 0 && game.global.lastClearedCell + 1 >= voidMapLevelSettingMap &&
-        (game.global.world == voidMapLevelSettingZone ||
-            (game.global.world >= voidMapLevelSettingZone && getPageSetting('RunNewVoidsUntilNew') != 0 && (voidsuntil == -1 || game.global.world <= (voidsuntil + voidMapLevelSettingZone))));
-    if (game.global.totalVoidMaps == 0)
-        doVoids = false;
-    return doVoids;
-}
-
-function findVoidMap(){
-    //voidArray: make an array with all our voidmaps, so we can sort them by real-world difficulty level
-    var voidArray = [];
-    //values are easiest to hardest. (hardest has the highest value)
-    var prefixlist = {
-        'Deadly': 10,
-        'Heinous': 11,
-        'Poisonous': 20,
-        'Destructive': 30
-    };
-    var prefixkeys = Object.keys(prefixlist);
-    var suffixlist = {
-        'Descent': 7.077,
-        'Void': 8.822,
-        'Nightmare': 9.436,
-        'Pit': 10.6
-    };
-    var suffixkeys = Object.keys(suffixlist);
-    for (var map in game.global.mapsOwnedArray) {
-        var theMap = game.global.mapsOwnedArray[map];
-        if (theMap.location == 'Void') {
-            for (var pre in prefixkeys) {
-                if (theMap.name.includes(prefixkeys[pre]))
-                    theMap.sortByDiff = 1 * prefixlist[prefixkeys[pre]];
-            }
-            for (var suf in suffixkeys) {
-                if (theMap.name.includes(suffixkeys[suf]))
-                    theMap.sortByDiff += 1 * suffixlist[suffixkeys[suf]];
-            }
-            voidArray.push(theMap);
-        }
-    }
-    //sort the array (harder/highvalue last):
-    var voidArraySorted = voidArray.sort(function(a, b) {
-        return b.sortByDiff - a.sortByDiff; //i want destructives first for health purchase
-        //return a.sortByDiff - b.sortByDiff;
-    });
-    for (var map in voidArraySorted) {
-        var theMap = voidArraySorted[map];
-        //if we are on toxicity, don't clear until we will have max stacks at the last cell.
-        if (game.global.challengeActive == 'Toxicity' && game.challenges.Toxicity.stacks < (1500 - theMap.size)) break;
-        doVoids = true;
-        //check to make sure we won't get 1-shot in nostance by boss
-        var eAttack = getEnemyMaxAttack(game.global.world, theMap.size, 'Voidsnimp', theMap.difficulty);
-        if (game.global.world >= 181 || (game.global.challengeActive == "Corrupted" && game.global.world >= 60))
-            eAttack *= (getCorruptScale("attack") / 2).toFixed(1);
-        //TODO: Account for magmated voidmaps. (not /2)
-        //TODO: Account for daily.
-        var ourHealth = baseHealth;
-        if (game.global.challengeActive == 'Balance') {
-            var stacks = game.challenges.Balance.balanceStacks ? (game.challenges.Balance.balanceStacks > theMap.size) ? theMap.size : game.challenges.Balance.balanceStacks : false;
-            eAttack *= 2;
-            if (stacks) {
-                for (i = 0; i < stacks; i++) {
-                    ourHealth *= 1.01;
-                }
-            }
-        }
-        if (game.global.challengeActive == 'Toxicity') eAttack *= 5;
-        //break to prevent finishing map to finish a challenge?
-        //continue to check for doable map?
-        var diff = parseInt(getPageSetting('VoidCheck')) > 0 ? parseInt(getPageSetting('VoidCheck')) : 2;
-        var ourBlock = getBattleStats("block", true); //use block tooltip (after death block) instead of current army block.
-        if (ourHealth / diff < eAttack - ourBlock) {
-            shouldFarm = true;
-            voidCheckPercent = Math.round((ourHealth / diff) / (eAttack - ourBlock) * 100);
-            abandonVoidMap(); //exit/restart if below <95% health, we have ForceAbandon on, and its not due to randomly losing anti stacks
-            break;
-        } else {
-            voidCheckPercent = 0;
-            if (getPageSetting('DisableFarm'))
-                shouldFarm = shouldFarm || false;
-        }
-        //only go into the voidmap if we need to.
-        return theMap.id;
-    }
-    return null;
-
+    HDratio = (enemyHealth / ourBaseDamage);
+    if(HDratio < 0.00001)
+        HDratio = HDratio.toExponential(4);
+    else if (HDratio < 1)
+        HDratio = HDratio.toFixed(4);
+    else
+        HDratio = HDratio.toFixed(1);
 }
 
 //AutoMap - function originally created by Belaith (in 1971)
@@ -284,6 +180,7 @@ function autoMap() {
     calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
     updateAutoMapsStatus("", "Advancing"); //default msg. any other trigger will override this later
     currWorldZone = game.global.world;
+    AutoMapsCoordOverride = false;
     
     //lets see if we can figure out how much fragments we're getting
     //need to be inside of a map while calling this function to see our expected frags per second
@@ -331,6 +228,12 @@ function autoMap() {
     //prevents map-screen from flickering on and off during startup when base damage is 0.
     if (ourBaseDamage > 0) {
         shouldDoMaps = !enoughDamage || shouldFarm || scryerStuck || needPrestige;
+        if(!enoughDamage) {
+            AutoMapsCoordOverride = true;
+            updateAutoMapsStatus("", "Need Damage");
+        }    
+        else
+            AutoMapsCoordOverride = false;
     }
     //Check our graph history and - Estimate = The zone should take around this long in milliseconds.
     //mapTimeEstimate = mapTimeEstimater(); //currently unused, but interesting
@@ -345,6 +248,10 @@ function autoMap() {
     else if (game.global.mapBonus < customVars.wantHealthMapBonus && !enoughHealth && !shouldDoMaps && !needPrestige) {
         shouldDoMaps = true;
         shouldDoHealthMaps = true;
+        if(enoughDamage)
+            updateAutoMapsStatus("", "Need Health!");
+        else
+            updateAutoMapsStatus("", "Need Health/Dmg!");
     }
 
     //Disable Farm mode if we are capped for all attack weapons
@@ -406,7 +313,7 @@ function autoMap() {
             var cpthlth = getCorruptScale("health") / 2; //get corrupted health mod
             if (mutations.Magma.active())
                 maphp *= cpthlth;
-            var mapdmg = ourBaseDamage2 * (game.unlocks.imps.Titimp ? 2 : 1); // *2 for titimp. (ourBaseDamage2 has no mapbonus in it)
+            var mapdmg = ourBaseDamage2;// * (game.unlocks.imps.Titimp ? 2 : 1); // *2 for titimp. (ourBaseDamage2 has no mapbonus in it)
             if (game.upgrades.Dominance.done && !getPageSetting('ScryerUseinMaps2'))
                 mapdmg *= 4; //dominance stance and not-scryer stance in maps.
             if (mapdmg < maphp) {
@@ -1191,4 +1098,122 @@ function behindOnPrestige(zone) {
         return true;
     else
         return false;
+}
+
+function fragCalc(){
+    var fragIncome = 0;
+    
+    //for true, need to be currently in a map
+    //fragIncome = rewardResource("fragments", 1, currWorldZone-1, true);
+    fragIncome = 5;
+    
+    //debug("fragIncome = " + fragIncome);
+    return fragIncome;
+}
+
+function checkNeedToVoid(){
+    //FIND VOID MAPS LEVEL:
+    var voidMapLevelSetting = getPageSetting('VoidMaps');
+    //Add your daily zone mod onto the void maps level
+    var dailyVoidMod = getPageSetting('AutoFinishDailyNew');
+    if ((game.global.challengeActive == "Daily") && (getPageSetting('AutoFinishDailyNew') != 999) && (getPageSetting('DailyVoidMod'))) {
+        (voidMapLevelSetting += dailyVoidMod);
+    }
+    //decimal void maps are possible, using string function to avoid false float precision (0.29999999992). javascript can compare ints to strings anyway.
+    var voidMapLevelSettingZone = (voidMapLevelSetting + "").split(".")[0];
+    var voidMapLevelSettingMap = (voidMapLevelSetting + "").split(".")[1];
+    if (voidMapLevelSettingMap === undefined || (game.global.challengeActive == 'Lead'))
+        voidMapLevelSettingMap = 90;
+    if (voidMapLevelSettingMap.length == 1) voidMapLevelSettingMap += "0"; //entering 187.70 becomes 187.7, this will bring it back to 187.70
+    var voidsuntil = getPageSetting('RunNewVoidsUntilNew');
+    doVoids = voidMapLevelSetting > 0 && game.global.totalVoidMaps > 0 && game.global.lastClearedCell + 1 >= voidMapLevelSettingMap &&
+        (game.global.world == voidMapLevelSettingZone ||
+            (game.global.world >= voidMapLevelSettingZone && getPageSetting('RunNewVoidsUntilNew') != 0 && (voidsuntil == -1 || game.global.world <= (voidsuntil + voidMapLevelSettingZone))));
+    if (game.global.totalVoidMaps == 0)
+        doVoids = false;
+    return doVoids;
+}
+
+function findVoidMap(){
+    //voidArray: make an array with all our voidmaps, so we can sort them by real-world difficulty level
+    var voidArray = [];
+    //values are easiest to hardest. (hardest has the highest value)
+    var prefixlist = {
+        'Deadly': 10,
+        'Heinous': 11,
+        'Poisonous': 20,
+        'Destructive': 30
+    };
+    var prefixkeys = Object.keys(prefixlist);
+    var suffixlist = {
+        'Descent': 7.077,
+        'Void': 8.822,
+        'Nightmare': 9.436,
+        'Pit': 10.6
+    };
+    var suffixkeys = Object.keys(suffixlist);
+    for (var map in game.global.mapsOwnedArray) {
+        var theMap = game.global.mapsOwnedArray[map];
+        if (theMap.location == 'Void') {
+            for (var pre in prefixkeys) {
+                if (theMap.name.includes(prefixkeys[pre]))
+                    theMap.sortByDiff = 1 * prefixlist[prefixkeys[pre]];
+            }
+            for (var suf in suffixkeys) {
+                if (theMap.name.includes(suffixkeys[suf]))
+                    theMap.sortByDiff += 1 * suffixlist[suffixkeys[suf]];
+            }
+            voidArray.push(theMap);
+        }
+    }
+    //sort the array (harder/highvalue last):
+    var voidArraySorted = voidArray.sort(function(a, b) {
+        return b.sortByDiff - a.sortByDiff; //i want destructives first for health purchase
+        //return a.sortByDiff - b.sortByDiff;
+    });
+    for (var map in voidArraySorted) {
+        var theMap = voidArraySorted[map];
+        //if we are on toxicity, don't clear until we will have max stacks at the last cell.
+        if (game.global.challengeActive == 'Toxicity' && game.challenges.Toxicity.stacks < (1500 - theMap.size)) break;
+        doVoids = true;
+        //check to make sure we won't get 1-shot in nostance by boss
+        var eAttack = getEnemyMaxAttack(game.global.world, theMap.size, 'Voidsnimp', theMap.difficulty);
+        if (game.global.world >= 181 || (game.global.challengeActive == "Corrupted" && game.global.world >= 60))
+            eAttack *= (getCorruptScale("attack") / 2).toFixed(1);
+        //TODO: Account for magmated voidmaps. (not /2)
+        //TODO: Account for daily.
+        var ourHealth = baseHealth;
+        if (game.global.challengeActive == 'Balance') {
+            var stacks = game.challenges.Balance.balanceStacks ? (game.challenges.Balance.balanceStacks > theMap.size) ? theMap.size : game.challenges.Balance.balanceStacks : false;
+            eAttack *= 2;
+            if (stacks) {
+                for (i = 0; i < stacks; i++) {
+                    ourHealth *= 1.01;
+                }
+            }
+        }
+        if (game.global.challengeActive == 'Toxicity') eAttack *= 5;
+        //break to prevent finishing map to finish a challenge?
+        //continue to check for doable map?
+        var diff = parseInt(getPageSetting('VoidCheck')) > 0 ? parseInt(getPageSetting('VoidCheck')) : 2;
+        var ourBlock = getBattleStats("block", true); //use block tooltip (after death block) instead of current army block.
+        if (ourHealth / diff < eAttack - ourBlock) {
+            shouldFarm = true;
+            voidCheckPercent = Math.round((ourHealth / diff) / (eAttack - ourBlock) * 100);
+            abandonVoidMap(); //exit/restart if below <95% health, we have ForceAbandon on, and its not due to randomly losing anti stacks
+            break;
+        } else {
+            voidCheckPercent = 0;
+            if (getPageSetting('DisableFarm'))
+                shouldFarm = shouldFarm || false;
+        }
+        //only go into the voidmap if we need to.
+        return theMap.id;
+    }
+    return null;
+
+}
+
+function windZone(){
+    return ((game.global.world-241) % 15 <= 4);
 }
