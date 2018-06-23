@@ -5,7 +5,7 @@ var coordBuyThreshold;
 var allowBuyingCoords = true;
 var maxCoords = -1;
 var trimpicide = false;
-var oldGeneAssistIndexOfStep;
+var oldGeneAssistIndexOfStep = game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting); //back up our current geneassist setting
 var minAnticipationStacks;
 var worldArray = [];
 var lastHealthyCell = -1;
@@ -26,7 +26,7 @@ function calcBaseDamageinS() {
     else if (game.global.formation != "0")
         baseBlock *= 2;
 
-    //H stance
+    //H stance 
     if (game.global.formation == 1)
         baseHealth /= 4;
     else if (game.global.formation != "0")
@@ -541,6 +541,17 @@ function autoStanceCheck(enemyCrit) {
 }
 
 function autoStance3() {
+    if (game.global.soldierHealth <= 0) { //dont calculate stances when dead, the "current" numbers are not updated when dead.
+        if(trimpicide)
+            getTargetAntiStack(minAnticipationStacks, false);
+        return;
+    } 
+    
+    if(isActiveSpireAT()){
+        setFormation(2);
+        return;
+    }
+    
     windStackZone = getPageSetting('WindStackingMin'); 
     if((windStackZone > 0) && ((windStackZone - 241) % 15 > 4)) 
         windStackZone += 15 - ((windStackZone - 241) % 15); //raise windStackZone to first wind zone
@@ -550,11 +561,7 @@ function autoStance3() {
     
     if (game.global.world < 81) return;//no D stance, no wind stacks, nothing to do here
     if (game.global.gridArray.length === 0) return;
-    if (game.global.soldierHealth <= 0) { //dont calculate stances when dead, the "current" numbers are not updated when dead.
-        if(trimpicide)
-            getTargetAntiStack(minAnticipationStacks, false);
-        return;
-    } 
+
     
     if(windStackZone < 0 || game.global.world < windStackZone || game.global.spireActive || !windZone()) {
         if(game.global.soldierHealth > 0 && game.global.antiStacks <= minAnticipationStacks) //we probably left our army with low stacks from wind stacking. lets kill it
@@ -574,6 +581,10 @@ function autoStance3() {
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     var nextCell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum + 1] : game.global.gridArray[cellNum + 1];
     
+    var maxDesiredStacks = ((game.global.challengeActive == "Daily") ? 200 : 150); //overshooting is really bad, so take a safety margin on non dailies. note the with plaguebringer script will overshoot this by quite a bit on occasions so a big safety margin recommended
+    if((cell.corrupted !== undefined && cell.corrupted.includes("healthy")) || cellNum == 99)
+        maxDesiredStacks = 200; //still want max stacks for healthy/end cells
+    
     var ourAvgDmgS = baseDamage;
     var ourAvgDmgD = ourAvgDmgS * 8;
     var ourAvgDmgX = ourAvgDmgS * 2;
@@ -581,7 +592,7 @@ function autoStance3() {
     var enemyHealth = cell.health;  //current health
     var enemyMaxHealth = cell.maxHealth; //in future can do some prediction with plaguebringer and expected minimum enemy max health of world zone
     var enemyPercentHealthRemaining = cell.health/cell.maxHealth * 100;
-    var missingStacks = 200-game.empowerments.Wind.currentDebuffPower;
+    var missingStacks = Math.max(maxDesiredStacks-game.empowerments.Wind.currentDebuffPower, 0);
     
     var expectedNumHitsS = enemyHealth / ourAvgDmgS;
     var expectedNumHitsX = enemyHealth / ourAvgDmgX;
@@ -603,7 +614,7 @@ function autoStance3() {
         coordBuyThreshold = 40;
         
         if(cell.corrupted !== undefined && cell.corrupted != "none"){ //disregard non corrupted cells
-            if(stacks + expectedNumHitsD > 220 && maxD > coordBuyThreshold && currentBadGuyNum != cellNum){ //if it takes more than this many hits in D, buy 1 coord.
+            if(stacks + expectedNumHitsD > maxDesiredStacks+20 && maxD > coordBuyThreshold && currentBadGuyNum != cellNum){ //if it takes more than this many hits in D, buy 1 coord.
                 currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
                 allowBuyingCoords = true;
                 maxCoords = game.upgrades.Coordination.done + 1;
@@ -623,11 +634,13 @@ function autoStance3() {
         
         var minWasteRatio = 2; //check if we have too much damage. maybe we want to trimpicide to remove anticipation stacks
         minAnticipationStacks = 1;
-        if(cell.corrupted !== undefined && cell.corrupted != "none"){ //disregard non corrupted cells
-            if(!rushCell(cellNum) && expectedNumHitsS + stacks < 120 && (maxS/(1+0.2*game.global.antiStacks)) < 4 && game.global.antiStacks > minAnticipationStacks){ //gotta make sure the enemy isnt complete weakling that even with no stacks he'll die too fast
-                trimpicide = true;
-                getTargetAntiStack(minAnticipationStacks, true);
-                return;
+        if(cell.corrupted !== undefined && cell.corrupted != "none" && cellNum < 99){ //ignores regular cells
+            if(getCurrentEnemy(1).corrupted != "corruptBleed" && getCurrentEnemy(1).corrupted == "healthyBleed") { //we're quite likely to die again against these, so dont trimpicide to lower stacks
+                if(!rushCell(cellNum) && expectedNumHitsS + stacks+10 < expectedNumHitsS*(1+0.2*game.global.antiStacks)/(1+0.2*minAnticipationStacks)+stacks*0.85 && (maxS/(1+0.2*game.global.antiStacks)) < 4 && game.global.antiStacks > minAnticipationStacks){ //gotta make sure the enemy isnt complete weakling that even with no stacks he'll die too fast
+                    trimpicide = true;
+                    getTargetAntiStack(minAnticipationStacks, true);
+                    return;
+                }
             }
         }
     }
@@ -648,6 +661,7 @@ function autoStance3() {
     if(nextCell !== undefined){
         var nextPBDmg = nextCell.plaguebringer; //extra damage on next cell from PB
         var pbHits = Math.ceil(nextCell.plagueHits); //extra wind stacks on next cell from PB
+        //nextCell.plagueHits += game.heirlooms.Shield.plaguebringer.currentBonus / 100 from game files
         var nextStartingStacks = 1 + Math.ceil(game.empowerments.Wind.currentDebuffPower * getRetainModifier("Wind")) + pbHits;
         var missingStacksNext = 200-nextStartingStacks;
     }*/
@@ -664,6 +678,7 @@ function autoStance3() {
 function getTargetAntiStack(target, firstRun){
     if(target < 1 || target > 45){
         debug("error target anti stacks out of bounds " + target);
+        switchToGAStep(oldGeneAssistIndexOfStep); //return to previous
         return;
     }
 
@@ -682,9 +697,9 @@ function getTargetAntiStack(target, firstRun){
     
     if(firstRun){
         var deltaGenes = getDeltaGenes(minAnticipationStacks); //calculate how many geneticists we need to fire to be below minAnticipationStacks
+        oldGeneAssistIndexOfStep = game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting); //back up our current geneassist setting
         if(deltaGenes > 0){ //if we need to fire geneticists
             debug("Trimpicide to remove anticipation. Firing " + deltaGenes + " Geneticists. New Geneticists: " + (game.jobs.Geneticist.owned-deltaGenes));
-            oldGeneAssistIndexOfStep = game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting); //back up our current geneassist setting
             switchToGAStep('0'); //pause autogeneticist            
             fireGeneticists(deltaGenes);
         }
@@ -705,6 +720,7 @@ function getTargetAntiStack(target, firstRun){
             mapsClicked();
         }
     }
+    switchToGAStep(oldGeneAssistIndexOfStep); //return to previous
 }
 
 function getDeltaGenes(target){

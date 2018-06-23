@@ -163,6 +163,9 @@ function calcDmg(){
     poisonMult = (getEmpowerment() == "Poison" ? customVars.poisonMult : 1);
     enoughDamage = (ourBaseDamage * enoughDamageCutoff * windStackingMult * poisonMult > enemyHealth); //add damage multiplier for poison zones (30 by default)
     threshhold = (poisonMult*windStackingMult*enoughDamageCutoff).toFixed(0);
+
+    if(!enoughHealth)
+        debug("missing health");
     
     HDratio = (enemyHealth / ourBaseDamage);
     if(HDratio < 0.00001)
@@ -246,12 +249,13 @@ function autoMap() {
         shouldFarmLowerZone = getPageSetting('LowerFarmingZone');
     //do (1) map if we dont have enough health
     else if (game.global.mapBonus < customVars.wantHealthMapBonus && !enoughHealth && !shouldDoMaps && !needPrestige) {
-        shouldDoMaps = true;
+        debug("automaps wants more health."); //TODO: do we want to run maps for healths? feels unneeded in currentyear
+        /*shouldDoMaps = true;
         shouldDoHealthMaps = true;
         if(enoughDamage)
             updateAutoMapsStatus("", "Need Health!");
         else
-            updateAutoMapsStatus("", "Need Health/Dmg!");
+            updateAutoMapsStatus("", "Need Health/Dmg!");*/
     }
 
     //Disable Farm mode if we are capped for all attack weapons
@@ -522,7 +526,7 @@ function autoMap() {
     } 
     
     //#3 in premap screen
-    else if (game.global.preMapsActive) { 
+    if (game.global.preMapsActive) { 
         if (selectedMap == "world") {
             mapsClicked(); //go back to world
         } else {
@@ -553,6 +557,7 @@ function autoMap() {
 
 //update the UI with stuff from automaps.
 function updateAutoMapsStatus(get, msg) {
+
     var status;
     var minSp = getPageSetting('MinutestoFarmBeforeSpire');
 
@@ -571,7 +576,7 @@ function updateAutoMapsStatus(get, msg) {
     } else if (spireMapBonusFarming) status = 'Getting Spire Map Bonus<br>';
     else if (doVoids && voidCheckPercent == 0) status = 'Remaining VMs: ' + game.global.totalVoidMaps + "<br>";
     else if (skippedPrestige) status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b><br>'; // Show skipping prestiges
-    else if (!(enoughHealth && enoughDamage)) status = 'Need Dmg/Health<br>';
+    else if (!(enoughHealth)) status = 'Need Health<br>';
     
     var formattedRatio;
     if(HDratio > 1e6 || HDratio < 1e-6)
@@ -591,6 +596,7 @@ function updateAutoMapsStatus(get, msg) {
     else if (!enoughDamage) status = 'Want ' + HDratio.toFixed(2) + 'x &nbspmore damage';
     else if (!enoughHealth) status = 'Want more health';
     */
+    debug("status " + status + " " + msg);
 
     if (getPageSetting('AutoMaps') == 0) status = 'Off';
 
@@ -622,6 +628,11 @@ function PrestigeRaid() {
         PRaidMax = 0;
         setPageSetting('PRaidingMaxZones', 0);
     }
+    
+    //at the zone where we BW, we want the most gear from normal maps that is possible.
+    if (game.global.world == getPageSetting('BWraidingz') && getPageSetting('BWraid') &&
+        !(getPageSetting('BWraidDailyCOnly') && !(game.global.runningChallengeSquared || game.global.challengeActive)))
+            PRaidMax = 10;
     
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
         return true; 
