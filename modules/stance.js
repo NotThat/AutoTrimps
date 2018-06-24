@@ -5,7 +5,6 @@ var coordBuyThreshold;
 var allowBuyingCoords = true;
 var maxCoords = -1;
 var trimpicide = false;
-var oldGeneAssistIndexOfStep = game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting); //back up our current geneassist setting
 var minAnticipationStacks;
 var worldArray = [];
 var lastHealthyCell = -1;
@@ -541,9 +540,14 @@ function autoStanceCheck(enemyCrit) {
 }
 
 function autoStance3() {
+    //if(game.global.world > 480 && game.jobs.Geneticist.owned <= 500){
+//        debug("error geneticists world");
+//    }
+    
+    if(trimpicide)
+        getTargetAntiStack(minAnticipationStacks, false);
+
     if (game.global.soldierHealth <= 0) { //dont calculate stances when dead, the "current" numbers are not updated when dead.
-        if(trimpicide)
-            getTargetAntiStack(minAnticipationStacks, false);
         return;
     } 
     
@@ -620,9 +624,10 @@ function autoStance3() {
                 maxCoords = game.upgrades.Coordination.done + 1;
             }
             //consider trimpicide for max stacks
-            if(hiddenBreedTimer >= maxAnti && game.global.antiStacks < maxAnti && maxD > 30 && Math.min(stacks + expectedNumHitsD, 200) - Math.min(stacks*0.85 + expectedNumHitsD*(5+maxAnti)/(5+game.global.antiStacks), 200) < 20){ 
+            if(hiddenBreedTimer >= maxAnti && game.global.antiStacks < maxAnti && maxD > 30 && Math.min(stacks + expectedNumHitsD, 200) - Math.min(stacks*0.85 + expectedNumHitsD*(5+maxAnti)/(5+game.global.antiStacks), 200) < 20 && game.resources.trimps.owned == game.resources.trimps.realMax()){ 
                 debug("Trimpiciding to get max stacks");
                 stackConservingTrimpicide();
+                switchOnGA();
                 return;
             }
         }
@@ -635,17 +640,14 @@ function autoStance3() {
         var minWasteRatio = 2; //check if we have too much damage. maybe we want to trimpicide to remove anticipation stacks
         minAnticipationStacks = 1;
         if(cell.corrupted !== undefined && cell.corrupted != "none" && cellNum < 99){ //ignores regular cells
-            if(getCurrentEnemy(1).corrupted != "corruptBleed" && getCurrentEnemy(1).corrupted == "healthyBleed") { //we're quite likely to die again against these, so dont trimpicide to lower stacks
+            if(cell.corrupted != "corruptBleed" && cell.corrupted != "healthyBleed") { //we're quite likely to die again against these, so dont trimpicide to lower stacks
                 if(!rushCell(cellNum) && expectedNumHitsS + stacks+10 < expectedNumHitsS*(1+0.2*game.global.antiStacks)/(1+0.2*minAnticipationStacks)+stacks*0.85 && (maxS/(1+0.2*game.global.antiStacks)) < 4 && game.global.antiStacks > minAnticipationStacks){ //gotta make sure the enemy isnt complete weakling that even with no stacks he'll die too fast
-                    trimpicide = true;
                     getTargetAntiStack(minAnticipationStacks, true);
                     return;
                 }
             }
         }
     }
-    
-    trimpicide = false;
 
     if (chosenFormation == '0' && game.global.soldierHealth < 0.55 * game.global.soldierHealthMax){ //dont swap to X if it will kill/almost kill us
         chosenFormation = 2;
@@ -678,38 +680,39 @@ function autoStance3() {
 function getTargetAntiStack(target, firstRun){
     if(target < 1 || target > 45){
         debug("error target anti stacks out of bounds " + target);
-        switchToGAStep(oldGeneAssistIndexOfStep); //return to previous
+        switchOnGA();
+        trimpicide = false;
         return;
     }
 
     if (game.global.antiStacks <= target && game.global.antiStacks > 0){
         debug("getTargetAntiStacks target="+target+" firstRun="+firstRun+" got called, but our stacks="+game.global.antiStacks+" are fine.");
         trimpicide = false;
-        switchToGAStep(oldGeneAssistIndexOfStep); //return to previous
+        switchOnGA();
         return;
     }
     
+    if(firstRun){
+        trimpicide = true;
+        var deltaGenes = getDeltaGenes(minAnticipationStacks); //calculate how many geneticists we need to fire to be below minAnticipationStacks
+        if(deltaGenes > 0){ //if we need to fire geneticists
+            debug("Trimpicide to remove anticipation. Firing " + deltaGenes + " Geneticists. New Geneticists: " + (game.jobs.Geneticist.owned-deltaGenes));
+            switchOffGA(); //pause autogeneticist            
+            fireGeneticists(deltaGenes);
+        }
+        stackConservingTrimpicide();
+        return;
+    }
+
     if(game.global.preMapsActive){
        if (!game.global.switchToMaps){
             mapsClicked();
         }
     }
     
-    if(firstRun){
-        var deltaGenes = getDeltaGenes(minAnticipationStacks); //calculate how many geneticists we need to fire to be below minAnticipationStacks
-        oldGeneAssistIndexOfStep = game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting); //back up our current geneassist setting
-        if(deltaGenes > 0){ //if we need to fire geneticists
-            debug("Trimpicide to remove anticipation. Firing " + deltaGenes + " Geneticists. New Geneticists: " + (game.jobs.Geneticist.owned-deltaGenes));
-            switchToGAStep('0'); //pause autogeneticist            
-            fireGeneticists(deltaGenes);
-        }
-        stackConservingTrimpicide();
-        return;
-    }
-    
-    if(game.global.breedBack < 0){ //breedback keeps track of our bred trimps. it starts from armysize/2 and counts down. when breedback trimps have been bred the geneticist bonus kicks in. that's what we're after.
+    if(game.global.breedBack <= 0){ //breedback keeps track of our bred trimps. it starts from armysize/2 and counts down. when breedback trimps have been bred the geneticist bonus kicks in. that's what we're after.
         trimpicide = false; //we're done here
-        switchToGAStep(oldGeneAssistIndexOfStep); //return to previous
+        switchOnGA();
         setFormation(4);
         fightManual();
         return;
@@ -720,24 +723,45 @@ function getTargetAntiStack(target, firstRun){
             mapsClicked();
         }
     }
-    switchToGAStep(oldGeneAssistIndexOfStep); //return to previous
 }
 
 function getDeltaGenes(target){
     var timeLeft = getBreedTime(true);  //how much time untill we're full on trimps
+    if (timeLeft < 1) timeLeft = 45; //lets just assume GA sets this to 45 seconds
     var ratio = timeLeft / target;      
     
     var deltaGenes = -1 * Math.floor(Math.log(ratio) / Math.log(0.98)); //we need to fire this many genes to reach our target breed timer
     return deltaGenes;
 }
 
-function switchToGAStep(step){
+function switchOnGA(){
+    debug("switchOnGA");
     var steps = game.global.GeneticistassistSteps;
     var currentStep = steps.indexOf(game.global.GeneticistassistSetting);
-    while(currentStep != step){ //get to the last active GA mode
+    if (currentStep == 3){
+        debug("already on");
+        return;
+    }
+    while(currentStep != 3){ //get to the last active GA mode
         toggleGeneticistassist();
         currentStep = steps.indexOf(game.global.GeneticistassistSetting);
     }
+    debug("GA on");
+}
+
+function switchOffGA(){
+    debug("switchOffGA");
+    var steps = game.global.GeneticistassistSteps;
+    var currentStep = steps.indexOf(game.global.GeneticistassistSetting);
+    if (currentStep == '0'){
+        debug("already off");
+        return;
+    }
+    while(currentStep != '0'){ //get to the last active GA mode
+        toggleGeneticistassist();
+        currentStep = steps.indexOf(game.global.GeneticistassistSetting);
+    }
+    debug("GA off");
 }
 
 function stackConservingTrimpicide(){
@@ -757,6 +781,10 @@ function trimpicideNow(){
 }
 
 function fireGeneticists(howMany){
+    if (howMany > game.jobs.Geneticist.owned){
+        debug("error! not enough gen to fire " + howMany);
+        return;
+    }
     game.global.buyAmt = Math.floor(howMany);
     game.global.firing = true;
     buyJob('Geneticist', true, true); 
