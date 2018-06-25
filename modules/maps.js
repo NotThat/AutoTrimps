@@ -62,20 +62,28 @@ var maxAnti = (game.talents.patience.purchased ? 45 : 30);
 var AutoMapsCoordOverride = false;
 
 function calcDmg(){
-    //START CALCULATING DAMAGES:
-    calcBaseDamageinS();
-        
-    ourBaseDamage = baseDamage*8; //automaps always looks at damage in D
     
-    ourBaseDamage = ourBaseDamage / (game.unlocks.imps.Titimp ? 2 : 1); // *2 for titimp.
+    calcBaseDamageinS(); //baseDamage = our displayed damage in S
+    const FORMATION_MOD_1 = game.upgrades.Dominance.done ? 2 : 1;
     
-    //if we dont have max anticipation stacks, calculate as though we do. we dont want automap to kick in after autostance3 went through all the trouble of deliberately lowering our current anticipation stacks
+    ourBaseDamage = baseDamage*2*(game.upgrades.Dominance.done ? 4 : 1); //D if we have it, X otherwise
+    
+    ourBaseDamage = ourBaseDamage / (game.unlocks.imps.Titimp ? 2 : 1); // *we dont care about titimp damage
+    
+    //if we dont have max anticipation stacks, calculate as though we do. we dont want automap to kick in after autostance3 went through all the trouble of deliberately lowering our current anticipation stacks, and really it shouldnt be automap()'s job to handle trimpicides
     if(game.global.antiStacks < maxAnti)
         ourBaseDamage = ourBaseDamage / (1+0.2*game.global.antiStacks) * (1+0.2 * maxAnti);
     
     //calculate with map bonus
     var mapbonusmulti = 1 + (0.20 * game.global.mapBonus);
     //(autostance2 has mapbonusmulti built in)
+    
+    //if autostance 3 forces not to buy coordinations, factor those in. otherwise we'll enter maps for more damage thinking that we dont have enough.
+    if(buyCoords == false && canAffordCoordinationTrimps() && getPageSetting('AutoStance') == 3){
+        var missingCoords = game.global.world - 1 + (game.global.world > 230 ? 100 : 0) - game.upgrades.Coordination.done;
+        ourBaseDamage = ourBaseDamage * Math.pow(1.25, missingCoords);
+    }
+    
     ourBaseDamage2 = ourBaseDamage; //keep a version without mapbonus
     ourBaseDamage *= mapbonusmulti;
 
@@ -104,7 +112,6 @@ function calcDmg(){
         var atkprop = cptpct * cptatk; //Proportion of cells corrupted * attack of a corrupted cell
         if (atkprop >= 1)
             enemyDamage *= atkprop;
-        //console.log("enemy dmg:" + enemyDamage + " enemy hp:" + enemyHealth + " base dmg: " + ourBaseDamage);
     }
     // enter farming if it takes over 4 hits in D stance (16) (and exit if under.)
     if (!getPageSetting('DisableFarm')) {
@@ -138,31 +145,21 @@ function calcDmg(){
             shouldFarm = enemyHealth > (ourBaseDamage * customVars.LeadfarmingCutoff);
         }
     }
-    //does not take corrupted void maps into consideration?
-    //Enough Health and Damage calculations:
+
     var pierceMod = (game.global.brokenPlanet && !game.global.mapsActive) ? getPierceAmt() : 0;
-    const FORMATION_MOD_1 = game.upgrades.Dominance.done ? 2 : 1;
+    
+    //Enough Health and Damage calculations:    
     //asks if we can survive x number of hits in either D stance or X stance.
     enoughHealth = (baseHealth / FORMATION_MOD_1 > customVars.numHitsSurvived * (enemyDamage - baseBlock / FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock / FORMATION_MOD_1 : enemyDamage * pierceMod));
-    if(game.global.soldierHealth < 1.65*enemyDamage && game.global.soldierHealth > 1000){ //lets try buying more health if current health < 35% enemy attack, but not if 0 because we're dead)
-        enoughHealth=false;
-        //buyArmor()
-        /*numTab(3);
-        buyEquipment('Boots');
-        buyEquipment('Helmet');
-        buyEquipment('Pants');
-        buyEquipment('Shoulderguards');
-        buyEquipment('Breastplate')
-        buyEquipment('Gambeson')*/
-    }
     
     if (currWorldZone >= windStackZone && windZone() && getPageSetting('AutoStance')==3)
-        windStackingMult = 2.5; //in windstacking zones, wait much longer before doing maps for damage
+        windMult = 2.5; //in windstacking zones, wait longer before doing maps for damage
     else
-        windStackingMult = 1;
+        windMult = 1;
     poisonMult = (getEmpowerment() == "Poison" ? customVars.poisonMult : 1);
-    enoughDamage = (ourBaseDamage * enoughDamageCutoff * windStackingMult * poisonMult > enemyHealth); //add damage multiplier for poison zones (30 by default)
-    threshhold = (poisonMult*windStackingMult*enoughDamageCutoff).toFixed(0);
+    
+    threshhold = poisonMult * windMult * enoughDamageCutoff;
+    enoughDamage = (ourBaseDamage * threshhold > enemyHealth); //add damage multiplier for poison zones (30 by default)
 
     if(!enoughHealth)
         debug("missing health");
@@ -233,7 +230,7 @@ function autoMap() {
         shouldDoMaps = !enoughDamage || shouldFarm || scryerStuck || needPrestige;
         if(!enoughDamage) {
             AutoMapsCoordOverride = true;
-            updateAutoMapsStatus("", "Need Damage");
+            updateAutoMapsStatus("", "AutoMaps: Need Damage, forcing Coordination purchase");
         }    
         else
             AutoMapsCoordOverride = false;

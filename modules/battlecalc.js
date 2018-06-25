@@ -347,7 +347,6 @@ function calcOurDmg(number,maxormin,disableStances,disableFlucts) { //number = b
         return number;
 }
 
-
 function calcBadGuyDmg(enemy,attack,daily,maxormin,disableFlucts) {
     var number;
     if (enemy)
@@ -393,11 +392,8 @@ function calcBadGuyDmg(enemy,attack,daily,maxormin,disableFlucts) {
         number *= game.mapUnlocks.roboTrimp.getShriekValue();
     }
     
-    if (getEmpowerment() == "Ice"){
-        //debug("game.empowerments.Ice.currentDebuffPower " + game.empowerments.Ice.currentDebuffPower);
-        //debug("game.empowerments.Ice.getCombatModifier() " + game.empowerments.Ice.getCombatModifier());
+    if (getEmpowerment() == "Ice")
         number *= game.empowerments.Ice.getCombatModifier();
-    }
 
     if (!disableFlucts) {
         if (minFluct > 1) minFluct = 1;
@@ -406,7 +402,6 @@ function calcBadGuyDmg(enemy,attack,daily,maxormin,disableFlucts) {
         var min = Math.floor(number * (1 - minFluct));
         var max = Math.ceil(number + (number * maxFluct));
 
-        //number = Math.floor(Math.random() * ((max + 1) - min)) + min;
         return maxormin ? max : min;
     }
     else

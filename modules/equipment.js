@@ -320,7 +320,6 @@ function autoLevelEquipment() {
             first = false;
         }
         enoughHealthE = false;
-        //buyArmor()
         //numTab(3);
         buyEquipment('Boots', false, true);
         buyEquipment('Helmet', false, true);

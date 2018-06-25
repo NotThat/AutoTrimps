@@ -74,7 +74,7 @@ function getScienceCostToUpgrade(upgrade) {
 
 function getEnemyMaxAttack(world, level, name, diff, corrupt) {
     var amt = 0;
-    var adjWorld = ((world - 1) * 100) + level;
+    //var adjWorld = ((world - 1) * 100) + level;
     amt += 50 * Math.sqrt(world) * Math.pow(3.27, world / 2);
     amt -= 10;
     if (world == 1){
