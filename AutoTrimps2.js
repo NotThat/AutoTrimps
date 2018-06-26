@@ -178,6 +178,8 @@ var poisonMult=30;
 var enemyHealth=1;
 var threshhold=1;
 var HDratio = 0;
+var maxAnti = (game.talents.patience.purchased ? 45 : 30);
+var wantedAnticipation = maxAnti;
 
 var windStackZone;
 
@@ -288,6 +290,7 @@ function mainCleanup() {
     lastrunworld = currentworld;
     currentworld = game.global.world;
     aWholeNewWorld = lastrunworld != currentworld;
+ 
     //run once per portal:
     if (currentworld == 1 && aWholeNewWorld) {
         lastHeliumZone = 0;

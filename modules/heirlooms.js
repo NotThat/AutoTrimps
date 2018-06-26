@@ -558,6 +558,84 @@ function newSelectHeirloom(number, location, elem){
     protectHeirloom();
 }
 
+function equipMainShield(){
+    if(!getPageSetting('HeirloomSwapping')) return false;
+    var loom = findMainShield();
+    if (loom == null) return false;
+    newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");
+    equipHeirloom();
+    highDamageHeirloom = true;
+    return true;
+}
+equipMainShield();
+
+function equipLowDmgShield(){
+    if(!getPageSetting('HeirloomSwapping')) return false;
+    var loom = findLowDmgShield();
+    if (loom == null) return false;
+    newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");
+    equipHeirloom();
+    highDamageHeirloom = false;
+    return true;
+}
+
+function findMainShield(){
+    for (loom of game.global.heirloomsCarried){
+        var matchCounter = 0; //lets count how many of the top 5 mods shields have. a 5/5 shield is our good shield.
+        for (mod of loom.mods){
+            switch (mod[0]) {
+                case "critChance":
+                    matchCounter++;
+                    break;
+                case "critDamage":
+                    matchCounter++;
+                    break;
+                case "plaguebringer":
+                    matchCounter++;
+                    break;
+                case "trimpAttack":
+                    matchCounter++;
+                    break;
+                case "voidMaps":
+                    matchCounter++;
+                    break;
+            }
+            if(matchCounter >= 5)
+                return loom;
+        }
+    }
+    return null;
+}    
+
+//looks for a shield with just PB and void maps and zero damage mods on it
+function findLowDmgShield(){
+    for (loom of game.global.heirloomsCarried){
+        var matchCounter = 0; 
+        for (mod of loom.mods){
+            switch (mod[0]) {
+                case "voidMaps":
+                    matchCounter++;
+                    break;
+                case "plaguebringer":
+                    matchCounter++;
+                    break;
+                case "critChance":
+                    matchCounter++;
+                    continue;
+                case "critDamage":
+                    matchCounter++;
+                    continue;
+                case "trimpAttack":
+                    continue;
+
+            }
+            if(matchCounter == 2)
+                return loom;
+        }
+    }
+    return null;
+}
+
 //replacement function that inserts a new onclick action into the heirloom icons so it can populate the proper Protect icon. (yes this is the best way to do it.)
 function generateHeirloomIcon(heirloom, location, number){
     if (typeof heirloom.name === 'undefined') return "<span class='icomoon icon-sad3'></span>";

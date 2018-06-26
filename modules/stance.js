@@ -13,6 +13,12 @@ var dailyMult = 1;
 var Goal = 0.005;
 var pctTotal;
 var OmniThreshhold;
+var minHP;
+var maxHP;
+var desiredDamage;
+var m;
+var hr;
+var highDamageHeirloom = true;
 
 function calcBaseDamageinS() {
     //baseDamage
@@ -545,62 +551,78 @@ function autoStanceCheck(enemyCrit) {
 }
 
 function autoStance3() {
-    if(trimpicide)
-        getTargetAntiStack(minAnticipationStacks, false);
-
-    if (game.global.soldierHealth <= 0) return;
-    if (game.global.world < 81) return;//no D stance, no wind stacks, nothing to do here
-    if (game.global.gridArray.length === 0) return;
-    
-    if(isActiveSpireAT()){
-        setFormation(2);
-        return;
+    calcBaseDamageinS(); //this finds our displayed damage in S 'baseDamage'
+    if(baseDamage <= 0){ debug("Error Stance3: " + baseDamage + " damage!"); return; }
+    if (lastZoneGridded != game.global.world || lastrunworld != currentworld){ 
+        buildWorldArray();
+        lastZoneGridded = game.global.world;
     }
+    else
+        updateOmniThreshhold();
+    
     
     windStackZone = getPageSetting('WindStackingMin'); 
-    if((windStackZone > 0) && ((windStackZone - 241) % 15 > 4)){
-        windStackZone += 15 - ((windStackZone - 241) % 15); //raise windStackZone to first wind zone
-        setPageSetting('WindStackingMin', windStackZone);
+    if(windStackZone > 0){    
+        if(windStackZone < 241) windStackZone = 241;
+        if((windStackZone - 241) % 15 > 4)
+            windStackZone += 15 - ((windStackZone - 241) % 15); //raise windStackZone to first wind zone
+        if(windStackZone != getPageSetting('WindStackingMin'))
+            setPageSetting('WindStackingMin', windStackZone);
     }
-    if(windStackZone < 0) return;
     
-    allowBuyingCoords = false; //dont buy coords unless we explicitly permit it. automaps() can also allow it if player runs a map for ratio.
-    
-    if(game.global.world < windStackZone || !windZone()) {
+    if(windStackZone <= 0 || game.global.world < windStackZone || !windZone()){ 
+        equipMainShield();
         if(game.global.soldierHealth > 0 && game.global.antiStacks <= minAnticipationStacks && hiddenBreedTimer >= maxAnti) //we probably left our army with low stacks from wind stacking. lets kill it
             stackConservingTrimpicide();
         
+        if(game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting) == 0)
+            switchOnGA(); //in rare cases we leave GA disabled, so make sure to turn it back on
         allowBuyingCoords = true;
         setFormation(2);
         return;
     }
+    
+    if(trimpicide)
+        getTargetAntiStack(minAnticipationStacks, false);
+
+    if (game.global.soldierHealth <= 0){ 
+        if(game.global.breedBack <= 0 && hiddenBreedTimer > wantedAnticipation)
+            fightManual();
+        else
+            return;
+    }
+    if (game.global.world < 81) return;//no D stance, no wind stacks, nothing to do here
+    if (game.global.gridArray.length === 0) return;
+    
+    if(isActiveSpireAT()){
+        equipMainShield();
+        if(game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting) == 0)
+            switchOnGA();
+        setFormation(2);
+        return;
+    }
+    
+    allowBuyingCoords = false; //dont buy coords unless we explicitly permit it. automaps() can also allow it if player runs a map for ratio.
     
     if(game.global.mapsActive){
         setFormation(2);
         return;
     }
     
-    if (lastZoneGridded < game.global.world){
-        buildWorldArray();
-        lastZoneGridded = game.global.world;
-    }
+
     
     //we shouldnt be in a map here, but just in case
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     var nextCell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum + 1] : game.global.gridArray[cellNum + 1];
     
-    var maxDesiredStacks = ((game.global.challengeActive == "Daily") ? 198 : 170); //overshooting is really bad, so take a safety margin on non dailies. note that with plaguebringer the script will overshoot this by quite a bit on occasions so a big safety margin is recommended
+    var maxDesiredStacks = ((game.global.challengeActive == "Daily") ? 198 : 180); //overshooting is really bad, so take a safety margin on non dailies. note that with plaguebringer the script will overshoot this by quite a bit on occasions so a big safety margin is recommended
     if((cell.corrupted !== undefined && cell.corrupted.includes("healthy")) || cellNum == 99)
         maxDesiredStacks = 198; //still want max stacks for healthy/end cells
     
     var stacks = game.empowerments.Wind.currentDebuffPower;
-    var missingStacks = Math.max(maxDesiredStacks-stacks, 0);
+    var missingStacks = Math.max(maxDesiredStacks-stacks, -5);
     
-    var OmnipotrimpValue = 1; //maybe have this as user input. in later zones we value more each omniworth
-    
-    calcBaseDamageinS(); //this finds our displayed damage in S 'baseDamage'
-    if(baseDamage <= 0){ debug("Error Stance3: " + baseDamage + " damage!"); return; }
     var ourAvgDmgS = baseDamage;
     var ourAvgDmgD = ourAvgDmgS * 8;
     var ourAvgDmgX = ourAvgDmgS * 2;
@@ -625,11 +647,12 @@ function autoStance3() {
     if(cellNum < 99){
         worldArray[cellNum+1].health = Math.max(worldArray[cellNum+1].maxHealth - nextPBDmgtmp, 0.05*worldArray[cellNum+1].maxHealth); //extra damage on next cell from PB
         worldArray[cellNum+1].pbHits = pbHitstmp; //extra wind stacks on next cell from PB
-        var nextStartingStacks = 1 + Math.ceil(stacks * getRetainModifier("Wind")) + pbHitstmp;
+        var nextStartingStacks = Math.min(1 + Math.ceil(stacks * getRetainModifier("Wind")) + pbHitstmp, 200);
     }
+    else var nextStartingStacks = "-";
     var nextMaxHealthtmp = (cellNum < 99 ? worldArray[cellNum+1].health : 0);
     
-    //worldArray[cellNum] = {name : "", mutation : "", corrupted : "", health : "", maxHealth : "", stacks : "", pbHits : "", nextPBDmg : "", baseWorth : "", geoRelativeCellWorth : "", PBWorth : "", finalWorth : ""};
+    //var enemy = {finalWorth : "", name : "", mutation : "", corrupted : "", health : "", maxHealth : "", stacks : "", pbHits : "", nextPBDmg : "", baseWorth : "", geoRelativeCellWorth : "", PBWorth : ""};
     worldArray[cellNum].health = enemyHealth;
     worldArray[cellNum].stacks = stacks;
     
@@ -641,6 +664,9 @@ function autoStance3() {
         if(stanceStats.lastCell == cellNum && stanceStats.lastStacks > stacks){ //we trimpicided
             stanceStats.trimpicides++;
             stanceStats.wastedStacks += stanceStats.lastStacks - stacks;
+        }
+        if(stanceStats.lastCell == 98 && cellNum == 99){ //lets print stats on last cell
+            debug("atks " + stanceStats.attacks + " OmnisPerAttack " + stanceStats.OmnisPerAttack.toFixed(2) + " trimpicides: "+stanceStats.trimpicides + " wastedStacks " + stanceStats.wastedStacks + " wastedPBs " + stanceStats.wastedPBs);
         }
         if(stanceStats.lastCell != "" && stanceStats.lastCell != cellNum){ //we killed an enemy
             stanceStats.OmnisWorths += worldArray[stanceStats.lastCell].baseWorth * stanceStats.lastStacks * game.empowerments.Wind.getModifier();
@@ -656,68 +682,92 @@ function autoStance3() {
     stanceStats.lastCell = cellNum;
     stanceStats.OmnisPerAttack = stanceStats.OmnisWorths / stanceStats.attacks; //we can measure our windstacking farm efficiency in Omnis equivalent per attack.
     
-    debug(game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+worldArray[cellNum].finalWorth.toFixed(2)+" S/X/D " + maxS.toFixed(0) + "/"+maxX.toFixed(0)+"/"+maxD.toFixed(0) + " " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " " + corruptedtmp + " " + enemyHealth.toExponential(1) + "("+nextMaxHealthtmp.toExponential(1)+")", "spam");
+    var shield = (highDamageHeirloom ? "+" : "-");
     
     var chosenFormation;
     
-    if(expectedNumHitsD > missingStacks){
+    var pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100: 0);
+    var projectedNextStartingStacks = Math.min(1 + Math.ceil(stacks * getRetainModifier("Wind")) + pbHitstmp + expectedNumHitsD*pbMult, 200); //projected stacks on next enemy
+    
+    var cmp;
+    //figure out what attacking the current cell is worth. 3 cases:
+    if (projectedNextStartingStacks == 200) //we've capped nextcell's stacks at 200
+       cmp =  worldArray[cellNum].geoRelativeCellWorth;
+    else if (expectedNumHitsD > 200 - stacks){ //we're going to cap stacks at 200
+        if (!highDamageHeirloom && equipMainShield()) //this looks for a 5/5 shield and equips it if found
+            return;
+        cmp = worldArray[cellNum].PBWorth;
+    }
+    else //we're gaining full benefit
+        cmp = worldArray[cellNum].finalWorth;
+    
+    debug(shield+game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+(cmp/OmniThreshhold).toFixed(2)+" S/X/D " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " " + corruptedtmp + " " + enemyHealth.toExponential(1) + "("+nextMaxHealthtmp.toExponential(1)+")", "spam");
+        
+    if(expectedNumHitsD > missingStacks){ //we need more damage
+        setFormation(2);
+        if (!highDamageHeirloom && equipMainShield())
+            if (cmp >= OmniThreshhold) return; //if we want to farm cell, come back again. otherwise proceed to check coords & potential trimpicide for stacks.
         chosenFormation = 2;
         
         coordBuyThreshold = 40;
         
-        if(cell.corrupted !== undefined && cell.corrupted != "none"){ //disregard non corrupted cells
-            if(stacks + expectedNumHitsD > maxDesiredStacks+20 && maxD > coordBuyThreshold && currentBadGuyNum != cellNum){ //if it takes more than this many hits in D, buy 1 coord.
-                currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
-                allowBuyingCoords = true;
-                maxCoords = game.upgrades.Coordination.done + 1;
-                debug("Autostance3: allowing buying coord #" + maxCoords + " on " + game.global.world + "." + cellNum);
-            }
-            
-            //consider trimpicide for max stacks
-            var before = Math.min(stacks + expectedNumHitsD, 200); //how many stacks we'll end up with currently
-            var after = Math.min(stacks*0.85 + expectedNumHitsS*(5+game.global.antiStacks)/(5+maxAnti), 200); //how many stacks we'll end up with after max stacks trimpicide
-            if(game.resources.trimps.owned == game.resources.trimps.realMax() && hiddenBreedTimer >= maxAnti && game.global.antiStacks < maxAnti && maxD > 30 && before <= after){ 
-                debug("Trimpiciding to get max stacks. Before/After " + before+"/"+after);
-                stackConservingTrimpicide();
-                //switchOnGA();
-                return;
-            }
+        if(stacks + expectedNumHitsD > maxDesiredStacks+20 && maxD > coordBuyThreshold && currentBadGuyNum != cellNum){ //if it takes more than this many hits in D, buy 1 coord.
+            currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
+            allowBuyingCoords = true;
+            maxCoords = game.upgrades.Coordination.done + 1;
+            debug("Autostance3: allowing buying coord #" + maxCoords + " on " + game.global.world + "." + cellNum);
+        }
+
+        //consider trimpicide for max stacks
+        var before = Math.min(expectedNumHitsD + stacks, 200); //how many stacks we'll end up with currently
+        var after = Math.min(stacks*0.85 + expectedNumHitsS*(5+game.global.antiStacks)/(5+maxAnti), 200); //how many stacks we'll end up with after max stacks trimpicide
+        if(game.resources.trimps.owned == game.resources.trimps.realMax() && hiddenBreedTimer >= maxAnti && game.global.antiStacks < maxAnti && maxD > 30 && before <= after){ 
+            debug("Trimpiciding to get max stacks. Before/After " + before+"/"+after);
+            wantedAnticipation = maxAnti;
+            stackConservingTrimpicide();
+            return;
         }
     }
     else if (expectedNumHitsX > missingStacks)
         chosenFormation = '0';
     else {
-        chosenFormation = 4;
+        setFormation(4);
         
-        var minWasteRatio = 2; //check if we have too much damage. maybe we want to trimpicide to remove anticipation stacks
-        minAnticipationStacks = 1;
-        if(cell.corrupted !== undefined && cell.corrupted != "none" && cellNum < 99){ //ignores regular cells
-            if(cell.corrupted != "corruptBleed" && cell.corrupted != "healthyBleed") { //we're quite likely to die again against these, so dont trimpicide to lower stacks
-                var before = Math.min(expectedNumHitsS + stacks, 200);
-                var after = Math.min(expectedNumHitsS*(1+0.2*game.global.antiStacks)/(1+0.2*minAnticipationStacks)+stacks*0.85, 200);
-                //if(worldArray[cellNum].OmnisPerAttack > OmniThreshhold && after > before + 5 && (maxS/(1+0.2*game.global.antiStacks)) < 4 && game.global.antiStacks > minAnticipationStacks){ //gotta make sure the enemy isnt complete weakling that even with no stacks he'll die too fast
-                if(worldArray[cellNum].OmnisPerAttack > OmniThreshhold && after > before + 5 && (maxS/(1+0.2*game.global.antiStacks)) < 6 && game.global.antiStacks > minAnticipationStacks){ //gotta make sure the enemy isnt complete weakling that even with no stacks he'll die too fast
-                    getTargetAntiStack(minAnticipationStacks, true);
-                    return;
-                }
+        if (expectedNumHitsS < missingStacks && expectedNumHitsS > 0.1 && cmp >= OmniThreshhold){ //we have too much damage so try to fix it, but if it's too much then dont even try (keep main shield as much as possible for VM)
+            if(highDamageHeirloom && equipLowDmgShield()){ //this looks for a shield that has PB + VM and zero damage mods, and equip it if found
+               return; //need to recalculate all the damages, so do that in next iteration
+            }
+            
+            var minWasteRatio = 2; //we might want to trimpicide to remove anticipation stacks
+            minAnticipationStacks = Math.min(45, 1+(HDratio > 1 ? (HDratio - 1) * 0.7 : 0));
+
+            var before = Math.min(stacks      + expectedNumHitsS, 200); //stacks if we dont trimpicide
+            var after  = Math.min(0.75*stacks + expectedNumHitsS * (1+0.2*game.global.antiStacks)/(1+0.2*minAnticipationStacks), 200); //stacks if we do trimpicidde
+
+            if(before+5 < after && maxS/(1+0.2*game.global.antiStacks) < 1.5 && game.global.antiStacks > minAnticipationStacks){ //gotta make sure the enemy isnt complete weakling that even with no stacks he'll die too fast
+                wantedAnticipation = minAnticipationStacks;
+                getTargetAntiStack(minAnticipationStacks, true);
+                return;
             }
         }
     }
 
-    if (chosenFormation == '0' && game.global.soldierHealth < 0.55 * game.global.soldierHealthMax){ //dont swap to X if it will kill/almost kill us
-        chosenFormation = 2;
+    if(cmp < OmniThreshhold){ //it's not worth our time hitting this guy
+        setFormation(2);
+        return;
+    }
+
+    if (chosenFormation == '0' && game.global.soldierHealth < 0.66 * game.global.soldierHealthMax){ //dont swap to X if it will kill/almost kill us
+        chosenFormation = 4;
     }
     
-    if(worldArray[cellNum].OmnisPerAttack < OmniThreshhold) //super placeholder
-        chosenFormation = 2; 
+    //sharp enemies
+    if (worldArray[cellNum].corrupted == "healthyBleed" || worldArray[cellNum].corrupted == "corruptBleed"){
+        if(!(cmp > OmniThreshhold * 1.5 && hiddenBreedTimer > 35)) //only stack against them if they're worthwhile, and if we have less than 10 seconds left on our army's breeding
+            chosenFormation = 2;
+    }
     
     setFormation(chosenFormation); 
-    
-    //dont windstack vs sharp enemies. in filler runs go D vs dodge enemies as they are time inefficient
-    if (getCurrentEnemy(1).corrupted == "healthyBleed" && (chosenFormation == '0' || chosenFormation == 1))
-        setFormation(2);
-    else if (getCurrentEnemy(1).corrupted == "corruptBleed" || (getCurrentEnemy(1).corrupted == "corruptDodge" && !(game.global.runningChallengeSquared || game.global.challengeActive)))
-        setFormation(2);
 }
 
 function getTargetAntiStack(target, firstRun){
@@ -782,7 +832,7 @@ function switchOnGA(){
     var steps = game.global.GeneticistassistSteps;
     var currentStep = steps.indexOf(game.global.GeneticistassistSetting);
     if (currentStep == 3){
-        debug("switchOnGA: already on");
+        //debug("switchOnGA: already on");
         return;
     }
     while(currentStep != 3){ //get to the last active GA mode
@@ -843,14 +893,15 @@ function buildWorldArray(){
         debug("grid is empty");
         return false;
     }
+    equipMainShield();
     
-    worldArray; //create a new duplicate of the world array that's safe to write to
+    worldArray = []; //create a world array that's safe to write to
     lastHealthyCell = -1;
-    var minHP = game.global.gridArray[0].maxHealth;
-    var maxHP = game.global.gridArray[0].maxHealth;
+    minHP = game.global.gridArray[0].maxHealth;
+    maxHP = game.global.gridArray[0].maxHealth;
     
     for (var i = 0; i < 100; i++){
-        var enemy = {name : "", mutation : "", corrupted : "", health : "", maxHealth : "", stacks : "", pbHits : "", nextPBDmg : "", baseWorth : "", geoRelativeCellWorth : "", PBWorth : "", finalWorth : ""};
+        var enemy = {mutation : "", finalWorth : "", name : "", corrupted : "",  health : "", maxHealth : "", stacks : "", pbHits : "", nextPBDmg : "", baseWorth : "", geoRelativeCellWorth : "", PBWorth : ""};
         enemy.name = game.global.gridArray[i].name;
         enemy.mutation = game.global.gridArray[i].mutation;
         if(enemy.mutation == "Healthy") 
@@ -861,7 +912,8 @@ function buildWorldArray(){
         switch(enemy.mutation){
             case "Corruption":
                 mutationMult = mutations.Corruption.statScale(10);
-                enemy.baseWorth = 0.15;
+                var dodgeMult = (enemy.corrupted == "corruptDodge" ? 0.7 : 1); //dodge enemies are more helium/time inefficient to spend time on
+                enemy.baseWorth = 0.15 * dodgeMult;
                 break;
             case "Healthy":
                 mutationMult = mutations.Healthy.statScale(14);
@@ -885,23 +937,25 @@ function buildWorldArray(){
 
         worldArray.push(enemy);
     }
-    debug("lowest hp: " + minHP + " highest " + maxHP);
+    desiredDamage = minHP/12;
+    debug("low / high:" + minHP.toExponential(2) + "/" + maxHP.toExponential(2) + " diff:" + (maxHP/minHP).toFixed(2) + " desiredDamage dmg:" + desiredDamage.toExponential(2) + " " + (minHP/desiredDamage).toFixed(2)+"/"+(maxHP/desiredDamage).toFixed(2));
+    debug("base damage is " + (baseDamage/desiredDamage).toFixed(2) + " of what we want it to be");
+    
     //next we want to calculate a value for each cell based on the healthy/corrupted/empty/omni distribution of the zone. this will be used to decide if a cell is worth spending any attacks in
     var pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100: 0);
     for(var i = 99; i >= 0; i--){
         //geometric series that asks what is the value of 1 attack in stacks always from the point where we are at. this is a decent approximation ignoring rounding
-        worldArray[i].geoRelativeCellWorth = worldArray[i].baseWorth * (1-Math.pow(getRetainModifier("Wind"), 99-i+1))/(1-getRetainModifier("Wind")) * game.empowerments.Wind.getModifier();
+        worldArray[i].geoRelativeCellWorth = worldArray[i].baseWorth * (1-Math.pow(getRetainModifier("Wind"), 99-i+1))/(1-getRetainModifier("Wind")) * game.empowerments.Wind.getModifier() * dodgeMult;
         worldArray[i].PBWorth = pbMult * (i == 99 ? 0 : worldArray[i+1].geoRelativeCellWorth); //plaguebringer is worth exactly a part of a stack in the next cell
         worldArray[i].finalWorth = worldArray[i].geoRelativeCellWorth + worldArray[i].PBWorth; //this is in Omnipotrimps units
+    }
+    if(game.global.world % 5 > 0 && mutations.Healthy.cellCount() > 10){ //on wind zones that arent the last
+        worldArray[99].geoRelativeCellWorth+= 0.11*mutations.Healthy.cellCount(); //we want to reflect the worth of the starting cells in next zone. in high zones this is worth a lot due to healthy cells. in low zones very little
+        worldArray[99].finalWorth = worldArray[99].geoRelativeCellWorth + worldArray[99].PBWorth;
     }
     
     stanceStats = {OmnisPerAttack : 0, attacks : 0, enemyLastHP : -1, lastCell : "", OmnisWorths : 0, lastStacks : 0, wastedStacks : 0, lastNextStartingStacks : 0, wastedPBs : 0, trimpicides : 0}; //keep track of how well we're doing
     calcOmniHelium();
-    
-    Goal = getPageSetting('WindStackingPctHe');
-    if(Goal == -1) Goal = 0.5;
-    OmniThreshhold = Goal/pctTotal;
-    debug("OmniThreshhold is " + OmniThreshhold.toFixed(2));
     
     return true;
 }
@@ -925,18 +979,26 @@ function  calcOmniHelium(){ //rewardResource()
     var fluffyBonus = Fluffy.isRewardActive("helium");
     var l = 1 + (fluffyBonus * 0.25);
     
-    dailyMult;
     if (getDailyHeliumValue(countDailyWeight()) / 100 == 2) //no daily
         dailyMult = 1;
     else
         dailyMult = 1 + getDailyHeliumValue(countDailyWeight()) / 100;
     
-    var m = a*b*c*d*e*f*g*h*i*j*k*l;
-    var hr = m * 60 * 60 * 1/(Math.pow(0.95, 20) - 0.1);
+    m = a*b*c*d*e*f*g*h*i*j*k*l;
+    hr = m * 60 * 60 * 1/(Math.pow(0.95, 20) - 0.1);
+    
+    updateOmniThreshhold();
+    debug("Omnipotrimp gives " + m.toExponential(2) + " helium, " + hr.toExponential(2) + " he/hr, he/hr/total " + pctTotal.toFixed(3) + "%");
+    debug("OmniThreshhold is " + OmniThreshhold.toFixed(2));
+}
+
+function updateOmniThreshhold(){
     pctTotal = (100*hr/game.global.totalHeliumEarned);
-    debug("Omnipotrimp gives " + m.toExponential(2) + " helium, " + hr.toExponential(2) + " he/hr, he/hr total " + pctTotal.toFixed(3) + "%");
     if(dailyMult > 1){
         pctTotal = pctTotal*dailyMult;
-        debug("You are also running a daily with a multiplier of " + dailyMult.toFixed(2) + ". Omni he/hr total = "+ pctTotal.toFixed(3) + "%");
+        debug("You are also running a daily with a multiplier of " + dailyMult.toFixed(2) + ". Omni he/hr/total = "+ pctTotal.toFixed(3) + "%");
     }
+    Goal = getPageSetting('WindStackingPctHe');
+    if(Goal == -1) Goal = 0.5;
+    OmniThreshhold = Goal/pctTotal;
 }

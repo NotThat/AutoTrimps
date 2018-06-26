@@ -101,7 +101,7 @@ function equipEffect(gameResource, equip) {
     if (equip.Equip) {
         return gameResource[equip.Stat + 'Calculated'];
     } else {
-        //That be Gym
+        //Gym
         var oldBlock = gameResource.increase.by * gameResource.owned;
         var Mod = game.upgrades.Gymystic.done ? (game.upgrades.Gymystic.modifier + (0.01 * (game.upgrades.Gymystic.done - 1))) : 1;
         var newBlock = gameResource.increase.by * (gameResource.owned + 1) * Mod;
@@ -384,7 +384,6 @@ function autoLevelEquipment() {
                     $equipUpgrade.style.border = '2px solid red';
                 }
             }
-
 
             //Code is Spaced This Way So You Can Read It:
             if (evaluation.StatusBorder == 'red' && !(game.global.world < 60 && game.global.world >= 58 && MODULES["equipment"].waitTill60)) {
