@@ -600,9 +600,9 @@ function autoStance3() {
             allowBuyingCoords = true;
         else{ //dont buy coords unless we arent capping overkill anymore
             
-            allowBuyingCoords = true;
+            //allowBuyingCoords = true;
             //still has issues. too slow on low wind zones for cells that have cmp < 1. 
-            /*var overkillCells = 1+Fluffy.isRewardActive("overkiller"); //0 / 1 / 2
+            var overkillCells = 1+Fluffy.isRewardActive("overkiller"); //0 / 1 / 2
             var OmniHP = worldArray[99].maxHealth * (poisonZone() ? 0.2 : 1);
             var overkillPercent = game.portal.Overkill.level * 0.005;
             var extraSafetyMargin = 1;
@@ -619,7 +619,7 @@ function autoStance3() {
                     debug("Zone " + game.global.world + " Enabling buying Coord");
                 }
             }
-            debug("dmg/omni remaining " + (100*dmg/worldArray[99].maxHealth).toFixed(2) + "% / " + (dmg/dmg2).toFixed(2) + "%");*/
+            debug("dmg/omni remaining " + (100*dmg/worldArray[99].maxHealth).toFixed(2) + "% / " + (dmg/dmg2).toFixed(2) + "%");
         }
         
         setFormation(2);
