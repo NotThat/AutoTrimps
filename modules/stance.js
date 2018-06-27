@@ -619,7 +619,7 @@ function autoStance3() {
                     debug("Zone " + game.global.world + " Enabling buying Coord");
                 }
             }
-            debug("dmg/omni remaining " + (100*dmg/worldArray[99].maxHealth).toFixed(2) + "% / " + (dmg/dmg2).toFixed(2) + "%");
+            //debug("dmg/omni remaining " + (100*dmg/worldArray[99].maxHealth).toFixed(2) + "% / " + (dmg/dmg2).toFixed(2) + "%");
         }
         
         setFormation(2);
@@ -1116,7 +1116,7 @@ function updateOmniThreshhold() {
     
     if(dailyMult > 1){
         pctTotal = pctTotal*dailyMult;
-        debug("You are also running a daily with a multiplier of " + dailyMult.toFixed(2) + ". Omni he/hr/total = "+ pctTotal.toFixed(3) + "%");
+        //debug("You are also running a daily with a multiplier of " + dailyMult.toFixed(2) + ". Omni he/hr/total = "+ pctTotal.toFixed(3) + "%");
     }
     Goal = getPageSetting('WindStackingPctHe');
     if(Goal == -1) Goal = 0.5;
