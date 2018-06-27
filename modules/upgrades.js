@@ -9,15 +9,16 @@ function buyUpgrades() {
         buyCoords = true;
         
         if(getPageSetting('AutoStance') == 3){
-            if(game.global.world >= windStackZone && windZone()){
+            if(game.global.world >= windStackZone && getPageSetting('DelayCoordsForWind')){
                 if(!allowBuyingCoords){ //if autostance3 is on and we're in windstack zones, only buy coords if autostance3 allows it, or automaps overridde.
                     if(game.upgrades.Coordination.done < maxCoords)
                         buyCoords = true;
                     else
                         buyCoords = false;
 
-                    if (game.global.world == 500) //always want all coords for spire4
+                    if (isActiveSpireAT() || game.global.world == getPageSetting('VoidMaps') || BWRaidNowLogic() || PRaidingActive){ //always want all coords for active spires and void maps
                         buyCoords = true;
+                    }
                 }
 
                 if(game.global.lastClearedCell == -1 && (game.global.world % 10 == 6 || game.global.world % 10 == 1)) //fix to stop upgrades() from instantly buying a coord in the first wind zone
@@ -27,13 +28,11 @@ function buyUpgrades() {
                 buyCoords = true;
         }
         
-        if(popArmyRatio < 1350 ){ //skip this calculation unless we're dangerously close to losing amalgamator
+        if(popArmyRatio < 1350){ //we're dangerously close to losing amalgamator
             var coordinatedLevel = game.portal.Coordinated.level;
             var coordinationMult = 1+0.25*Math.pow(0.98, coordinatedLevel);
             var currentSendAfter = game.resources.trimps.getCurrentSend()*coordinationMult;
             var popArmyRatioAfter = game.resources.trimps.realMax()/currentSendAfter;
-            //debug("popArmyRatio = " + popArmyRatio);
-            //debug("popArmyRatioAfter = " + popArmyRatioAfter);
             if (popArmyRatioAfter <= 1001){
                 debug("Skipping coordination to preserve Amalgamator!");
                 buyCoords = false;
@@ -41,7 +40,9 @@ function buyUpgrades() {
         }
         
         var dontBuyStartZ = getPageSetting('NoCoordBuyStartZ');
-        if (dontBuyStartZ > 0 && dontBuyStartZ <= game.global.world && getPageSetting('TillWeHaveAmalg') > 0) { //if dontBuyStartZ is set and we've passed it
+        if(dontBuyStartZ > game.global.world)
+            buyCoords = true;
+        else if (dontBuyStartZ > 0 && getPageSetting('TillWeHaveAmalg') > 0) { //if dontBuyStartZ is set and we've passed it
             if (game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg'))
                 buyCoords = false;
         }

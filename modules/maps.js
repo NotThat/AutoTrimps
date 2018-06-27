@@ -59,6 +59,7 @@ var currWorldZone = 1;
 //Activate Robo Trimp (will activate on the first zone after liquification)
 var lastMsg; //stores last message, stops spam to console
 var AutoMapsCoordOverride = false;
+var PRaidingActive = false; //used for coordination purchase during praids
 
 function calcDmg(){
     
@@ -158,8 +159,8 @@ function calcDmg(){
     poisonMult = (getEmpowerment() == "Poison" ? customVars.poisonMult : 1);
     
     threshhold = poisonMult * windMult * enoughDamageCutoff;
-    if(windMult > 1 && (game.global.preMapsActive || game.global.MapsActive) && game.empowerments.Wind.currentDebuffPower < 50) //if we enter map screen in wind farm zone and have low stacks, we already paid the stack penalty (25%), may as well do a few more maps
-        threshhold *= 1.3;
+    if(windMult > 1 && (game.global.MapsActive) && game.empowerments.Wind.currentDebuffPower < 50) //if we enter map screen in wind farm zone and have low stacks, may as well do a few more maps
+        threshhold = threshhold / 1.3;
     enoughDamage = (ourBaseDamage * threshhold > enemyHealth); //add damage multiplier for poison zones (30 by default)
 
     if(!enoughHealth)
@@ -178,12 +179,8 @@ function calcDmg(){
 //anything/everything to do with maps.
 function autoMap() {
     
-    var swapback = false;
-    if(!highDamageHeirloom && equipMainShield()) //if we arent using our 5/5 heirloom, swap to it for dmg calc then remember to swap back
-        swapback = true;
+    equipMainShield();
     calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
-    if(swapback)
-        equipLowDmgShield();
     
     updateAutoMapsStatus("", "Advancing"); //default msg. any other trigger will override this later
     currWorldZone = game.global.world;
@@ -218,9 +215,12 @@ function autoMap() {
     }
     
     if (getPageSetting('PRaidingZoneStart') >0)
-        if(!PrestigeRaid()) //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
+        if(!PrestigeRaid()){ //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
+            PRaidingActive = true;
             return; 
+        }
     
+    PRaidingActive = false;
     if (getPageSetting('BWraid')==true && (!getPageSetting('BWraidDailyC2Only') || game.global.challengeActive))
         if(!BWraiding()) //BW Raiding
             return; 
@@ -651,10 +651,14 @@ function PrestigeRaid() {
         //do we need prestige from this map?
         var needPrestige = behindOnPrestige(getCurrentMapObject().level);
         if(needPrestige){
-            if(getCurrentMapObject().location === "Bionic")
-                updateAutoMapsStatus("", "BW Raid");    
-            else
-                updateAutoMapsStatus("", "Prestige Raid");
+            if(getCurrentMapObject().location === "Bionic"){
+                var map = game.global.mapsOwnedArray[getMapIndex(game.global.currentMapId)];
+                updateAutoMapsStatus("", "BW Raiding: "+ addSpecials(true, true, map));
+            }
+            else{
+                var map = game.global.mapsOwnedArray[getMapIndex(game.global.currentMapId)];
+                updateAutoMapsStatus("", "Prestige Raid: " + addSpecials(true, true, map));
+            }
         }
         else{
             if (game.global.repeatMap) {//make sure repeat button is turned off
@@ -726,7 +730,8 @@ function PrestigeRaid() {
     
     runMap();
     
-    updateAutoMapsStatus("", "Prestige Raid");
+    var map = game.global.mapsOwnedArray[getMapIndex(game.global.currentMapId)];
+    updateAutoMapsStatus("", "Prestige Raid: " + addSpecials(true, true, map));
 
     if (!game.global.repeatMap) {
         repeatClicked();
@@ -1230,4 +1235,8 @@ function findVoidMap(){
 
 function windZone(){
     return ((game.global.world-241) % 15 <= 4);
+}
+
+function poisonZone(){
+    return ((game.global.world-236) % 15 <= 4);
 }

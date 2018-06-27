@@ -225,12 +225,19 @@ function calcPrestige() {
     return max;
 }
 
-//returns true when done
-function BWraiding() {
+function BWRaidNowLogic(){
     if (!(game.global.world == getPageSetting('BWraidingz') && getPageSetting('BWraid')))
-        return true;
+        return false;
     
     if (getPageSetting('BWraidDailyCOnly') && !(game.global.runningChallengeSquared || game.global.challengeActive)) //if BWraidDailyCOnly is set then only BW raid dduring dailes/challenges/c2
+        return false;
+    
+    return true;
+}
+
+//returns true when done
+function BWraiding() {
+    if(!BWRaidNowLogic())
         return true;
     
     //find the lowest bionic map that still has items for us
@@ -255,7 +262,8 @@ function BWraiding() {
             while (game.options.menu.repeatUntil.enabled != 2) {
                 toggleSetting('repeatUntil'); //repeat for all items
             }
-            updateAutoMapsStatus("", "BW Raiding");
+            var map = game.global.mapsOwnedArray[getMapIndex(game.global.currentMapId)];
+            updateAutoMapsStatus("", "BW Raiding: "+ addSpecials(true, true, map));
         }
         else { //we're in another map
             if (game.global.repeatMap) {
@@ -274,7 +282,8 @@ function BWraiding() {
     while (game.options.menu.repeatUntil.enabled != 2) {
         toggleSetting('repeatUntil'); //repeat for all items
     }
-    updateAutoMapsStatus("", "BW Raiding");
+    var map = game.global.mapsOwnedArray[getMapIndex(game.global.currentMapId)];
+    updateAutoMapsStatus("", "BW Raiding: "+ addSpecials(true, true, map));
     return false;
  }
 
