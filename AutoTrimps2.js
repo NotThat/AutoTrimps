@@ -68,8 +68,9 @@ function initializeAutoTrimps() {
 
 var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
-changelogList.push({date: "13/06/2018", version: "v0.1", description: "War was beginning ", isNew: true});
 changelogList.push({date: "28/06/2018", version: "v0.2", description: "PRaiding. BWRaiding. Stop Coords to get next Amal. Never lose Amal. Heirloom Swapping. No Nurseries in Ice. Massive overhaul to AS3 windstacking he/hr% based. Stall Coords/items for more stacking. Calculate cell by cell. AutoTrimps->Display->General Spam for less spam.", isNew: true});
+changelogList.push({date: "13/06/2018", version: "v0.1", description: "War was beginning ", isNew: false});
+
 //changelogList.push({date: "05/06/2018", version: "v2.2.1", description: "Updated Heirloom calc, should be 4.8 ready. Ratios will be updated soon. ", isNew: true});
 //changelogList.push({date: "28/05/2018", version: "v2.2", description: "Added single use prestige raiding, BW raiding, looting II dump, amals are now calcd properly. ", isNew: true});
 //changelogList.push({date: "4/2", version: "v2.1.6.9b", description: "Import Export, Modules Load code Improvements. Multiple Buttons/Settings Were Combined. AutoPerks code was changed but still functions the same, except for a new algorithm that reduces the time to allocate for high helium players to near-instantaneous. Please test new algo with MODULES[\"perks\"].useAlgo2=true; .You can also clear all perks then allocate and have it work now.  AutoMaps no longer considered as being in Lead challenge during Chall^2. ", isNew: true});
@@ -89,8 +90,7 @@ function printChangelog() {
     };
     var footer =
         '<b>Ongoing Development</b> - <u>Report any bugs/problems please</u>!\
-        <br>Talk with the dev: <b>meowchan_#0720</b> @ <a target="#" href="https://discord.gg/0VbWe0dxB9kIfV2C">AutoTrimps Discord Channel</a>\
-        <br>See <a target="#" href="https://github.com/genbtc/AutoTrimps/blob/gh-pages/README.md">ReadMe</a> Or check <a target="#" href="https://github.com/genBTC/AutoTrimps/commits/gh-pages" target="#">the commit history</a> (if you want).'
+        <br>Talk with the dev: <b>meowchan_#0720</b> @ <a target="#" href="https://discord.gg/0VbWe0dxB9kIfV2C">AutoTrimps Discord Channel</a>'
     ,   action = 'cancelTooltip()'
     ,   title = 'Script Update Notice<br>' + ATversion
     ,   acceptBtnText = "Thank you for playing AutoTrimps. Accept and Continue."
