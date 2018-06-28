@@ -780,7 +780,7 @@ function autoStance3() {
         requiredDmg = requiredDmg / 0.15;
         requiredDmg += worldArray[cellNum + i].maxHealth;
     }
-    debug("diff " + requiredDmg / maxStacksBaseDamageD);
+    //debug("ratio to OK " + requiredDmg / maxStacksBaseDamageD).toFixed(2)));
     
     if(expectedNumHitsD > missingStacks || cmp < OmniThreshhold || maxDesiredRatio > 8000){ //we need more damage, or this cell isnt worth our time, or we do far too much damage anyway so dont even try and risk losing an extra overkill
         setFormation(2);
@@ -901,7 +901,7 @@ function autoStance3() {
     var shield = (highDamageHeirloom ? "+" : "-");
     
     //debug(shield+game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+(cmp/OmniThreshhold).toFixed(2)+" S/X/D " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " " + corruptedtmp + " " + enemyHealth.toExponential(1) + "("+nextMaxHealthtmp.toExponential(1)+")", "spam");
-    debug(shield+game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+(cmp/OmniThreshhold).toFixed(2)+" S/X/D " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " " + maxDesiredRatio.toExponential(2) +" of desired dmg " + corruptedtmp, "spam");
+    debug(shield+game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+(cmp/OmniThreshhold).toFixed(2)+" " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " " + maxDesiredRatio.toExponential(2) +" desired " + (requiredDmg / maxStacksBaseDamageD).toFixed(2) + " OK " + corruptedtmp, "general");
 }
 
 function getTargetAntiStack(target, firstRun){
@@ -1090,7 +1090,7 @@ function buildWorldArray(){
     calcBaseDamageinS();
     var baseDamageGood = baseDamage;
     var heirloomDiff = baseDamageGood / baseDamageBad;
-    //debug("heirloom diff is " + heirloomDiff);
+    debug("heirloom diff is " + heirloomDiff, "general");
     
     desiredDamage = maxHP / maxHPDivider; //this is where we want our damage to be using good heirloom, D stance and max anticipations for optimal wind farming
     maxStacksBaseDamageD = maxAnti * 8 * baseDamage / (1 + 0.2*game.global.antiStacks); //45 stacks D stance good heirloom damage. The most damage we can dish out right now
