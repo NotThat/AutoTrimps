@@ -89,7 +89,7 @@ function printChangelog() {
     };
     var footer =
         '<b>Ongoing Development</b> - <u>Report any bugs/problems please</u>!\
-        <br>Talk with the dev: <b>genr8_#8163</b> @ <a target="#" href="https://discord.gg/0VbWe0dxB9kIfV2C">AutoTrimps Discord Channel</a>\
+        <br>Talk with the dev: <b>meowchan_#0720</b> @ <a target="#" href="https://discord.gg/0VbWe0dxB9kIfV2C">AutoTrimps Discord Channel</a>\
         <br>See <a target="#" href="https://github.com/genbtc/AutoTrimps/blob/gh-pages/README.md">ReadMe</a> Or check <a target="#" href="https://github.com/genBTC/AutoTrimps/commits/gh-pages" target="#">the commit history</a> (if you want).'
     ,   action = 'cancelTooltip()'
     ,   title = 'Script Update Notice<br>' + ATversion

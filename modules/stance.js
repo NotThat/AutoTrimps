@@ -1090,7 +1090,7 @@ function buildWorldArray(){
     calcBaseDamageinS();
     var baseDamageGood = baseDamage;
     var heirloomDiff = baseDamageGood / baseDamageBad;
-    debug("heirloom diff is " + heirloomDiff, "general");
+    //debug("heirloom diff is " + heirloomDiff, "general");
     
     desiredDamage = maxHP / maxHPDivider; //this is where we want our damage to be using good heirloom, D stance and max anticipations for optimal wind farming
     maxStacksBaseDamageD = maxAnti * 8 * baseDamage / (1 + 0.2*game.global.antiStacks); //45 stacks D stance good heirloom damage. The most damage we can dish out right now
