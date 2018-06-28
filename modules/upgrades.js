@@ -8,23 +8,20 @@ function buyUpgrades() {
         var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();    
         buyCoords = true;
         
-        if(getPageSetting('AutoStance') == 3){
-            if(game.global.world >= windStackZone && getPageSetting('DelayCoordsForWind')){
-                if(!allowBuyingCoords){ //if autostance3 is on and we're in windstack zones, only buy coords if autostance3 allows it, or automaps overridde.
-                    if(game.upgrades.Coordination.done < maxCoords)
-                        buyCoords = true;
-                    else
-                        buyCoords = false;
-
-                    if (isActiveSpireAT() || game.global.world == getPageSetting('VoidMaps') || BWRaidNowLogic() || PRaidingActive){ //always want all coords for active spires and void maps
-                        buyCoords = true;
-                    }
-                }
-
-                if(game.global.lastClearedCell == -1 && (game.global.world % 10 == 6 || game.global.world % 10 == 1)) //fix to stop upgrades() from instantly buying a coord in the first wind zone
+        if(getPageSetting('AutoStance') == 3 && getPageSetting('DelayCoordsForWind')){
+            if(!allowBuyingCoords){ //only buy coords if autostance3 allows it
+                if(game.upgrades.Coordination.done < maxCoords)
+                    buyCoords = true;
+                else
                     buyCoords = false;
+
+                if (isActiveSpireAT() || game.global.world == getPageSetting('VoidMaps') || BWRaidNowLogic() || PRaidingActive) //always want all coords for active spires and void maps
+                    buyCoords = true;
             }
-            if(AutoMapsCoordOverride) //we dont want to farm maps for damage when we have unspent coordinations
+
+            if(game.global.lastClearedCell == -1 && (game.global.world % 10 == 6 || game.global.world % 10 == 1)) //fix to stop upgrades() from instantly buying a coord in the first wind zone
+                buyCoords = false;
+            if(AutoMapsCoordOverride) //we dont want to farm maps for damage when we have unspent coordinations, so allow automaps to override AS3
                 buyCoords = true;
         }
         

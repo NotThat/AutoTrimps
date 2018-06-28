@@ -181,8 +181,6 @@ var HDratio = 0;
 var maxAnti = (game.talents.patience.purchased ? 45 : 30);
 var wantedAnticipation = maxAnti;
 
-var windStackZone;
-
 ////////////////////////////////////////
 //Main LOGIC Loop///////////////////////
 ////////////////////////////////////////

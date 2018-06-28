@@ -8,6 +8,8 @@ MODULES["equipment"].alwaysLvl2 = true; //Always buys the 2nd level of equipment
 MODULES["equipment"].waitTill60 = true; // 'Skip Gear Level 58&59', 'Dont Buy Gear during level 58 and 59, wait till level 60, when cost drops down to 10%
 MODULES["equipment"].equipHealthDebugMessage = false;    //this repeats a message when you don't have enough health. set to false to stop the spam.
 
+var buyWeaponsModeAS3; //1: prestige till -1 and level 2: 2: buy levels only 3: get all
+
 var equipmentList = { 
     'Dagger': {
         Upgrade: 'Dagadder',
@@ -128,7 +130,6 @@ function PrestigeValue(what) {
     return toReturn;
 }
 
-
 //evaluateEquipmentEfficiency: Back end function for autoLevelEquipment to determine most cost efficient items, and what color they should be.
 function evaluateEquipmentEfficiency(equipName) {
     var equip = equipmentList[equipName];
@@ -160,6 +161,10 @@ function evaluateEquipmentEfficiency(equipName) {
             else
                 var NextCost = Math.ceil(getNextPrestigeCost(equip.Upgrade) * Math.pow(1 - game.portal.Artisanistry.modifier, game.portal.Artisanistry.level));
             Wall = (NextEffect / NextCost > Factor);
+            var done = game.upgrades[equipmentList[equipName].Upgrade].done;
+            var allowed = game.upgrades[equipmentList[equipName].Upgrade].allowed;
+            if(getPageSetting('DelayWeaponsForWind') && buyWeaponsModeAS3 === 1 && done === allowed - 1) //1: prestige till 1 before max prestige and level 2: prestige only 3: buy everything
+                Wall = false;
         }
 
         //white - Upgrade is not available
@@ -239,6 +244,7 @@ function evaluateEquipmentEfficiency(equipName) {
 
 var resourcesNeeded;
 var Best;
+
 //autoLevelEquipment = "Buy Armor", "Buy Armor Upgrades", "Buy Weapons", "Buy Weapons Upgrades"
 function autoLevelEquipment() {
     if (!(baseDamage > 0)) return;  //if we have no damage, why bother running anything? (this fixes weird bugs)
@@ -338,6 +344,9 @@ function autoLevelEquipment() {
     if (!enoughHealthE && MODULES["equipment"].equipHealthDebugMessage)
         debug("Equipment module thought there was not enough health","equips");
 
+
+//BuyWeaponsNew - GUI gets converted to BuyWeaponUpgrades
+//if(buyWeaponsModeAS3 == 1 && getPageSetting('DelayWeaponsForWind')); //1: prestige till -1 and level 2: 2: buy levels only 3: get all
 //PRESTIGE and UPGRADE SECTION:
     for (var equipName in equipmentList) {
         var equip = equipmentList[equipName];
@@ -412,12 +421,27 @@ function autoLevelEquipment() {
                     )
                 )
                 {
+                    var allow = true;
+                    if(equipmentList[equipName].Stat == 'attack' && getPageSetting('DelayWeaponsForWind') && (buyWeaponsModeAS3 === 0 || buyWeaponsModeAS3 === 1)){
+                        if(buyWeaponsModeAS3 === 0){ //only buy prestige if it lowers our damage
+                            if(game.equipment[equipName].level < 9)
+                                allow = false;
+                        }
+                        if(buyWeaponsModeAS3 === 1){ //dont buy the last prestige
+                            var done = game.upgrades[equipmentList[equipName].Upgrade].done;
+                            var allowed = game.upgrades[equipmentList[equipName].Upgrade].allowed;
+                            if (done === allowed - 1)
+                                allow = false;
+                        }
+                    }
+       
                     var upgrade = equipmentList[equipName].Upgrade;
-                    if (upgrade != "Gymystic")
+                    if (upgrade != "Gymystic" && allow)
                         debug('Upgrading ' + upgrade + " - Prestige " + game.equipment[equipName].prestige, "equips", '*upload');
-                    else
+                    else if (allow)
                         debug('Upgrading ' + upgrade + " # " + game.upgrades[upgrade].allowed, "equips", '*upload');
-                    buyUpgrade(upgrade, true, true);
+                    if(allow)
+                        buyUpgrade(upgrade, true, true);
                 }
                 else {
                     $equipName.style.color = 'orange';
@@ -426,6 +450,11 @@ function autoLevelEquipment() {
             }
         }
     }
+        //game.upgrades[p].allowed
+    //equipmentList[equipName].Upgrade
+    //equipmentList[equipName].Stat == 'attack'
+    //BuyWeaponsNew - GUI gets converted to BuyWeaponUpgrades
+    //if(buyWeaponsModeAS3 == 1 && getPageSetting('DelayWeaponsForWind')); //1: prestige till 1 before max prestige and level 2: prestige only 3: buy everything
     //(same function)
 //LEVELING EQUIPMENT SECTION:
     preBuy();
@@ -450,8 +479,14 @@ function autoLevelEquipment() {
             //If we're considering an attack item, we want to buy weapons if we don't have enough damage, or if we don't need health (so we default to buying some damage)
             if (BuyWeaponLevels && DaThing.Stat == 'attack' && (!enoughDamageE || enoughHealthE || maxmap || spirecheck)) {
                 if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {
-                    debug('Leveling equipment ' + eqName, "equips", '*upload3');
-                    buyEquipment(eqName, null, true);
+                    var allow = true;
+                    if(getPageSetting('DelayWeaponsForWind') && (buyWeaponsModeAS3 === 0 || buyWeaponsModeAS3 === 2)){
+                        allow = false;
+                    }
+                    if(allow){
+                        debug('Leveling equipment ' + eqName, "equips", '*upload3');
+                        buyEquipment(eqName, null, true);
+                    }
                 }
             }
             //If we're considering a health item, buy it if we don't have enough health, otherwise we default to buying damage

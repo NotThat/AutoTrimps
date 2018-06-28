@@ -99,6 +99,16 @@ function calcDmg(){
     if (game.global.challengeActive == "Toxicity") {
         enemyHealth *= 2;
     }
+    
+    if (game.global.challengeActive == "Daily"){
+        if (typeof game.global.dailyChallenge.badHealth !== 'undefined'){
+                enemyHealth *= dailyModifiers.badHealth.getMult(game.global.dailyChallenge.badHealth.strength);
+        }
+        if (typeof game.global.dailyChallenge.empower !== 'undefined'){
+                        enemyHealth *= dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
+        }
+    }
+    
     //Corruption Zone Proportionality Farming Calculator:
     var corrupt = currWorldZone >= mutations.Corruption.start(true);
     if (getPageSetting('CorruptionCalc') && corrupt) {
@@ -152,7 +162,7 @@ function calcDmg(){
     //asks if we can survive x number of hits in either D stance or X stance.
     enoughHealth = (baseHealth / FORMATION_MOD_1 > customVars.numHitsSurvived * (enemyDamage - baseBlock / FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock / FORMATION_MOD_1 : enemyDamage * pierceMod));
     
-    if (currWorldZone >= windStackZone && windZone() && getPageSetting('AutoStance')==3)
+    if (windZone() && getPageSetting('AutoStance')==3)
         windMult = 2.5; //in windstacking zones, wait longer before doing maps for damage
     else
         windMult = 1;
@@ -188,7 +198,7 @@ function autoMap() {
     
     //lets see if we can figure out how much fragments we're getting
     //need to be inside of a map while calling this function to see our expected frags per second
-    var fragIncome = fragCalc();
+    //var fragIncome = fragCalc(); //TODO: maybe someday
     
     //allow script to handle abandoning
     // if(game.options.menu.alwaysAbandon.enabled == 1) toggleSetting('alwaysAbandon');
@@ -237,6 +247,7 @@ function autoMap() {
         shouldDoMaps = !enoughDamage || shouldFarm || scryerStuck || needPrestige;
         if(!enoughDamage) {
             AutoMapsCoordOverride = true;
+            buyWeaponsModeAS3 = 3; //buy/get everything
             updateAutoMapsStatus("", "AutoMaps: Need Damage, forcing Coordination purchase");
         }    
         else
@@ -324,6 +335,10 @@ function autoMap() {
             var mapdmg = ourBaseDamage2;// * (game.unlocks.imps.Titimp ? 2 : 1); // *2 for titimp. (ourBaseDamage2 has no mapbonus in it)
             if (game.upgrades.Dominance.done && !getPageSetting('ScryerUseinMaps2'))
                 mapdmg *= 4; //dominance stance and not-scryer stance in maps.
+            if (game.global.challengeActive == "Daily"){
+                if (typeof game.global.dailyChallenge.badMapHealth !== 'undefined' && game.global.mapsActive)
+                    maphp *= dailyModifiers.badMapHealth.getMult(game.global.dailyChallenge.badMapHealth.strength);
+            }
             if (mapdmg < maphp) {
                 break;
             }
@@ -1135,9 +1150,9 @@ function checkNeedToVoid(){
     var voidMapLevelSetting = getPageSetting('VoidMaps');
     //Add your daily zone mod onto the void maps level
     var dailyVoidMod = getPageSetting('AutoFinishDailyNew');
-    if ((game.global.challengeActive == "Daily") && (getPageSetting('AutoFinishDailyNew') != 999) && (getPageSetting('DailyVoidMod'))) {
-        (voidMapLevelSetting += dailyVoidMod);
-    }
+    if (game.global.challengeActive == "Daily" && getPageSetting('AutoFinishDailyNew') != 999 && getPageSetting('DailyVoidMod'))
+        voidMapLevelSetting += dailyVoidMod;
+    
     //decimal void maps are possible, using string function to avoid false float precision (0.29999999992). javascript can compare ints to strings anyway.
     var voidMapLevelSettingZone = (voidMapLevelSetting + "").split(".")[0];
     var voidMapLevelSettingMap = (voidMapLevelSetting + "").split(".")[1];
