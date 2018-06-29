@@ -247,7 +247,7 @@ var Best;
 
 //autoLevelEquipment = "Buy Armor", "Buy Armor Upgrades", "Buy Weapons", "Buy Weapons Upgrades"
 function autoLevelEquipment() {
-    var boughtCounter = 10;
+    var boughtCounter = 0;
     while (boughtCounter >= 0){ //keep running this until we dont buy anything
         boughtCounter--;
     if (!(baseDamage > 0)) return;  //if we have no damage, why bother running anything? (this fixes weird bugs)
