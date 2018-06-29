@@ -106,20 +106,17 @@ function printLowerLevelPlayerNotice() {
 
 //Magic Numbers
 toggleSetting('pauseGame');
-//var runInterval = 100;      //How often to loop through logic
-//var startupDelay = 2500;    //How long to wait for everything to load
 var runInterval = 100;      //How often to loop through logic
-var startupDelay = 1;    //How long to wait for everything to load
+var startupDelay = 2500;    //How long to wait for everything to load
 
 //Start Loops
-//setTimeout(delayStart, startupDelay);
-
+setTimeout(delayStart, startupDelay);
 function delayStart() {
     initializeAutoTrimps();
     printChangelog();
     setTimeout(delayStartAgain, startupDelay);
 }
-delayStart();
+
 function delayStartAgain(){
     if (game.achievements.zones.finished < 8)   //z60
         printLowerLevelPlayerNotice();

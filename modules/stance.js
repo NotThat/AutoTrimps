@@ -1004,9 +1004,9 @@ function buildWorldArray(){
     }
     
     //toggleSetting('pauseGame');
-    tooltip('Export', null, 'update');
-    console.log(document.getElementById("exportArea").value);
-    cancelTooltip();
+    //tooltip('Export', null, 'update');
+    //console.log(document.getElementById("exportArea").value);
+    //cancelTooltip();
     
     worldArray = []; //create a world array that's safe to write to
     lastHealthyCell = -1;
