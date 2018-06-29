@@ -21,9 +21,9 @@ var m;
 var hr;
 var highDamageHeirloom = true;
 var avgWorthZone = 0;
+var highestAvgWorthZone = -1;
 var maxStacksBaseDamageD;
 var maxDesiredRatio;
-var maxHPDivider = 2;
 
 function calcBaseDamageinS() {
     //baseDamage
@@ -587,8 +587,6 @@ function autoStanceCheck(enemyCrit) {
 function autoStance3() {
     equipMainShield(); //always start calculations with the good shield
     calcBaseDamageinS(); //this finds our displayed damage in S 'baseDamage'
-    maxStacksBaseDamageD = maxAnti*8*baseDamage/(1 + 0.2*game.global.antiStacks); //45 stacks D stance good heirloom damage. The most damage we can dish out right now
-    maxDesiredRatio = maxStacksBaseDamageD/desiredDamage; //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
     
     if (isActiveSpireAT() || game.global.world == getPageSetting('VoidMaps') || BWRaidNowLogic() || PRaidingActive)
         buyWeaponsModeAS3 = 3; //buy everything
@@ -621,7 +619,7 @@ function autoStance3() {
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     var nextCell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum + 1] : game.global.gridArray[cellNum + 1];
-    desiredDamage = maxHP / maxHPDivider;
+
     
     allowBuyingCoords = !getPageSetting('DelayCoordsForWind'); //dont buy coords unless we explicitly permit it. automaps() can also allow it if player runs a map for ratio.
     buyWeaponsModeAS3 = (getPageSetting('DelayWeaponsForWind') ? 0 : 3); //0: buy nothing, only prestige if it lowers our damage. 1: prestige till 1 before max prestige and level 2: prestige only 3: buy everything
@@ -636,48 +634,39 @@ function autoStance3() {
             return;
     }
     
+    //calculate how much dmg we need to fully overkill on next attack
+    var overkillCells = 1+Fluffy.isRewardActive("overkiller"); //0 / 1 / 2
+    var overkillPercent = game.portal.Overkill.level * 0.005;
+    var requiredDmgToOK = 0;
+    for(var i = overkillCells; i>=1; i--){
+        if(cellNum + i >= 100)
+            continue;
+        requiredDmgToOK += worldArray[cellNum + i].maxHealth;
+        requiredDmgToOK = requiredDmgToOK / overkillPercent;
+    }
+    requiredDmgToOK += game.global.gridArray[cellNum].health;
+    if(poisonZone())
+        requiredDmgToOK -= Math.min(game.empowerments.Poison.currentDebuffPower, game.global.gridArray[cellNum].health);
+    
+
     if(!windZone()){ 
         if(game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting) == 0)
             switchOnGA(); //in rare cases we leave GA disabled, so make sure to turn it back on
         
-        buyWeaponsModeAS3 = 1; //1: prestige till 1 before max prestige and level
-        if(maxDesiredRatio < 10)
-            buyWeaponsModeAS3 = 3; //buy everything
+        buyWeaponsModeAS3 = 1; //1: prestige till 1 before max prestige and level weapons as much as possible
+        setFormation(2);
         
-        //we consider buying coordinations in 2 cases: either we do a lot of damage and want to guarantee full overkill (early game) or we trying to clear non wind zones at reasonable pace (late game)
-        if(maxDesiredRatio > 100){ //we do a lot of damage, but lets make sure we full overkill to prevent slowdowns
-            var overkillCells = 1+Fluffy.isRewardActive("overkiller"); //0 / 1 / 2
-            var overkillPercent = game.portal.Overkill.level * 0.005;
-            var currCellHP = worldArray[cellNum].maxHealth;
-            if(poisonZone())
-                currCellHP -= game.empowerments.Poison.currentDebuffPower;
-            currCellHP -= maxStacksBaseDamageD; 
-            if(currCellHP > 0){ //this really should never happen here
-                currentBadGuyNum = cellNum;
-                allowBuyingCoords = true;
-                debug("Zone " + game.global.world + " Buying Coord early game");
-            }
-            var remainingOKDmg = Math.abs(currCellHP) * overkillPercent; 
-
-            for(var i = 1; i <= overkillCells+1; i++){
-                if(cellNum + i == 100)
-                    break;
-                remainingOKDmg -= worldArray[cellNum + i].maxHealth;
-                remainingOKDmg *= overkillPercent;
-                if(remainingOKDmg <= minHP * 0.075 && currentBadGuyNum != cellNum){ //bit of a safety margin
-                    currentBadGuyNum = cellNum;
-                    allowBuyingCoords = true;
-                    debug("Zone " + game.global.world + " Buying Coord early game");
-                }
-            }
-        }
-        else if(maxDesiredRatio < 1 && currentBadGuyNum != cellNum){
+        if(requiredDmgToOK / maxStacksBaseDamageD > 0.8 && currentBadGuyNum != cellNum){ //get coords
             currentBadGuyNum = cellNum;
             allowBuyingCoords = true;
-            debug("Zone " + game.global.world + " Buying Coord late game");
+            maxCoords = game.upgrades.Coordination.done + 1;
+            //if(game.upgrades.Coordination.done < maxCoords)
+                debug("Zone " + game.global.world + "."+cellNum+" Buying Coord");
         }
         
-        setFormation(2);
+        if(requiredDmgToOK / maxStacksBaseDamageD > 1 && game.upgrades.Coordination.done == game.upgrades.Coordination.allowed)
+            buyWeaponsModeAS3 = 3; //buy weapon prestiges+levels
+        
         return;
     }
     
@@ -755,69 +744,70 @@ function autoStance3() {
     //figure out what attacking the current cell is worth. 3 cases:
     if (stacks < 200) //we dont have max stacks
         cmp += worldArray[cellNum].geoRelativeCellWorth;
-    if (nextStartingStacks < 200) //next cell doesnt have max stacks
+    if (nextStartingStacks < 195) //next cell doesnt have max stacks
         cmp += worldArray[cellNum].PBWorth;
-    if(stacks < 200 && nextStartingStacks == 200){ //current cell isnt capped but next one is
+    if(stacks < 200 && nextStartingStacks >= 195){ //current cell isnt capped but next one is
         if(cellNum < 99)
             cmp -= worldArray[cellNum+1].geoRelativeCellWorth;
     }
-    if(worldArray[cellNum].corrupted == "corruptDodge") cmp *= 0.7; //dodge cells are worth less    
+    if(worldArray[cellNum].corrupted == "corruptDodge") cmp *= 0.7; //dodge cells are worth less
+    cmp = cmp / OmniThreshhold; //cmp is in OmniThreshhold units
     
-    //cmp *= 1000;
-    //cmp *= 0.001;
+    //cmp *= 1000; avgWorthZone *= 1000;
+    //cmp *= 0.001; avgWorthZone *= 1000;
     
-    if(avgWorthZone < 0.2) //if avg zone value too low, buy all weapons so we can overkill more
-        buyWeaponsModeAS3 = 3; //buy/get everything
+    //maxStacksBaseDamageD
+    //highestAvgWorthZone
+    //if(avgWorthZone < 0.2) //if avg zone value too low, buy all weapons so we can overkill more
+    //    buyWeaponsModeAS3 = 3; //buy/get everything
     
-    //calculate how much dmg we need to fully overkill
-    var overkillCells = 1+Fluffy.isRewardActive("overkiller"); //0 / 1 / 2
-    var overkillPercent = game.portal.Overkill.level * 0.005;
-    var requiredDmg = worldArray[cellNum].maxHealth;
-
-    for(var i = overkillCells; i>=1; i--){
-        if(cellNum + i >= 100)
-            continue;
-        requiredDmg = requiredDmg / 0.15;
-        requiredDmg += worldArray[cellNum + i].maxHealth;
-    }
-    //debug("ratio to OK " + requiredDmg / maxStacksBaseDamageD).toFixed(2)));
+    //maxStacksBaseDamageD
+    //maxDesiredRatio
+    //highestAvgWorthZone
+    //requiredDmgToOK
+    //debug("ratio to OK " + (requiredDmg / maxStacksBaseDamageD).toFixed(2));
     
-    if(expectedNumHitsD > missingStacks || cmp < OmniThreshhold || maxDesiredRatio > 8000){ //we need more damage, or this cell isnt worth our time, or we do far too much damage anyway so dont even try and risk losing an extra overkill
+    if(expectedNumHitsD > missingStacks+2 || cmp < 1 || maxDesiredRatio > 8000){ //we need more damage, or this cell isnt worth our time, or we do far too much damage anyway so dont even try and risk losing an extra overkill
         setFormation(2);
         chosenFormation = 2;
+        
+        if (requiredDmgToOK / maxStacksBaseDamageD > 1 && avgWorthZone < 0.2){ //we need more damage to OK in a poor zone
+            buyWeaponsModeAS3 = 3;
+            debug("Buying more dmg to OK");
+            if(requiredDmgToOK / maxStacksBaseDamageD > 1.2 && currentBadGuyNum != cellNum){
+                currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
+                allowBuyingCoords = true;
+                maxCoords = game.upgrades.Coordination.done + 1;
+                //if(game.upgrades.Coordination.done < maxCoords)
+                    debug("Autostance3: allowing buying coord Wind #" + maxCoords + " on " + game.global.world + "." + cellNum);
+            }
+        }
 
-        if(maxDesiredRatio < 1){ 
-            buyWeaponsModeAS3 = 3; //buy/get everything
+        if(maxDesiredRatio < 1){ //need more damage, get it
+            buyWeaponsModeAS3 = 3; //buy /get everything
         }
         
-        //check to see if we want to coordinate
-        if(maxDesiredRatio < 1 && currentBadGuyNum != cellNum){ //allow 1 coordination purchase
+        if(maxDesiredRatio < 0.9 && currentBadGuyNum != cellNum && game.global.antiStacks >= maxAnti-1){ //need more damage, get it, but only if we're at near max stacks.
             currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
             allowBuyingCoords = true;
             maxCoords = game.upgrades.Coordination.done + 1;
-            debug("Autostance3: allowing buying coord Universal #" + maxCoords + " on " + game.global.world + "." + cellNum);
+            //if(game.upgrades.Coordination.done < maxCoords)
+                debug("Autostance3: allowing buying coord Wind #" + maxCoords + " on " + game.global.world + "." + cellNum);
         }
         
         //consider trimpicide for max stacks
-        if(game.global.antiStacks < maxAnti-1 && game.resources.trimps.owned == game.resources.trimps.realMax() && hiddenBreedTimer > maxAnti){
-            var sum=0;
-            for (var i  = cellNum; i <= 99; i++)
-                sum+= worldArray[i].finalWorth;
-            var avgWorthRemainingZone = sum/(99-cellNum+1); //calculate average value of the
-            
-            var before = Math.min(stacks + expectedNumHitsD, 200); //how many stacks we'll get currently
-            var after = Math.min(stacks*0.75 + enemyHealth / maxStacksBaseDamageD, 200); //how many stacks we'll end up with after max stacks trimpicide
-            if(maxDesiredRatio > 8000 || maxDesiredRatio*(5+maxAnti)/(5+game.global.antiStacks) < 1 || after > 180 || (avgWorthRemainingZone < 0.8 && cellNum < 90 && cellNum > lastHealthy)) { 
-                debug("Trimpiciding to get max stacks. Before/After " + before+"/"+after);
+        var before = Math.min(stacks + expectedNumHitsD, 200); //how many stacks we'll get currently
+        var after = Math.min(stacks*0.75 + enemyHealth / maxStacksBaseDamageD, 200); //how many stacks we'll end up with after max stacks trimpicide
+        //if(game.global.antiStacks < maxAnti-1 && game.resources.trimps.owned == game.resources.trimps.realMax() && hiddenBreedTimer > maxAnti){
+        if(game.global.antiStacks < maxAnti-1 && hiddenBreedTimer > maxAnti){
+            if((maxDesiredRatio > 4000 || maxDesiredRatio*(5+maxAnti)/(5+game.global.antiStacks) < 1) || (avgWorthZone < 0.7 && cellNum < 90 && cellNum > lastHealthy)) { 
+                debug("Trimpiciding to get max stacks.");
                 wantedAnticipation = maxAnti;
                 stackConservingTrimpicide();
                 return;
             }
         }
         
-            if(cmp < OmniThreshhold){ 
-
-            }
         
     }
     else if (expectedNumHitsX > missingStacks)
@@ -851,31 +841,12 @@ function autoStance3() {
             }
             
             if(chosenFormation == 4 && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99)){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
-                //step 1
-                //calculate our desired damage, which is maxhp/12
-                //step 2
-                //calculate how many anticipation stacks it takes to get us there with our good shield and D stance
-                //step 3
-                //decide if its worth trimpiciding or not
-                
-                equipMainShield();
-                calcBaseDamageinS();
-                
-                /*var noStacksBaseDamageD = 8*baseDamage/(1 + 0.2*game.global.antiStacks);
-                var ratio = desiredDamage/noStacksBaseDamageD;
-                minAnticipationStacks = Math.floor((ratio - 1) * 5); //5 anticipation stacks is +100% more base damage
-                if (minAnticipationStacks > maxAnti) minAnticipationStacks = maxAnti;
-                if (minAnticipationStacks < 1) minAnticipationStacks = 1;*/
-
                 minAnticipationStacks = 1;
-                equipLowDmgShield();
-                calcBaseDamageinS();
                 var ourLowestDamage = baseDamage*(1 + 0.2 * minAnticipationStacks)/(1 + 0.2 * game.global.antiStacks);
-
                 var before = Math.min(stacks      + expectedNumHitsS, 200); //stacks if we dont trimpicide
-                var after  = Math.min(0.85*stacks + enemyHealth / ourLowestDamage, 200); //stacks if we do trimpicide, a bit less actually but with enough modifiers trimpiciding is good in the long run
+                var after  = Math.min(0.5*stacks + enemyHealth / ourLowestDamage + (avgWorthZone-1) * 15, 200); //stacks if we do trimpicide. the more a zone is worth the more we are willing to trimpicide if we need less damage.
                 
-                if(before < after && game.global.antiStacks > minAnticipationStacks){ //trimpiciding costs 25% stacks.
+                if(before <= after && game.global.antiStacks > minAnticipationStacks){ //trimpiciding costs 25% stacks twice.
                     wantedAnticipation = minAnticipationStacks;
                     getTargetAntiStack(minAnticipationStacks, true);
                     return;
@@ -890,7 +861,7 @@ function autoStance3() {
     
     //sharp enemies
     if (worldArray[cellNum].corrupted == "healthyBleed" || worldArray[cellNum].corrupted == "corruptBleed"){
-        if(cmp < OmniThreshhold * 3){ //only stack against them if they're worthwhile
+        if(cmp < 3){ //only stack against them if they're worthwhile
             equipMainShield();
             chosenFormation = 2;
         }
@@ -900,8 +871,13 @@ function autoStance3() {
     
     var shield = (highDamageHeirloom ? "+" : "-");
     
-    //debug(shield+game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+(cmp/OmniThreshhold).toFixed(2)+" S/X/D " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " " + corruptedtmp + " " + enemyHealth.toExponential(1) + "("+nextMaxHealthtmp.toExponential(1)+")", "spam");
-    debug(shield+game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+(cmp/OmniThreshhold).toFixed(2)+" " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " " + maxDesiredRatio.toExponential(2) +" desired " + (requiredDmg / maxStacksBaseDamageD).toFixed(2) + " OK " + corruptedtmp, "general");
+        //maxStacksBaseDamageD
+    //highestAvgWorthZone
+    //requiredDmgToOK
+    //(requiredDmgToOK/maxStacksBaseDamageD).toFixed(2)
+    
+    //debug(shield+game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+cmp.toFixed(2)+" S/X/D " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " " + corruptedtmp + " " + enemyHealth.toExponential(1) + "("+nextMaxHealthtmp.toExponential(1)+")", "spam");
+    debug(shield+game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+cmp.toFixed(2)+" " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " x" + maxDesiredRatio.toExponential(2) +" desired " + (requiredDmgToOK/maxStacksBaseDamageD).toFixed(2) + " ToOK " + corruptedtmp, "general");
 }
 
 function getTargetAntiStack(target, firstRun){
@@ -1090,18 +1066,17 @@ function buildWorldArray(){
     calcBaseDamageinS();
     var baseDamageGood = baseDamage;
     var heirloomDiff = baseDamageGood / baseDamageBad;
-    //debug("heirloom diff is " + heirloomDiff, "general");
+    debug("heirloom diff is " + heirloomDiff, "general");
     
-    desiredDamage = maxHP / maxHPDivider; //this is where we want our damage to be using good heirloom, D stance and max anticipations for optimal wind farming
-    maxStacksBaseDamageD = maxAnti * 8 * baseDamage / (1 + 0.2*game.global.antiStacks); //45 stacks D stance good heirloom damage. The most damage we can dish out right now
-    maxDesiredRatio = maxStacksBaseDamageD/desiredDamage; //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
+    maxStacksBaseDamageD = 8 * baseDamage * (1+0.2*maxAnti) / (1 + 0.2*game.global.antiStacks); //45 stacks D stance good heirloom damage. The most damage we can dish out right now
+    maxDesiredRatio = maxStacksBaseDamageD/maxHP; //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
     
     debug("our dmg = " + (maxDesiredRatio).toExponential(2) + " of desired");
     
     //next we want to calculate a value for each cell based on the healthy/corrupted/empty/omni distribution of the zone. this will be used to decide if a cell is worth spending any attacks in
-    var pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100: 0);
-    if(game.global.world % 5 > 0 && mutations.Healthy.cellCount() > 5) //on wind zones that arent the last
-        worldArray[99].geoRelativeCellWorth = (1 + 0.22*mutations.Healthy.cellCount()) * game.empowerments.Wind.getModifier(); //we want to reflect the worth of the starting cells in next zone. in high zones this is worth a lot due to healthy cells. in low zones very little
+    var pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
+    if(game.global.world % 5 > 0) //on wind zones that arent the last
+        worldArray[99].geoRelativeCellWorth = (1 + 0.2*mutations.Healthy.cellCount()) * game.empowerments.Wind.getModifier(); //we want to reflect the worth of the starting cells in next zone. in high zones this is worth a lot due to healthy cells. in low zones very little
     else
         worldArray[99].geoRelativeCellWorth = game.empowerments.Wind.getModifier(); //we want to reflect the worth of the starting cells in next zone. in high zones this is worth a lot due to healthy cells. in low zones very little    
     worldArray[99].PBWorth = 0; //PB doesnt get carried over to next zone
@@ -1119,7 +1094,12 @@ function buildWorldArray(){
     var sum = 0;
     for (var i  = 0; i <= 99; i++)
         sum += worldArray[i].finalWorth;
-    avgWorthZone = dailyMult * sum / 100;
+    avgWorthZone = dailyMult * sum / (100 * OmniThreshhold);
+    
+    if(game.global.world < 230)
+        highestAvgWorthZone = 0;
+    else if (windZone())
+        highestAvgWorthZone = avgWorthZone;
     
     return true;
 }

@@ -247,6 +247,9 @@ var Best;
 
 //autoLevelEquipment = "Buy Armor", "Buy Armor Upgrades", "Buy Weapons", "Buy Weapons Upgrades"
 function autoLevelEquipment() {
+    var boughtCounter = 10;
+    while (boughtCounter >= 0){ //keep running this until we dont buy anything
+        boughtCounter--;
     if (!(baseDamage > 0)) return;  //if we have no damage, why bother running anything? (this fixes weird bugs)
     //if((game.jobs.Miner.locked && game.global.challengeActive != 'Metal') || (game.jobs.Scientist.locked && game.global.challengeActive != "Scientist"))
         //return;
@@ -440,8 +443,9 @@ function autoLevelEquipment() {
                         debug('Upgrading ' + upgrade + " - Prestige " + game.equipment[equipName].prestige, "equips", '*upload');
                     else if (allow)
                         debug('Upgrading ' + upgrade + " # " + game.upgrades[upgrade].allowed, "equips", '*upload');
-                    if(allow)
+                    if(allow){
                         buyUpgrade(upgrade, true, true);
+                    }
                 }
                 else {
                     $equipName.style.color = 'orange';
@@ -508,6 +512,7 @@ function autoLevelEquipment() {
         }
     }
     postBuy();
+    }
 }
 
 //check if we have cap to 10 equip on, and we are capped for all attack weapons
