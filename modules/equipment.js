@@ -330,12 +330,13 @@ function autoLevelEquipment() {
         }
         enoughHealthE = false;
         //numTab(3);
-        buyEquipment('Boots', false, true);
+        //removed temporarily while tracking negative dmg bug
+        /*buyEquipment('Boots', false, true);
         buyEquipment('Helmet', false, true);
         buyEquipment('Pants', false, true);
         buyEquipment('Shoulderguards', false, true);
         buyEquipment('Breastplate', false, true);
-        buyEquipment('Gambeson', false, true);
+        buyEquipment('Gambeson', false, true);*/
     }
     else if (game.global.soldierHealth > (safetyNet+1)*enemyDamage && game.global.soldierHealth > 1000 && !first){
         debug("enough health");
