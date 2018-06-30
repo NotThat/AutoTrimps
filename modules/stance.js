@@ -667,6 +667,10 @@ function autoStance3() {
         if(requiredDmgToOK / maxStacksBaseDamageD > 1 && game.upgrades.Coordination.done == game.upgrades.Coordination.allowed)
             buyWeaponsModeAS3 = 3; //buy weapon prestiges+levels
         
+        if (isActiveSpireAT() || doVoids || BWRaidNowLogic() || PRaidingActive){
+            buyWeaponsModeAS3 = 3;
+        }
+        
         return;
     }
     
@@ -846,7 +850,7 @@ function autoStance3() {
                 var before = Math.min(stacks      + expectedNumHitsS, 200); //stacks if we dont trimpicide
                 var after  = Math.min(0.5*stacks + enemyHealth / ourLowestDamage + (avgWorthZone-1) * 15, 200); //stacks if we do trimpicide. the more a zone is worth the more we are willing to trimpicide if we need less damage.
                 
-                if(before <= after && game.global.antiStacks > minAnticipationStacks){ //trimpiciding costs 25% stacks twice.
+                if(before <= after && game.global.antiStacks > minAnticipationStacks && maxDesiredRatio*(5+minAnticipationStacks)/(5+game.global.antiStacks) > 1){ //trimpiciding costs 25% stacks twice.
                     wantedAnticipation = minAnticipationStacks;
                     getTargetAntiStack(minAnticipationStacks, true);
                     return;
