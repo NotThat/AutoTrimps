@@ -593,7 +593,16 @@ function autoStance3() {
     else
         buyWeaponsModeAS3 = 0; //buy nothing
     
-    if(baseDamage <= 0){ debug("Error Stance3: " + baseDamage + " damage!"); return; }
+    if(baseDamage <= 0){
+        debug("Error Stance3: " + baseDamage + " damage!");
+        if(!game.global.preMapsActive){
+            if (!game.global.switchToMaps){
+                mapsClicked();
+            }
+        }
+        mapsClicked();
+        return; 
+    }
     if (lastZoneGridded != game.global.world || lastrunworld != currentworld){ 
         buildWorldArray();
         lastZoneGridded = game.global.world;
