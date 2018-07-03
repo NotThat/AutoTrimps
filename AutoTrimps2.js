@@ -110,7 +110,7 @@ var runInterval = 100;      //How often to loop through logic
 var startupDelay = 2500;    //How long to wait for everything to load
 
 //Start Loops
-//setTimeout(delayStart, startupDelay);
+setTimeout(delayStart, startupDelay);
 function delayStart() {
     initializeAutoTrimps();
     printChangelog();
