@@ -105,7 +105,7 @@ function printLowerLevelPlayerNotice() {
 ////////////////////////////////////////
 
 //Magic Numbers
-toggleSetting('pauseGame');
+//toggleSetting('pauseGame');
 var runInterval = 100;      //How often to loop through logic
 var startupDelay = 2500;    //How long to wait for everything to load
 
