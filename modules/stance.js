@@ -874,10 +874,10 @@ function autoStance3() {
     
     //sharp enemies
     if (worldArray[cellNum].corrupted == "healthyBleed" || worldArray[cellNum].corrupted == "corruptBleed"){
-        if(cmp < 3){ //only stack against them if they're worthwhile
+        //if(cmp < 3){ //only stack against them if they're worthwhile
             equipMainShield();
             chosenFormation = 2;
-        }
+        //}
     }
     
     setFormation(chosenFormation); 
@@ -1140,8 +1140,9 @@ function  calcOmniHelium(){ //rewardResource()
     var k = (game.global.totalSquaredReward / 1000) + 1;
     var fluffyBonus = Fluffy.isRewardActive("helium");
     var l = 1 + (fluffyBonus * 0.25);
+    var heliumy = game.singleRunBonuses.heliumy.owned ? 1.25 : 1;
     
-    m = a*b*c*d*e*f*g*h*i*j*k*l; //Omnipotrimp helium
+    m = a*b*c*d*e*f*g*h*i*j*k*l*heliumy; //Omnipotrimp helium
     hr = m * 60 * 60 * 1/(Math.pow(0.95, 20) - 0.1); //if we kill Omni every attack how much he/hr we'll have
 
     updateOmniThreshhold();
