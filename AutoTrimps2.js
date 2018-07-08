@@ -174,7 +174,6 @@ var heirloomFlag = false;
 var heirloomCache = game.global.heirloomsExtra.length;
 var magmiteSpenderChanged = false;
 
-var enoughDamageCutoff = 6; //above this the game will do maps for map bonus stacks
 var windMult; 
 var poisonMult=30;
 var enemyHealth=1;
