@@ -126,6 +126,9 @@ function getEnemyMaxHealth(world, level, corrupt) {
         amt *= game.badGuys["Grimp"].health;
     else
         amt *= getCorruptScale("health");
+    if (game.global.challengeActive == "Coordinate"){
+	   amt *= getBadCoordLevel();
+	}
     return Math.floor(amt);
 }
 
