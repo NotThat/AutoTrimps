@@ -1251,7 +1251,7 @@ function findVoidMap(){
 }
 
 function windZone(){
-    return ((game.global.world-241) % 15 <= 4);
+    return (game.global.world-241) % 15 <= 4 && game.global.world > 240;
 }
 
 function poisonZone(){
