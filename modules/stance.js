@@ -668,8 +668,13 @@ function autoStance3() {
         else
             enemyAttack -= baseBlock*(1 - getPierceAmt());
         
+        if(game.global.challengeActive == "Daily" && typeof game.global.dailyChallenge.crits !== 'undefined')
+            enemyAttack *= dailyModifiers.crits.getMult(game.global.dailyChallenge.crits.strength);
+        
         if (game.global.gridArray[cellNum].corrupted == "corruptCrit")
             enemyAttack *= 5;
+        else if (game.global.gridArray[cellNum].corrupted == "healthyCrit")
+            enemyAttack *= 7;
         else if (game.global.gridArray[cellNum].corrupted == "corruptBleed")
             ourHP *= 0.8;
         else if (game.global.gridArray[cellNum].corrupted == "healthyBleed")
