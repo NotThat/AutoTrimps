@@ -164,7 +164,7 @@ function calcDmg(){
     //asks if we can survive x number of hits in either D stance or X stance.
     enoughHealth = (baseHealth / FORMATION_MOD_1 > customVars.numHitsSurvived * (enemyDamage - baseBlock / FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock / FORMATION_MOD_1 : enemyDamage * pierceMod));
     
-    if (windZone() && getPageSetting('AutoStance')==3)
+    if (windZone() && getPageSetting('AutoStance')==3 && avgWorthZone > 0.01)
         windMult = 2.5; //in windstacking zones, wait longer before doing maps for damage
     else
         windMult = 1;

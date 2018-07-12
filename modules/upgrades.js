@@ -26,8 +26,7 @@ function buyUpgrades() {
         }
         
         if(popArmyRatio < 1350){ //we're dangerously close to losing amalgamator
-            var coordinatedLevel = game.portal.Coordinated.level;
-            var coordinationMult = 1+0.25*Math.pow(0.98, coordinatedLevel);
+            var coordinationMult = 1+0.25*Math.pow(0.98, game.portal.Coordinated.level);
             var currentSendAfter = game.resources.trimps.getCurrentSend()*coordinationMult;
             var popArmyRatioAfter = game.resources.trimps.realMax()/currentSendAfter;
             if (popArmyRatioAfter <= 1001){

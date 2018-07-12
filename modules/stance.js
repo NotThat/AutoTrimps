@@ -628,7 +628,6 @@ function autoStance3() {
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     var nextCell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum + 1] : game.global.gridArray[cellNum + 1];
-
     
     allowBuyingCoords = !getPageSetting('DelayCoordsForWind'); //dont buy coords unless we explicitly permit it. automaps() can also allow it if player runs a map for ratio.
     buyWeaponsModeAS3 = (getPageSetting('DelayWeaponsForWind') ? 0 : 3); //0: buy nothing, only prestige if it lowers our damage. 1: prestige till 1 before max prestige and level 2: prestige only 3: buy everything
@@ -657,8 +656,39 @@ function autoStance3() {
     if(poisonZone())
         requiredDmgToOK -= Math.min(game.empowerments.Poison.currentDebuffPower, game.global.gridArray[cellNum].health);
     
+    if (typeof game.global.dailyChallenge.empower !== 'undefined' && !game.global.preMapsActive && !game.global.mapsActive){ //dont die in world on empowered dailies
+        var enemyAttack = game.global.gridArray[cellNum].attack * dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
+        var ourHP = game.global.soldierHealth;
+        
+        if (getEmpowerment() == "Ice")
+            enemyAttack *= game.empowerments.Ice.getCombatModifier();
+        
+        if(baseBlock > game.global.gridArray[cellNum].attack)
+            enemyAttack *= getPierceAmt();
+        else
+            enemyAttack -= baseBlock*(1 - getPierceAmt());
+        
+        if (game.global.gridArray[cellNum].corrupted == "corruptCrit")
+            enemyAttack *= 5;
+        else if (game.global.gridArray[cellNum].corrupted == "corruptBleed")
+            ourHP *= 0.8;
+        else if (game.global.gridArray[cellNum].corrupted == "healthyBleed")
+            ourHP *= 0.7;
+        
+        ourHP -= enemyAttack;
+            
+        if (ourHP <= 1000){ 
+            debug("Trimpiciding to prevent empowering e:" + enemyAttack.toExponential(2) + " us:" + game.global.soldierHealth.toExponential(2) + " ourHP:" + ourHP.toExponential(2));
+           if (!game.global.switchToMaps){
+                mapsClicked();
+            }
+            mapsClicked();
+            
+            return;
+        }
+    }
 
-    if(!windZone()){ 
+    if(!windZone() || avgWorthZone < 0.01){ 
         if(game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting) == 0)
             switchOnGA(); //in rare cases we leave GA disabled, so make sure to turn it back on
         
@@ -668,13 +698,13 @@ function autoStance3() {
         if(requiredDmgToOK / maxStacksBaseDamageD > 0.8 && currentBadGuyNum != cellNum){ //get coords
             currentBadGuyNum = cellNum;
             allowBuyingCoords = true;
-            maxCoords = game.upgrades.Coordination.done + 1;
-            //if(game.upgrades.Coordination.done < maxCoords)
+            if(game.upgrades.Coordination.done == maxCoords)
                 debug("Zone " + game.global.world + "."+cellNum+" Buying Coord");
+            maxCoords = game.upgrades.Coordination.done + 1;
+            
+            if(requiredDmgToOK / maxStacksBaseDamageD > 1 && game.upgrades.Coordination.done == game.upgrades.Coordination.allowed)
+                buyWeaponsModeAS3 = 3; //buy weapon prestiges+levels
         }
-        
-        if(requiredDmgToOK / maxStacksBaseDamageD > 1 && game.upgrades.Coordination.done == game.upgrades.Coordination.allowed)
-            buyWeaponsModeAS3 = 3; //buy weapon prestiges+levels
         
         if (isActiveSpireAT() || doVoids || BWRaidNowLogic() || PRaidingActive){
             buyWeaponsModeAS3 = 3;
@@ -1083,10 +1113,11 @@ function buildWorldArray(){
     equipMainShield();
     calcBaseDamageinS();
     var baseDamageGood = baseDamage;
-    var heirloomDiff = baseDamageGood / baseDamageBad;
-    debug("heirloom diff is " + heirloomDiff, "general");
     
-    maxStacksBaseDamageD = 8 * baseDamage * (1+0.2*maxAnti) / (1 + 0.2*game.global.antiStacks); //45 stacks D stance good heirloom damage. The most damage we can dish out right now
+    //var heirloomDiff = baseDamageGood / baseDamageBad;
+    //debug("heirloom diff is " + heirloomDiff, "general");
+    
+    maxStacksBaseDamageD = 8 * baseDamageGood * (1+0.2*maxAnti) / (1 + 0.2*game.global.antiStacks); //45 stacks D stance good heirloom damage. The most damage we can dish out right now
     maxDesiredRatio = maxStacksBaseDamageD/maxHP; //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
     
     debug("our dmg = " + (maxDesiredRatio).toExponential(2) + " of desired");
