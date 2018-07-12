@@ -3,7 +3,7 @@ MODULES["maps"] = {};
 
 var enoughDamageCutoff = 2; //above this the game will do maps for map bonus stacks
 
-MODULES["maps"].poisonMult = 30; //how much bonus damage to treat poison zones as giving us
+//MODULES["maps"].poisonMult = 30; //how much bonus damage to treat poison zones as giving us
 MODULES["maps"].farmingCutoff = 16; //above this the game will farm.
 MODULES["maps"].numHitsSurvived = 8; //survive X hits in D stance or not enough Health.
 MODULES["maps"].LeadfarmingCutoff = 10; //lead has its own farmingCutoff

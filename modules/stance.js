@@ -825,9 +825,9 @@ function autoStance3() {
             if(requiredDmgToOK / maxStacksBaseDamageD > 1.2 && currentBadGuyNum != cellNum){
                 currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
                 allowBuyingCoords = true;
-                maxCoords = game.upgrades.Coordination.done + 1;
-                //if(game.upgrades.Coordination.done < maxCoords)
+                if(game.upgrades.Coordination.done == maxCoords)
                     debug("Autostance3: allowing buying coord Wind #" + maxCoords + " on " + game.global.world + "." + cellNum);
+                maxCoords = game.upgrades.Coordination.done + 1;
             }
         }
 
@@ -839,8 +839,9 @@ function autoStance3() {
             currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
             allowBuyingCoords = true;
             maxCoords = game.upgrades.Coordination.done + 1;
-            //if(game.upgrades.Coordination.done < maxCoords)
+            if(game.upgrades.Coordination.done == maxCoords)
                 debug("Autostance3: allowing buying coord Wind #" + maxCoords + " on " + game.global.world + "." + cellNum);
+            maxCoords = game.upgrades.Coordination.done + 1;
         }
         
         //consider trimpicide for max stacks
