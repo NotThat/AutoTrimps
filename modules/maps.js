@@ -3,7 +3,6 @@ MODULES["maps"] = {};
 
 var enoughDamageCutoff = 2; //above this the game will do maps for map bonus stacks
 
-//MODULES["maps"].poisonMult = 30; //how much bonus damage to treat poison zones as giving us
 MODULES["maps"].farmingCutoff = 16; //above this the game will farm.
 MODULES["maps"].numHitsSurvived = 8; //survive X hits in D stance or not enough Health.
 MODULES["maps"].LeadfarmingCutoff = 10; //lead has its own farmingCutoff
@@ -168,7 +167,7 @@ function calcDmg(){
         windMult = 2.5; //in windstacking zones, wait longer before doing maps for damage
     else
         windMult = 1;
-    poisonMult = (getEmpowerment() == "Poison" ? customVars.poisonMult : 1);
+    poisonMult = (getEmpowerment() == "Poison" ? poisonMult : 1);
     
     threshhold = poisonMult * windMult * enoughDamageCutoff;
     if(windMult > 1 && (game.global.MapsActive) && game.empowerments.Wind.currentDebuffPower < 50) //if we enter map screen in wind farm zone and have low stacks, may as well do a few more maps
