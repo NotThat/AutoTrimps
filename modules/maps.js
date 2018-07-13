@@ -167,7 +167,7 @@ function calcDmg(){
         windMult = 2.5; //in windstacking zones, wait longer before doing maps for damage
     else
         windMult = 1;
-    poisonMult = (getEmpowerment() == "Poison" ? poisonMult : 1);
+    poisonMult = (getEmpowerment() == "Poison" ? poisonMultFixed : 1);
     
     threshhold = poisonMult * windMult * enoughDamageCutoff;
     if(windMult > 1 && (game.global.MapsActive) && game.empowerments.Wind.currentDebuffPower < 50) //if we enter map screen in wind farm zone and have low stacks, may as well do a few more maps

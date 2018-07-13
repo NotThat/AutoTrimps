@@ -175,7 +175,7 @@ var heirloomCache = game.global.heirloomsExtra.length;
 var magmiteSpenderChanged = false;
 
 var windMult; 
-var poisonMult=20;
+var poisonMultFixed=20;
 var enemyHealth=1;
 var threshhold=1;
 var HDratio = 0;
