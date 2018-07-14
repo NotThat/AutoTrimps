@@ -131,7 +131,7 @@ function PrestigeValue(what) {
 }
 
 //evaluateEquipmentEfficiency: Back end function for autoLevelEquipment to determine most cost efficient items, and what color they should be.
-function evaluateEquipmentEfficiency(equipName) {
+function evaluateEquipmentEfficiency(equipName) {    
     var equip = equipmentList[equipName];
     var gameResource = equip.Equip ? game.equipment[equipName] : game.buildings[equipName];
     if (equipName == 'Shield') {
@@ -247,6 +247,14 @@ var Best;
 
 //autoLevelEquipment = "Buy Armor", "Buy Armor Upgrades", "Buy Weapons", "Buy Weapons Upgrades"
 function autoLevelEquipment() {
+    
+    //autoLevelEquipment overrides buying/prestiging of weapons (from AS3) in some conditions
+    var dontBuyStartZ = getPageSetting('NoCoordBuyStartZ');
+    if (dontBuyStartZ <= game.global.world && dontBuyStartZ > 0 && getPageSetting('TillWeHaveAmalg') > 0) { //if dontBuyStartZ is set and we've passed it
+        if (game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg'))
+            buyWeaponsModeAS3 = 3; //buy everything
+    }
+    
     var boughtCounter = 10;
     while (boughtCounter >= 0){ //keep running this until we dont buy anything
         boughtCounter--;
