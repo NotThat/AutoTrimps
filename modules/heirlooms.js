@@ -565,8 +565,7 @@ function equipMainShield(){
     newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");
     equipHeirloom();
     updateAllBattleNumbers(true); //updates display
-    //document.getElementById("goodGuyAttack").innerHTML = calculateDamage(game.global.soldierCurrentAttack, true, true); //update important ingame displays
-    //document.getElementById("goodGuyHealthMax").innerHTML = prettify(game.global.soldierHealthMax);
+    //debug("equip main");
     highDamageHeirloom = true;
     return true;
 }
@@ -579,8 +578,7 @@ function equipLowDmgShield(){
     newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");
     equipHeirloom();
     updateAllBattleNumbers(true);
-    //document.getElementById("goodGuyAttack").innerHTML = calculateDamage(game.global.soldierCurrentAttack, true, true);
-    //document.getElementById("goodGuyHealthMax").innerHTML = prettify(game.global.soldierHealthMax);
+    //debug("equip alt");
     highDamageHeirloom = false;
     return true;
 }

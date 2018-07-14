@@ -692,14 +692,16 @@ function autoStance3() {
             return;
         }
     }
-
-    if(!windZone() || avgWorthZone < 0.01){ 
+    
+    //non wind zone or poor wind zone, max speed
+    if(!windZone() || avgWorthZone < 0.2){ 
         if(game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting) == 0)
             switchOnGA(); //in rare cases we leave GA disabled, so make sure to turn it back on
         
-        buyWeaponsModeAS3 = 1; //1: prestige till 1 before max prestige and level weapons as much as possible
         setFormation(2);
         
+        buyWeaponsModeAS3 = 1; //1: prestige till 1 before max prestige and level weapons as much as possible
+
         if(requiredDmgToOK / maxStacksBaseDamageD > 0.8 && currentBadGuyNum != cellNum){ //get coords
             currentBadGuyNum = cellNum;
             allowBuyingCoords = true;
@@ -815,27 +817,21 @@ function autoStance3() {
     //requiredDmgToOK
     //debug("ratio to OK " + (requiredDmg / maxStacksBaseDamageD).toFixed(2));
     
-    if(expectedNumHitsD > missingStacks+2 || cmp < 1 || maxDesiredRatio > 8000){ //we need more damage, or this cell isnt worth our time, or we do far too much damage anyway so dont even try and risk losing an extra overkill
+    if(expectedNumHitsD > missingStacks+2 || cmp < 1){ //we need more damage, or this cell isnt worth our time, or we do far too much damage anyway so dont even try and risk losing an extra overkill
         setFormation(2);
         chosenFormation = 2;
         
-        if (requiredDmgToOK / maxStacksBaseDamageD > 1 && avgWorthZone < 0.2){ //we need more damage to OK in a poor zone
-            buyWeaponsModeAS3 = 3;
-            debug("Buying more dmg to OK");
-            if(requiredDmgToOK / maxStacksBaseDamageD > 1.2 && currentBadGuyNum != cellNum){
-                currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
-                allowBuyingCoords = true;
-                if(game.upgrades.Coordination.done == maxCoords)
-                    debug("Autostance3: allowing buying coord Wind #" + maxCoords + " on " + game.global.world + "." + cellNum);
-                maxCoords = game.upgrades.Coordination.done + 1;
-            }
+        if(maxDesiredRatio > 1 && currentBadGuyNum != cellNum){ //need more damage, get weapon levels
+            currentBadGuyNum = cellNum;
+            buyWeaponsModeAS3 = 2; //buy levels only
         }
 
-        if(maxDesiredRatio < 1){ //need more damage, get it
+        if(maxDesiredRatio > 1.2 && currentBadGuyNum != cellNum){ //need even more damage, get prestiges as well
+            currentBadGuyNum = cellNum;
             buyWeaponsModeAS3 = 3; //buy /get everything
         }
         
-        if(maxDesiredRatio < 0.9 && currentBadGuyNum != cellNum && game.global.antiStacks >= maxAnti-1){ //need more damage, get it, but only if we're at near max stacks.
+        if(maxDesiredRatio > 1.4 && currentBadGuyNum != cellNum && game.global.antiStacks >= maxAnti-1){ //need more damage, get it, but only if we're at near max stacks.
             currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
             allowBuyingCoords = true;
             maxCoords = game.upgrades.Coordination.done + 1;
@@ -865,7 +861,7 @@ function autoStance3() {
         chosenFormation = 4;
         setFormation(4);
         
-        if (expectedNumHitsS < missingStacks && expectedNumHitsS > 0.1){ //we have too much damage so try to fix it, but if it's too much then dont even try (we want to lee[ main shield as much as possible)
+        if (expectedNumHitsS < missingStacks){ //we have too much damage so try to fix it, but if it's too much then dont even try (we want to lee[ main shield as much as possible)
             if(equipLowDmgShield()){
                 //need to recalculate damages
                 calcBaseDamageinS();
@@ -901,6 +897,9 @@ function autoStance3() {
                     return;
                 }
             }
+            else if(expectedNumHitsS == 0){ //we kill cell on next hit, so equip main shield for VM
+                equipMainShield();
+            }
         }
     }
 
@@ -919,14 +918,7 @@ function autoStance3() {
     setFormation(chosenFormation); 
     
     var shield = (highDamageHeirloom ? "+" : "-");
-    
-        //maxStacksBaseDamageD
-    //highestAvgWorthZone
-    //requiredDmgToOK
-    //(requiredDmgToOK/maxStacksBaseDamageD).toFixed(2)
-    
-    //debug(shield+game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+cmp.toFixed(2)+" S/X/D " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " " + corruptedtmp + " " + enemyHealth.toExponential(1) + "("+nextMaxHealthtmp.toExponential(1)+")", "spam");
-    debug(shield+game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+cmp.toFixed(2)+" " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " x" + maxDesiredRatio.toExponential(2) +" desired " + (requiredDmgToOK/maxStacksBaseDamageD).toFixed(2) + " ToOK " + corruptedtmp, "general");
+    debug(shield+game.global.world + "." + cellNum + " " + stacks+"W"+"("+nextStartingStacks+") "+cmp.toFixed(2)+" " + expectedNumHitsS.toFixed(0)+"/" + expectedNumHitsX.toFixed(0)+"/" + expectedNumHitsD.toFixed(0) + " " + game.global.formation + "-" + game.global.antiStacks + " max" + maxDesiredRatio.toExponential(2) +" toOK" + (requiredDmgToOK/maxStacksBaseDamageD).toFixed(2) + " " + corruptedtmp, "general");
 }
 
 function getTargetAntiStack(target, firstRun){
@@ -1124,7 +1116,7 @@ function buildWorldArray(){
     //debug("heirloom diff is " + heirloomDiff, "general");
     
     maxStacksBaseDamageD = 8 * baseDamageGood * (1+0.2*maxAnti) / (1 + 0.2*game.global.antiStacks); //45 stacks D stance good heirloom damage. The most damage we can dish out right now
-    maxDesiredRatio = maxStacksBaseDamageD/maxHP; //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
+    maxDesiredRatio = maxStacksBaseDamageD/maxHP * 0.3; //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
     
     debug("our dmg = " + (maxDesiredRatio).toExponential(2) + " of desired");
     
