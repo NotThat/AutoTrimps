@@ -69,7 +69,7 @@ function calcDmg(){
     
     ourBaseDamage = baseDamage*2*(game.upgrades.Dominance.done ? 4 : 1); //D if we have it, X otherwise
     
-    ourBaseDamage = ourBaseDamage / (game.global.titimpLeft > 0 ? 2 : 1); // *we dont care about titimp damage
+    ourBaseDamage = ourBaseDamage / ((game.global.titimpLeft > 0 && game.global.mapsActive) ? 2 : 1); // *we dont care about titimp damage
     
     //if we dont have max anticipation stacks, calculate as though we do. we dont want automap to kick in after autostance3 went through all the trouble of deliberately lowering our current anticipation stacks, and really it shouldnt be automap()'s job to handle trimpicides
     if(game.global.antiStacks < maxAnti)
