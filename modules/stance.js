@@ -886,7 +886,8 @@ function autoStance3() {
             }
             
             if(chosenFormation == 4 && maxDesiredRatio > 1 && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99)){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
-                minAnticipationStacks = Math.max(1, Math.ceil(maxDesiredRatio*(5 + maxAnti) - 5)); //find desired stacks to reach maxDesiredRatio
+                //minAnticipationStacks = Math.max(1, Math.ceil(maxDesiredRatio*(5 + maxAnti) - 5)); //find desired stacks to reach maxDesiredRatio
+                minAnticipationStacks = (5 + game.global.antiStacks)/maxDesiredRatio - 5; //find desired stacks to reach maxDesiredRatio
                 var ourNewLowDamage = baseDamage*(1 + 0.2 * minAnticipationStacks)/(1 + 0.2 * game.global.antiStacks);
                 var before = Math.min(stacks      + expectedNumHitsS, 200); //stacks if we dont trimpicide
                 var after  = Math.min(0.85*stacks + enemyHealth / ourNewLowDamage + (avgWorthZone-1) * 15, 200); //stacks if we do trimpicide. the more a zone is worth the more we are willing to trimpicide if we need less damage.
