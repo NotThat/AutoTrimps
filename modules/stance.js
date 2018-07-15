@@ -821,17 +821,17 @@ function autoStance3() {
         setFormation(2);
         chosenFormation = 2;
         
-        if(maxDesiredRatio > 1 && currentBadGuyNum != cellNum){ //need more damage, get weapon levels
+        if(maxDesiredRatio < 1 && currentBadGuyNum != cellNum){ //need more damage, get weapon levels
             currentBadGuyNum = cellNum;
             buyWeaponsModeAS3 = 2; //buy levels only
         }
 
-        if(maxDesiredRatio > 1.2 && currentBadGuyNum != cellNum){ //need even more damage, get prestiges as well
+        if(maxDesiredRatio < 0.8 && currentBadGuyNum != cellNum){ //need even more damage, get prestiges as well
             currentBadGuyNum = cellNum;
             buyWeaponsModeAS3 = 3; //buy /get everything
         }
         
-        if(maxDesiredRatio > 1.4 && currentBadGuyNum != cellNum && game.global.antiStacks >= maxAnti-1){ //need more damage, get it, but only if we're at near max stacks.
+        if(maxDesiredRatio < 0.6 && currentBadGuyNum != cellNum && game.global.antiStacks >= maxAnti-1){ //need more damage, get it, but only if we're at near max stacks.
             currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
             allowBuyingCoords = true;
             maxCoords = game.upgrades.Coordination.done + 1;
@@ -885,7 +885,7 @@ function autoStance3() {
                     chosenFormation = 4;
             }
             
-            if(chosenFormation == 4 && maxDesiredRatio < 1 && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99)){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
+            if(chosenFormation == 4 && maxDesiredRatio > 1 && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99)){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
                 minAnticipationStacks = Math.max(1, Math.ceil(maxDesiredRatio*(5 + maxAnti) - 5)); //find desired stacks to reach maxDesiredRatio
                 var ourNewLowDamage = baseDamage*(1 + 0.2 * minAnticipationStacks)/(1 + 0.2 * game.global.antiStacks);
                 var before = Math.min(stacks      + expectedNumHitsS, 200); //stacks if we dont trimpicide
@@ -1116,7 +1116,7 @@ function buildWorldArray(){
     //debug("heirloom diff is " + heirloomDiff, "general");
     
     maxStacksBaseDamageD = 8 * baseDamageGood * (1+0.2*maxAnti) / (1 + 0.2*game.global.antiStacks); //45 stacks D stance good heirloom damage. The most damage we can dish out right now
-    maxDesiredRatio = maxStacksBaseDamageD/maxHP * 0.3; //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
+    maxDesiredRatio = maxStacksBaseDamageD/maxHP * 0.2; //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
     
     debug("our dmg = " + (maxDesiredRatio).toExponential(2) + " of desired");
     
