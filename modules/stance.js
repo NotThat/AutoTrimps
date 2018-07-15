@@ -885,13 +885,13 @@ function autoStance3() {
                     chosenFormation = 4;
             }
             
-            if(chosenFormation == 4 && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99)){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
-                minAnticipationStacks = 1;
-                var ourLowestDamage = baseDamage*(1 + 0.2 * minAnticipationStacks)/(1 + 0.2 * game.global.antiStacks);
+            if(chosenFormation == 4 && maxDesiredRatio < 1 && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99)){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
+                minAnticipationStacks = Math.max(1, Math.ceil(maxDesiredRatio*(5 + maxAnti) - 5)); //find desired stacks to reach maxDesiredRatio
+                var ourNewLowDamage = baseDamage*(1 + 0.2 * minAnticipationStacks)/(1 + 0.2 * game.global.antiStacks);
                 var before = Math.min(stacks      + expectedNumHitsS, 200); //stacks if we dont trimpicide
-                var after  = Math.min(0.5*stacks + enemyHealth / ourLowestDamage + (avgWorthZone-1) * 15, 200); //stacks if we do trimpicide. the more a zone is worth the more we are willing to trimpicide if we need less damage.
+                var after  = Math.min(0.85*stacks + enemyHealth / ourNewLowDamage + (avgWorthZone-1) * 15, 200); //stacks if we do trimpicide. the more a zone is worth the more we are willing to trimpicide if we need less damage.
                 
-                if(before <= after && game.global.antiStacks > minAnticipationStacks && maxDesiredRatio*(5+minAnticipationStacks)/(5+game.global.antiStacks) > 1){ //trimpiciding costs 25% stacks twice.
+                 if(before <= after && game.global.antiStacks > minAnticipationStacks){ //trimpiciding costs 25% stacks twice.
                     wantedAnticipation = minAnticipationStacks;
                     getTargetAntiStack(minAnticipationStacks, true);
                     return;
