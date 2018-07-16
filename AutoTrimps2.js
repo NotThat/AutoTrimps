@@ -220,6 +220,8 @@ function mainLoop() {
         if (getPageSetting('AutoEggs'))
             easterEggClicked();
         setTitle(); // Set the browser title
+        
+        buildWorldArray();
     }
     setScienceNeeded();  //determine how much science is needed
 

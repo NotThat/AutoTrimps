@@ -225,6 +225,20 @@ function autoMap() {
         return;
     }
     
+    shouldDoMaps = false;
+    //prevents map-screen from flickering on and off during startup when base damage is 0.
+    if (ourBaseDamage > 0 && highDamageHeirloom) {
+        shouldDoMaps = !enoughDamage || shouldFarm || scryerStuck || needPrestige;
+        if(!enoughDamage) {
+            AutoMapsCoordOverride = true;
+            buyWeaponsModeAS3 = 3; //buy/get everything
+            updateAutoMapsStatus("", "AutoMaps: Need Damage, forcing Coordination purchase");
+        }    
+        else
+            AutoMapsCoordOverride = false;
+    }
+    
+    
     if (getPageSetting('PRaidingZoneStart') >0)
         if(!PrestigeRaid()){ //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
             PRaidingActive = true;
@@ -242,18 +256,7 @@ function autoMap() {
     //variables for doing maps
     var selectedMap = "world";
     var shouldFarmLowerZone = false;
-    shouldDoMaps = false;
-    //prevents map-screen from flickering on and off during startup when base damage is 0.
-    if (ourBaseDamage > 0 && highDamageHeirloom) {
-        shouldDoMaps = !enoughDamage || shouldFarm || scryerStuck || needPrestige;
-        if(!enoughDamage) {
-            AutoMapsCoordOverride = true;
-            buyWeaponsModeAS3 = 3; //buy/get everything
-            updateAutoMapsStatus("", "AutoMaps: Need Damage, forcing Coordination purchase");
-        }    
-        else
-            AutoMapsCoordOverride = false;
-    }
+
     //Check our graph history and - Estimate = The zone should take around this long in milliseconds.
     //mapTimeEstimate = mapTimeEstimater(); //currently unused, but interesting
 

@@ -603,12 +603,12 @@ function autoStance3() {
         mapsClicked();
         return; 
     }
-    if (lastZoneGridded != game.global.world || lastrunworld != currentworld){ 
+    /*if (lastZoneGridded != game.global.world || lastrunworld != currentworld){ 
         buildWorldArray();
         lastZoneGridded = game.global.world;
     }
-    else
-        updateOmniThreshhold();
+    else*/
+    updateOmniThreshhold();
     
     if (game.global.world < 81) return;//no D stance, no wind stacks, nothing to do here
     if (game.global.gridArray.length === 0) return;
@@ -694,7 +694,7 @@ function autoStance3() {
     }
     
     //non wind zone or poor wind zone, max speed
-    if(!windZone() || avgWorthZone < 0.2){ 
+    if(!windZone() || avgWorthZone < 0.4){ 
         if(game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting) == 0)
             switchOnGA(); //in rare cases we leave GA disabled, so make sure to turn it back on
         
@@ -806,17 +806,6 @@ function autoStance3() {
     //cmp *= 1000; avgWorthZone *= 1000;
     //cmp *= 0.001; avgWorthZone *= 1000;
     
-    //maxStacksBaseDamageD
-    //highestAvgWorthZone
-    //if(avgWorthZone < 0.2) //if avg zone value too low, buy all weapons so we can overkill more
-    //    buyWeaponsModeAS3 = 3; //buy/get everything
-    
-    //maxStacksBaseDamageD
-    //maxDesiredRatio
-    //highestAvgWorthZone
-    //requiredDmgToOK
-    //debug("ratio to OK " + (requiredDmg / maxStacksBaseDamageD).toFixed(2));
-    
     if(expectedNumHitsD > missingStacks+2 || cmp < 1){ //we need more damage, or this cell isnt worth our time, or we do far too much damage anyway so dont even try and risk losing an extra overkill
         setFormation(2);
         chosenFormation = 2;
@@ -887,12 +876,13 @@ function autoStance3() {
             
             if(chosenFormation == 4 && maxDesiredRatio > 1 && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99)){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
                 //minAnticipationStacks = Math.max(1, Math.ceil(maxDesiredRatio*(5 + maxAnti) - 5)); //find desired stacks to reach maxDesiredRatio
-                minAnticipationStacks = (5 + game.global.antiStacks)/maxDesiredRatio - 5; //find desired stacks to reach maxDesiredRatio
+                //debug(maxDesiredRatio.toFixed(2));
+                minAnticipationStacks = Math.ceil(Math.max(1, (5 + maxAnti)/maxDesiredRatio - 5)); //find desired stacks to reach maxDesiredRatio
                 var ourNewLowDamage = baseDamage*(1 + 0.2 * minAnticipationStacks)/(1 + 0.2 * game.global.antiStacks);
                 var before = Math.min(stacks      + expectedNumHitsS, 200); //stacks if we dont trimpicide
                 var after  = Math.min(0.85*stacks + enemyHealth / ourNewLowDamage + (avgWorthZone-1) * 15, 200); //stacks if we do trimpicide. the more a zone is worth the more we are willing to trimpicide if we need less damage.
                 
-                 if(before <= after && game.global.antiStacks > minAnticipationStacks){ //trimpiciding costs 25% stacks twice.
+                 if(before <= after && game.global.antiStacks > minAnticipationStacks){
                     wantedAnticipation = minAnticipationStacks;
                     getTargetAntiStack(minAnticipationStacks, true);
                     return;
@@ -908,12 +898,10 @@ function autoStance3() {
         chosenFormation = 4;
     }
     
-    //sharp enemies
-    if (worldArray[cellNum].corrupted == "healthyBleed" || worldArray[cellNum].corrupted == "corruptBleed"){
-        //if(cmp < 3){ //only stack against them if they're worthwhile
-            equipMainShield();
-            chosenFormation = 2;
-        //}
+    //skip these enemies
+    if (worldArray[cellNum].corrupted == "healthyBleed" || worldArray[cellNum].corrupted == "corruptBleed" || worldArray[cellNum].corrupted == "corruptDodge"){
+        equipMainShield();
+        chosenFormation = 2;
     }
     
     setFormation(chosenFormation); 
@@ -1117,7 +1105,7 @@ function buildWorldArray(){
     //debug("heirloom diff is " + heirloomDiff, "general");
     
     maxStacksBaseDamageD = 8 * baseDamageGood * (1+0.2*maxAnti) / (1 + 0.2*game.global.antiStacks); //45 stacks D stance good heirloom damage. The most damage we can dish out right now
-    maxDesiredRatio = maxStacksBaseDamageD/maxHP * 0.2; //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
+    maxDesiredRatio = maxStacksBaseDamageD/(maxHP * 0.2); //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
     
     debug("our dmg = " + (maxDesiredRatio).toExponential(2) + " of desired");
     
