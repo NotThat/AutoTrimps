@@ -25,6 +25,9 @@ function buyUpgrades() {
                 buyCoords = true;
         }
         
+        if(game.global.runningChallengeSquared)
+            buyCoords = true;
+        
         if(popArmyRatio < 1350){ //we're dangerously close to losing amalgamator
             var coordinationMult = 1+0.25*Math.pow(0.98, game.portal.Coordinated.level);
             var currentSendAfter = game.resources.trimps.getCurrentSend()*coordinationMult;

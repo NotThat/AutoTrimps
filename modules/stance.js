@@ -694,7 +694,7 @@ function autoStance3() {
     }
     
     //non wind zone or poor wind zone, max speed
-    if(!windZone() || avgWorthZone < 0.4){ 
+    if(!windZone() || avgWorthZone < 0.2){ 
         if(game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting) == 0)
             switchOnGA(); //in rare cases we leave GA disabled, so make sure to turn it back on
         
@@ -1131,6 +1131,8 @@ function buildWorldArray(){
     for (var i  = 0; i <= 99; i++)
         sum += worldArray[i].finalWorth;
     avgWorthZone = dailyMult * sum / (100 * OmniThreshhold);
+
+    debug("Goal: "+OmniThreshhold.toFixed(2)+" Omni/s avg zone " + avgWorthZone.toFixed(2));
     
     if(game.global.world < 230)
         highestAvgWorthZone = 0;
@@ -1164,9 +1166,6 @@ function  calcOmniHelium(){ //rewardResource()
     hr = m * 60 * 60 * 1/(Math.pow(0.95, 20) - 0.1); //if we kill Omni every attack how much he/hr we'll have
 
     updateOmniThreshhold();
-    
-    //debug("Omni gives " + m.toExponential(2) + " he, " + hr.toExponential(2) + " he/hr, he/hr/total " + pctTotal.toFixed(3) + "% ("+OmniThreshhold.toFixed(2)+")");
-    debug("Goal: "+OmniThreshhold.toFixed(2)+" Omni/s avg zone " + avgWorthZone.toFixed(2));
 }
 
 function updateOmniThreshhold() {

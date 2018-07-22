@@ -254,6 +254,8 @@ function autoLevelEquipment() {
         if (game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg'))
             buyWeaponsModeAS3 = 3; //buy everything
     }
+    if(game.global.runningChallengeSquared)
+        buyWeaponsModeAS3 = 3; //buy everything
     
     var boughtCounter = 10;
     while (boughtCounter >= 0){ //keep running this until we dont buy anything
