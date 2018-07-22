@@ -1097,6 +1097,9 @@ function buildWorldArray(){
     equipLowDmgShield();
     calcBaseDamageinS();
     var baseDamageBad = baseDamage;
+    
+    var pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0); //weaker shield should have more PB. PB isnt that good of a damage modifier.
+    
     equipMainShield();
     calcBaseDamageinS();
     var baseDamageGood = baseDamage;
@@ -1109,8 +1112,8 @@ function buildWorldArray(){
     
     debug("our dmg = " + (maxDesiredRatio).toExponential(2) + " of desired");
     
-    //next we want to calculate a value for each cell based on the healthy/corrupted/empty/omni distribution of the zone. this will be used to decide if a cell is worth spending any attacks in
-    var pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
+    //next we want to calculate a value for each cell based on the healthy/corrupted/empty/omni distribution of the zone. this will be used to decide if a cell is worth spending any attacks on
+
     if(game.global.world % 5 > 0) //on wind zones that arent the last
         worldArray[99].geoRelativeCellWorth = (1 + 0.2*mutations.Healthy.cellCount()) * game.empowerments.Wind.getModifier(); //we want to reflect the worth of the starting cells in next zone. in high zones this is worth a lot due to healthy cells. in low zones very little
     else
