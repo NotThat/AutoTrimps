@@ -657,7 +657,8 @@ function PrestigeRaid() {
             PRaidMax = 10;
     
     if (StartZone == -1 || currWorldZone < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
-        return true; 
+        if(!isActiveSpireAT() || !getPageSetting('PRaidSpire'))
+            return true; 
     }
     
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels

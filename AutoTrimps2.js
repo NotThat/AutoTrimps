@@ -21,6 +21,8 @@ var atscript = document.getElementById('AutoTrimps-script')
   //, basepath = 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/'  
   , modulepath = 'modules/'
   ;
+  
+  var ver = 5;
     
 //This should redirect the script to wherever its being mirrored from.
 if (atscript !== null) {
@@ -68,7 +70,7 @@ function initializeAutoTrimps() {
 
 var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
-changelogList.push({date: "13/06/2018", version: "v0.3", description: "3", isNew: true});
+changelogList.push({date: "13/06/2018", version: "v0.3", description: ver, isNew: true});
 changelogList.push({date: "28/06/2018", version: "v0.2", description: "PRaiding. BWRaiding. Stop Coords to get next Amal. Never lose Amal. Heirloom Swapping. No Nurseries in Ice. Massive overhaul to AS3 windstacking he/hr% based. Stall Coords/items for more stacking. Calculate cell by cell. AutoTrimps->Display->General Spam for less spam.", isNew: true});
 changelogList.push({date: "13/06/2018", version: "v0.1", description: "War was beginning ", isNew: false});
 

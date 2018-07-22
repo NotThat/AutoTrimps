@@ -694,7 +694,7 @@ function autoStance3() {
     }
     
     //non wind zone or poor wind zone, max speed
-    if(!windZone() || avgWorthZone < 0.2){ 
+    if(!windZone() || avgWorthZone < 0.3){ 
         if(game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting) == 0)
             switchOnGA(); //in rare cases we leave GA disabled, so make sure to turn it back on
         
@@ -750,7 +750,7 @@ function autoStance3() {
     if(cellNum < 99){
         worldArray[cellNum+1].health = Math.max(worldArray[cellNum+1].maxHealth - nextPBDmgtmp, 0.05*worldArray[cellNum+1].maxHealth); //extra damage on next cell from PB
         worldArray[cellNum+1].pbHits = pbHitstmp; //extra wind stacks on next cell from PB
-        var nextStartingStacks = Math.min(1 + Math.ceil(stacks * getRetainModifier("Wind")) + pbHitstmp, 200);
+        var nextStartingStacks = Math.min(1 + Math.ceil(stacks * getRetainModifier("Wind") + pbHitstmp + Math.ceil(worldArray[cellNum+1].health/ourAvgDmgD) + expectedNumHitsD), 200);
     }
     else var nextStartingStacks = "";
     
@@ -785,10 +785,6 @@ function autoStance3() {
     stanceStats.OmnisPerAttack = stanceStats.OmnisWorths / stanceStats.attacks; //we can measure our windstacking farm efficiency in Omnis equivalent per attack.
     */
     var chosenFormation;
-    
-    //var pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100: 0);
-    //var projectedNextStartingStacks = Math.min(1 + Math.ceil(stacks * getRetainModifier("Wind")) + pbHitstmp + expectedNumHitsD*pbMult, 200); //projected stacks on next enemy
-    var nextStartingStacks = Math.min(1 + Math.ceil(stacks * getRetainModifier("Wind")) + pbHitstmp, 200); //current stacks on next enemy
     
     var cmp = 0; 
     //figure out what attacking the current cell is worth. 3 cases:
@@ -834,7 +830,7 @@ function autoStance3() {
         var after = Math.min(stacks*0.75 + enemyHealth / maxStacksBaseDamageD, 200); //how many stacks we'll end up with after max stacks trimpicide
         //if(game.global.antiStacks < maxAnti-1 && game.resources.trimps.owned == game.resources.trimps.realMax() && hiddenBreedTimer > maxAnti){
         if(game.global.antiStacks < maxAnti-1 && hiddenBreedTimer > maxAnti){
-            if((maxDesiredRatio > 4000 || maxDesiredRatio*(5+maxAnti)/(5+game.global.antiStacks) < 1) || (avgWorthZone < 0.7 && cellNum < 90 && cellNum > lastHealthy)) { 
+            if((maxDesiredRatio > 4000 || maxDesiredRatio*(5+maxAnti)/(5+game.global.antiStacks) < 1) || (avgWorthZone < 0.7 && cellNum < 90 && cellNum > lastHealthy && game.empowerments.Wind.currentDebuffPower < 50)) { 
                 debug("Trimpiciding to get max stacks.");
                 wantedAnticipation = maxAnti;
                 stackConservingTrimpicide();
