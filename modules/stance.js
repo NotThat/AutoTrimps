@@ -603,11 +603,7 @@ function autoStance3() {
         mapsClicked();
         return; 
     }
-    /*if (lastZoneGridded != game.global.world || lastrunworld != currentworld){ 
-        buildWorldArray();
-        lastZoneGridded = game.global.world;
-    }
-    else*/
+
     updateOmniThreshhold();
     
     if (game.global.world < 81) return;//no D stance, no wind stacks, nothing to do here
@@ -636,7 +632,12 @@ function autoStance3() {
         getTargetAntiStack(minAnticipationStacks, false);
 
     if (game.global.soldierHealth <= 0){ 
-        if(game.global.breedBack <= 0 && hiddenBreedTimer > wantedAnticipation)
+        //if we liquify > 230 zones we dont want to wait for army to breed from magma overheat deaths
+        //if (game.options.menu.liquification.enabled && game.talents.liquification.purchased && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp" && game.global.soldierHealth === 0)
+        //    fightManual();
+        if(maxDesiredRatio > 100000000) //we do so much damage, dont need to wait
+            fightManual();
+        else if(game.global.breedBack <= 0 && hiddenBreedTimer > wantedAnticipation)
             fightManual();
         else
             return;
