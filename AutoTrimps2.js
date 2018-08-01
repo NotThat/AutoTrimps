@@ -22,7 +22,7 @@ var atscript = document.getElementById('AutoTrimps-script')
   , modulepath = 'modules/'
   ;
   
-  var ver = 6;
+  var ver = 7;
     
 //This should redirect the script to wherever its being mirrored from.
 if (atscript !== null) {
@@ -161,6 +161,7 @@ var enoughDamage = true;
 var enoughHealth = true;
 
 var baseDamage = 0;
+var baseDamageOld = 0;
 var baseBlock = 0;
 var baseHealth = 0;
 
@@ -178,13 +179,15 @@ var heirloomCache = game.global.heirloomsExtra.length;
 var magmiteSpenderChanged = false;
 
 var windMult; 
-var poisonMultFixed=20;
+var poisonMultFixed=0.05;
 var poisonMult;
 var enemyHealth=1;
 var threshhold=1;
-var HDratio = 0;
+var DHratio = 0;
 var maxAnti = (game.talents.patience.purchased ? 45 : 30);
 var wantedAnticipation = maxAnti;
+var highestPrestigeOwned = 0;
+var allowBuyingCoords = true;
 
 ////////////////////////////////////////
 //Main LOGIC Loop///////////////////////
@@ -209,6 +212,7 @@ function mainLoop() {
         if (getPageSetting('AutoUpgradeHeirlooms') && !heirloomsShown) autoNull();  //"Auto Upgrade Heirlooms" (heirlooms.js)
 
         heirloomCache = game.global.heirloomsExtra.length;
+        highestPrestigeOwned = 0;
     }
     heirloomFlag = heirloomsShown;
     //Stuff to do  Every new Zone
@@ -248,7 +252,7 @@ function mainLoop() {
     if (getPageSetting('ManualGather2')<=1) manualLabor();  //"Auto Gather/Build"       (gather.js)
       else if (getPageSetting('ManualGather2')==2) manualLabor2();  //"Auto Gather/Build #2"  (")
       
-    getPageSetting('AutoMaps') > 0 ? autoMap() : updateAutoMapsStatus(); //"Auto Maps"      (automaps.js)
+    autoMap(); //"Auto Maps"      (automaps.js)
     //
     //if (getPageSetting('GeneticistTimer') >= 0) autoBreedTimer(); //"Geneticist Timer" / "Auto Breed Timer"     (autobreedtimer.js)
     if (autoTrimpSettings.AutoPortal.selected != "Off") autoPortal();   //"Auto Portal" (hidden until level 40) (portal.js)
@@ -256,7 +260,7 @@ function mainLoop() {
     if (getPageSetting('TrapTrimps') && game.global.trapBuildAllowed && game.global.trapBuildToggled == false) toggleAutoTrap(); //"Trap Trimps"
     if (aWholeNewWorld && getPageSetting('AutoRoboTrimp')) autoRoboTrimp();   //"AutoRoboTrimp" (other.js)
     if (aWholeNewWorld && getPageSetting('FinishC2')>0 && game.global.runningChallengeSquared) finishChallengeSquared(); // "Finish Challenge2" (other.js)
-    autoLevelEquipment();           //"Buy Armor", "Buy Armor Upgrades", "Buy Weapons", "Buy Weapons Upgrades"  (equipment.js)
+    //autoLevelEquipment();           //"Buy Armor", "Buy Armor Upgrades", "Buy Weapons", "Buy Weapons Upgrades"  (equipment.js)
     if (getPageSetting('UseScryerStance'))  useScryerStance();  //"Use Scryer Stance"   (scryer.js)
     else if (getPageSetting('AutoStance')<=1) autoStance();     //"Auto Stance"       (stance.js)
     else if (getPageSetting('AutoStance')==2) autoStance2();    //"Auto Stance #2"         (")

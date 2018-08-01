@@ -171,58 +171,68 @@ function findNextBionic(maxLevel) {
 function calcPrestige() {
     var max=1;
     var tmp;
-    var slotModifier=0;
     
     var prestigeList = ['Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest', 'Bootboost', 'Hellishmet', 'Pantastic', 'Smoldershoulder', 'Bestplate', 'GambesOP'];
-    //var numUnbought = 0;
     for (var i in prestigeList) {
-        var p = prestigeList[i];
-        switch(prestigeList[i]){
-            case "Dagadder":
-                slotModifier=1;
-                break;
-            case "Bootboost": 
-                slotModifier=1;
-                break;
-            case "Megamace":
-                slotModifier=2;
-                break;
-            case "Hellishmet":
-                slotModifier=2;
-                break;
-            case "Polierarm": 
-                slotModifier=3;
-                break;
-            case "Pantastic": 
-                slotModifier=3;
-                break;
-            case "Axeidic": 
-                slotModifier=4;
-                break;
-            case "Smoldershoulder": 
-                slotModifier=4;
-                break;
-            case "Greatersword": 
-                slotModifier=1; //dont count as full prestige until we have gambes
-                break;
-            case "Bestplate": 
-                slotModifier=1; //dont count as full prestige until we have gambes
-                break;
-            case "Harmbalest": 
-                slotModifier=1; //dont count as full prestige until we have gambes
-                break;
-            case "GambesOP": 
-                slotModifier=5;
-                break;
-            default:
-                debug("calcPrestige default i " + i + " prestigeList[i] = " + prestigeList[i]);
-        }
-        tmp = (game.upgrades[p].allowed+1)/2*10-10+slotModifier;
+        tmp = dropsAtZone(prestigeList[i], false);
+        
         if (tmp>max)
             max=tmp;
     }
 
     return max;
+}
+
+function dropsAtZone(itemName, nextLevel){
+    var slotModifier=0;
+    var calcNext;
+    if(nextLevel === undefined)
+        calcNext = false;
+    else
+        calcNext = nextLevel;
+    switch(itemName){
+        case "Dagadder":
+                slotModifier=1;
+                break;
+            case "Bootboost": 
+                slotModifier=0;
+                break;
+            case "Megamace":
+                slotModifier=2;
+                break;
+            case "Hellishmet":
+                slotModifier=0;
+                break;
+            case "Polierarm": 
+                slotModifier=3;
+                break;
+            case "Pantastic": 
+                slotModifier=0;
+                break;
+            case "Axeidic": 
+                slotModifier=4;
+                break;
+            case "Smoldershoulder": 
+                slotModifier=0;
+                break;
+            case "Greatersword": 
+                slotModifier=0; //dont count as full prestige until we have gambes
+                break;
+            case "Bestplate": 
+                slotModifier=0; //dont count as full prestige until we have gambes
+                break;
+            case "Harmbalest": 
+                slotModifier=0; //dont count as full prestige until we have gambes
+                break;
+            case "GambesOP": 
+                slotModifier=5;
+                break;
+            default:
+                //debug("dropsAtZone default itemName " + itemName);
+                return 0;
+    }
+    
+    return (game.upgrades[itemName].allowed+1)/2*10-(calcNext ? 0 : 10)+slotModifier;
 }
 
 function BWRaidNowLogic(){

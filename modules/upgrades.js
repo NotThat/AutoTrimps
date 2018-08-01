@@ -4,6 +4,7 @@ var buyCoords = true;
 
 //Buys all available non-equip upgrades listed in var upgradeList
 function buyUpgrades() {
+    //debug("buyUpgrades buyWeaponsModeAS3 " + buyWeaponsModeAS3 + " baseDamage " + baseDamage.toExponential(2));
     if (getPageSetting('BuyUpgradesNew') != 2){ //skip this calculation if AT isnt allowed to buy coords
         var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();    
         buyCoords = true;
@@ -19,8 +20,6 @@ function buyUpgrades() {
                     buyCoords = true;
             }
 
-            if(game.global.lastClearedCell == -1 && (game.global.world % 10 == 6 || game.global.world % 10 == 1)) //fix to stop upgrades() from instantly buying a coord in the first wind zone
-                buyCoords = false;
             if(AutoMapsCoordOverride) //we dont want to farm maps for damage when we have unspent coordinations, so allow automaps to override AS3
                 buyCoords = true;
         }
@@ -39,12 +38,14 @@ function buyUpgrades() {
         }
         
         var dontBuyStartZ = getPageSetting('NoCoordBuyStartZ');
-        if(dontBuyStartZ > game.global.world)
+        if(dontBuyStartZ == game.global.world + 1)
             buyCoords = true;
-        else if (dontBuyStartZ > 0 && getPageSetting('TillWeHaveAmalg') > 0) { //if dontBuyStartZ is set and we've passed it
+        else if (dontBuyStartZ > 0 && game.global.world > dontBuyStartZ && getPageSetting('TillWeHaveAmalg') > 0) { //if dontBuyStartZ is set and we've passed it
             if (game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg'))
                 buyCoords = false;
         }
+        if (game.global.challengeActive == "Trapper") //no amalgamators in trapper
+            buyCoords = true;
     }
     
     for (var upgrade in upgradeList) {

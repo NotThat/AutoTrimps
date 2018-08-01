@@ -554,17 +554,44 @@ function protectHeirloom(element, modify){
 
 //wrapper for selectHeirloom, to handle the protect button
 function newSelectHeirloom(number, location, elem){
-    selectHeirloom(number, location, elem);
+    //selectHeirloom(number, location, elem);
+    
+    //copying selectHeirloom() so we can remove populateHeirloomWindow() which is high cpu cost function
+    game.global.selectedHeirloom = [number, location];
+    //populateHeirloomWindow(); //this has high cpu cost, so lets remove the visual only aspect
+    var heirloom = game.global[location];
+    if (number > -1) heirloom = heirloom[number];
+    switch (location){
+        case "StaffEquipped":
+        case "ShieldEquipped":
+            document.getElementById("equippedHeirloomsBtnGroup").style.visibility = "visible";
+            break;
+        case "heirloomsCarried":
+            document.getElementById("carriedHeirloomsBtnGroup").style.visibility = "visible";
+            document.getElementById("equipHeirloomBtn").innerHTML = (typeof game.global[heirloom.type + "Equipped"].name === 'undefined') ? "Equip" : "Swap";
+            break;
+        case "heirloomsExtra":
+            document.getElementById("extraHeirloomsBtnGroup").style.visibility = "visible";
+            document.getElementById("equipHeirloomBtn2").innerHTML = (typeof game.global[heirloom.type + "Equipped"].name === 'undefined') ? "Equip" : "Swap";
+            if (game.global.heirloomsCarried.length < game.global.maxCarriedHeirlooms) swapClass("heirloomBtn", "heirloomBtnActive", document.getElementById("carryHeirloomBtn"));
+            document.getElementById("recycleHeirloomBtn").innerHTML = "Recycle (+" + prettify(getTotalHeirloomRefundValue(heirloom)) + " Nullifium)";
+            break;
+    }
+    displaySelectedHeirloom();
+    
     protectHeirloom();
 }
 
 function equipMainShield(){
-    if(!getPageSetting('HeirloomSwapping')) return false;
+    if(!getPageSetting('HeirloomSwapping')) {
+        highDamageHeirloom = true;
+        return false;
+    }
     var loom = findMainShield();
     if (loom == null) return false;
     newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");
-    equipHeirloom();
-    updateAllBattleNumbers(true); //updates display
+    equipHeirloom(); //this is slow
+    //updateAllBattleNumbers(true); //cpu expensive
     //debug("equip main");
     highDamageHeirloom = true;
     return true;
@@ -572,12 +599,15 @@ function equipMainShield(){
 equipMainShield();
 
 function equipLowDmgShield(){
-    if(!getPageSetting('HeirloomSwapping')) return false;
+    if(!getPageSetting('HeirloomSwapping')) {
+        highDamageHeirloom = true;
+        return false;
+    }
     var loom = findLowDmgShield();
     if (loom == null) return false;
     newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");
     equipHeirloom();
-    updateAllBattleNumbers(true);
+    //updateAllBattleNumbers(true); //cpu expensive
     //debug("equip alt");
     highDamageHeirloom = false;
     return true;
@@ -624,12 +654,13 @@ function findLowDmgShield(){
                     matchCounter++;
                     break;
                 case "critChance":
-                    matchCounter++;
+                    matchCounter+=100;
                     continue;
                 case "critDamage":
-                    matchCounter++;
+                    matchCounter+=100;
                     continue;
                 case "trimpAttack":
+                    matchCounter+=100;
                     continue;
 
             }

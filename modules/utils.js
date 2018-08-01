@@ -173,6 +173,19 @@ function setPageSetting(setting, value) {
     }
 }
 
+function timeEstimator(cellNum, useGoodShield){
+    var totalHP = 0;
+    var mult = 1;
+    if(useGoodShield && !goodShieldActuallyEquipped)
+        mult = goodShieldAtkMult;
+    for (var i = cellNum; i<100; i++){
+        totalHP += worldArray[i].maxHealth;
+    }
+    var ret = totalHP / (baseDamage*8*4*mult);
+    //debug("timeEstimator is " + ret);
+    return ret;
+}
+
 //Global debug message
 //type: general, upgrades, equips, buildings, jobs, maps, other, graphs
 function debug(message, type, lootIcon) {

@@ -267,7 +267,8 @@ function buyBuildings() {
         var buyWithExtraGems = (!game.buildings.Warpstation.locked && nursCost * resomod < nwr * game.resources.gems.owned);
         //do not buy nurseries in Ice zones
         var noIce = getPageSetting('NoNurseriesIce');
-        var stopBuyNurseries = noIce && (getEmpowerment() == "Ice");
+        var startNurseriesZ = getPageSetting('NoNurseriesUntil');
+        var stopBuyNurseries = noIce && (getEmpowerment() == "Ice") && game.global.world > startNurseriesZ+5;
         if ((maxNursery > game.buildings.Nursery.owned || maxNursery == -1) && !stopBuyNurseries &&
             (buyWithExtraGems ||
              ((nursCost < nwr * warpCost || game.buildings.Warpstation.locked) &&
