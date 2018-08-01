@@ -37,7 +37,7 @@ function automationMenuInit() {
     //create automaps status (in the world sidebar)
     newContainer = document.createElement("DIV");
     newContainer.setAttribute("style", "display: block; font-size: 1.1vw; text-align: center; background-color: rgba(0,0,0,0.3);");
-    newContainer.setAttribute("onmouseover", 'tooltip(\"Damage to Health ratio\", \"customText\", event, \"When DH ratio goes below the threshhold it will trigger mapping for up to 10 map bonus.<p><b>poisonMult: </b>\" + poisonMult + \"<br><b>windMult: </b>\" + windMult +\"<br><b>Base: </b>\" + enoughDamageCutoff +\"<br><b>Threshhold = </b>\" + threshhold.toFixed(3) + \"<br><b>DH ratio: </b>\" + DHratio +\"<br>")');
+    newContainer.setAttribute("onmouseover", 'tooltip(\"Damage to Health ratio\", \"customText\", event, \"When DH ratio goes below the threshhold it will trigger mapping for up to 10 map bonus.<p><b>poisonMult: </b>\" + poisonMult + \"<br><b>windMult: </b>\" + windMult +\"<br><b>Base: </b>\" + enoughDamageCutoff.toFixed(2) +\"<br><b>Threshhold = </b>\" + threshhold.toFixed(3) + \"<br><b>DH ratio: </b>\" + DHratio +\"<br>")');
     newContainer.setAttribute("onmouseout", 'tooltip("hide")');
     abutton = document.createElement("SPAN");
     abutton.id = 'autoMapStatus';

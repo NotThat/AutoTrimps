@@ -168,7 +168,8 @@ function calcDmg(){
         windMult = 1;
     poisonMult = (getEmpowerment() == "Poison" ? poisonMultFixed : 1);
     
-    enoughDamageCutoff = 1;
+    //enoughDamageCutoff = 1; // = cells remaining!
+    enoughDamageCutoff = 0.01 * (100 - game.global.lastClearedCell - 1);
     
     threshhold = poisonMult * windMult * enoughDamageCutoff;
 
@@ -183,9 +184,9 @@ function calcDmg(){
         getDamage(8*baseDamage*threshhold/DHratio, false);
     
     if(DHratio < 0.00001)
-        DHratio = DHratio.toExponential(4);
+        DHratio = DHratio.toExponential(2);
     else if (DHratio < 1)
-        DHratio = DHratio.toFixed(4);
+        DHratio = DHratio.toFixed(3);
     else if (DHratio < 10000)
         DHratio = DHratio.toFixed(1);
     else
@@ -646,7 +647,7 @@ function updateAutoMapsStatus(get, msg) {
     if (get) {
         return [status, getPercent, lifetime];
     } else {
-        document.getElementById('autoMapStatus').innerHTML = status + '<br>Threshhold = ' + threshhold;
+        document.getElementById('autoMapStatus').innerHTML = status + '<br>Threshhold = ' + threshhold.toFixed(3);
         document.getElementById('hiderStatus').innerHTML = hiderStatus;
     }
 }

@@ -1285,8 +1285,8 @@ function buildWorldArray(){
 
     if(game.global.world % 5 > 0){ //on wind zones that arent the last
         //if we will map on next zone, dont give omni credit for next zone stacks because we'll lose them anyway from entering maps
-        var nextZoneDHratio = DHratio / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2);
-        if(nextZoneDHratio > threshhold)
+        var nextZoneDHratio = parseFloat(DHratio) / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2);
+        if(nextZoneDHratio > poisonMult * windMult)
             worldArray[99].geoRelativeCellWorth = (1 + 0.2*mutations.Healthy.cellCount()) * game.empowerments.Wind.getModifier(); //we want to reflect the worth of the starting cells in next zone. in high zones this is worth a lot due to healthy cells. in low zones very little
         else
             worldArray[99].geoRelativeCellWorth = game.empowerments.Wind.getModifier();
