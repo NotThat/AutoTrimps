@@ -25,7 +25,7 @@ function automationMenuInit() {
     newContainer.setAttribute("id", "autoMapBtn");
     newContainer.setAttribute("class", "noselect settingsBtn");
     newContainer.setAttribute("onClick", "toggleAutoMaps()");
-    newContainer.setAttribute("onmouseover", 'tooltip(\"Toggle Automapping\", \"customText\", event, \"Toggle automapping on and off.\")');
+    newContainer.setAttribute("onmouseover", 'tooltip(\"Toggle Automapping2\", \"customText\", event, \"Toggle automapping2 on and off.\")');
     newContainer.setAttribute("onmouseout", 'tooltip("hide")');
     var abutton = document.createElement("SPAN");
     abutton.appendChild(document.createTextNode("Auto Maps"));

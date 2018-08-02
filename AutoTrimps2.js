@@ -22,7 +22,7 @@ var atscript = document.getElementById('AutoTrimps-script')
   , modulepath = 'modules/'
   ;
   
-  var ver = 8;
+  var ver = 9;
     
 //This should redirect the script to wherever its being mirrored from.
 if (atscript !== null) {
