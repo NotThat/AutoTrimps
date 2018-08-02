@@ -18,11 +18,11 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var atscript = document.getElementById('AutoTrimps-script')
   , basepath = 'https://notthat.github.io/AutoTrimps/'
-  , basepath = 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/'  
+  //, basepath = 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/'  
   , modulepath = 'modules/'
   ;
   
-  var ver = 7;
+  var ver = 8;
     
 //This should redirect the script to wherever its being mirrored from.
 if (atscript !== null) {
