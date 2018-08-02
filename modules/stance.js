@@ -855,6 +855,7 @@ function autoStance3() {
         worldArray[cellNum+1].health = Math.max(worldArray[cellNum+1].maxHealth - nextPBDmgtmp, 0.05*worldArray[cellNum+1].maxHealth); //extra damage on next cell from PB
         worldArray[cellNum+1].pbHits = pbHitstmp; //extra wind stacks on next cell from PB
         var nextStartingStacks = Math.min(1 + Math.ceil(stacks * getRetainModifier("Wind") + pbHitstmp + 1.2 * expectedNumHitsD * (pbMult + getRetainModifier("Wind")) + Math.ceil(worldArray[cellNum+1].health/ourAvgDmgD)), 200);
+        var nextStartingStacksCurrent = Math.min(1 + Math.ceil((stacks+1) * getRetainModifier("Wind") + pbHitstmp), 200);
     }
     else var nextStartingStacks = "";
     
@@ -862,9 +863,8 @@ function autoStance3() {
     
     var chosenFormation;
     
-
-    
-    var cmp = ((stacks < 200 ? worldArray[cellNum].geoRelativeCellWorth : 0) + (nextStartingStacks < 190 ? worldArray[cellNum].PBWorth : 0)) * game.empowerments.Wind.getModifier() * dailyMult;
+    var cmp = ((stacks < 200 ? worldArray[cellNum].geoRelativeCellWorth : 0) + (nextStartingStacks < 190 ? worldArray[cellNum].PBWorth : 0)) * game.empowerments.Wind.getModifier() * dailyMult; //this uses nextStartingStacks which includes an approximation of how many more hits we need
+    var cmpActual = ((stacks < 200 ? worldArray[cellNum].geoRelativeCellWorth : 0) + (nextStartingStacksCurrent < 200 ? worldArray[cellNum].PBWorth : 0)) * game.empowerments.Wind.getModifier() * dailyMult; //this is precise (used for display and record-keeping purposes)
     var cmpNextCapped = (stacks < 200 ? worldArray[cellNum].geoRelativeCellWorth : 0) * game.empowerments.Wind.getModifier() * dailyMult;
     if(worldArray[cellNum].corrupted == "corruptDodge") cmp *= 0.7; //dodge cells are worth less
     if(worldArray[cellNum].corrupted == "corruptDodge") cmpNextCapped *= 0.7; //dodge cells are worth less
@@ -1002,7 +1002,7 @@ function autoStance3() {
         lastMobHP = worldArray[cellNum].health;
     }
     
-    stancePrintout(cellNum, stacks, nextStartingStacks, cmp, expectedNumHitsS, expectedNumHitsX, expectedNumHitsD, corruptedtmp, lastDamageDealt, critSpan);
+    stancePrintout(cellNum, stacks, nextStartingStacksCurrent, cmpActual, expectedNumHitsS, expectedNumHitsX, expectedNumHitsD, corruptedtmp, lastDamageDealt, critSpan);
 }
 
 function stancePrintout(cellNum, stacks, nextStartingStacks, cmp, expectedNumHitsS, expectedNumHitsX, expectedNumHitsD, corruptedtmp, lastDamageDealt, critSpan){
@@ -1307,7 +1307,7 @@ function buildWorldArray(){
     calculateGravy(0);
     
     if(!isNaN(m) && !game.global.runningChallengeSquared)
-        debug("Goal: "+OmniThreshhold.toFixed(2)+" Omni/s zone worth = " + avgGravyFull.toFixed(2) + " Omni = " + m.toExponential(2));
+        debug("Omni/atk Goal: "+OmniThreshhold.toFixed(2)+" ("+ m.toExponential(2)+ ") zone worth = " + avgGravyFull.toFixed(2));
     
     return true;
 }
@@ -1357,14 +1357,16 @@ function updateOmniThreshhold() {
 function calculateGravy(fromCellNum){
     var sum = 0;
     var sumFull = 0;
-    for (var i = fromCellNum; i <= 99; i++)
-        if(worldArray[i].finalWorth > 1)
-            sum += worldArray[i].finalWorth - 1;
-    for (var i = 0; i <= 99; i++)
-        if(worldArray[i].finalWorth > 1)
-            sumFull += worldArray[i].finalWorth - 1;    
-    avgGravyFull = sumFull / (100 * OmniThreshhold);
-    avgGravyRemaining = sum / ((99 - fromCellNum + 1) * OmniThreshhold);
+    if(windZone()){
+        for (var i = fromCellNum; i <= 99; i++)
+            if(worldArray[i].finalWorth/OmniThreshhold > 1)
+                sum += worldArray[i].finalWorth/OmniThreshhold - 1;
+        for (var i = 0; i <= 99; i++)
+            if(worldArray[i].finalWorth/OmniThreshhold > 1)
+                sumFull += worldArray[i].finalWorth/OmniThreshhold - 1;    
+    }
+    avgGravyFull = sumFull / 100;
+    avgGravyRemaining = sum / (100 - fromCellNum + 1);
 }
 
 //var buyWeaponsModeAS3; //1: prestige till -1 and level 2: 2: buy levels only 3: get all

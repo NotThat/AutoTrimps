@@ -230,6 +230,7 @@ function mainLoop() {
         setTitle(); // Set the browser title
         
         buildWorldArray();
+        perked = false;
     }
     setScienceNeeded();  //determine how much science is needed
 

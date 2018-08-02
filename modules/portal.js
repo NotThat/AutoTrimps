@@ -113,6 +113,9 @@ function doPortal(challenge) {
     //AutoPerks: do this first, because it reflashes the screen.
     if (getPageSetting('AutoAllocatePerks')==1 && (typeof MODULES["perks"] !== 'undefined' || typeof AutoPerks !== 'undefined'))
         AutoPerks.clickAllocate();
+    if (getPageSetting('AutoAllocatePerks')==2) lootdump(); 
+    //if (getPageSetting('AutoAllocatePerks')==2) AutoPerks.clickAllocate();
+    //if (getPageSetting('AutoAllocatePerks')==2) AutoPerks.spendHelium2(game.resources.helium.owned + game.global.heliumLeftover);
     //Auto Start Daily:
     if (getPageSetting('AutoStartDaily')) {
         selectChallenge('Daily');
@@ -138,11 +141,11 @@ function doPortal(challenge) {
     else if(challenge) {
         selectChallenge(challenge);
     }
-    //Push He Data:
+    //Push He Data for graphs.js:
     pushData();
     //Actually Portal.
-    activateClicked();
-    activatePortal();
+    activateClicked(); //click button
+    activatePortal(); //confirm
     lastHeliumZone = 0; zonePostpone = 0;
 }
 

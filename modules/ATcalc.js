@@ -184,7 +184,7 @@ function calcDmgManual(printout, figureOutShield, number){
     if(figureOutShield){
         var num = number;
         num = num / (baseDamageNoCrit / shield);
-        debug("num is " + num.toFixed(2));
+        //debug("num is " + num.toFixed(2));
 
         if(num > 0.8 && num < 1.2)
             goodShieldActuallyEquipped = false;
@@ -241,6 +241,6 @@ function checkShield(){
     var min = parseFloat(str) / ((game.global.titimpLeft > 0 && game.global.mapsActive) ? 2 : 1); // *we dont care about titimp damage;
     calcDmgManual(false, true, min);
     shieldCheckedFlag = true;
-    debug("goodShieldActuallyEquipped = " + goodShieldActuallyEquipped + " highDamageHeirloom = " + highDamageHeirloom);
+    //debug("goodShieldActuallyEquipped = " + goodShieldActuallyEquipped + " highDamageHeirloom = " + highDamageHeirloom);
     calcBaseDamageinS(); //need to redo damage calculations in case we realized we use different shield
 }

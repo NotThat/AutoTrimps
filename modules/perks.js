@@ -413,6 +413,7 @@ AutoPerks.spendHelium = function(helium) {
         price = AutoPerks.calculatePrice(perks[i], 0);
         inc = AutoPerks.calculateIncrease(perks[i], 0);
         perks[i].efficiency = inc/price;
+        if (getPageSetting('AutoAllocatePerks')==2 && perks[i].name != "looting_II") perks[i].efficiency = 0;
         if(perks[i].efficiency < 0) {
             debug("Perk ratios must be positive values.","perks");
             return false;

@@ -1,7 +1,7 @@
 MODULES["maps"] = {};
 //These can be changed (in the console) if you know what you're doing:
 
-var enoughDamageCutoff;
+var remainingCells;
 
 MODULES["maps"].farmingCutoff = 16; //above this the game will farm.
 MODULES["maps"].numHitsSurvived = 8; //survive X hits in D stance or not enough Health.
@@ -168,10 +168,9 @@ function calcDmg(){
         windMult = 1;
     poisonMult = (getEmpowerment() == "Poison" ? poisonMultFixed : 1);
     
-    //enoughDamageCutoff = 1; // = cells remaining!
-    enoughDamageCutoff = 0.01 * (100 - game.global.lastClearedCell - 1);
+    remainingCells = 99 - game.global.lastClearedCell;
     
-    threshhold = poisonMult * windMult * enoughDamageCutoff;
+    threshhold = poisonMult * windMult * remainingCells * 0.01;
 
     if(!enoughHealth)
         debug("missing health");
@@ -368,9 +367,12 @@ function autoMap() {
         if (!game.global.mapsOwnedArray[map].noRecycle) { //not a unique map
             obj[map] = game.global.mapsOwnedArray[map].level; //find map with correct level
             //Get matching map for our siphonology level
-            //only accept LMC maps
-            if (game.global.mapsOwnedArray[map].level == siphlvl && (game.global.highestLevelCleared < 185 || game.global.mapsOwnedArray[map].bonus == "lmc"))
+
+            if (preferFAMaps && game.global.mapsOwnedArray[map].level == siphlvl && (game.global.highestLevelCleared < 185 || game.global.mapsOwnedArray[map].bonus == "fa"))
                 siphonMap = map;
+            else if (game.global.mapsOwnedArray[map].level == siphlvl && (game.global.highestLevelCleared < 185 || game.global.mapsOwnedArray[map].bonus == "lmc"))
+                siphonMap = map;
+            
         }
     }
     
@@ -680,7 +682,7 @@ function PrestigeRaid() {
         }
     
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
-    findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo); //decide which level we want to raid up to
+    findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo); //finds min and max levels we want to raid
 
     if(havePrestigeUpTo >= maxDesiredLevel) //have all the prestige levels that we want.
         return true; 
@@ -724,9 +726,43 @@ function PrestigeRaid() {
         }
     }
     
+    //first, lets create maps for each level between minDesiredLevel and maxDesiredLevel
+    var map = false;
+    var lvl;
+    for(lvl = maxDesiredLevel; lvl >= minDesiredLevel; lvl--){
+        map = findMap(lvl); //ignores uniques
+        if(!map){ //if we don't have a map, create one using 80% of our available fragments
+            if(decideMapParams(lvl, lvl, "Prestigious", true, 0.8)){ //this also sets the variables that createAMap uses
+                var flag = createAMap(currWorldZone, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
+                if (!flag){
+                    debug("error in creating map process");
+                    return true;
+                }
+            }
+            else if (lvl == maxDesiredLevel){ //we really want ANY map of the highest level, even if its a bad one. if we cant buy it with 80% frag, try with 100%
+                if(decideMapParams(lvl, lvl, "Prestigious", true)){
+                    var flag = createAMap(currWorldZone, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
+                    if (!flag){
+                        debug("error in creating map process");
+                        return true;
+                    }
+                }
+            }    
+        }
+    }
+    
     //Let's see if we already own a map of suitable level
-    var map = findMap(minDesiredLevel); //ignores bionics and uniques
-    if(map == -1){ //do not own a high enough map, try to make one if we can afford it
+    var map = false;
+    for(var i = minDesiredLevel; i <= maxDesiredLevel; i++){
+        map = findMap(i); //ignores uniques
+        if(map)
+            break;
+    }
+    
+    if(!map)
+        return true;
+    
+    /*if(!map){ //do not own a high enough map, try to make one if we can afford it
         var foundSuitableMap = false;
         
         foundSuitableMap = decideMapParams(minDesiredLevel, minDesiredLevel, "Prestigious", true); //get dagger first for speed before going max level map
@@ -748,13 +784,13 @@ function PrestigeRaid() {
             return true;
         }
         debug("Level = "+(baseLevel+extraLevels)+"|"+sizeSlider+"|"+diffSlider+"|"+lootSlider+"|"+specialMod+"|perfect="+perfect+ "|"+type+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.");
-    }
+    }*/
     
     if (!game.global.preMapsActive) { //in world, get to map screen
         mapsClicked();
     }
 
-    if(map == -1){
+    /*if(!map){
         //lets create the map
         var flag = createAMap(currWorldZone, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
         if (!flag){
@@ -763,9 +799,9 @@ function PrestigeRaid() {
         }
         selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id); //the map we just created
     }
-    else{ //we have a map with prestige available in our map list
+    else{ //we have a map with prestige available in our map list*/
         selectMap(map.id);
-    }
+    //}
     
     debug("havePrestigeUpTo = " + havePrestigeUpTo + " | minDesiredLevel = " + minDesiredLevel + " | maxDesiredLevel = " + maxDesiredLevel, "general", "");
     
@@ -789,7 +825,7 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
         mapsClicked();
         if (!game.global.preMapsActive) 
             mapsClicked();
-	debug("Entered map screeen");
+	//debug("Entered map screeen");
     }
     
     while (game.options.menu.repeatUntil.enabled != 2) {
@@ -819,13 +855,14 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
         updateMapCost();        
         
         if ((updateMapCost(true) <= game.resources.fragments.owned)) {
+            debug("Level = "+(baseLevel+extraLevels)+"|"+sizeSlider+"|"+diffSlider+"|"+lootSlider+"|"+specialMod+"|perfect="+perfect+ "|"+type+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.");
             var result = buyMap();
             if (result == -2) {
-                    debug("Too many maps, recycling now: ", "maps", 'th-large');
-                    recycleBelow(true);
-                    debug("Retrying, Buying a Map, level: #" + (baseLevel+extraLevels), "maps", 'th-large');
-                    buyMap();
-                }
+                debug("Too many maps, recycling now: ", "maps", 'th-large');
+                recycleBelow(true);
+                debug("Retrying, Buying a Map, level: #" + (baseLevel+extraLevels), "maps", 'th-large');
+                buyMap();
+            }
             return true;
         }
         else {
@@ -841,35 +878,31 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
 
 //searches for a map of at least minimum level
 function findMap(level){
-    var bestSoFar = -1;
-    var theMap;
-    for (var map in game.global.mapsOwnedArray) {
-        if (!game.global.mapsOwnedArray[map].noRecycle) { //not a unique map
-        //if (!map.noRecycle) { //not a unique map
-            if(game.global.mapsOwnedArray[map].level >= bestSoFar && game.global.mapsOwnedArray[map].level >= level){
-            //if(map.level >= bestSoFar && map.level >= level){
-                theMap = game.global.mapsOwnedArray[map];
-                bestSoFar = theMap.level;
-                //debug("map is " + theMap + "game.global.mapsOwnedArray[map] " + game.global.mapsOwnedArray[map] + "game.global.mapsOwnedArray[map].level " +game.global.mapsOwnedArray[map].level + " game.global.mapsOwnedArray[map].noRecycle" + game.global.mapsOwnedArray[map].noRecycle);
-            }
+    var map1 = false;
+    var map2 = false;
+    for (var map in game.global.mapsOwnedArray)
+        if (!game.global.mapsOwnedArray[map].noRecycle && game.global.mapsOwnedArray[map].level == level){
+            map1 = game.global.mapsOwnedArray[map];
+            break;
         }
-    }    
-    if (bestSoFar>-1){
-        return theMap;
-    }
-    return -1;
+    if(!map1 || addSpecials(true, true, map1) > 1) //if no map of level - nothing to run. if it has multiple items in it, run it
+        return map1;
+    
+    //map has 1 item remaining. we can either run it, or run a prestigious map of 1 level higher
+    for (var map in game.global.mapsOwnedArray)
+        if (!game.global.mapsOwnedArray[map].noRecycle && game.global.mapsOwnedArray[map].level == level+1 && game.global.mapsOwnedArray[map].bonus == "p"){
+            map2 = game.global.mapsOwnedArray[map];
+            break;
+        }
+    if(map2)
+        return map2;
+    return map1;
 }
 
-function decideMapParams(minLevel, maxLevel, special, cheap){
-    var fragments = game.resources.fragments.owned;
-    baseLevel = Math.min(currWorldZone, maxLevel); //if maxLevel == currWorldZone that means extra levels is 0 and we are doing world zone map at the highest.
+function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
+    var fragments = game.resources.fragments.owned * (fragCap === undefined ? 1 : fragCap);
+    var baseLevel = game.global.world;
     var sizeLast=0, diffLast=0, lootLast=0, specialModLast="", perfectLast=false, extraLevelsLast=minLevel-baseLevel, typeLast="Random";
-    if (special == "LMC")
-        specialModLast = "LMC";
-    else if (special == "FA") 
-        specialModLast = "FA";
-    else
-        specialModLast = "";
     
     var mostExpensiveType;
     if (cheap)
@@ -884,20 +917,14 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
     if(maxLevel < baseLevel) maxLevel = baseLevel;
     if(minLevel > maxLevel) minLevel = maxLevel;    
     
-    //function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod,     perfect,     extraLevels,     type){
-    cost =      calcMapCost(minLevel, sizeLast,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast);
+    cost = calcMapCost(baseLevel, sizeLast, diffLast, lootLast, specialModLast, perfectLast, extraLevelsLast, typeLast);
     if(cost > fragments){
-        //debug("cant afford map level " + minLevel);
-        sizeSlider = 0;
-        diffSlider = 0;
-        lootSlider = 0;
-        specialMod = "";
-        extraLevels = minLevel-baseLevel;
-        perfect = false;
-        type = "Random";
+        debug("can't afford map level " + minLevel + " " + cost);
         return false;
     }
 
+    var fragments = game.resources.fragments.owned * (fragCap === undefined ? 1 : fragCap);
+    
     //order of importance for prestigious maps (prestige mode):
     //size > prestigious > difficulty > perfect
     //order of importance for LMC maps (map bonus/metal):
@@ -908,43 +935,47 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
     
     while(true){
         for(lootEnum = 0; lootEnum <= 9; lootEnum++){
-            if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootEnum,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
+            if(calcMapCost(baseLevel, sizeLast, diffLast, lootEnum, specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
                 lootLast = lootEnum;
             else
                 break;            
             
             for(diffEnum = 0; diffEnum <= 9; diffEnum++){
-                if(  calcMapCost(baseLevel, sizeLast,   diffEnum,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
+                if(calcMapCost(baseLevel, sizeLast, diffEnum, lootLast, specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
                     diffLast = diffEnum;
                 else
                     break;
 
                 if(special != "LMC"){ //LMC never skip. prestigious maybe skip
-                    if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   "Prestigious", perfectLast, extraLevelsLast, typeLast) < fragments)
-                        specialModLast = "Prestigious";
+                    if(calcMapCost(baseLevel, sizeLast, diffLast, lootLast, special, perfectLast, extraLevelsLast, typeLast) < fragments){
+                         specialModLast = special;
+                    }
                     else
                         specialModLast = "";
                 }
 
                 for(sizeEnum = 0; sizeEnum <= 9; sizeEnum++){
-                    if(  calcMapCost(baseLevel, sizeEnum,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
+                    if(calcMapCost(baseLevel, sizeEnum, diffLast, lootLast, specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
                         sizeLast = sizeEnum;
                     else
                         break;
                 }
             }
         }
+
+        if(cheap && calcMapCost(baseLevel, sizeLast, diffLast, lootLast, specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments * 0.1)
+            lootLast = 0;
         
         if(sizeLast+diffLast+lootLast < 27)
             perfectLast=false;
         else{
-            if(  calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, true, extraLevelsLast, typeLast) < fragments)
+            if(calcMapCost(baseLevel, sizeLast, diffLast, lootLast, specialModLast, true, extraLevelsLast, typeLast) < fragments)
                 perfectLast = true;
             else
                 perfectLast = false;
         }
         
-        if(2 * calcMapCost(baseLevel, sizeLast,   diffLast,   lootLast,   specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments && special == "LMC")
+        if(2 * calcMapCost(baseLevel, sizeLast, diffLast, lootLast, specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments)
             typeLast = mostExpensiveType;
         else
             typeLast = "Random";
@@ -962,10 +993,10 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
             perfect = false;
             type = "Random";
         }
-        if(specialMod != "LMC"){
-            perfect = false;
-            lootSlider = 0;
-        }
+        //if(specialMod != "LMC"){
+        //    perfect = false;
+        //    lootSlider = 0;
+        //}
         
         if(extraLevelsLast+1 > maxLevel-baseLevel)
             break;
@@ -977,9 +1008,10 @@ function decideMapParams(minLevel, maxLevel, special, cheap){
             else
                 break;
         }
-        if(calcMapCost(baseLevel, 0, 0, 0, "", false, extraLevelsLast+1, "Random") < fragments){
-             sizeLast=0; diffLast=0; lootLast=0; specialModLast=""; perfectLast=false; extraLevelsLast=extraLevelsLast+1, typeLast="Random";
+        if(calcMapCost(baseLevel, 0, 0, 0, specialModLast, false, extraLevelsLast+1, "Random") < fragments){
+             sizeLast=0; diffLast=0; lootLast=0; perfectLast=false; extraLevelsLast=extraLevelsLast+1, typeLast="Random";
         }
+        
         else
             break;
     
@@ -1136,6 +1168,33 @@ function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, 
     baseCost += baseLevel;
     baseCost = Math.floor((((baseCost / 150) * (Math.pow(1.14, baseCost  - 1))) * baseLevel  * 2) * Math.pow((1.03 + (baseLevel / 50000)), baseLevel))* (type == "Random" ? 1 : 2);
     return baseCost;
+}
+
+function updateMapCost(getValue){
+	var mapLevel =  parseInt(document.getElementById("mapLevelInput").value, 10);
+	var baseCost = 0;
+	baseCost += getMapSliderValue("size");
+	baseCost += getMapSliderValue("loot");
+	baseCost += getMapSliderValue("difficulty");
+	baseCost *= (game.global.world >= 60) ? 0.74 : 1;
+	var specialModifier = getSpecialModifierSetting();
+	if (specialModifier != "0"){
+		baseCost += mapSpecialModifierConfig[specialModifier].costIncrease;
+	}
+	//Perfect Checkbox
+	if (checkPerfectChecked()){
+		baseCost += 6;
+	}
+	//Extra Levels
+	var extraLevels = getExtraMapLevels();
+	if (extraLevels > 0){
+		baseCost += (10 * extraLevels);
+	}
+	baseCost += mapLevel;
+	baseCost = Math.floor((((baseCost / 150) * (Math.pow(1.14, baseCost - 1))) * mapLevel * 2) * Math.pow((1.03 + (mapLevel / 50000)), mapLevel));
+	if (document.getElementById("biomeAdvMapsSelect").value != "Random") baseCost *= 2;
+	if (getValue) return baseCost;
+	document.getElementById("mapCostFragmentCost").innerHTML = prettify(baseCost);
 }
 
 function mapTimeEstimater() {

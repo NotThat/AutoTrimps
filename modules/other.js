@@ -299,23 +299,36 @@ function BWraiding() {
 
 //AutoAllocate Looting II
 function lootdump() {
-if (game.global.world==getPageSetting('lootdumpz') && !perked && getPageSetting('AutoAllocatePerks')==2 && getPageSetting('lootdumpa') > 0 && getPageSetting('lootdumpz') > 0) {
-	    viewPortalUpgrades();
-	    game.global.lastCustomAmt = getPageSetting('lootdumpa');
-	    numTab(5, true);
-	    if (getPortalUpgradePrice("Looting_II")+game.resources.helium.totalSpentTemp <= game.resources.helium.respecMax) {
-		buyPortalUpgrade('Looting_II');
-		activateClicked();
-		cancelPortal();
-		debug('Bought ' + getPageSetting('lootdumpa') + ' Looting II');
-	     }
-	else {
-	     perked = true;
-	     cancelPortal();
-	     debug("Done buying Looting II");
-	     }
-	}
-else if (perked == true && game.global.world !== getPageSetting('lootdumpz')) {
-         perked = false;
-             }
+    if (game.global.world == 1 && !perked && getPageSetting('AutoAllocatePerks')==2) {
+        viewPortalUpgrades();
+        var currLevel = parseFloat(game.portal.Looting_II.level);
+        var totalSpent = parseFloat(game.portal.Looting_II.heliumSpent);
+        var totalUnspent = parseFloat(game.global.heliumLeftover); //this is for mid-run allocation
+        //var totalUnspent = game.resources.helium.owned + game.global.heliumLeftover; //this is for portal allocation
+
+        var amt = Math.floor(1/100*(Math.sqrt(2)*Math.sqrt(totalSpent+totalUnspent+451250)-950)) - currLevel;
+        //debug("game.portal.Looting_II.level " + currLevel + " game.portal.Looting_II.heliumSpent " + totalSpent + " game.global.heliumLeftover " + totalUnspent);
+        //debug("amt = " + amt);
+        
+        if(amt <= 0){
+            perked = true;
+            cancelPortal();
+	    //debug("Done buying Looting II");
+            return;
+        }
+        game.global.lastCustomAmt = amt;
+        
+        numTab(5, true);
+        if (getPortalUpgradePrice("Looting_II")+game.resources.helium.totalSpentTemp <= game.resources.helium.respecMax) {
+            buyPortalUpgrade('Looting_II');
+            activateClicked();
+            cancelPortal();
+            debug('Bought ' + amt.toExponential(2) + ' Looting II');
+        }
+        else{
+	    perked = true;
+	    cancelPortal();
+	    debug("Done buying Looting II");
+        }
+    }
 }
