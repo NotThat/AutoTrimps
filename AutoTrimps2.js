@@ -24,7 +24,7 @@ var atscript = document.getElementById('AutoTrimps-script')
   , modulepath = 'modules/'
   ;
   
-  var ver = 11;
+  var ver = 12;
     
 function delayStart() {
     initializeAutoTrimps();
