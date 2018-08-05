@@ -16,14 +16,23 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////
 
+var scrpt = false;
+//var scrpt = true;
+
 var atscript = document.getElementById('AutoTrimps-script')
-  , basepath = 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/'  
-  , basepath = 'https://notthat.github.io/AutoTrimps/'
+    , basepath = (scrpt ? 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/')
   , modulepath = 'modules/'
   ;
   
   var ver = 11;
     
+function delayStart() {
+    initializeAutoTrimps();
+    if (!scrpt)
+        printChangelog();
+    setTimeout(delayStartAgain, startupDelay);
+}
+
 //This should redirect the script to wherever its being mirrored from.
 if (atscript !== null) {
     basepath = atscript.src.replace(/AutoTrimps2\.js$/, '');
@@ -114,15 +123,6 @@ var startupDelay = 2500;    //How long to wait for everything to load
 
 //Start Loops
 setTimeout(delayStart, startupDelay);
-function delayStart() {
-    initializeAutoTrimps();
-    if (atscript != null && atscript.basepath == 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/'){
-        
-    }
-    else
-        printChangelog();
-    setTimeout(delayStartAgain, startupDelay);
-}
 
 function delayStartAgain(){
     if (game.achievements.zones.finished < 8)   //z60

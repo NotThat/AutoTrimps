@@ -989,12 +989,15 @@ function autoStance3() {
                     var after  = Math.min(0.85*stacks + enemyHealth / ourNewLowDamage + (avgGravyRemaining) * 30, 200); //stacks if we do trimpicide. the more a zone is worth the more we are willing to trimpicide if we need less damage.
 
                     if(before <= after && (game.global.antiStacks > minAnticipationStacks || wantToSwapShieldFlag) && cellNum < lastHealthy){ //TODO: cellNum < lastHealthy is bandaid fix for multiple trimpicides at start of zone due to stacks/shield competition
-                        if(wantToSwapShieldFlag)
-                            shieldCheckedFlag = false;
-                        debug("trimpiciding " + minAnticipationStacks + " wantToSwapShield " + wantToSwapShieldFlag);
-                        wantedAnticipation = minAnticipationStacks;
-                        getTargetAntiStack(minAnticipationStacks, true);
-                        return;
+                        var wantToSwap = ((desiredShield == "good" && !goodShieldActuallyEquipped) || (desiredShield == "low" && goodShieldActuallyEquipped))
+                        if (Math.abs(game.global.antiStacks-target) > 1 && wantToSwap){
+                            if(wantToSwapShieldFlag)
+                                shieldCheckedFlag = false;
+                            debug("trimpiciding " + minAnticipationStacks + " wantToSwapShield " + wantToSwapShieldFlag);
+                            wantedAnticipation = minAnticipationStacks;
+                            getTargetAntiStack(minAnticipationStacks, true);
+                            return;
+                        }
                     }
                 }
             }
