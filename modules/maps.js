@@ -628,7 +628,7 @@ function updateAutoMapsStatus(get, msg) {
             (hours + 'h') : (mins + 'm:' + (secs >= 10 ? secs : ('0' + secs)) + 's');
         status = 'Farming for Spire ' + spiretimeStr + ' left<br>';
     } else if (spireMapBonusFarming) status = 'Getting Spire Map Bonus<br>';
-    else if (doVoids && voidCheckPercent == 0) status = 'Remaining VMs: ' + game.global.totalVoidMaps + "<br>";
+    else if (doVoids && voidCheckPercent == 0) status = 'VMs Left: ' + game.global.totalVoidMaps + "<br>";
     else if (skippedPrestige) status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b><br>'; // Show skipping prestiges
     else if (!(enoughHealth)) status = 'Need Health<br>';
     
@@ -834,7 +834,8 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
         if ((updateMapCost(true) <= game.resources.fragments.owned)) {
             var perfectText = (perfect ? "Perfect" : "");
             var specialModText = (specialMod ? specialMod : "-");
-            debug("Level = "+(baseLevel+extraLevels)+"|"+parseFloat(lootSlider)+"|"+parseFloat(sizeSlider)+"|"+parseFloat(diffSlider)+"|"+specialModText+"|"+perfectText+"|"+type+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.");
+            var typeText = (type == "Plentiful" ? "Garden" : type);
+            debug("Level = "+(baseLevel+extraLevels)+"|"+parseFloat(lootSlider)+"|"+parseFloat(sizeSlider)+"|"+parseFloat(diffSlider)+"|"+specialModText+"|"+perfectText+"|"+typeText+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.");
             var result = buyMap();
             if (result == -2) {
                 debug("Too many maps, recycling now: ", "maps", 'th-large');
@@ -996,12 +997,10 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
     
     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
     
-    if(fragments >= cost){
+    if(fragments >= cost)
         return true;
-    }
-    
-    debug("error: can't afford map level " + minLevel);
-    return false;
+    else
+        return false;
 }
 
 function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){

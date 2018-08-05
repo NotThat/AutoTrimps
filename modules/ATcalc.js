@@ -200,6 +200,7 @@ function calcDmgManual(printout, figureOutShield, number){
             //if (num >= 10.8 || num <= 10)
             //    debug("error shield atk num = " + num.toFixed(2));
         }
+        effectiveShieldAtkMult = num;
     }
     
     var critMult = calcCritModifier(getPlayerCritChance(), getPlayerCritDamageMult());

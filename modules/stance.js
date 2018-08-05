@@ -38,6 +38,7 @@ var lastHiddenBreedTimer = -1;
 var shieldCheckedFlag = false;
 var desiredShield;
 var negativeDamageCounter = 0;
+var effectiveShieldAtkMult = 1;
 
 function formationToSModifier(){
     switch (game.global.formation){
@@ -1062,8 +1063,7 @@ function stancePrintout(cellNum, stacks, nextStartingStacks, cmp, expectedNumHit
     var shield = (highDamageHeirloom ? "+" : "-");
     var actualShield = (goodShieldActuallyEquipped ? "+" : "-");
     if(lastDamageDealtA > 0){
-        //var msg = shield+actualShield+game.global.world + "." + cellNumA + " " + stacksA+"W"+"("+nextStartingStacksA+") "+cmpA.toFixed(2)+" " + expectedNumHitsSA.toFixed(0)+"/" + expectedNumHitsXA.toFixed(0)+"/" + expectedNumHitsDA.toFixed(0) + " " + game.global.antiStacks + letter + " " + displayDmg.toExponential(2) + " " + lastDamageDealtA.toExponential(2) + " " + critText + corruptedtmpA;
-        var msg = shield+actualShield+game.global.world + "." + cellNumA + " " + stacksA+"W"+"("+nextStartingStacksA+") "+cmpA.toFixed(2)+" " + critText +"C " + expectedNumHitsSA.toFixed(0)+"/" + expectedNumHitsXA.toFixed(0)+"/" + expectedNumHitsDA.toFixed(0) + " " + game.global.antiStacks + letter + " " + corruptedtmpA;
+        var msg = shield+actualShield+game.global.world + "." + cellNumA + " " + stacksA+"W"+"("+nextStartingStacksA+") "+cmpA.toFixed(2)+" " + critText +"C " + expectedNumHitsSA.toFixed(0)+"/" + expectedNumHitsXA.toFixed(0)+"/" + expectedNumHitsDA.toFixed(0) + " " + game.global.antiStacks + letter + " " + corruptedtmpA + " " + effectiveShieldAtkMult.toFixed(2);
         if (!(lastDebug == msg))
             debug(msg, "general");
         lastDebug = msg;
@@ -1078,7 +1078,8 @@ function getTargetAntiStack(target, firstRun){
         return true;
     }
 
-    if (Math.abs(game.global.antiStacks-target) <= 1){
+    var wantToSwap = ((desiredShield == "good" && !goodShieldActuallyEquipped) || (desiredShield == "low" && goodShieldActuallyEquipped))
+    if (Math.abs(game.global.antiStacks-target) <= 1 && !wantToSwap){
         trimpicide = false;
         switchOnGA();
         return true;
