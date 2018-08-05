@@ -990,7 +990,7 @@ function autoStance3() {
 
                     if(before <= after && (game.global.antiStacks > minAnticipationStacks || wantToSwapShieldFlag) && cellNum < lastHealthy){ //TODO: cellNum < lastHealthy is bandaid fix for multiple trimpicides at start of zone due to stacks/shield competition
                         var wantToSwap = ((desiredShield == "good" && !goodShieldActuallyEquipped) || (desiredShield == "low" && goodShieldActuallyEquipped))
-                        if (Math.abs(game.global.antiStacks-target) > 1 && wantToSwap){
+                        if (Math.abs(game.global.antiStacks-minAnticipationStacks) > 1 && wantToSwap){
                             if(wantToSwapShieldFlag)
                                 shieldCheckedFlag = false;
                             debug("trimpiciding " + minAnticipationStacks + " wantToSwapShield " + wantToSwapShieldFlag);
