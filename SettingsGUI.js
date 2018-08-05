@@ -382,7 +382,7 @@ function initializeAllSettings() {
     createSetting('BWraidingz', 'Z to BW Raid', 'Raids BWs at zone specified. Example: 495, will raid all BWs for all gear starting from 495. Will skip lower BWs if you have enough damage. Once all gear is obtained, will return to regular farming.', 'value', -1, null, 'Spire');
     createSetting('BWraidingmax', 'Max BW to raid', 'Raids BWs until zone specified. Example: 515, will raid all BWs for all gear until 515. Will skip lower BWs if you have enough damage. Once all gear is obtained, will return to regular farming.', 'value', -1, null, 'Spire');
     createSetting('PRaidSpire', 'Raid +5 in Spire', 'Raid +5 levels for gear in active spires', 'boolean', false, null, 'Spire');
-    
+    createSetting('StackSpire4', 'Windstack Spire IV', 'Attempts to maximize windstacks in Spire IV. Recommended you have Raid +5 in Spire enabled when you use this.', 'boolean', false, null, 'Spire');
 
 
 //Combat

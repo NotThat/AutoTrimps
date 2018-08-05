@@ -23,7 +23,7 @@ MODULES["maps"].UnearnedPrestigesRequired = 2;
 MODULES["maps"].maxMapBonusAfterZ = MODULES["maps"].maxMapBonus; //Max Map Bonus After Zone uses this many stacks
 //- init as default value (10). user can set if they want.
 
-//Initialize Global Vars (dont mess with these ones, nothing good can come from it).
+//Initialize Global Vars
 var customVars = MODULES["maps"];  
 var doVoids = false;
 var presRaiding = false;
@@ -56,10 +56,10 @@ var cost;
 var maxDesiredLevel;
 var minDesiredLevel;
 var currWorldZone = 1;
-//Activate Robo Trimp (will activate on the first zone after liquification)
 var lastMsg; //stores last message, stops spam to console
 var AutoMapsCoordOverride = false;
 var PRaidingActive = false; //used for coordination purchase during praids
+var spireStackFirst = true;
 
 function calcDmg(){    
     var AThiddenBreedTimer = ((game.jobs.Amalgamator.owned > 0) ? ((new Date().getTime() - game.global.lastSoldierSentAt) / 1000) : (game.global.lastBreedTime / 1000))
@@ -80,8 +80,7 @@ function calcDmg(){
 
     ourBaseDamage = baseDamage*8;
     if(!goodShieldActuallyEquipped)
-        ourBaseDamage *= goodShieldAtkMult; //calculate automaps damage as though we were wearing our good shield, because we can always trimpicide and swap to  it
-    //ourBaseDamage = ourBaseDamage / ((game.global.titimpLeft > 0 && game.global.mapsActive) ? 2 : 1); // *we dont care about titimp damage
+        ourBaseDamage *= goodShieldAtkMult; //calculate automaps damage as though we were wearing our good shield, because we can always trimpicide and swap to it
     
     if(!temp){
         equipLowDmgShield();
@@ -90,8 +89,6 @@ function calcDmg(){
     }
     
     const FORMATION_MOD_1 = game.upgrades.Dominance.done ? 2 : 1;
-    
-
     
     //calculate dmg with max anticipation in autogen setting #3 (so if its lower than max, our max is lower than max
     if(game.global.antiStacks < maxAnti){
@@ -114,7 +111,7 @@ function calcDmg(){
         enemyDamage = getEnemyMaxAttack(game.global.world, 50, 'Snimp', 1.2);
         enemyDamage = calcDailyAttackMod(enemyDamage); //daily mods: badStrength,badMapStrength,bloodthirst
     } else {
-        enemyDamage = calcBadGuyDmg(null, getEnemyMaxAttack(game.global.world, 50, 'Snimp', 1.0), true, true); //(enemy,attack,daily,maxormin,[disableFlucts])
+        enemyDamage = calcBadGuyDmg(null, getEnemyMaxAttack(game.global.world, 50, 'Snimp', 1.0), true, true);
     }
     enemyHealth = getEnemyMaxHealth(game.global.world, 50);
     if (game.global.challengeActive == "Toxicity") {
@@ -175,12 +172,13 @@ function calcDmg(){
     if(!enoughHealth)
         debug("missing health");
     
-    //DHratio = (enemyHealth / ourBaseDamage);
     DHratio = (ourBaseDamage*0.25 / enemyHealth);
     enoughDamage = DHratio > threshhold;
     
+    var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
+    var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     if(!enoughDamage)
-        getDamage(8*baseDamage*threshhold/DHratio, false);
+        getDamageCaller(cell.health, false, false); //TODO: how much damage do we want here?
     
     if(DHratio < 0.00001)
         DHratio = DHratio.toExponential(2);
@@ -261,9 +259,6 @@ function autoMap() {
     var selectedMap = "world";
     var shouldFarmLowerZone = false;
 
-    //Check our graph history and - Estimate = The zone should take around this long in milliseconds.
-    //mapTimeEstimate = mapTimeEstimater(); //currently unused, but interesting
-
     var shouldDoHealthMaps = false;
     //if we are at max map bonus (10), and we don't need to farm, don't do maps
     if (game.global.mapBonus >= customVars.maxMapBonus && !shouldFarm)
@@ -273,12 +268,6 @@ function autoMap() {
     //do (1) map if we dont have enough health
     else if (game.global.mapBonus < customVars.wantHealthMapBonus && !enoughHealth && !shouldDoMaps && !needPrestige) {
         debug("automaps wants more health."); //TODO: do we want to run maps for healths? feels unneeded in currentyear
-        /*shouldDoMaps = true;
-        shouldDoHealthMaps = true;
-        if(enoughDamage)
-            updateAutoMapsStatus("", "Need Health!");
-        else
-            updateAutoMapsStatus("", "Need Health/Dmg!");*/
     }
 
     //Disable Farm mode if we are capped for all attack weapons
@@ -307,16 +296,15 @@ function autoMap() {
         shouldDoWatchMaps = true; //TODO coding: this is overloaded - not ideal.
     }
     
-    //Farm X Minutes Before Spire:
-    var shouldDoSpireMaps = false;
+    //spire specific settings
+    if (game.global.world != 500 || (game.global.lastClearedCell + 1 !== 0)) spireStackFirst = true;
+    var stackSpire = (game.global.world == 500) && getPageSetting('StackSpire4') && (game.global.spireDeaths <= 8);
+    var stackSpireGetMinDamage = stackSpire && (game.global.lastClearedCell + 1 === 0) && spireStackFirst;
     preSpireFarming = (isActiveSpireAT()) && (spireTime = (new Date().getTime() - game.global.zoneStarted) / 1000 / 60) < getPageSetting('MinutestoFarmBeforeSpire');
     spireMapBonusFarming = getPageSetting('MaxStacksForSpire') && isActiveSpireAT() && game.global.mapBonus < customVars.maxMapBonus;
-    if (preSpireFarming || spireMapBonusFarming) {
+    if (preSpireFarming || spireMapBonusFarming || stackSpireGetMinDamage)
         shouldDoMaps = true;
-        shouldDoSpireMaps = true;
-    }
     
-    //MaxMapBonusAfterZone (idea from awnv)
     var maxMapBonusZ = getPageSetting('MaxMapBonusAfterZone');
     doMaxMapBonus = (maxMapBonusZ >= 0 && game.global.mapBonus < customVars.maxMapBonusAfterZ && game.global.world >= maxMapBonusZ);
     if (doMaxMapBonus)
@@ -372,7 +360,8 @@ function autoMap() {
                 siphonMap = map;
             else if (game.global.mapsOwnedArray[map].level == siphlvl && (game.global.highestLevelCleared < 185 || game.global.mapsOwnedArray[map].bonus == "lmc"))
                 siphonMap = map;
-            
+            else if (game.global.mapsOwnedArray[map].level == siphlvl)
+                siphonMap = map;
         }
     }
     
@@ -446,7 +435,7 @@ function autoMap() {
     updateAutoMapsStatus("", "");
     
     //LEAD EVEN ZONE EXIT
-    //don't map on even worlds if on Lead Challenge, except if person is dumb and wants to void on even
+    //don't map on even worlds if on Lead Challenge, except if person wants to void on even
     if (game.global.challengeActive == 'Lead' && !doVoids && (game.global.world % 2 == 0 || game.global.lastClearedCell < customVars.shouldFarmCell)) {
         if (game.global.preMapsActive)
             mapsClicked();
@@ -488,12 +477,16 @@ function autoMap() {
         }
         else if (siphonMap != -1) //use the siphonology adjusted map
             selectedMap = game.global.mapsOwnedArray[siphonMap].id;
+        //else if (true){
+            
+        //}
     }
     
-    //3 cases based on where we are: 
-    //1) in a map - decide what to do with repeat button
-    //2) in the world - do we need to enter the map screen?
-    //3) in premap screen - create/select a map and run it, or go back to world
+    /*
+    3 cases based on where we are: 
+    1) in a map - decide what to do with repeat button
+    2) in the world - do we need to enter the map screen?
+    3) in premap screen - create/select a map and run it, or go back to world*/
     
     //#1 in a map, figure out repeat button
     if (game.global.mapsActive) { 
@@ -585,14 +578,33 @@ function autoMap() {
                     selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id; //the map we just created
                 } 
             }
-            //debug("selectedMap " + selectedMap);
             selectMap(selectedMap);
-            var themapobj = game.global.mapsOwnedArray[getMapIndex(selectedMap)];
-            var levelText = " Level: " + themapobj.level;
-            var voidorLevelText = themapobj.location == "Void" ? " Void: " : levelText;
-            debug("Running selected " + selectedMap + voidorLevelText + " Name: " + themapobj.name, "maps", 'th-large');
-            runMap();
-            lastMapWeWereIn = getCurrentMapObject();
+            if(!spireMapBonusFarming && stackSpireGetMinDamage){ //equip low shield - enter map, go to premaps. enter map - manual fight - go to premaps - exit to world - manual fight
+                equipLowDmgShield();
+                calcBaseDamageinS();
+                debug("Lowering damage for Spire IV");
+                runMap();                           //--enter map
+                fightManual();                      //--fight
+                mapsClicked();                      //--exit map
+                runMap();                           //--enter map
+                fightManual();                      //--fight
+                mapsClicked();                      //--exit map
+                recycleMap();
+                mapsClicked();                      //--exit to world
+                fightManual();                      //--fight
+                updateAllBattleNumbers(true);
+                checkShield();
+                spireStackFirst = false;
+                return;
+            }
+            else{
+                var themapobj = game.global.mapsOwnedArray[getMapIndex(selectedMap)];
+                var levelText = " Level: " + themapobj.level;
+                var voidorLevelText = themapobj.location == "Void" ? " Void: " : levelText;
+                debug("Running selected " + selectedMap + voidorLevelText + " Name: " + themapobj.name, "maps", 'th-large');
+                runMap();
+                lastMapWeWereIn = getCurrentMapObject();                
+            }
         }
     }
 }
@@ -762,46 +774,11 @@ function PrestigeRaid() {
     if(!map)
         return true;
     
-    /*if(!map){ //do not own a high enough map, try to make one if we can afford it
-        var foundSuitableMap = false;
-        
-        foundSuitableMap = decideMapParams(minDesiredLevel, minDesiredLevel, "Prestigious", true); //get dagger first for speed before going max level map
-        if(cost/game.resources.fragments.owned < 0.01){ //if map is very cheap, we'll go 1 level at a time for fastest prestiging
-            
-        }
-        else if(maxDesiredLevel-havePrestigeUpTo>=8){ //if need to run +8, grab dagger first
-            debug("need to run " + (maxDesiredLevel-havePrestigeUpTo)+" maps levels higher, running +6 first");
-            foundSuitableMap = decideMapParams(havePrestigeUpTo+6, havePrestigeUpTo+6, "Prestigious", true); //get dagger first for speed before going max level map
-        }
-        else
-            foundSuitableMap = decideMapParams(minDesiredLevel, maxDesiredLevel, "Prestigious", false);
-
-        if (!foundSuitableMap){
-            //debug("Could not create a suitable map. min " + minDesiredLevel + " max " + maxDesiredLevel + " currWorldZone " + currWorldZone + " extraLevels " + extraLevels);
-            //debug("Cheapest map level " + (currWorldZone+extraLevels) + "  would cost " + cost.toPrecision(3) + " fragments.");
-            //debug("Exiting.");
-            updateAutoMapsStatus("", "Need Fragments. Advancing."); //UI
-            return true;
-        }
-        debug("Level = "+(baseLevel+extraLevels)+"|"+sizeSlider+"|"+diffSlider+"|"+lootSlider+"|"+specialMod+"|perfect="+perfect+ "|"+type+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.");
-    }*/
-    
     if (!game.global.preMapsActive) { //in world, get to map screen
         mapsClicked();
     }
 
-    /*if(!map){
-        //lets create the map
-        var flag = createAMap(currWorldZone, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
-        if (!flag){
-            debug("error in creating map process");
-            return true;
-        }
-        selectMap(game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id); //the map we just created
-    }
-    else{ //we have a map with prestige available in our map list*/
-        selectMap(map.id);
-    //}
+    selectMap(map.id);
     
     debug("havePrestigeUpTo = " + havePrestigeUpTo + " | minDesiredLevel = " + minDesiredLevel + " | maxDesiredLevel = " + maxDesiredLevel, "general", "");
     
@@ -855,7 +832,9 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
         updateMapCost();        
         
         if ((updateMapCost(true) <= game.resources.fragments.owned)) {
-            debug("Level = "+(baseLevel+extraLevels)+"|"+sizeSlider+"|"+diffSlider+"|"+lootSlider+"|"+specialMod+"|perfect="+perfect+ "|"+type+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.");
+            var perfectText = (perfect ? "Perfect" : "");
+            var specialModText = (specialMod ? specialMod : "-");
+            debug("Level = "+(baseLevel+extraLevels)+"|"+parseFloat(lootSlider)+"|"+parseFloat(sizeSlider)+"|"+parseFloat(diffSlider)+"|"+specialModText+"|"+perfectText+"|"+type+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.");
             var result = buyMap();
             if (result == -2) {
                 debug("Too many maps, recycling now: ", "maps", 'th-large');
@@ -914,16 +893,17 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
             mostExpensiveType = "Mountain";
     }
     
-    if(maxLevel < baseLevel) maxLevel = baseLevel;
+    if(maxLevel < minLevel) maxLevel = minLevel;
     if(minLevel > maxLevel) minLevel = maxLevel;    
     
     cost = calcMapCost(baseLevel, sizeLast, diffLast, lootLast, specialModLast, perfectLast, extraLevelsLast, typeLast);
     if(cost > fragments){
-        debug("can't afford map level " + minLevel + " " + cost);
+        debug("can't afford map level " + minLevel + " " + cost.toExponential(2));
         return false;
     }
 
     var fragments = game.resources.fragments.owned * (fragCap === undefined ? 1 : fragCap);
+    specialModLast = special;
     
     //order of importance for prestigious maps (prestige mode):
     //size > prestigious > difficulty > perfect
@@ -963,8 +943,8 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
             }
         }
 
-        if(cheap && calcMapCost(baseLevel, sizeLast, diffLast, lootLast, specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments * 0.1)
-            lootLast = 0;
+        //if(cheap && calcMapCost(baseLevel, sizeLast, diffLast, lootLast, specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments * 0.1)
+        //    lootLast = 0;
         
         if(sizeLast+diffLast+lootLast < 27)
             perfectLast=false;
@@ -985,18 +965,8 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
         lootSlider = lootLast;
         specialMod = specialModLast;
         extraLevels = extraLevelsLast;
-        if(!cheap){
-            perfect = perfectLast;
-            type = typeLast;
-        }
-        else{//for quick +6 maps we never wanna spend the frags for perfect/garden
-            perfect = false;
-            type = "Random";
-        }
-        //if(specialMod != "LMC"){
-        //    perfect = false;
-        //    lootSlider = 0;
-        //}
+        perfect = perfectLast;
+        type = typeLast;
         
         if(extraLevelsLast+1 > maxLevel-baseLevel)
             break;
@@ -1008,16 +978,24 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
             else
                 break;
         }
-        if(calcMapCost(baseLevel, 0, 0, 0, specialModLast, false, extraLevelsLast+1, "Random") < fragments){
+        else if(calcMapCost(baseLevel, 0, 0, 0, specialModLast, false, extraLevelsLast+1, "Random") < fragments){
              sizeLast=0; diffLast=0; lootLast=0; perfectLast=false; extraLevelsLast=extraLevelsLast+1, typeLast="Random";
         }
-        
         else
             break;
     
     }
     
     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+    
+    if(cheap && cost > fragments * 0.01){
+        lootSlider = 0;
+        perfect = false;
+        type = "Random";
+    }
+    
+    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+    
     if(fragments >= cost){
         return true;
     }

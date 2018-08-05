@@ -132,7 +132,7 @@ function PrestigeValue(what) {
     return toReturn;
 }
 
-//evaluateEquipmentEfficiency: Back end function for autoLevelEquipment to determine most cost efficient items, and what color they should be.
+//evaluateEquipmentEfficiency: Back end function to determine most cost efficient items, and what color they should be.
 function evaluateEquipmentEfficiency(equipName) {    
     var equip = equipmentList[equipName];
     var gameResource = equip.Equip ? game.equipment[equipName] : game.buildings[equipName];
@@ -256,11 +256,27 @@ function evaluateEquipmentEfficiency(equipName) {
 var resourcesNeeded;
 var Best;
 
+//due to in-game bug, buying equipment with a different shield than what we had while first sending our army causes incorrect damage numbers.
+//as a fix, we'll manually reequip the same shield the game uses for the purposes of equipment buying
+function autoLevelEquipmentCaller(lowerDamage, fastMode) {
+    var temp = highDamageHeirloom;
+    
+    if(goodShieldActuallyEquipped) equipMainShield();
+    else equipLowDmgShield();
+    
+    calcBaseDamageinS();
+    
+    autoLevelEquipment(lowerDamage, fastMode);
+    
+    if(temp) equipMainShield();
+    else equipLowDmgShield();
+    
+    calcBaseDamageinS();
+    updateAllBattleNumbers(true);
+}
+
 //autoLevelEquipment = "Buy Armor", "Buy Armor Upgrades", "Buy Weapons", "Buy Weapons Upgrades"
 function autoLevelEquipment(lowerDamage, fastMode) {
-    //calcBaseDamageinS();
-    //var tmpDmg = baseDamage;
-
     //if((game.jobs.Miner.locked && game.global.challengeActive != 'Metal') || (game.jobs.Scientist.locked && game.global.challengeActive != "Scientist"))
         //return;
     resourcesNeeded = {"food": 0, "wood": 0, "metal": 0, "science": 0, "gems": 0};  //list of amount of resources needed for stuff we want to afford
@@ -356,10 +372,6 @@ function autoLevelEquipment(lowerDamage, fastMode) {
     enoughDamageE = (baseDamage * MODULES["equipment"].enoughDmgCutoff > enemyHealth);
     if (!enoughHealthE && MODULES["equipment"].equipHealthDebugMessage)
         debug("Equipment module thought there was not enough health","equips");
-    
-    //if(buyWeaponsModeAS3 >= 3){
-    //    debug("hi " + buyWeaponsModeAS3);
-    //}
 
 
 //BuyWeaponsNew - GUI gets converted to BuyWeaponUpgrades

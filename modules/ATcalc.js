@@ -91,6 +91,11 @@ function calcDmgManual(printout, figureOutShield, number){
     dmg *= shield;
     if (printout) debug("shield " + shield.toFixed(2) + " dmg " + dmg.toExponential(2));
     
+    if (game.talents.voidPower.purchased && game.global.voidBuff){
+        var vpAmt = (game.talents.voidPower2.purchased) ? ((game.talents.voidPower3.purchased) ? 65 : 35) : 15;
+        dmg *= ((vpAmt / 100) + 1);
+        if (printout) debug("void power " + ((vpAmt / 100) + 1).toFixed(2) + " dmg " + dmg.toExponential(2));
+    }
     if (game.talents.magmamancer.purchased){
         var magmamancers = game.jobs.Magmamancer.getBonusPercent();
         dmg *= magmamancers;
@@ -171,12 +176,12 @@ function calcDmgManual(printout, figureOutShield, number){
     var max = 1.2;
     if (game.global.challengeActive == "Daily"){
         if (typeof game.global.dailyChallenge.minDamage !== 'undefined'){
-            min = dailyModifiers.minDamage.getMult(game.global.dailyChallenge.minDamage.strength);
+            min = (1-dailyModifiers.minDamage.getMult(game.global.dailyChallenge.minDamage.strength));
             baseDamageNoCrit *= min;
             if (printout) debug("daily min " + min.toFixed(2));
         }
         if (typeof game.global.dailyChallenge.maxDamage !== 'undefined'){   
-            max = dailyModifiers.maxDamage.getMult(game.global.dailyChallenge.maxDamage.strength) + 0.2;
+            max = 1.2 + dailyModifiers.maxDamage.getMult(game.global.dailyChallenge.maxDamage.strength);
             if (printout) debug("daily max " + max.toFixed(2));
         }
     }
@@ -186,19 +191,22 @@ function calcDmgManual(printout, figureOutShield, number){
         num = num / (baseDamageNoCrit / shield);
         //debug("num is " + num.toFixed(2));
 
-        if(num > 0.8 && num < 1.2)
+        if(num > 0.9 && num < 1.1)
             goodShieldActuallyEquipped = false;
-        else if (num > 1.2)
+        else if(isNaN(num))
+            debug("num is NaN " + num);
+        else{
             goodShieldActuallyEquipped = true;
-        else
-            debug("error shield atk num = " + num);
+            if (num >= 10.8 || num <= 10)
+                debug("error shield atk num = " + num.toFixed(2));
+        }
     }
     
     var critMult = calcCritModifier(getPlayerCritChance(), getPlayerCritDamageMult());
     dmg *= critMult;
     if (printout) debug ("critchance " + getPlayerCritChance() + " critMult " + getPlayerCritDamageMult() + " final " + critMult.toFixed(2) + " dmg " + dmg.toExponential(2));
     
-    var avgRange = 1 + (max - min) / 2;
+    var avgRange = (max + min) / 2;
     dmg *= avgRange;
     if (printout) debug("avgRange " + avgRange.toFixed(2) + " dmg " + dmg.toExponential(2));
     return dmg;
@@ -235,10 +243,14 @@ function calcGoodShieldAtkMult(){
 }
 
 function checkShield(){
-    //parseFloat(calculateDamage(game.global.soldierCurrentAttack, true, true).substr(0,calculateDamage(game.global.soldierCurrentAttack, true, true).indexOf('-')));
+    if (game.global.soldierHealth <= 0) //damage may or may not be accurate if army is dead
+        return;
+    
     var str = calculateDamage(game.global.soldierCurrentAttack, true, true);
-    str.substr(0,str.indexOf('-'));
+    str = str.substr(0,str.indexOf('-'));
     var min = parseFloat(str) / ((game.global.titimpLeft > 0 && game.global.mapsActive) ? 2 : 1); // *we dont care about titimp damage;
+    if(isNaN(min))
+        return false; //no displayed damage, we're probably in premaps.
     calcDmgManual(false, true, min);
     shieldCheckedFlag = true;
     //debug("goodShieldActuallyEquipped = " + goodShieldActuallyEquipped + " highDamageHeirloom = " + highDamageHeirloom);

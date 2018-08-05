@@ -17,12 +17,12 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 ////////////////////////////////////////
 
 var atscript = document.getElementById('AutoTrimps-script')
+  , basepath = 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/'  
   , basepath = 'https://notthat.github.io/AutoTrimps/'
-  //, basepath = 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/'  
   , modulepath = 'modules/'
   ;
   
-  var ver = 9;
+  var ver = 11;
     
 //This should redirect the script to wherever its being mirrored from.
 if (atscript !== null) {
@@ -116,7 +116,7 @@ var startupDelay = 2500;    //How long to wait for everything to load
 setTimeout(delayStart, startupDelay);
 function delayStart() {
     initializeAutoTrimps();
-    printChangelog();
+    //printChangelog();
     setTimeout(delayStartAgain, startupDelay);
 }
 
@@ -239,7 +239,7 @@ function mainLoop() {
     //if (getPageSetting('loomprotect') == true) protectloom(); //"Exit Spire After Cell" (other.js)
 
     if (getPageSetting('AutoAllocatePerks')==2) lootdump(); //Loot Dumping (other.js)
-    if (getPageSetting('BuyUpgradesNew') != 0) buyUpgrades();                                //"Buy Upgrades"       (upgrades.js)         
+    if (getPageSetting('BuyUpgradesNew') != 0) buyUpgradesCaller();                                //"Buy Upgrades"       (upgrades.js)         
     
     var agu = getPageSetting('AutoGoldenUpgrades');
     if (agu && agu!='Off') autoGoldenUpgradesAT(agu);                                       //"Golden Upgrades"     (other.js)
@@ -261,7 +261,7 @@ function mainLoop() {
     if (getPageSetting('TrapTrimps') && game.global.trapBuildAllowed && game.global.trapBuildToggled == false) toggleAutoTrap(); //"Trap Trimps"
     if (aWholeNewWorld && getPageSetting('AutoRoboTrimp')) autoRoboTrimp();   //"AutoRoboTrimp" (other.js)
     if (aWholeNewWorld && getPageSetting('FinishC2')>0 && game.global.runningChallengeSquared) finishChallengeSquared(); // "Finish Challenge2" (other.js)
-    //autoLevelEquipment();           //"Buy Armor", "Buy Armor Upgrades", "Buy Weapons", "Buy Weapons Upgrades"  (equipment.js)
+
     if (getPageSetting('UseScryerStance'))  useScryerStance();  //"Use Scryer Stance"   (scryer.js)
     else if (getPageSetting('AutoStance')<=1) autoStance();     //"Auto Stance"       (stance.js)
     else if (getPageSetting('AutoStance')==2) autoStance2();    //"Auto Stance #2"         (")
