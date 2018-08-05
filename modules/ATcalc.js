@@ -197,8 +197,8 @@ function calcDmgManual(printout, figureOutShield, number){
             debug("num is NaN " + num);
         else{
             goodShieldActuallyEquipped = true;
-            if (num >= 10.8 || num <= 10)
-                debug("error shield atk num = " + num.toFixed(2));
+            //if (num >= 10.8 || num <= 10)
+            //    debug("error shield atk num = " + num.toFixed(2));
         }
     }
     
