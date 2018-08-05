@@ -116,7 +116,7 @@ var startupDelay = 2500;    //How long to wait for everything to load
 setTimeout(delayStart, startupDelay);
 function delayStart() {
     initializeAutoTrimps();
-    if (atscript.basepath == 'https://notthat.github.io/AutoTrimps/')
+    if (atscript != null && atscript.basepath == 'https://notthat.github.io/AutoTrimps/')
         printChangelog();
     setTimeout(delayStartAgain, startupDelay);
 }
