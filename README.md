@@ -68,7 +68,7 @@ The mainLoop() consists of the following subroutine functions, all of which are 
 -     autoMap();              //"Auto Maps"
 -     autoBreedTimer();          //"Genetecist Timer" / "Auto Breed Timer"
 -     autoPortal();           //"Auto Portal" (hidden until level 40)
--     autoHeirlooms2();  or  autoHeirlooms(); //"Auto Heirlooms 2" (genBTC settings area) or //"Auto Heirlooms"
+-     autoHeirlooms2();       //"Auto Heirlooms 2" (genBTC settings area)
 -     autoNull();             //"Auto Upgrade Heirlooms" (genBTC settings area)
 -     toggleAutoTrap();       //"Trap Trimps"
 -     autoRoboTrimp();        //"AutoRoboTrimp" (genBTC settings area)

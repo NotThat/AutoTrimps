@@ -135,61 +135,30 @@ function autoMagmiteSpender() {
      debug("Leftover magmite: " + game.global.magmite,"magmite");
 }
 
-/**
- * Auto Generator:
- * [Early Mode (autogen2)]
- * -> (Reach Z / optimal fuel from Supply) ->
- * [Late Mode (for now: switch to primary mode)] // soon: autogen3
- */
-function autoGenerator() {
-  const world = game.global.world;
-  if (world < 230)
-    return; // Magma only
-
-  const endZ = getPageSetting('AutoGen2End');
-  const endS = getPageSetting('AutoGen2SupplyEnd');
-  var endEarly = (endZ > 0 && world >= endZ) || (endS && world >= (230 + 2 * game.generatorUpgrades.Supply.upgrades));
-  if (endEarly) {
-    //if (autoGenerator3);
-    if (!autoGenOverrides()) {
-      const lateMode = getPageSetting('AutoGen3');
-      if (game.global.generatorMode != lateMode)
-        changeGeneratorState(lateMode);
-    }
-  } else autoGenerator2();
-}
-
 /** Early Mode */
-function autoGenerator2() {
-  const MI = 0, FUEL = 1, HYBRID = 2;
-  // Respect overrides first.
-  if (getPageSetting('AutoGen2Override') && autoGenOverrides())
-    return;
+function autoGenerator() {
+    if(game.global.world < 230)
+        return;
+    
+    const MI = 0, FUEL = 1, HYBRID = 2;
 
-  const mode = getPageSetting('AutoGen2'); // None : Microtick : Cap
-  if (!mode) // Default: move on
-    return;
-  else if (mode == 3 && game.generatorUpgrades["Overclocker"].upgrades > 0) { // Only trigger overclock if we have Overclocker upgrades.
-    changeGeneratorState(FUEL);
-    return;
-  }
-
-  const fuel = game.global.magmaFuel;
-  const want = mode == 1 ? getFuelBurnRate() : getGeneratorFuelCap();
-  if (!game.global.generatorMode) { // Currently: Gain Mi
-    if (fuel < want)
-      changeGeneratorState(game.permanentGeneratorUpgrades.Hybridization.owned ? HYBRID : FUEL);
-  } else if (fuel >= want) // Not gaining Mi when we should
-    changeGeneratorState(MI);
-}
-
-/**
- * Apply the necessary tweaks the user wants.
- * @return false or 0 if unnecessary; 1 fuel; 2 hybrid
- */
-function autoGenOverrides() {
-  const overriden = (game.global.runningChallengeSquared && getPageSetting('AutoGenC2')) || (game.global.dailyChallenge.seed && getPageSetting('AutoGenDC'));
-  if (overriden && (game.global.generatorMode != overriden))
-    changeGeneratorState(overriden);
-  return overriden;
+    var fuelFromZ = getPageSetting('FuelFromZ');
+    var fuelToZ = getPageSetting('FuelToZ');
+    if(fuelFromZ < 230) {fuelFromZ = 230; setPageSetting('FuelFromZ', fuelFromZ);}
+    if(fuelToZ < fuelFromZ) {fuelToZ = fuelFromZ; setPageSetting('FuelToZ', fuelToZ);}
+    
+    var dailyFlag = game.global.challengeActive == "Daily" && getPageSetting('AutoGenDC');
+    var c2Flag = game.global.runningChallengeSquared && getPageSetting('AutoGenC2') && game.global.challengeActive != "Trapper";
+    if(c2Flag || dailyFlag){
+        changeGeneratorState(FUEL);
+        return;
+    }
+    
+    var amalOverride = getPageSetting('FuelUntilAmal') && game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg');
+    if(game.global.world < fuelFromZ)
+        changeGeneratorState(MI);
+    else if(game.global.world > fuelToZ && !amalOverride)
+        changeGeneratorState(MI);
+    else
+        changeGeneratorState(FUEL);
 }

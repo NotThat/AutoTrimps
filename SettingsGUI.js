@@ -422,13 +422,20 @@ function initializeAllSettings() {
 
 // Dimensional Generator settings:
     createSetting('UseAutoGen', ['Auto Generator OFF', 'Auto Generator ON'], '<b>MASTER BUTTON</b> Dynamically switch generator modes. Required for the following mode management configurations to work. The Dimensional Generator is a building unlocked in The Magma, from z230.', 'multitoggle', 0, null, 'Magma');
-    createSetting('AutoGen2', ['Default', 'Microtick', 'Max Cap', 'Overclock'], 'Before Z is reached, Microtick and Max Cap will switch between [Hybrid / Gain Fuel] to get EXACTLY one / FULL stacks of Capacity (not Storage) before using [Gain Mi]. Default will respect whatever you set it to and won\'t fiddle with it unless challenge overriding is on. Overclock will Gain Fuel until Z.', 'multitoggle', 2, null, 'Magma');
-    createSetting('AutoGen2End', 'End Early Mode Z', 'On and after Z, be done with the mode we start with and switch to the final mode. -1 to disable.', 'value', 300, null, 'Magma');
-    createSetting('AutoGen2SupplyEnd', 'End at Supply', 'On and after the zone for gathering the most magma by Supply, end Early Mode. Works alongside AutoGen2End and will end when either condition is met.', 'boolean', false, null, 'Magma');
-    createSetting('AutoGen3', ['Gain Mi', 'Gain Fuel', 'Hybrid'], 'Mode to use after Z / SupplyEnd.', 'multitoggle', 1, null, 'Magma');
-    createSetting('AutoGenDC', ['Daily: Normal', 'Daily: Fuel', 'Daily: Hybrid'], 'Use a special mode in dailies to make the most out of it. Overrides AutoGen3 unless Strong Override is on.', 'multitoggle', 1, null, 'Magma');
-    createSetting('AutoGenC2', ['c2: Normal', 'c2: Fuel', 'c2: Hybrid'], 'Use a special mode when running challenge2s to make the most out of it. Overrides AutoGen3 unless Strong Override is on.', 'multitoggle', 1, null, 'Magma');
-    createSetting('AutoGen2Override', ['Override Final Only', 'Strong Override'], 'Overrides apply to the final mode (always use early mode), or also to early mode (will stop microtick etc). Normal will not change anything.', 'multitoggle', 1, null, 'Magma');
+    //createSetting('AutoGen2', ['Default', 'Microtick', 'Max Cap', 'Overclock'], 'Before Z is reached, Microtick and Max Cap will switch between [Hybrid / Gain Fuel] to get EXACTLY one / FULL stacks of Capacity (not Storage) before using [Gain Mi]. Default will respect whatever you set it to and won\'t fiddle with it unless challenge overriding is on. Overclock will Gain Fuel until Z.', 'multitoggle', 2, null, 'Magma');
+    //createSetting('AutoGen2End', 'End Early Mode Z', 'On and after Z, be done with the mode we start with and switch to the final mode. -1 to disable.', 'value', 300, null, 'Magma');
+    //createSetting('AutoGen2SupplyEnd', 'End at Supply', 'On and after the zone for gathering the most magma by Supply, end Early Mode. Works alongside AutoGen2End and will end when either condition is met.', 'boolean', false, null, 'Magma');
+    //createSetting('AutoGen3', ['Gain Mi', 'Gain Fuel', 'Hybrid'], 'Mode to use after Z / SupplyEnd.', 'multitoggle', 1, null, 'Magma');
+    createSetting('FuelFromZ', 'Fuel Start Zone', 'Start fueling from this zone.', 'value', 230, null, 'Magma');
+    createSetting('FuelToZ', 'Fuel End Zone', 'Fuel until this zone (including).', 'value', 999, null, 'Magma');
+    //createSetting('AutoGenDC', ['Daily: Normal', 'Daily: Fuel', 'Daily: Hybrid'], 'Use a special mode in dailies to make the most out of it. Overrides AutoGen3 unless Strong Override is on.', 'multitoggle', 1, null, 'Magma');
+    //createSetting('AutoGenC2', ['c2: Normal', 'c2: Fuel', 'c2: Hybrid'], 'Use a special mode when running challenge2s to make the most out of it. Overrides AutoGen3 unless Strong Override is on.', 'multitoggle', 1, null, 'Magma');
+    
+    createSetting('FuelUntilAmal', 'Fuel until Amalgamator', 'Continue using Fuel until Fuel End Zone AND Amalgamator Amount are reached.', 'boolean', false, null, 'Magma');
+    createSetting('AutoGenDC', 'Daily: Fuel', 'Always fuel in Dailies', 'boolean', true, null, 'Magma');
+    createSetting('AutoGenC2', 'C2: Fuel', 'Always fuel in C2 (except Trapper)', 'boolean', true, null, 'Magma');
+    
+    //createSetting('AutoGen2Override', ['Override Final Only', 'Strong Override'], 'Overrides apply to the final mode (always use early mode), or also to early mode (will stop microtick etc). Normal will not change anything.', 'multitoggle', 1, null, 'Magma');
     createSetting('AutoMagmiteSpender2', ['Spend Magmite OFF', 'Spend Magmite (Portal)', 'Spend Magmite Always'], 'Auto Spends any unspent Magmite immediately before portaling. (Or Always, if toggled). Part 1 buys any permanent one-and-done upgrades in order from most expensive to least. Part 2 then analyzes Efficiency vs Capacity for cost/benefit, and buys Efficiency if its BETTER than Capacity. If not, if the PRICE of Capacity is less than the price of Supply, it buys Capacity. If not, it buys Supply. And then it repeats itself until you run out of Magmite and cant buy anymore. For Magma z230+ purposes.', 'multitoggle', 1, null, 'Magma');
     createSetting('SupplyWall', 'Throttle Supply (or Capacity)', 'Positive number NOT 1 e.g. 2.5: Consider Supply when its cost * 2.5 is < Capacity, instead of immediately when < Cap. Effectively throttles supply for when you don\'t need too many.<br><br>Negative number (-1 is ok) e.g. -2.5: Consider Supply if it costs < Capacity * 2.5, buy more supplys! Effectively throttling capacity instead.<br><br><b>Set to 1: DISABLE SUPPLY only spend magmite on Efficiency, Capacity and Overclocker. (For some end game players, supply is worth probably figuratively nothing.)<br>Set to 0: IGNORE SETTING and use old behaviour (will still try to buy overclocker)</b>', 'valueNegative', 2, null, 'Magma');
     createSetting('BuyOneTimeOC', ['Buy OneTime Only (No OC)', 'Maybe Buy OneTime & OC', 'Maybe Buy OneTime (No OC)', 'Buy OneTime & OC Only'], 'Buy OneTime Only (No OC) = ONLY BUYS ONE TIME UPGRADES, NOTHING ELSE. <br>Maybe Buy OneTime & OC = Normal spending, will consider Overclocker and One Time Upgrades<br>Maybe Buy OneTime (No OC) = Normal Spending, but will NOT Buy Overclocker (Will still buy the first level if you don\'t have it).<br>Buy OneTime & OC Only = Will Force spend magmite on these two only, ignoring Efficiency, Capacity and Supply. <br> Recommend Default (Maybe Buy OneTime & OC)', 'multitoggle', 1, null, 'Magma');
@@ -437,11 +444,14 @@ function initializeAllSettings() {
 
 
 
+
 //Heirloom Settings
-    createSetting('AutoHeirloomsNew', ['AutoHeirlooms Off', 'AutoHeirlooms 1', 'AutoHeirlooms 2'], 'Use Autoheirlooms 2. It will keep heirlooms on portal. ', 'multitoggle', 0, null, 'Heirlooms');
-    createSetting('AutoUpgradeHeirlooms', 'Auto Upgrade Heirlooms', 'Automatically buys the upgrades the script advises for the Equipped shield and staff, until we are out of nullifium.', 'boolean', false, null, 'Heirlooms');
-    createSetting('dontCarryJunkHeirlooms', 'Dont Carry Extra Heirlooms', 'Will carry/not carry extra heirlooms in bags. Useful for maximizing available Nu. Green = do not carry. Red = carry. Only works with autoheirlooms2', 'boolean', true, null, 'Heirlooms');
+    //createSetting('AutoHeirloomsNew', ['AutoHeirlooms Off', 'AutoHeirlooms 1', 'AutoHeirlooms 2'], 'Use Autoheirlooms 2. It will keep heirlooms on portal. ', 'multitoggle', 0, null, 'Heirlooms');
+    createSetting('AutoHeirlooms', 'Auto Heirlooms', 'Toggles AT handling of heirlooms.', 'boolean', true, null, 'Heirlooms');
+    //createSetting('AutoUpgradeHeirlooms', 'Auto Upgrade Heirlooms', 'Automatically buys the upgrades the script advises for the Equipped shield and staff, until we are out of nullifium.', 'boolean', false, null, 'Heirlooms');
+    //createSetting('dontCarryJunkHeirlooms', 'Dont Carry Extra Heirlooms', 'Will carry/not carry extra heirlooms in bags. Useful for maximizing available Nu. Green = do not carry. Red = carry.', 'boolean', true, null, 'Heirlooms');
     createSetting('HeirloomSwapping', 'Heirloom Swapping', 'Enables heirloom swapping (Endgame only feature). You need a 5/5 shield and a 2/5 shield that has exactly Plaguebringer and Void Maps and no damage mods. With this enabled the script will juggle between them for optimal windstacking. Your no-damage shield should prioritize Plaguebringer and your high-damage shield should prioritize Void Map Drop. Backup your game before using this.', 'boolean', false, null, 'Heirlooms');
+    createSetting('HeirloomEvalNew', 'Only keep Plagued', 'Will only keep valid Plagued looms that fit either 5/5 staff or 5/5 shield or 2/5 shield for low damage. Use this when you have Plagued shield and staff already. Disable to use old Heirloom eval method (will not value low damage shields!)', 'boolean', false, null, 'Heirlooms');
 
 //Golden Upgrade Strategies:
     createSetting('AutoGoldenUpgrades', 'AutoGoldenUpgrades', 'IMPORTANT SETTING. Automatically Buy the specified Golden Upgrades as they become available. Faster than vanilla. <b>NOTE:</b> Void setting unlocks more settings: goldStrat, goldAlternating, goldZone and goldNoBattle. <b>New:</b> Void also has a \\"Max then Helium\\" setting so you can get the perfect 60% Voids then Helium. More buttons will become visible when you make selections.', 'dropdown', 'Void', ["Off", "Helium", "Battle", "Void"], 'Golden');
@@ -696,8 +706,8 @@ function settingChanged(id) {
     updateCustomButtons();
     saveSettings();
     checkPortalSettings();
-    if ((autoTrimpSettings.AutoGen2.value == 3) && game.generatorUpgrades["Overclocker"].upgrades <= 0)
-        tooltip('confirm', null, 'update', 'WARNING: You are set to Overclock but do not have any Overclocker upgrades. AutoGen2 will default to \'Max Cap\' in this case. If this is not desired, please fix your AutoGen2 setting.', 'cancelTooltip()', 'Cannot Overclock');
+    //if ((autoTrimpSettings.AutoGen2.value == 3) && game.generatorUpgrades["Overclocker"].upgrades <= 0)
+    //    tooltip('confirm', null, 'update', 'WARNING: You are set to Overclock but do not have any Overclocker upgrades. AutoGen2 will default to \'Max Cap\' in this case. If this is not desired, please fix your AutoGen2 setting.', 'cancelTooltip()', 'Cannot Overclock');
 }
 
 //Popup Tooltip - ask them to enter some numerical input. (STANDARDIZED)

@@ -753,14 +753,12 @@ function autoStance3() {
     allowBuyingCoords = !getPageSetting('DelayCoordsForWind'); //dont buy coords unless we explicitly permit it. automaps() can also allow it if player runs a map for ratio.
 
     if (game.global.soldierHealth <= 0){ 
-        if (game.global.challengeActive == "Trapper" || holdingBack || (game.global.breedBack <= 0 && hiddenBreedTimer > wantedAnticipation))
+        if (game.global.challengeActive == "Trapper" || (game.global.breedBack <= 0 && (hiddenBreedTimer > wantedAnticipation || DHratio > 1)))
             fightManual();
         return;
     }
     
     if(game.global.mapsActive){
-        if(!stackSpire) //save up the prestiges if  we're stacking the spire
-            getDamageCaller(cell.health, false, false); //TODO: how much damage do we want here?
         return;
     }
     
@@ -895,12 +893,8 @@ function autoStance3() {
     if(expectedNumHitsD > missingStacks || cmp < 1 || (cmpNextCapped < 1 && nextStartingStacks + expectedNumHitsDNextCell > 190) || rushFlag){ //we need more damage, or this cell isnt worth our time                
         chosenFormation = 2;
         
-        var rushMode = avgGravyFull < 0.1;
-        //getDamageCaller(6*baseDamage/maxDesiredRatio, false);
-        if(rushMode) //wind zone suxxx full OK
+        if(avgGravyFull < 0.1) //wind zone suxxx full OK
             getDamageCaller(1.5*Math.max(requiredDmgToOK, requiredDmgToOKNext), false, true);
-        //else if (stackSpire)
-        //    getDamageCaller(worldArray[cellNum].health/50, false);
         else
             getDamageCaller(worldArray[cellNum].health/10, false);
         
@@ -909,21 +903,21 @@ function autoStance3() {
             desiredShield = "good"; 
         
         //consider trimpicide for max stacks / equipping main shield. 2 scenarios: we're in a high zone where killing anything is hard and we need more damage, or we're in a semi hard zone thats not worth much and we wanna speed it up
-        //scenario 1
-        if(!stackSpire && (maxDesiredRatio < 1*(goodShieldActuallyEquipped ? 1 : 10)) && !holdingBack && hiddenBreedTimer > maxAnti && (wantToSwapShieldFlag || game.global.antiStacks < maxAnti-1)){
-            if(wantToSwapShieldFlag)
-                shieldCheckedFlag = false;
-            debug("Zone is hard. Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks" : "") + (wantToSwapShieldFlag ? " equip good shield" : ""));
-            wantedAnticipation = maxAnti;
-            stackConservingTrimpicide();
-        }
         
-        //scenario 2
-        if((game.global.antiStacks < maxAnti-1 || wantToSwapShieldFlag) && hiddenBreedTimer > maxAnti && cellNum < 90 && (game.empowerments.Wind.currentDebuffPower < 50 || (!goodShieldActuallyEquipped && DHratio/goodShieldAtkMult < 0.125)) && typeof game.global.dailyChallenge.bogged === 'undefined'){
-            if(wantToSwapShieldFlag)
-                shieldCheckedFlag = false;
+        //shared requirements:
+        if(hiddenBreedTimer > maxAnti && (effectiveShieldAtkMult < 3 || game.global.antiStacks < maxAnti-1) && !stackSpire && typeof game.global.dailyChallenge.bogged === 'undefined'){
+            //scenario 1:
+            if(DHratio < 3 && !holdingBack){
+                if(wantToSwapShieldFlag)
+                    shieldCheckedFlag = false;
+                debug("Zone is hard. Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks" : "") + (wantToSwapShieldFlag ? " equip good shield" : ""));
+                wantedAnticipation = maxAnti;
+                stackConservingTrimpicide();
+            }
+
+            //scenario 2:
             var goodCellFlag = false;
-            for (var i = cellNum; i < cellNum+20; i++){ //check if theres a single good cell in the next 20 cells
+            for (var i = cellNum; i < cellNum+10; i++){ //check if theres a single good cell in the next 10 cells
                 if(i > 99)
                     continue
                 if(worldArray[i].finalWorth > 1){
@@ -931,15 +925,21 @@ function autoStance3() {
                     break;
                 }
             }
-            var timeEstimate = timeEstimator(cellNum, true);
-            if(!goodCellFlag && timeEstimate > 50){
+            var timeEstimate = timeEstimator(cellNum, true); //rough estimate of how long it will take to finish zone
+            var nextZoneDHratio = parseFloat(DHratio) / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2); //if this is low, we'll want to map at next zone, 
+            var careAboutArmyReadyFlag = (game.global.world % 5 === 0 || nextZoneDHratio <= poisonMult * windMult);
+            var timeFlag = timeEstimate > 50 || !careAboutArmyReadyFlag;
+            if(!goodCellFlag && timeFlag){
+                if(wantToSwapShieldFlag)
+                    shieldCheckedFlag = false;
                 debug("timeEstimate = " + timeEstimate);
                 debug("Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks" : "") + (wantToSwapShieldFlag ? " equip good shield" : ""));
                 wantedAnticipation = maxAnti;
                 stackConservingTrimpicide();
                 return;
             }        
-        }  
+            
+        }
     }
     else if (expectedNumHitsX > missingStacks)
         chosenFormation = '0';
@@ -982,22 +982,21 @@ function autoStance3() {
                 if(wantToSwapShieldFlag)
                     desiredShield = "low";
                 
-                if (maxDesiredRatio > 1 && !stackSpire && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99) && typeof game.global.dailyChallenge.bogged === 'undefined'){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
+                if (DHratio >= 3 && !stackSpire && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99) && typeof game.global.dailyChallenge.bogged === 'undefined'){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
                     minAnticipationStacks = Math.ceil(Math.max(1, (5 + maxAnti)/maxDesiredRatio - 5)); //find desired stacks to reach maxDesiredRatio
                     var ourNewLowDamage = baseDamage*(1 + 0.2 * minAnticipationStacks)/((1 + 0.2 * game.global.antiStacks) * (wantToSwapShieldFlag ? 5 : 1));
                     var before = Math.min(stacks      + expectedNumHitsS, 200); //stacks if we dont trimpicide
-                    var after  = Math.min(0.85*stacks + enemyHealth / ourNewLowDamage + (avgGravyRemaining) * 30, 200); //stacks if we do trimpicide. the more a zone is worth the more we are willing to trimpicide if we need less damage.
-
-                    if(before <= after && (game.global.antiStacks > minAnticipationStacks || wantToSwapShieldFlag) && cellNum < lastHealthy){ //TODO: cellNum < lastHealthy is bandaid fix for multiple trimpicides at start of zone due to stacks/shield competition
-                        var wantToSwap = ((desiredShield == "good" && !goodShieldActuallyEquipped) || (desiredShield == "low" && goodShieldActuallyEquipped))
-                        if (Math.abs(game.global.antiStacks-minAnticipationStacks) > 1 && wantToSwap){
+                    var after  = Math.min(0.85*stacks + enemyHealth / ourNewLowDamage, 200); //stacks if we do trimpicide
+                    //debug("before " + before.toFixed(0) + " after " + after.toFixed(0));
+                    if(before+10 <= after && (game.global.antiStacks - minAnticipationStacks > 1 || effectiveShieldAtkMult > 3)){ 
+                        
                             if(wantToSwapShieldFlag)
                                 shieldCheckedFlag = false;
                             debug("trimpiciding " + minAnticipationStacks + " wantToSwapShield " + wantToSwapShieldFlag);
                             wantedAnticipation = minAnticipationStacks;
                             getTargetAntiStack(minAnticipationStacks, true);
                             return;
-                        }
+                        
                     }
                 }
             }
@@ -1294,7 +1293,7 @@ function buildWorldArray(){
     
     var baseDamageGood = baseDamage;
     if(!goodShieldActuallyEquipped)
-        baseDamageGood *= goodShieldAtkMult;
+        baseDamageGood *= effectiveShieldAtkMult;
     
     //debug("heirloom diff is " + (baseDamageGood / baseDamageBad).toFixed(2), "general");
     
@@ -1327,7 +1326,9 @@ function buildWorldArray(){
     calculateGravy(0);
     
     if(!isNaN(m) && !game.global.runningChallengeSquared)
-        debug("Omni/atk Goal: "+OmniThreshhold.toFixed(2)+" ("+ m.toExponential(2)+ ") zone worth = " + avgGravyFull.toFixed(2));
+        debug("Zone " + game.global.world + " Omni/atk Goal: "+OmniThreshhold.toFixed(2)+" ("+ m.toExponential(2)+ ") zone worth = " + avgGravyFull.toFixed(2));
+    else
+        debug("Zone " + game.global.world);
     
     return true;
 }

@@ -86,7 +86,7 @@ function calcDmgManual(printout, figureOutShield, number){
     if(figureOutShield) //used to check which shield the game uses for current cell/trimps army
         shield = calcHeirloomBonus("Shield", "trimpAttack", 1);
     else
-        shield = goodShieldActuallyEquipped ? goodShieldAtkMult : 1;
+        shield = goodShieldActuallyEquipped ? effectiveShieldAtkMult : 1;
         
     dmg *= shield;
     if (printout) debug("shield " + shield.toFixed(2) + " dmg " + dmg.toExponential(2));
@@ -191,7 +191,7 @@ function calcDmgManual(printout, figureOutShield, number){
         num = num / (baseDamageNoCrit / shield);
         //debug("num is " + num.toFixed(2));
 
-        if(num > 0.9 && num < 2)
+        if(num < (goodShieldAtkMult+1)/2)
             goodShieldActuallyEquipped = false;
         else if(isNaN(num))
             debug("num is NaN " + num);
@@ -218,9 +218,13 @@ function dmgNeededToOK(cellNum, HP){
     var overkillCells = 1+Fluffy.isRewardActive("overkiller"); //0 / 1 / 2
     var overkillPercent = game.portal.Overkill.level * 0.005;
     var requiredDmgToOK = 0;
+    var maxCells = (game.global.mapsActive) ? game.global.mapGridArray.length : 100;
     for(var i = overkillCells; i>=1; i--){
-        if(cellNum + i >= 100)
+        if(cellNum + i >= maxCells)
             continue;
+        if(game.global.mapsActive)
+            requiredDmgToOK += game.global.mapGridArray[0].maxHealth; //TODO actually build maparray?
+        else
         requiredDmgToOK += worldArray[cellNum + i].maxHealth;
         requiredDmgToOK = requiredDmgToOK / overkillPercent;
     }

@@ -1,4 +1,4 @@
-MODULES["dimgen"] = {};
+/*MODULES["dimgen"] = {};
 //This Dimensional Generator has likely been ==DEPRECATED== in favor of Magmite.js which is a complete Magma management system. 
 // If you choose to enable the simpler one, replace 'magmite' with 'dimgen' on line 32 of AutoTrimps2.js - var ATmodules = [...]
 MODULES["dimgen"].FuelOnlyZone = 250;
@@ -31,4 +31,4 @@ function autodimgen() {
     } else if (game.global.world < customVars.MagmiteZone) {
         if (game.global.generatorMode != 0) changeGeneratorState(0);
     }
-}
+}*/

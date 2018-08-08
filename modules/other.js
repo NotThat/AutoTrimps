@@ -15,8 +15,8 @@ function autoRoboTrimp() {
     //activate the button when we are above the cutoff zone, and we are out of cooldown (and the button is inactive)
     if (game.global.world >= robotrimpzone && !game.global.useShriek && (game.global.world - robotrimpzone) % 5 == 0){
         magnetoShriek();
-        if (MODULES["other"].enableRoboTrimpSpam)
-            debug("Activated Robotrimp MagnetoShriek Ability @ z" + game.global.world, "graphs", '*podcast');
+        //if (MODULES["other"].enableRoboTrimpSpam)
+        //    debug("Activated Robotrimp MagnetoShriek Ability @ z" + game.global.world, "graphs", '*podcast');
     }
 }
 
@@ -104,7 +104,7 @@ function autoNatureTokens() {
                 var convertRate = (game.talents.nature.purchased) ? ((game.talents.nature2.purchased) ? 8 : 6) : 5;
                 game.empowerments[targetNature].tokens += convertRate;
                 changed = true;
-                debug('Converted ' + nature + ' tokens to ' + targetNature, 'nature');
+                //debug('Converted ' + nature + ' tokens to ' + targetNature, 'nature');
             }
         }
         else {
@@ -118,7 +118,7 @@ function autoNatureTokens() {
             var convertRate = (game.talents.nature.purchased) ? ((game.talents.nature2.purchased) ? 8 : 6) : 5;
             game.empowerments[targetNature].tokens += convertRate;
             changed = true;
-            debug('Converted ' + nature + ' tokens to ' + targetNature, 'nature');
+            //debug('Converted ' + nature + ' tokens to ' + targetNature, 'nature');
         }
     }
     if (changed)

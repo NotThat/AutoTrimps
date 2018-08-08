@@ -85,7 +85,6 @@ BuyArmorNew = BuyArmorUpgrades + BuyArmor
 ManualGather2 was 2 now 3 (4=way)  - needs to be converted.
 BuyOneTimeOC = BuyOvclock + OneTimeOnly
 PrestigeSkip1_2 = PrestigeSkipMode + PrestigeSkip2
-AutoHeirloomsNew = AutoHeirlooms + AutoHeirlooms2
 ScryerDieToUseS += ScryerDieZ
 (+more since 5 days ago)
 */
@@ -177,7 +176,7 @@ function timeEstimator(cellNum, useGoodShield){
     var totalHP = 0;
     var mult = 1;
     if(useGoodShield && !goodShieldActuallyEquipped)
-        mult = goodShieldAtkMult;
+        mult = effectiveShieldAtkMult;
     for (var i = cellNum; i<100; i++){
         totalHP += worldArray[i].maxHealth;
     }

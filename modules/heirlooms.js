@@ -1,12 +1,12 @@
-//MODULES["heirlooms"] = {};
+var lowShieldName = "LowDmgShield"; //edit these to change the names used (visual only).
+var highShieldName = "HighDmgShield";
+
+////MODULES["heirlooms"] = {};
 ////////////////////////////////////////
 //Heirloom Functions////////////////////
 ////////////////////////////////////////
-
-//OLD:
-//renamed from sortHeirlooms to worthOfHeirlooms
 var worth = {'Shield': {}, 'Staff': {}};
-function worthOfHeirlooms(){
+function sortHeirlooms(){
     worth = {'Shield': {}, 'Staff': {}};
     for (var loom in game.global.heirloomsExtra) {
         var theLoom = game.global.heirloomsExtra[loom];
@@ -27,9 +27,9 @@ function worthOfHeirlooms(){
 
 
 //NEW:
-//makes an array of heirlooms sitting in the temporary extra area to indicate to the autoHeirlooms2() function which to Carry/Drop
+//makes an array of heirlooms sitting in the temporary extra area to indicate to the autoHeirlooms() function which to Carry/Drop
 var worth2 = {'Shield': [], 'Staff': []};
-function worthOfHeirlooms2(){
+function worthOfHeirlooms(){
     worth2 = {'Shield': [], 'Staff': []};
     for (var index in game.global.heirloomsExtra) {
         var theLoom = game.global.heirloomsExtra[index];
@@ -65,8 +65,7 @@ function worthOfHeirlooms2(){
 //Crit Chance/Crit Damage, Miner Efficiency/Metal Drop, Gem Drop/Dragimp Efficiency, Farmer/Lumberjack Efficiency. 
 //For the purposes of carrying, rarity trumps all of the stat evaluations. Empty mod slots are valued at the average value of the best missing mod.
 //NEW:
-function autoHeirlooms2() {
-    //if(!heirloomsShown && game.global.heirloomsExtra.length > 0){
+function autoHeirlooms() {
     if(!heirloomsShown){
         //PART 1: start by dropping ALL carried heirlooms
         var originalLength = game.global.heirloomsCarried.length;
@@ -85,99 +84,86 @@ function autoHeirlooms2() {
             }
         }
         
-        //dont want to carry anything
-        //dontCarryJunkHeirlooms
-        var dontCarryJunk=getPageSetting('dontCarryJunkHeirlooms');
-        worthOfHeirlooms2();
-        //now start by re-filling any empty carried slots with the most highly evaluated heirlooms
-        //Alternates EQUALLY between Shield and Staff, putting the best ones of each.
-        //PART 3:
-        while ((game.global.heirloomsCarried.length < game.global.maxCarriedHeirlooms) && game.global.heirloomsExtra.length > 0){
-            if(dontCarryJunk)
-                break;
-            //re-evaluate their worth (needed to refresh the worth array since we for sure re-arranged everything.)
-            worthOfHeirlooms2();
-            if (worth2["Shield"].length > 0){
-                var carryshield = worth2["Shield"].shift();
-                selectHeirloom(carryshield.index, 'heirloomsExtra');
-                carryHeirloom();
-            }
-            worthOfHeirlooms2();
-            if (worth2["Staff"].length > 0){
-                var carrystaff = worth2["Staff"].shift();
-                selectHeirloom(carrystaff.index, 'heirloomsExtra');
-                carryHeirloom();
-            }
-        }
-        worthOfHeirlooms();
-        // Doing the Alternating Shield/Staff method above can cause good heirlooms to remain un-carried, just because the above was trying to hard to balance.
-        // example: It picks up 4 ethereal shields and 2 ethereal staffs and 2 bad rare staffs, but there was actually a 5th good ethereal shield that it skipped.
-        //          this will replace the lesser rarity or stat with the higher rarity or stat, either shield or staff.
-        //PART 4:
-        //Check each carried heirloom....
-        for(var carried in game.global.heirloomsCarried) {
-            if(dontCarryJunk)
-                break;
-            var theLoom = game.global.heirloomsCarried[carried];
-            //... against the Opposite type
-            var opposite = {"Shield":"Staff", "Staff":"Shield"};
-            if(worth[opposite[theLoom.type]].length == 0) continue; //end loop quick if absolutely nothin to swap in
-            var index = worth[opposite[theLoom.type]][0];
-            //... and compare the carried against the best worth opposite type in the extra pile. (since part 3 above took care of the bests of each same type)
-            if(theLoom.rarity < game.global.heirloomsExtra[index].rarity) {
-                if (!theLoom.protected){
-                    selectHeirloom(carried, 'heirloomsCarried');
-                    stopCarryHeirloom();
-                    selectHeirloom(index, 'heirloomsExtra');
-                    carryHeirloom();
-                    worthOfHeirlooms();
-                }
-                //do nothing if the carried thing was protected.
-            }
-        }
+        //dont want to carry anything extra
+        //if(getPageSetting('dontCarryJunkHeirlooms'))
+        //    return;
+        
+        if(!getPageSetting('HeirloomEvalNew'))
+            valueLoomsOld(); //uses old heirloom valuing method
+        else
+            valueLoomsNew(); //only care about plagued heirlooms, and only 5/5 staves/shields and 2/5 shields.
     }
     else if(heirloomsShown && game.global.selectedHeirloom.length > 0){
         heirloomUpgradeHighlighting();
     }
 }
 
-//OLD:
-function autoHeirlooms() {
-    if(!heirloomsShown && game.global.heirloomsExtra.length > 0){
-        //start by immediately carrying any protected heirlooms.
-        for(var extra in game.global.heirloomsExtra) {
-            var theLoom = game.global.heirloomsExtra[extra];
-            if ((theLoom.protected) && (game.global.heirloomsCarried.length < game.global.maxCarriedHeirlooms)){
-                selectHeirloom(extra, 'heirloomsExtra');
-                carryHeirloom();
-            }
+function valueLoomsNew(){
+    var counter = 0;
+    for(loom of game.global.heirloomsExtra){
+        counter++;
+        if(game.global.heirloomsCarried.length >= game.global.maxCarriedHeirlooms){ //can't carry any more
+            debug("Can't carry any more heirlooms.");
+            return;
         }
-        //re-evaluate their worth (needed to refresh the worth array since we possibly moved the extras)
+        if(loom.rarity < 8) //not plagued, ignore it
+            continue;
+        if(loom.name == "Plagued Staff")
+            debug("hi");
+        if(isValidLowShield(loom, true) || isValidHighShield(loom, true) || isValidStaff(loom, true) || isValidPushShield(loom, true)){
+            //debug("carrying heirloom " + loom);
+            selectHeirloom(game.global.heirloomsExtra.indexOf(loom), 'heirloomsExtra');
+            carryHeirloom(); //this reshuffles game.global.heirloomsExtra, so lets recall the function for the new array
+            valueLoomsNew();
+            return;
+        }
+    }
+    //debug("counter " + counter);
+}
+
+function valueLoomsOld(){
+    worthOfHeirlooms();
+    //now start by re-filling any empty carried slots with the most highly evaluated heirlooms
+    //Alternates EQUALLY between Shield and Staff, putting the best ones of each.
+    //PART 3:
+    while ((game.global.heirloomsCarried.length < game.global.maxCarriedHeirlooms) && game.global.heirloomsExtra.length > 0){
+        //re-evaluate their worth (needed to refresh the worth array since we for sure re-arranged everything.)
         worthOfHeirlooms();
-        for(var carried in game.global.heirloomsCarried) {
-            var theLoom = game.global.heirloomsCarried[carried];
-            if(worth[theLoom.type].length == 0) continue;
-            var index = worth[theLoom.type][0];
-            if(theLoom.rarity < game.global.heirloomsExtra[index].rarity || (theLoom.rarity == game.global.heirloomsExtra[index].rarity && evaluateHeirloomMods(carried, 'heirloomsCarried') < evaluateHeirloomMods(index, 'heirloomsExtra'))) {
-                if (!theLoom.protected){
-                    selectHeirloom(carried, 'heirloomsCarried');
-                    stopCarryHeirloom();
-                    selectHeirloom(index, 'heirloomsExtra');
-                    carryHeirloom();
-                    worthOfHeirlooms();
-                }
-            }
+        if (worth2["Shield"].length > 0){
+            var carryshield = worth2["Shield"].shift();
+            selectHeirloom(carryshield.index, 'heirloomsExtra');
+            carryHeirloom();
         }
-        if (game.global.heirloomsCarried.length < game.global.maxCarriedHeirlooms){
-            if(worth.Shield.length > 0)
-                selectHeirloom(worth.Shield[0], 'heirloomsExtra');
-            else if(worth.Staff.length > 0)
-                selectHeirloom(worth.Staff[0], 'heirloomsExtra');
+        worthOfHeirlooms();
+        if (worth2["Staff"].length > 0){
+            var carrystaff = worth2["Staff"].shift();
+            selectHeirloom(carrystaff.index, 'heirloomsExtra');
             carryHeirloom();
         }
     }
-    else if(heirloomsShown && game.global.selectedHeirloom.length > 0){
-        heirloomUpgradeHighlighting();
+    sortHeirlooms();
+    // Doing the Alternating Shield/Staff method above can cause good heirlooms to remain un-carried, just because the above was trying to hard to balance.
+    // example: It picks up 4 ethereal shields and 2 ethereal staffs and 2 bad rare staffs, but there was actually a 5th good ethereal shield that it skipped.
+    //          this will replace the lesser rarity or stat with the higher rarity or stat, either shield or staff.
+    //PART 4:
+    //Check each carried heirloom....
+    for(var carried in game.global.heirloomsCarried) {
+        var theLoom = game.global.heirloomsCarried[carried];
+        //... against the Opposite type
+        var opposite = {"Shield":"Staff", "Staff":"Shield"};
+        if(worth[opposite[theLoom.type]].length == 0) continue; //end loop quick if absolutely nothin to swap in
+        var index = worth[opposite[theLoom.type]][0];
+        //... and compare the carried against the best worth opposite type in the extra pile. (since part 3 above took care of the bests of each same type)
+        if(theLoom.rarity < game.global.heirloomsExtra[index].rarity) {
+            if (!theLoom.protected){
+                selectHeirloom(carried, 'heirloomsCarried');
+                stopCarryHeirloom();
+                selectHeirloom(index, 'heirloomsExtra');
+                carryHeirloom();
+                sortHeirlooms();
+            }
+            //do nothing if the carried thing was protected.
+        }
     }
 }
 
@@ -204,54 +190,12 @@ function heirloomUpgradeHighlighting() {
 }
 
 //Automatically upgrades the best mod on the equipped shield and equipped staff. Runs until you run out of nullifium.
-//Do not tamper with this.
 function autoNull(){try {
     for(var e,d=[game.global.ShieldEquipped,game.global.StaffEquipped],o=0;2>o;o++){var l=d[o];if(e=evaluateHeirloomMods(0,l.type+"Equipped",!0),e.index){selectedMod=e.index;var a=getModUpgradeCost(l,selectedMod);if(game.global.nullifium<a)continue;game.global.nullifium-=a;var i=getModUpgradeValue(l,selectedMod),t=l.mods[selectedMod];t[1]=i,"undefined"!=typeof t[3]?t[3]++:(t[2]=0,t[3]=1),game.heirlooms[l.type][l.mods[selectedMod][0]].currentBonus=i}}
     } catch (err) {
         debug("AutoSpendNull Error encountered, no Heirloom detected?: " + err.message,"general");
     }
 }
-
-//commented out because it was never finished.
-/*
-function autoSwapHeirlooms(loomtype="Shield" || "Staff", loomlocation="heirloomsCarried" || "heirloomsExtra"){
-    var bestfooddroploom = [];
-    var bestwooddroploom = [];
-    var bestmetaldroploom = [];
-    var bestgemdroploom = [];
-
-    //search in loomlocation="heirloomsCarried" or "heirloomsExtra"
-    for(var eachloom in game.global[loomlocation]) {
-        var theLoom = game.global[loomlocation][eachloom];
-        if (theLoom.type != loomtype)
-            continue;
-        var effRating = evaluateHeirloomMods(eachloom, loomlocation);
-    }
-    if(loomlocation.includes('Equipped'))
-        loom = game.global[loomlocation];
-    else
-        loom = game.global[loomlocation][loom];
-
-    //---------- SHIELD SWAP FUNCTION (search on critdamage and swap)---
-    var count = 0;
-    for (var carried in game.global.heirloomsCarried){
-        var heirloom = game.global.heirloomsCarried[carried];
-        for (var item in heirloom.mods){
-            if (item[0] == "critDamage" && item[1] > 300){
-                unequipHeirloom(game.global.ShieldEquipped, "heirloomsCarried");
-                game.global.ShieldEquipped = heirloom;
-                game.global.heirloomsCarried.splice(count, 1);
-            }
-        }
-        count++;
-    }
-    for (var item in heirloom.mods){
-        game.heirlooms[heirloom.type][heirloom.mods[item][0]].currentBonus += heirloom.mods[item][1];
-    }
-    populateHeirloomWindow();
-    //-------OK------
-}
-*/
 
 //Heirloom helper function
 function checkForMod(what, loom, location){
@@ -508,7 +452,6 @@ function evaluateHeirloomMods(loom, location, upgrade) {
     return eff;
 }
 
-
 var hrlmProtBtn1 = document.createElement("DIV");
 hrlmProtBtn1.setAttribute('class', 'noselect heirloomBtnActive heirBtn');
 hrlmProtBtn1.setAttribute('onclick', 'protectHeirloom(this, true)');
@@ -587,6 +530,10 @@ function equipMainShield(){
         highDamageHeirloom = true;
         return false;
     }
+    if(isValidHighShield(game.global.ShieldEquipped, true)){
+        highDamageHeirloom = true;
+        return true;
+    }
     var loom = findMainShield();
     if (loom == null) return false;
     newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");
@@ -603,6 +550,10 @@ function equipLowDmgShield(){
         highDamageHeirloom = true;
         return false;
     }
+    if(isValidLowShield(game.global.ShieldEquipped, true)){
+        highDamageHeirloom = false;
+        return true;
+    }
     var loom = findLowDmgShield();
     if (loom == null) return false;
     newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");
@@ -615,27 +566,19 @@ function equipLowDmgShield(){
 
 function findMainShield(){
     for (loom of game.global.heirloomsCarried){
-        var matchCounter = 0; //lets count how many of the top 5 mods shields have. a 5/5 shield is our good shield.
-        for (mod of loom.mods){
-            switch (mod[0]) {
-                case "critChance":
-                    matchCounter++;
-                    break;
-                case "critDamage":
-                    matchCounter++;
-                    break;
-                case "plaguebringer":
-                    matchCounter++;
-                    break;
-                case "trimpAttack":
-                    matchCounter++;
-                    break;
-                case "voidMaps":
-                    matchCounter++;
-                    break;
-            }
-            if(matchCounter >= 5)
-                return loom;
+        if(loom.name == highShieldName)
+            return loom;
+    }
+    for (loom of game.global.heirloomsCarried){
+        if(isValidHighShield(loom, false)){ //find a shield that's 5/5 (ignoring empty slots)
+            loom.name = highShieldName;
+            return loom;
+        }
+    }
+    for (loom of game.global.heirloomsCarried){
+        if(isValidHighShield(loom, true)){ //find a shield that could be 5/5 (accept empty slots)
+            loom.name = highShieldName;
+            return loom;
         }
     }
     return null;
@@ -644,31 +587,142 @@ function findMainShield(){
 //looks for a shield with just PB and void maps and zero damage mods on it
 function findLowDmgShield(){
     for (loom of game.global.heirloomsCarried){
-        var matchCounter = 0; 
-        for (mod of loom.mods){
-            switch (mod[0]) {
-                case "voidMaps":
-                    matchCounter++;
-                    break;
-                case "plaguebringer":
-                    matchCounter++;
-                    break;
-                case "critChance":
-                    matchCounter+=100;
-                    continue;
-                case "critDamage":
-                    matchCounter+=100;
-                    continue;
-                case "trimpAttack":
-                    matchCounter+=100;
-                    continue;
-
-            }
-            if(matchCounter == 2)
-                return loom;
+        if(loom.name == lowShieldName)
+            return loom;
+    }
+    for (loom of game.global.heirloomsCarried){
+        if(isValidLowShield(loom, false)){ //find a shield that's 2/5 (ignoring empty slots)
+            loom.name = lowShieldName;
+            return loom;
+        }
+    }
+    for (loom of game.global.heirloomsCarried){
+        if(isValidLowShield(loom, true)){ //find a shield that could be 2/5 (accept empty slots)
+            loom.name = lowShieldName;
+            return loom;
         }
     }
     return null;
+}
+
+function isValidLowShield(loom, acceptEmpty){
+    if(loom.type != "Shield")
+        return false;
+    var matchCounter = 0;
+    for (mod of loom.mods){
+        switch (mod[0]) {
+            case "voidMaps":
+                matchCounter++;
+                break;
+            case "plaguebringer":
+                matchCounter++;
+                break;
+            case "critChance":
+                matchCounter+=100;
+                break;
+            case "critDamage":
+                matchCounter+=100;
+                break;
+            case "trimpAttack":
+                matchCounter+=100;
+                break;
+            case "empty":
+                if(acceptEmpty)
+                    matchCounter++;
+                break;
+        }
+    }
+    return (matchCounter === 2);
+}
+
+function isValidHighShield(loom, acceptEmpty){
+    if(loom.type != "Shield")
+        return false;
+    var matchCounter = 0;
+    for (mod of loom.mods){
+        switch (mod[0]) {
+            case "critChance":
+                matchCounter++;
+                break;
+            case "critDamage":
+                matchCounter++;
+                break;
+            case "plaguebringer":
+                matchCounter++;
+                break;
+            case "trimpAttack":
+                matchCounter++;
+                break;
+            case "voidMaps":
+                matchCounter++;
+                break;
+            case "empty":
+                if(acceptEmpty)
+                    matchCounter++;
+                break;
+        }
+    }
+    return (matchCounter === 5);
+}
+
+function isValidPushShield(loom, acceptEmpty){
+    if(loom.type != "Shield")
+        return false;
+    var matchCounter = 0;
+    for (mod of loom.mods){
+        switch (mod[0]) {
+            case "critChance":
+                matchCounter++;
+                break;
+            case "critDamage":
+                matchCounter++;
+                break;
+            case "plaguebringer":
+                matchCounter++;
+                break;
+            case "trimpAttack":
+                matchCounter++;
+                break;
+            case "trimpHealth":
+                matchCounter++;
+                break;
+            case "empty":
+                if(acceptEmpty)
+                    matchCounter++;
+                break;
+        }
+    }
+    return (matchCounter === 5);
+}
+
+function isValidStaff(loom, acceptEmpty){
+    if(loom.type != "Staff")
+        return false;
+    var matchCounter = 0;
+    for (mod of loom.mods){
+        switch (mod[0]) {
+            case "FluffyExp":
+                matchCounter++;
+                break;
+            case "ExplorerSpeed":
+                matchCounter++;
+                break;
+            case "fragmentsDrop":
+                matchCounter++;
+                break;
+            case "metalDrop":
+                matchCounter++;
+                break;
+            case "MinerSpeed":
+                matchCounter++;
+                break;
+            case "empty":
+                if(acceptEmpty)
+                    matchCounter++;
+                break;
+        }
+    }
+    return (matchCounter === 5);
 }
 
 //replacement function that inserts a new onclick action into the heirloom icons so it can populate the proper Protect icon. (yes this is the best way to do it.)

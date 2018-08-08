@@ -3,20 +3,17 @@ var upgradeList = ['Miners', 'Scientists', 'Coordination', 'Speedminer', 'Speedl
 var buyCoords = true;
 
 function buyUpgradesCaller(){
-    var temp = highDamageHeirloom;
-    
+    /*var temp = highDamageHeirloom;
     if(goodShieldActuallyEquipped) equipMainShield();
     else equipLowDmgShield();
-    
-    calcBaseDamageinS();
+    calcBaseDamageinS();*/
     
     buyUpgrades();
     
-    if(temp) equipMainShield();
+    /*if(temp) equipMainShield();
     else equipLowDmgShield();
-    
     calcBaseDamageinS();
-    updateAllBattleNumbers(true);
+    updateAllBattleNumbers(true);*/
 }
 
 //Buys all available non-equip upgrades listed in var upgradeList

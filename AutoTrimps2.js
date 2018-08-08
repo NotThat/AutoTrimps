@@ -24,7 +24,7 @@ var atscript = document.getElementById('AutoTrimps-script')
   , modulepath = 'modules/'
   ;
   
-  var ver = 12;
+  var ver = 13;
     
 function delayStart() {
     initializeAutoTrimps();
@@ -199,7 +199,11 @@ var allowBuyingCoords = true;
 ////////////////////////////////////////
 function mainLoop() {
     if (ATrunning == false) return;
-    if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled || game.global.viewingUpgrades) return;
+    if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled || game.global.viewingUpgrades) {
+        if(getPageSetting('PauseScript'))
+            updateAutoMapsStatus("", "AT paused");
+        return;
+    }
     ATrunning = true;
     if(game.options.menu.showFullBreed.enabled != 1) toggleSetting("showFullBreed");    //more detail
     hiddenBreedTimer = ((game.jobs.Amalgamator.owned > 0) ? Math.floor((new Date().getTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000));
@@ -212,7 +216,6 @@ function mainLoop() {
             || (heirloomCache != game.global.heirloomsExtra.length)) { // inventory size changed (a drop appeared)
             // also pre-portal: portal.js:111
         if (getPageSetting('AutoHeirlooms2')) autoHeirlooms2(); //"Auto Heirlooms 2" (heirlooms.js)
-        else if (getPageSetting('AutoHeirlooms')) autoHeirlooms();//"Auto Heirlooms"      (")
         if (getPageSetting('AutoUpgradeHeirlooms') && !heirloomsShown) autoNull();  //"Auto Upgrade Heirlooms" (heirlooms.js)
 
         heirloomCache = game.global.heirloomsExtra.length;

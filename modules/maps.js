@@ -177,8 +177,11 @@ function calcDmg(){
     
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
-    if(!enoughDamage)
-        getDamageCaller(cell.health, false, false); //TODO: how much damage do we want here?
+    var stackSpire = (game.global.world == 500) && getPageSetting('StackSpire4') && (game.global.spireDeaths <= 8);
+    if(game.global.mapsActive && !stackSpire){
+        var requiredDmgToOK = dmgNeededToOK(cellNum, cell.health);
+        getDamageCaller(requiredDmgToOK*3, false, false); //very rough approximation
+    }
     
     if(DHratio < 0.00001)
         DHratio = DHratio.toExponential(2);
@@ -199,6 +202,9 @@ function autoMap() {
         return;
     
     }
+    if(game.global.mapsActive && game.global.antiStacks < maxAnti-1 && hiddenBreedTimer > maxAnti) //if we need stacks, get them
+        mapsClicked();
+    
     updateAutoMapsStatus("", "Advancing"); //default msg. any other trigger will override this later
     currWorldZone = game.global.world;
     AutoMapsCoordOverride = false;
@@ -321,7 +327,7 @@ function autoMap() {
     //Lower Farming Zone = Lowers the zone used during Farming mode. Starts 10 zones below current and Finds the minimum map level you can successfully one-shot
     var siphlvl = shouldFarmLowerZone ? game.global.world - 10 : game.global.world - game.portal.Siphonology.level;
     var maxlvl = game.talents.mapLoot.purchased ? game.global.world - 1 : game.global.world;
-    if (getPageSetting('DynamicSiphonology') || shouldFarmLowerZone) {
+    if ((getPageSetting('DynamicSiphonology') || shouldFarmLowerZone) && windZone()){ //outside of wind zones we get bad value from doing not the lowest siph maps.
         for (siphlvl; siphlvl < maxlvl; siphlvl++) {
             //check HP vs damage and find how many siphonology levels we need.
             var maphp = getEnemyMaxHealth(siphlvl) * 1.1; // 1.1 mod is for all maps (taken out of the function)
@@ -356,12 +362,14 @@ function autoMap() {
             obj[map] = game.global.mapsOwnedArray[map].level; //find map with correct level
             //Get matching map for our siphonology level
 
-            if (preferFAMaps && game.global.mapsOwnedArray[map].level == siphlvl && (game.global.highestLevelCleared < 185 || game.global.mapsOwnedArray[map].bonus == "fa"))
+            if (preferFAMaps && game.global.mapsOwnedArray[map].level == siphlvl && (game.global.highestLevelCleared < 185 || game.global.mapsOwnedArray[map].bonus == "fa")){
                 siphonMap = map;
-            else if (game.global.mapsOwnedArray[map].level == siphlvl && (game.global.highestLevelCleared < 185 || game.global.mapsOwnedArray[map].bonus == "lmc"))
+                break;
+            }
+            else if (!preferFAMaps && game.global.mapsOwnedArray[map].level == siphlvl && (game.global.highestLevelCleared < 185 || game.global.mapsOwnedArray[map].bonus == "lmc")){
                 siphonMap = map;
-            else if (game.global.mapsOwnedArray[map].level == siphlvl)
-                siphonMap = map;
+                break;
+            }
         }
     }
     
@@ -833,7 +841,7 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
         
         if ((updateMapCost(true) <= game.resources.fragments.owned)) {
             var perfectText = (perfect ? "Perfect" : "");
-            var specialModText = (specialMod ? specialMod : "-");
+            var specialModText = (specialMod ? specialMod : "vanilla");
             var typeText = (type == "Plentiful" ? "Garden" : type);
             debug("Level = "+(baseLevel+extraLevels)+"|"+parseFloat(lootSlider)+"|"+parseFloat(sizeSlider)+"|"+parseFloat(diffSlider)+"|"+specialModText+"|"+perfectText+"|"+typeText+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.");
             var result = buyMap();
@@ -904,7 +912,8 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
     }
 
     var fragments = game.resources.fragments.owned * (fragCap === undefined ? 1 : fragCap);
-    specialModLast = special;
+    if(special == "LMC")
+        specialModLast = "LMC";
     
     //order of importance for prestigious maps (prestige mode):
     //size > prestigious > difficulty > perfect
@@ -943,9 +952,6 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
                 }
             }
         }
-
-        //if(cheap && calcMapCost(baseLevel, sizeLast, diffLast, lootLast, specialModLast, perfectLast, extraLevelsLast, typeLast) < fragments * 0.1)
-        //    lootLast = 0;
         
         if(sizeLast+diffLast+lootLast < 27)
             perfectLast=false;
@@ -999,8 +1005,16 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
     
     if(fragments >= cost)
         return true;
-    else
-        return false;
+    else //something went wrong, revert to base
+    {
+        debug("decideMapParams error - cant afford map");
+        specialMod = "";
+        cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+        if(fragments >= cost)
+            return true;
+        else
+            return false;
+    }
 }
 
 function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){

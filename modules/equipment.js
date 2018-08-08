@@ -259,20 +259,17 @@ var Best;
 //due to in-game bug, buying equipment with a different shield than what we had while first sending our army causes incorrect damage numbers.
 //as a fix, we'll manually reequip the same shield the game uses for the purposes of equipment buying
 function autoLevelEquipmentCaller(lowerDamage, fastMode) {
-    var temp = highDamageHeirloom;
-    
+    /*var temp = highDamageHeirloom;
     if(goodShieldActuallyEquipped) equipMainShield();
     else equipLowDmgShield();
-    
-    calcBaseDamageinS();
+    calcBaseDamageinS();*/
     
     autoLevelEquipment(lowerDamage, fastMode);
     
-    if(temp) equipMainShield();
+    /*if(temp) equipMainShield();
     else equipLowDmgShield();
-    
     calcBaseDamageinS();
-    updateAllBattleNumbers(true);
+    updateAllBattleNumbers(true);*/
 }
 
 //autoLevelEquipment = "Buy Armor", "Buy Armor Upgrades", "Buy Weapons", "Buy Weapons Upgrades"
