@@ -18,13 +18,12 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
+var ver = 14;
 
 var atscript = document.getElementById('AutoTrimps-script')
     , basepath = (local ? 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/')
   , modulepath = 'modules/'
-  ;
-  
-  var ver = 13;
+  ;  
     
 function delayStart() {
     initializeAutoTrimps();
