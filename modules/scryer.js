@@ -3,12 +3,6 @@
 var wantToScry = false;
 //use S stance
 function useScryerStance() {
-  var AutoStance = getPageSetting('AutoStance');
-    function autostancefunction() {
-        if (AutoStance<=1) autoStance();    //"Auto Stance"
-        else if (AutoStance==2) autoStance2();
-        else if (AutoStance==3) autoStance3();   //"Auto Stance #3"
-    };
 
     //check NEVER & Prerequisites (This overrides overkill settings)
     var use_auto = game.global.preMapsActive || game.global.gridArray.length === 0 || game.global.highestLevelCleared < 180;
@@ -32,7 +26,7 @@ function useScryerStance() {
     iscorrupt = iscorrupt || (game.global.mapsActive && mutations.Magma.active());
     iscorrupt = iscorrupt || (game.global.mapsActive && getCurrentMapObject().location == "Void" && game.global.world >= mutations.Corruption.start());
     if ((iscorrupt && getPageSetting('ScryerSkipCorrupteds2') == 0 || (use_auto))) {
-        autostancefunction();
+        autoStance();
         wantToScry = false;
         return;
     }
@@ -58,10 +52,9 @@ function useScryerStance() {
 
 //If neither NEVER or FORCE, move on to assessing whether to MAYBE
 //First, calculate damage
-    if (AutoStance<=1)
-        calcBaseDamageinS(); //calculate internal script variables normally processed by autostance.
-    else if (AutoStance>=2)
-        calcBaseDamageinX2(); //calculate method #2
+
+    calcBaseDamageinS(); //calculate internal script variables normally processed by autostance.
+
 //Decide whether it is oktoswitch (Suicide)
     var missingHealth = game.global.soldierHealthMax - game.global.soldierHealth;
     var newSquadRdy = game.resources.trimps.realMax() <= game.resources.trimps.owned + 1;
@@ -114,7 +107,7 @@ function useScryerStance() {
             setFormation(4);
         wantToScry = true;
     } else {
-        autostancefunction();
+        autoStance();
         wantToScry = false;
         return;
     }

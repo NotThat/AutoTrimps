@@ -80,7 +80,7 @@ function initializeAutoTrimps() {
 var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
 changelogList.push({date: "13/06/2018", version: "v0.3", description: ver, isNew: true});
-changelogList.push({date: "28/06/2018", version: "v0.2", description: "Backup your game before using this or any AT fork for the first time and often! Please Trimps responsibly!", isNew: true});
+changelogList.push({date: "28/06/2018", version: "v0.2", description: "Backup your game before using this or any AT fork for the first time (and often)! Please Trimps responsibly!", isNew: true});
 changelogList.push({date: "28/06/2018", version: "v0.2", description: "PRaiding. BWRaiding. Stop Coords to get next Amal. Never lose Amal. Heirloom Swapping. No Nurseries in Ice. Massive overhaul to AS3 windstacking he/hr% based. Stall Coords/items for more stacking. Calculate cell by cell. AutoTrimps->Display->General Spam for less spam.", isNew: true});
 changelogList.push({date: "13/06/2018", version: "v0.1", description: "War was beginning ", isNew: false});
 
@@ -271,9 +271,7 @@ function mainLoop() {
     if (aWholeNewWorld && getPageSetting('FinishC2')>0 && game.global.runningChallengeSquared) finishChallengeSquared(); // "Finish Challenge2" (other.js)
 
     if (getPageSetting('UseScryerStance'))  useScryerStance();  //"Use Scryer Stance"   (scryer.js)
-    else if (getPageSetting('AutoStance')<=1) autoStance();     //"Auto Stance"       (stance.js)
-    else if (getPageSetting('AutoStance')==2) autoStance2();    //"Auto Stance #2"         (")
-    else if (getPageSetting('AutoStance')==3) autoStance3();    //"Auto Stance #3"         (")
+    else if (getPageSetting('AutoStance')) autoStance();    //"Auto Stance #3"         (")
     if (getPageSetting('UseAutoGen')) autoGenerator();          //"Auto Generator ON" (magmite.js)
     ATselectAutoFight();  //  pick the right version of Fight/AutoFight/BetterAutoFight/BAF2 (fight.js)       
     var forcePrecZ = (getPageSetting('ForcePresZ')<0) || (game.global.world<getPageSetting('ForcePresZ'));
