@@ -97,7 +97,7 @@ function calcDmg(){
     }
     
     //if autostance 3 forces not to buy coordinations, factor those in. otherwise we'll enter maps for more damage thinking that we dont have enough.
-    if(buyCoords == false && canAffordCoordinationTrimps() && getPageSetting('AutoStance') == 3){
+    if(buyCoords == false && canAffordCoordinationTrimps() && getPageSetting('AutoStance')){
         var missingCoords = game.global.world - 1 + (game.global.world > 230 ? 100 : 0) - game.upgrades.Coordination.done;
         ourBaseDamage = ourBaseDamage * Math.pow(1.25, missingCoords);
     }
@@ -159,7 +159,7 @@ function calcDmg(){
     //asks if we can survive x number of hits in either D stance or X stance.
     enoughHealth = (baseHealth / FORMATION_MOD_1 > customVars.numHitsSurvived * (enemyDamage - baseBlock / FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock / FORMATION_MOD_1 : enemyDamage * pierceMod));
     
-    if (windZone() && getPageSetting('AutoStance')==3)
+    if (windZone() && getPageSetting('AutoStance'))
         windMult = 0.125; //in windstacking zones, we want less dmg since we can equip high damage shield to compensate
     else
         windMult = 1;

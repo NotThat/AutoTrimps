@@ -23,7 +23,7 @@ function buyUpgrades() {
         var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();    
         buyCoords = true;
         
-        if(getPageSetting('AutoStance') == 3 && getPageSetting('DelayCoordsForWind')){
+        if(getPageSetting('AutoStance') && getPageSetting('DelayCoordsForWind')){
             if(!allowBuyingCoords){ //only buy coords if autostance3 allows it
                 if(game.upgrades.Coordination.done < maxCoords)
                     buyCoords = true;

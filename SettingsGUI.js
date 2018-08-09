@@ -872,13 +872,13 @@ function updateCustomButtons() {
     //if ShieldBlock is for sure, remove ShieldBlock from settingsbox (achievement=12 means z100).
     //(game.achievements.zones.finished < 12) ? turnOn("BuyShieldblock") : function(){turnOff("BuyShieldblock");setPageSetting("BuyShieldblock",false);}();
     //if AS3 is not selected, remove Windstack settingsbox
-    getPageSetting('AutoStance')==3 ? turnOn("ScryUseinPoison"): turnOff("ScryUseinPoison");
-    getPageSetting('AutoStance')==3 ? turnOn("ScryUseinWind"): turnOff("ScryUseinWind");
-    getPageSetting('AutoStance')==3 ? turnOn("ScryUseinIce"): turnOff("ScryUseinIce");
-    getPageSetting('AutoStance')!=3 ? turnOn("IgnoreCrits") : turnOff("IgnoreCrits");
-    getPageSetting('AutoStance')==3 ? turnOn("WindStackingPctHe"): turnOff("WindStackingPctHe");
-    getPageSetting('AutoStance')==3 ? turnOn("DelayCoordsForWind"): turnOff("DelayCoordsForWind");
-    getPageSetting('AutoStance')==3 ? turnOn("DelayWeaponsForWind"): turnOff("DelayWeaponsForWind");
+    getPageSetting('AutoStance') ? turnOn("ScryUseinPoison"): turnOff("ScryUseinPoison");
+    getPageSetting('AutoStance') ? turnOn("ScryUseinWind"): turnOff("ScryUseinWind");
+    getPageSetting('AutoStance') ? turnOn("ScryUseinIce"): turnOff("ScryUseinIce");
+    getPageSetting('AutoStance') ? turnOn("IgnoreCrits") : turnOff("IgnoreCrits");
+    getPageSetting('AutoStance') ? turnOn("WindStackingPctHe"): turnOff("WindStackingPctHe");
+    getPageSetting('AutoStance') ? turnOn("DelayCoordsForWind"): turnOff("DelayCoordsForWind");
+    getPageSetting('AutoStance') ? turnOn("DelayWeaponsForWind"): turnOff("DelayWeaponsForWind");
     
     getPageSetting('AutoAllocatePerks')==1 ? turnOn("fastallocate") : turnOff("fastallocate");
     
