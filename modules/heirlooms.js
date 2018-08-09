@@ -108,9 +108,11 @@ function valueLoomsNew(){
         }
         if(loom.rarity < 8) //not plagued, ignore it
             continue;
-        if(loom.name == "Plagued Staff")
-            debug("hi");
-        if(isValidLowShield(loom, true) || isValidHighShield(loom, true) || isValidStaff(loom, true) || isValidPushShield(loom, true)){
+        var keepLowShield = isValidLowShield(loom, true) && getPageSetting('HeirloomLowShield');
+        var keepHighShield = isValidHighShield(loom, true) && getPageSetting('HeirloomHighShield');
+        var keepPushShield = isValidPushShield(loom, true) && getPageSetting('HeirloomPushShield');
+        var keepStaves = isValidStaff(loom, true) && getPageSetting('HeirloomStave');
+        if(keepLowShield || keepHighShield || keepPushShield || keepStaves){
             //debug("carrying heirloom " + loom);
             selectHeirloom(game.global.heirloomsExtra.indexOf(loom), 'heirloomsExtra');
             carryHeirloom(); //this reshuffles game.global.heirloomsExtra, so lets recall the function for the new array
