@@ -235,7 +235,7 @@ function dmgNeededToOK(cellNum, HP){
     return requiredDmgToOK;
 }
 
-function calcGoodShieldAtkMult(){
+function getShieldStats(){
     var original = highDamageHeirloom;
     if(!getPageSetting('HeirloomSwapping')){
         goodShieldAtkMult = 1;
@@ -243,8 +243,11 @@ function calcGoodShieldAtkMult(){
     }
     equipMainShield();
     goodShieldAtkMult = calcHeirloomBonus("Shield", "trimpAttack", 1);
-    if(!original)
-        equipLowDmgShield();
+    equipLowDmgShield();
+    lowShieldPB = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
+    if(original)
+        equipMainShield();
+    calcBaseDamageinS();
 }
 
 function checkShield(){

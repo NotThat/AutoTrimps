@@ -21,7 +21,7 @@ var m;
 var hr;
 var highDamageHeirloom = true;
 var avgGravyRemaining = 1;
-var avgGravyFull = 1;
+var avgGravyFull = 0;
 var maxStacksBaseDamageD;
 var baseDamageNoCrit;
 var baseDamageCritOnly;
@@ -31,6 +31,7 @@ var cellLastHealth = 0;
 var holdingBack = true;
 var originallyEquippedShield = true;
 var goodShieldAtkMult = 1;
+var lowShieldPB = 0;
 var goodShieldActuallyEquipped; //bugfix
 var lastMobHP = -1;
 
@@ -305,7 +306,7 @@ function autoStance() {
     var corruptedtmp = (cell.corrupted === undefined ? "none" : cell.corrupted);
     
     //figure out what attacking the current cell is worth
-    var pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0); //weaker shield should have more PB. PB isnt that good of a damage modifier.
+    var pbMult = lowShieldPB;
     if(cellNum < 99)
         worldArray[cellNum].PBWorth = pbMult * worldArray[cellNum+1].geoRelativeCellWorth;
     else
@@ -338,17 +339,11 @@ function autoStance() {
     if(expectedNumHitsD > missingStacks || cmp < 1 || (cmpNextCapped < 1 && nextStartingStacks + expectedNumHitsDNextCell > 190) || rushFlag){ //we need more damage, or this cell isnt worth our time                
         chosenFormation = 2;
         
-        if(avgGravyFull < 0.1) //wind zone suxxx full OK
-            getDamageCaller(1.5*Math.max(requiredDmgToOK, requiredDmgToOKNext), false, true);
-        else
-            getDamageCaller(worldArray[cellNum].health/10, false);
+        //consider trimpicide for max stacks / equipping main shield. 2 scenarios: we're in a high zone where killing anything is hard and we need more damage, or we're in a semi hard zone thats not worth much and we wanna speed it up
         
         var wantToSwapShieldFlag = (!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping'));
         if(wantToSwapShieldFlag)
             desiredShield = "good"; 
-        
-        //consider trimpicide for max stacks / equipping main shield. 2 scenarios: we're in a high zone where killing anything is hard and we need more damage, or we're in a semi hard zone thats not worth much and we wanna speed it up
-        
         //shared requirements:
         if(hiddenBreedTimer > maxAnti && (effectiveShieldAtkMult < 3 || game.global.antiStacks < maxAnti-1) && !stackSpire && typeof game.global.dailyChallenge.bogged === 'undefined'){
             //scenario 1:
@@ -383,8 +378,13 @@ function autoStance() {
                 stackConservingTrimpicide();
                 return;
             }        
-            
         }
+        
+        if(avgGravyFull < 0.1) //wind zone suxxx full OK
+            getDamageCaller(1.5*Math.max(requiredDmgToOK, requiredDmgToOKNext), false, true);
+        else
+            getDamageCaller(worldArray[cellNum].health/3, false);
+        
     }
     else if (expectedNumHitsX > missingStacks)
         chosenFormation = '0';
@@ -647,7 +647,7 @@ function buildWorldArray(){
     lastHealthyCell = -1;
     currentBadGuyNum = -1;
     
-    calcGoodShieldAtkMult(); //bugfix for the game. we store the good shield's atk mult so we can later add it manually
+    getShieldStats(); //store some shield stats for later
     
     var dailyHPMult = 1;
     if (game.global.challengeActive == "Daily"){
@@ -729,8 +729,8 @@ function buildWorldArray(){
     
     equipLowDmgShield();
     calcBaseDamageinS();
-    
-    var pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0); //weaker shield should have more PB. PB isnt that good of a damage modifier.
+    //we want to save pb of weak shield
+    var pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0); //weaker shield should have more PB. PB isnt that good of a damage modifier.    
     
     equipMainShield();
     calcBaseDamageinS();
@@ -745,28 +745,18 @@ function buildWorldArray(){
     maxStacksBaseDamageD = 8 * baseDamageGood * (1+0.2*maxAnti) / (1 + 0.2*game.global.antiStacks); //45 stacks D stance good heirloom damage. The most damage we can dish out right now
     maxDesiredRatio = maxStacksBaseDamageD/(maxHP * 0.2); //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
     
-    //next we want to calculate a value for each cell based on the healthy/corrupted/empty/omni distribution of the zone. this will be used to decide if a cell is worth spending any attacks on
-
-    if(game.global.world % 5 > 0){ //on wind zones that arent the last
-        //if we will map on next zone, dont give omni credit for next zone stacks because we'll lose them anyway from entering maps
-        var nextZoneDHratio = parseFloat(DHratio) / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2);
-        if(nextZoneDHratio > poisonMult * windMult)
-            worldArray[99].geoRelativeCellWorth = (1 + 0.2*mutations.Healthy.cellCount()) * game.empowerments.Wind.getModifier(); //we want to reflect the worth of the starting cells in next zone. in high zones this is worth a lot due to healthy cells. in low zones very little
-        else
-            worldArray[99].geoRelativeCellWorth = game.empowerments.Wind.getModifier();
-    }   
-    else
-        worldArray[99].geoRelativeCellWorth = game.empowerments.Wind.getModifier(); //we want to reflect the worth of the starting cells in next zone. in high zones this is worth a lot due to healthy cells. in low zones very little    
+    calcOmniHelium();
+        
+    worldArray[99].geoRelativeCellWorth = game.empowerments.Wind.getModifier();    
     worldArray[99].PBWorth = 0; //PB doesnt get carried over to next zone
-    worldArray[99].finalWorth = worldArray[99].geoRelativeCellWorth * dailyMult;
+    worldArray[99].finalWorth = worldArray[99].geoRelativeCellWorth * dailyMult / OmniThreshhold;
     for(var i = 98; i >= 0; i--){
         worldArray[i].geoRelativeCellWorth = (worldArray[i].baseWorth + getRetainModifier("Wind") * worldArray[i+1].geoRelativeCellWorth);
         worldArray[i].PBWorth = pbMult * worldArray[i+1].geoRelativeCellWorth;
-        worldArray[i].finalWorth = (worldArray[i].geoRelativeCellWorth + worldArray[i].PBWorth) * game.empowerments.Wind.getModifier() * dailyMult; //this is in Omnipotrimps units
+        worldArray[i].finalWorth = (worldArray[i].geoRelativeCellWorth + worldArray[i].PBWorth) * game.empowerments.Wind.getModifier() * dailyMult / OmniThreshhold; //this is in Omnipotrimps units
     }
         
     stanceStats = {OmnisPerAttack : 0, attacks : 0, enemyLastHP : -1, lastCell : "", OmnisWorths : 0, lastStacks : 0, wastedStacks : 0, lastNextStartingStacks : 0, wastedPBs : 0, trimpicides : 0}; //keep track of how well we're doing
-    calcOmniHelium();
     
     calculateGravy(0);
     
@@ -825,11 +815,11 @@ function calculateGravy(fromCellNum){
     var sumFull = 0;
     if(windZone()){
         for (var i = fromCellNum; i <= 99; i++)
-            if(worldArray[i].finalWorth/OmniThreshhold > 1)
-                sum += worldArray[i].finalWorth/OmniThreshhold - 1;
+            if(worldArray[i].finalWorth*OmniThreshhold > 1)
+                sum += worldArray[i].finalWorth*OmniThreshhold - 1;
         for (var i = 0; i <= 99; i++)
-            if(worldArray[i].finalWorth/OmniThreshhold > 1)
-                sumFull += worldArray[i].finalWorth/OmniThreshhold - 1;    
+            if(worldArray[i].finalWorth*OmniThreshhold > 1)
+                sumFull += worldArray[i].finalWorth*OmniThreshhold - 1;    
     }
     avgGravyFull = sumFull / 100;
     avgGravyRemaining = sum / (100 - fromCellNum + 1);
