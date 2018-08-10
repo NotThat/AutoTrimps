@@ -137,15 +137,15 @@ function autoMagmiteSpender() {
 
 /** Early Mode */
 function autoGenerator() {
-    if(game.global.world < 230)
-        return;
-    
     const MI = 0, FUEL = 1, HYBRID = 2;
 
     var fuelFromZ = getPageSetting('FuelFromZ');
     var fuelToZ = getPageSetting('FuelToZ');
     if(fuelFromZ < 230) {fuelFromZ = 230; setPageSetting('FuelFromZ', fuelFromZ);}
     if(fuelToZ < fuelFromZ) {fuelToZ = fuelFromZ; setPageSetting('FuelToZ', fuelToZ);}
+    
+    if(game.global.world < 230)
+        return;
     
     var dailyFlag = game.global.challengeActive == "Daily" && getPageSetting('AutoGenDC');
     var c2Flag = game.global.runningChallengeSquared && getPageSetting('AutoGenC2') && game.global.challengeActive != "Trapper";

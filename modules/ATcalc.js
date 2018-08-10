@@ -212,9 +212,26 @@ function calcDmgManual(printout, figureOutShield, number){
     if (printout) debug("avgRange " + avgRange.toFixed(2) + " dmg " + dmg.toExponential(2));
     return dmg;
 }
+function dmgNeededToOK(cellNum){
+    if(game.global.mapsActive){ //we dont generate map grid
+        debug("error: dmgNeededToOK in map");
+        return -1;
+    }
+    var requiredDmgToOK = dmgNeededToOKHelper(cellNum, game.global.gridArray[cellNum].health); //how much dmg we need to fully OK on this attack
+    var requiredDmgToOKNext = 1; //calculate damage to OK next attack. this number is more important since our damage on current attack is mostly locked, we need to predict the next attack/cell
+    for (var i = 1+Fluffy.isRewardActive("overkiller"); i >= 1; i--){
+        if(cellNum + i >= 100)
+            continue;
+        var tmp = dmgNeededToOKHelper(cellNum+i, worldArray[cellNum+i].maxHealth);
+        if (tmp > requiredDmgToOKNext)
+            requiredDmgToOKNext = tmp;
+    }
+    
+    return Math.max(requiredDmgToOK, requiredDmgToOKNext);
+}
 
 //calculates how much dmg we need to fully overkill starting on cellNum which has HP health remaining
-function dmgNeededToOK(cellNum, HP){
+function dmgNeededToOKHelper(cellNum, HP){
     var overkillCells = 1+Fluffy.isRewardActive("overkiller"); //0 / 1 / 2
     var overkillPercent = game.portal.Overkill.level * 0.005;
     var requiredDmgToOK = 0;
@@ -263,4 +280,48 @@ function checkShield(){
     shieldCheckedFlag = true;
     //debug("goodShieldActuallyEquipped = " + goodShieldActuallyEquipped + " highDamageHeirloom = " + highDamageHeirloom);
     calcBaseDamageinS(); //need to redo damage calculations in case we realized we use different shield
+}
+
+function aboutToDie(){
+    if(game.global.mapsActive){ //we dont generate map grid
+        debug("error: aboutToDie in map");
+        return false;
+    }
+    var cellNum = game.global.lastClearedCell + 1;
+    
+    var enemyAttack = game.global.gridArray[cellNum].attack * dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
+    var ourHP = game.global.soldierHealth;
+
+    if (getEmpowerment() == "Ice")
+        enemyAttack *= game.empowerments.Ice.getCombatModifier();
+
+    if(baseBlock > game.global.gridArray[cellNum].attack)
+        enemyAttack *= getPierceAmt();
+    else
+        enemyAttack -= baseBlock*(1 - getPierceAmt());
+
+    if(game.global.challengeActive == "Daily" && typeof game.global.dailyChallenge.crits !== 'undefined')
+        enemyAttack *= dailyModifiers.crits.getMult(game.global.dailyChallenge.crits.strength);
+
+    if (game.global.gridArray[cellNum].corrupted == "corruptCrit")
+        enemyAttack *= 5;
+    else if (game.global.gridArray[cellNum].corrupted == "healthyCrit")
+        enemyAttack *= 7;
+    else if (game.global.gridArray[cellNum].corrupted == "corruptBleed")
+        ourHP *= 0.8;
+    else if (game.global.gridArray[cellNum].corrupted == "healthyBleed")
+        ourHP *= 0.7;
+
+    ourHP -= enemyAttack;
+
+    if (ourHP <= 1000){ 
+        debug("Trimpiciding to prevent empowering e:" + enemyAttack.toExponential(2) + " us:" + game.global.soldierHealth.toExponential(2) + " ourHP:" + ourHP.toExponential(2));
+       if (!game.global.switchToMaps){
+            mapsClicked();
+        }
+        mapsClicked();
+
+        return true;
+    }
+    return false;
 }

@@ -581,3 +581,98 @@ function areWeAttackLevelCapped() {
     }
     return attack.every(evaluation => (evaluation.Factor == 0 && evaluation.Wall == true));
 }
+
+//var buyWeaponsModeAS3; //1: prestige till -1 and level 2: 2: buy levels only 3: get all
+function getDamage(dmg, lowerDamage, noCrit){
+    equipMainShield(); //always start calculations with the good shield
+    calcBaseDamageinS(); //this incoorperates damage that will only be updated on next cell
+    var modifier = 1;
+    //if(!goodShieldActuallyEquipped)
+    //    modifier = goodShieldAtkMult; //calculate automaps damage as though we were wearing our good shield, because we can always trimpicide and swap to it
+    
+    updateAllBattleNumbers(true);
+    var dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage) * modifier;
+    
+    holdingBack = true;
+    
+    if (baseDamage <= 0) {
+        debug("getDamage baseDamage is 0");
+        return;
+    }
+    
+     if(game.global.runningChallengeSquared){
+        buyWeaponsModeAS3 = 3;
+        autoLevelEquipmentCaller(lowerDamage, true); 
+        holdingBack = false;
+        return;
+    }
+    
+    if (!game.global.spireActive && game.options.menu.liquification.enabled && game.talents.liquification.purchased && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
+        if(dmgToCheck*8 >= dmg){
+            buyWeaponsModeAS3 = 0;
+        }
+        else
+            buyWeaponsModeAS3 = 3;
+        autoLevelEquipmentCaller(lowerDamage, true);
+        return;
+    }
+    
+    if (dmgToCheck*8 >= dmg) //we have enough damage, run autoLevelEquipment once for armor/gyms only
+        buyWeaponsModeAS3 = 0;
+    
+    var dmgLast = 0;
+    var maxLoop = 50;
+    
+    while (dmgLast != dmgToCheck && maxLoop-- > 0){
+        dmgLast = dmgToCheck;
+        autoLevelEquipmentCaller(lowerDamage);
+        calcBaseDamageinS(); 
+        dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage) * modifier;
+        if (dmgToCheck*8 >= dmg) //have enough damage
+            return;
+    }
+    
+    if (buyWeaponsModeAS3 < 2){
+        buyWeaponsModeAS3 = 2; //allow buying equipment levels but not prestige
+        getDamage(dmg, lowerDamage, noCrit)
+    }
+    
+    if (dmgToCheck*8 >= dmg) //have enough damage
+        return;
+    
+    if (buyWeaponsModeAS3 < 3){
+        buyWeaponsModeAS3 = 3; //allow buying equipment levels and prestiges
+        getDamage(dmg, lowerDamage, noCrit)
+    }
+    
+    if (dmgToCheck*8 >= dmg) //have enough damage
+        return;
+    
+    if(maxLoop > 0 && windZone()){// && currentBadGuyNum != cellNum){ //need more damage, buy coordinates
+        //currentBadGuyNum = cellNum; //newly bought coordination doesnt take effect until next enemy, so only buy 1 coordination per enemy.
+        allowBuyingCoords = true;
+        maxCoords = game.upgrades.Coordination.done + 1;
+        if(game.upgrades.Coordination.done == maxCoords)
+            debug("Autostance3: allowing buying coord Wind #" + maxCoords + " on " + game.global.world + "." + cellNum);
+        maxCoords = game.upgrades.Coordination.done + 1;
+    }
+    
+    holdingBack = false;
+}
+
+//returns us to our original heirloom after calling getDamage
+function getDamageCaller(dmg, lowerDamage, noCrit){
+    originallyEquippedShield = highDamageHeirloom;
+    if(!highDamageHeirloom){
+        equipMainShield(); //always start calculations with the good shield
+        calcBaseDamageinS(); //this incoorperates damage that will only be updated on next cell
+    }
+    
+    getDamage(dmg, lowerDamage, noCrit);
+    
+    if (!originallyEquippedShield){
+        equipLowDmgShield(); //always start calculations with the good shield
+        calcBaseDamageinS(); //this incoorperates damage that will only be updated on next cell
+        updateAllBattleNumbers(true);
+    }
+}

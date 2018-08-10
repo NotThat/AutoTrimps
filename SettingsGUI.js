@@ -173,7 +173,7 @@ function initializeAllTabs() {
     //addTabsDiv.appendChild(addtabsUL);
     //Then it has to be maintained and toggled on off.
     //Make Tabs.
-    createTabs("Core", "Core - Main Controls for the script");
+    createTabs("Core", "Meowchan's Fork Ver. " + ver + " / " + verDate);
     createTabs("Buildings", "Building Settings");
     createTabs("Jobs", "Jobs - Worker Settings");
     createTabs("Gear", "Gear - Equipment Settings");
@@ -243,7 +243,7 @@ function initializeAllSettings() {
     createSetting('ManualGather2', ['Manual Gather/Build', 'Auto Gather/Build', 'Auto Gather/Build #2', 'Science Research OFF'], 'Controls what YOU do. Manual does nothing<br>The Decision between AutoGather 1 or 2 is up to you, and they should be similar. Auto Gathering of Food,Wood,Metal(w/turkimp) & Science. Auto speed-Builds your build queue.<br>You can disable science researching for the achievement: Reach Z120 without using manual research.', 'multitoggle', 1, null, "Core");
     createSetting('BuyUpgradesNew', ['Manual Upgrades', 'Buy All Upgrades', 'Upgrades no Coords'], 'Autobuys non-equipment upgrades (equipment is controlled in the Gear tab). The second option does NOT buy coordination (use this <b>ONLY</b> if you know what you\'re doing).', 'multitoggle', 1, null, "Core");
     createSetting('NoCoordBuyStartZ', 'Start no Coord Buy', 'From this zone, stop buying coord upgrades until we get Amalgamator Amount. Disable with -1.', 'value', -1, null, 'Core');
-    createSetting('TillWeHaveAmalg', 'Until Amalgamator Amount', 'The script will not buy any more coordinations starting zone Z, until we have this many Amalgamators. -1 to disable.', 'value', -1, null, 'Core');
+    createSetting('TillWeHaveAmalg', 'Amalgamator Goal', 'The script will not buy any more coordinations starting zone Z, until we have this many Amalgamators. -1 to disable.', 'value', -1, null, 'Core');
     createSetting('TrapTrimps', 'Trap Trimps', 'Automatically trap trimps when needed, including building traps. (when you turn this off, you may aswell turn off the in-game autotraps button, think of the starving trimps that could eat that food!)', 'boolean', true, null, "Core");
     createSetting('AutoAllocatePerks', ['Auto Allocate Off', 'Auto Allocate On', 'Dump into Looting II'], 'Uses the AutoPerks ratio based preset system to automatically allocate your perks to spend whatever helium you have when you AutoPortal. Does not change Fixed Perks: siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, capable. Dump all He into Looting II', 'multitoggle', 0, null, 'Core');
     createSetting('fastallocate', 'Fast Allocate', 'Turn on if your helium is above 500Qa. Not recommended for low amounts of helium. ', 'boolean', false, null, 'Core');

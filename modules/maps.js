@@ -61,6 +61,8 @@ var AutoMapsCoordOverride = false;
 var PRaidingActive = false; //used for coordination purchase during praids
 var spireStackFirst = true;
 
+var prestigeState = 0;
+
 function calcDmg(){    
     var AThiddenBreedTimer = ((game.jobs.Amalgamator.owned > 0) ? ((new Date().getTime() - game.global.lastSoldierSentAt) / 1000) : (game.global.lastBreedTime / 1000))
     if(AThiddenBreedTimer < lastHiddenBreedTimer)
@@ -179,7 +181,7 @@ function calcDmg(){
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     var stackSpire = (game.global.world == 500) && getPageSetting('StackSpire4') && (game.global.spireDeaths <= 8);
     if(game.global.mapsActive && !stackSpire){
-        var requiredDmgToOK = dmgNeededToOK(cellNum, cell.health);
+        var requiredDmgToOK = dmgNeededToOKHelper(cellNum, cell.health);
         getDamageCaller(requiredDmgToOK*3, false, false); //very rough approximation
     }
     
@@ -191,7 +193,6 @@ function calcDmg(){
         DHratio = DHratio.toFixed(1);
     else
         DHratio = DHratio.toExponential(2);
-    
 }
 
 function autoMap() {
@@ -348,12 +349,13 @@ function autoMap() {
             }
         }
     }
+    if(game.global.world % 100 != 0)
+        siphlvl = game.global.world - game.portal.Siphonology.level; //speed up run. is this better?
+    
     //if we dont need the resources and arent in wind zones, always farm lowest map that gives map bonus
     var preferFAMaps = false;
-    if(game.equipment["Dagger"].level > 100 && game.equipment["Greatsword"].level > 100 && !windZone()){
-        siphlvl = game.global.world - game.portal.Siphonology.level;
+    if(game.equipment["Dagger"].level > 100 && game.equipment["Greatsword"].level > 100 && !windZone())
         preferFAMaps = true;
-    }
     
     var obj = {};
     var siphonMap = -1;
@@ -704,7 +706,11 @@ function PrestigeRaid() {
     var havePrestigeUpTo = calcPrestige(); //check currently owned prestige levels
     findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo); //finds min and max levels we want to raid
 
-    if(havePrestigeUpTo >= maxDesiredLevel) //have all the prestige levels that we want.
+    if(havePrestigeUpTo > maxDesiredLevel) //have all the prestige levels that we want.
+        return true; 
+    if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 2) //have all
+        return true; 
+    if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 1 && game.global.world % 100 != 0) //only missing last armor (we want the armor in spire)
         return true; 
     
     if (game.global.mapsActive){ //if we are in a map
@@ -717,7 +723,7 @@ function PrestigeRaid() {
             else
                 updateAutoMapsStatus("", "Prestige Raid: " + addSpecials(true, true, map));
             //if this is last run we need of the map, turn off repeat button
-            var levelFromThisRun = Math.max(dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-1].special, true), dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-2].special, true))
+            var levelFromThisRun = Math.max(Math.floor(dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-1].special, true)), Math.floor(dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-2].special, true)))
             if (levelFromThisRun == getCurrentMapObject().level && game.global.repeatMap) 
                 repeatClicked();
             
@@ -750,6 +756,8 @@ function PrestigeRaid() {
     var map = false;
     var lvl;
     for(lvl = maxDesiredLevel; lvl >= minDesiredLevel; lvl--){
+        if(lvl % 10 > 5 || lvl % 10 === 0)
+            continue;
         map = findMap(lvl); //ignores uniques
         if(!map){ //if we don't have a map, create one using 80% of our available fragments
             if(decideMapParams(lvl, lvl, "Prestigious", true, 0.8)){ //this also sets the variables that createAMap uses
@@ -788,7 +796,7 @@ function PrestigeRaid() {
 
     selectMap(map.id);
     
-    debug("havePrestigeUpTo = " + havePrestigeUpTo + " | minDesiredLevel = " + minDesiredLevel + " | maxDesiredLevel = " + maxDesiredLevel, "general", "");
+    //debug("havePrestigeUpTo = " + havePrestigeUpTo + " | minDesiredLevel = " + minDesiredLevel + " | maxDesiredLevel = " + maxDesiredLevel, "general", "");
     
     runMap();
     
@@ -873,6 +881,8 @@ function findMap(level){
             map1 = game.global.mapsOwnedArray[map];
             break;
         }
+    
+    //prestigeState: 0 - have something from zone (zone xx5 and we have greatsword and possibly breastplate) 1 - have all but last armor 2 - have everything from zone
     if(!map1 || addSpecials(true, true, map1) > 1) //if no map of level - nothing to run. if it has multiple items in it, run it
         return map1;
     
@@ -1139,8 +1149,17 @@ function findDesiredMapLevel(currWorldZone, PRaidMax, PAggro, havePrestigeUpTo){
         maxDesiredLevel = maxDesiredLevel - maxDesiredLevel % 10 + 5;
     if(lastDigitZone <= 5 && minDesiredLevel < currWorldZone) //always want to keep prestige at least upto current zone
         minDesiredLevel = currWorldZone;
-    if(minDesiredLevel < havePrestigeUpTo + 1)
-        minDesiredLevel = havePrestigeUpTo + 1;
+    
+    //prestigeState: 0 - have something from zone (zone xx5 and we have greatsword and possibly breastplate) 1 - have all but last armor 2 - have everything from zone
+    if(prestigeState === 2){
+        if(minDesiredLevel < havePrestigeUpTo + 1)
+            minDesiredLevel = havePrestigeUpTo + 1;    
+    }
+    else{
+        if(minDesiredLevel < havePrestigeUpTo)
+            minDesiredLevel = havePrestigeUpTo;
+    }
+    
     if(minDesiredLevel > maxDesiredLevel)
         minDesiredLevel = maxDesiredLevel;
 }

@@ -111,7 +111,7 @@ function valueLoomsNew(){
         var keepLowShield = isValidLowShield(loom, true) && getPageSetting('HeirloomLowShield');
         var keepHighShield = isValidHighShield(loom, true) && getPageSetting('HeirloomHighShield');
         var keepPushShield = isValidPushShield(loom, true) && getPageSetting('HeirloomPushShield');
-        var keepStaves = isValidStaff(loom, true) && getPageSetting('HeirloomStave');
+        var keepStaves = isValidStaff(loom, true) && getPageSetting('HeirloomStaves');
         if(keepLowShield || keepHighShield || keepPushShield || keepStaves){
             //debug("carrying heirloom " + loom);
             selectHeirloom(game.global.heirloomsExtra.indexOf(loom), 'heirloomsExtra');
@@ -528,7 +528,7 @@ function newSelectHeirloom(number, location, elem){
 }
 
 function equipMainShield(){
-    if(!getPageSetting('HeirloomSwapping')) {
+    if(!getPageSetting('HeirloomSwapping') || !getPageSetting('AutoHeirlooms')) {
         highDamageHeirloom = true;
         return false;
     }
@@ -548,7 +548,7 @@ function equipMainShield(){
 equipMainShield();
 
 function equipLowDmgShield(){
-    if(!getPageSetting('HeirloomSwapping')) {
+    if(!getPageSetting('HeirloomSwapping') || !getPageSetting('AutoHeirlooms')) {
         highDamageHeirloom = true;
         return false;
     }
@@ -586,7 +586,7 @@ function findMainShield(){
     return null;
 }    
 
-//looks for a shield with just PB and void maps and zero damage mods on it
+//looks for a shield with just PB and void maps and zero damage mods or breed speed on it
 function findLowDmgShield(){
     for (loom of game.global.heirloomsCarried){
         if(loom.name == lowShieldName)
@@ -628,6 +628,9 @@ function isValidLowShield(loom, acceptEmpty){
             case "trimpAttack":
                 matchCounter+=100;
                 break;
+            //case "breedSpeed":
+            //    matchCounter+=100;
+            //    break;
             case "empty":
                 if(acceptEmpty)
                     matchCounter++;

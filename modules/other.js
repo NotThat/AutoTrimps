@@ -168,7 +168,7 @@ function findNextBionic(maxLevel) {
     return highestBionicMap;
 }
 
-function calcPrestige() {
+function calcPrestige(){
     var max=1;
     var tmp;
     
@@ -179,8 +179,20 @@ function calcPrestige() {
         if (tmp>max)
             max=tmp;
     }
+    
+    prestigeState = 0;
+    if(max % 1 > 0.35 && max % 1 < 0.45){
+        //debug("only missing 1 armor prestige " + max);
+        prestigeState = 1; //0 - have something from zone (zone xx5 and we have greatsword and possibly breastplate) 1 - have all but last armor 2 - have everything from zone
+    }
+    else if(max % 1 > 0.45){
+        //debug("have everything from zone " + max);
+        prestigeState = 2;
+    }
+    //if(prestigeState === 0)
+        //debug("have 1-2 things from zone " + max);
 
-    return max;
+    return Math.floor(max);
 }
 
 function dropsAtZone(itemName, nextLevel){
@@ -192,43 +204,42 @@ function dropsAtZone(itemName, nextLevel){
         calcNext = nextLevel;
     switch(itemName){
         case "Dagadder":
-                slotModifier=1;
+                slotModifier=1.4;
                 break;
             case "Bootboost": 
-                slotModifier=0;
+                slotModifier=1.5;
                 break;
             case "Megamace":
-                slotModifier=2;
+                slotModifier=2.4;
                 break;
             case "Hellishmet":
-                slotModifier=0;
+                slotModifier=2.5;
                 break;
             case "Polierarm": 
-                slotModifier=3;
+                slotModifier=3.4;
                 break;
             case "Pantastic": 
-                slotModifier=0;
+                slotModifier=3.5;
                 break;
             case "Axeidic": 
-                slotModifier=4;
+                slotModifier=4.4;
                 break;
             case "Smoldershoulder": 
-                slotModifier=0;
+                slotModifier=4.5;
                 break;
             case "Greatersword": 
-                slotModifier=0; //dont count as full prestige until we have gambes
+                slotModifier=5.2;
                 break;
             case "Bestplate": 
-                slotModifier=0; //dont count as full prestige until we have gambes
+                slotModifier=5.3;
                 break;
             case "Harmbalest": 
-                slotModifier=0; //dont count as full prestige until we have gambes
+                slotModifier=5.4; 
                 break;
             case "GambesOP": 
-                slotModifier=5;
+                slotModifier=5.5;
                 break;
             default:
-                //debug("dropsAtZone default itemName " + itemName);
                 return 0;
     }
     

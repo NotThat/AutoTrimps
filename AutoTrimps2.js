@@ -18,7 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = 14;
+var ver = 15;
+var verDate = "10.8.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
     , basepath = (local ? 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/')
@@ -215,7 +216,7 @@ function mainLoop() {
             || (!heirloomsShown && heirloomFlag) // closed heirlooms screen
             || (heirloomCache != game.global.heirloomsExtra.length)) { // inventory size changed (a drop appeared)
             // also pre-portal: portal.js:111
-        if (getPageSetting('AutoHeirlooms2')) autoHeirlooms2(); //"Auto Heirlooms 2" (heirlooms.js)
+        if (getPageSetting('AutoHeirlooms')) autoHeirlooms(); //"Auto Heirlooms" (heirlooms.js)
         if (getPageSetting('AutoUpgradeHeirlooms') && !heirloomsShown) autoNull();  //"Auto Upgrade Heirlooms" (heirlooms.js)
 
         heirloomCache = game.global.heirloomsExtra.length;
