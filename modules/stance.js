@@ -322,7 +322,7 @@ function autoStance() {
     
     //we have high shield here
     var currRatio = parseFloat(DHratio);
-    var limit = 60;
+    var limit = 10;
     if (currRatio < limit) //if DHratio falls below limit, we allow buying of gear and coordinates to get it
         getDamageCaller(baseDamage * limit / currRatio, false);
     
