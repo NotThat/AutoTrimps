@@ -326,6 +326,19 @@ function autoStance() {
         worldArray[cellNum+1].pbHits = pbHitstmp; //extra wind stacks on next cell from PB
         var nextStartingStacks = Math.min(1 + Math.ceil(stacks * getRetainModifier("Wind") + pbHitstmp + expectedNumHitsD * (pbMult + getRetainModifier("Wind")) + Math.ceil(worldArray[cellNum+1].health/ourAvgDmgD)), 200);
         var nextStartingStacksCurrent = Math.min(1 + Math.ceil((stacks+1) * getRetainModifier("Wind") + pbHitstmp), 200);
+        if(cellNum == 80){
+            var nextZoneDHratio = parseFloat(DHratio) / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2); //if this is low, we'll want to map at next zone, therefor we dont count transfer from omni
+            if(nextZoneDHratio <= poisonMult * windMult && worldArray[99].geoRelativeCellWorth > 0){
+                worldArray[99].geoRelativeCellWorth = 0; //need to update previous cells as well
+                if(local)
+                    debug("cell 99 not worth for next zone");
+                for(var i = 98; i>80; i++){
+                    worldArray[i].geoRelativeCellWorth = getRetainModifier("Wind") * (worldArray[i+1].baseWorth + worldArray[i+1].geoRelativeCellWorth);
+                    worldArray[i].PBWorth = pbMult * (worldArray[i+1].baseWorth + worldArray[i+1].geoRelativeCellWorth);
+                    worldArray[i].finalWorth = (worldArray[i].baseWorth + worldArray[i].geoRelativeCellWorth + worldArray[i].PBWorth) * game.empowerments.Wind.getModifier() * dailyMult / OmniThreshhold; //this is in Omnipotrimps units
+                }
+            }
+        }
     }
     else {
         var nextStartingStacks = 2+Math.ceil(stacks * getRetainModifier("Wind"));
