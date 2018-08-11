@@ -277,7 +277,8 @@ function autoStance() {
             //debug("eff " + effectiveShieldAtkMult.toFixed(2) + " / " + goodShieldAtkMult);
             var wantDmg = 8*baseDamage*maxDHratio/currDHratio * goodShieldAtkMult/effectiveShieldAtkMult; //unfortunately we can not hit exact damages because of the game bug
             var parsedMaxDHratio = (maxDHratio > 10000 ? maxDHratio.toExponential(2) : maxDHratio.toFixed(0))
-            debug(game.global.world + " maxDHratio: " + parsedMaxDHratio + " wantDmg: " + wantDmg.toExponential(2) + " current: " + (8*baseDamage).toExponential(2));
+            if(local)
+                debug(game.global.world + " maxDHratio: " + parsedMaxDHratio + " wantDmg: " + wantDmg.toExponential(2) + " current: " + (8*baseDamage).toExponential(2));
             getDamageCaller(wantDmg, false, true);
         }
         
@@ -587,18 +588,6 @@ function saveStats(cellNum){
 
 //game was loaded from a save mid-zone, set all previous values to 0 for the graph
 function setEmptyStats(){
-    /*stanceStats = {cmp: [], stacks: [], wastedStacksAtEnd: [], wastedStacksAtStart: [], shieldUsedAtCellDeath: [], trimpicides: [], wantLessDamage: [], wantMoreDamage: [], timeDead: 0}; //keep track of how well we're doing
-    for(var i = 0; i < 100; i++){
-        stanceStats.cmp[i] = 0;
-        stanceStats.stacks[i] = 0;
-        stanceStats.wastedStacksAtEnd[i] = 0;
-        stanceStats.wastedStacksAtStart[i] = 0;
-        stanceStats.shieldUsedAtCellDeath[i] = 1;
-        stanceStats.trimpicides[i] = 0;
-        stanceStats.wantLessDamage[i] = false;
-        stanceStats.wantMoreDamage[i] = false;
-        stanceStats.timeDead = 0;
-    }*/
     stanceStats = {cmp: [], stacks: [], wastedStacksAtEnd: [], wastedStacksAtStart: [], shieldUsedAtCellDeath: [], trimpicides: [], wantLessDamage: [], wantMoreDamage: [], timeDead: 0}; //keep track of how well we're doing
     for(var i = 0; i < game.global.lastClearedCell+1; i++){
         stanceStats.cmp[i] = 0;
