@@ -241,6 +241,8 @@ function debug(message, type, lootIcon) {
             output = profiles;
             break;            
     }
+    if(message.length < 5)
+        debug("hidfoisdnisnddsg");
     if (output) {
         if (enableDebug){
             if(noclock)

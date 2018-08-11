@@ -181,8 +181,21 @@ function calcDmg(){
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     var stackSpire = (game.global.world == 500) && getPageSetting('StackSpire4') && (game.global.spireDeaths <= 8);
     if(game.global.mapsActive && !stackSpire){
-        var requiredDmgToOK = dmgNeededToOKHelper(cellNum, cell.health);
-        getDamageCaller(requiredDmgToOK*3, false, false); //very rough approximation
+        if(game.global.world % 100 === 0){ //mapping for prestige in spire4 without spire stacking. we probably want all the damage.
+            var requiredDmgToOK = dmgNeededToOKHelper(80, worldArray[80].maxHealth);
+            getDamageCaller(requiredDmgToOK*3, false, false);
+        }
+        else{   
+            if(poisonZone() && game.global.world % 10 === 5 && zoneWorth > 1){ //xx5 poison zone potentially mapping +10. if zones worth is high we dont wanna overshoot damage or we wont be able to stack properly next zone(s)
+                var limit = 20;
+                getDamageCaller(8*baseDamage * 3*limit / parseFloat(DHratio) * goodShieldAtkMult/effectiveShieldAtkMult, false);
+            }
+            else{
+                var requiredDmgToOK = dmgNeededToOKHelper(cellNum, cell.health);
+                getDamageCaller(requiredDmgToOK*3, false, false);
+            }
+            
+        }
     }
     
     if(DHratio < 0.00001)
@@ -240,7 +253,6 @@ function autoMap() {
         shouldDoMaps = !enoughDamage || shouldFarm || scryerStuck || needPrestige;
         if(!enoughDamage) {
             AutoMapsCoordOverride = true;
-            //buyWeaponsModeAS3 = 3; //buy/get everything
             updateAutoMapsStatus("", "AutoMaps: Need Damage, forcing Coordination purchase");
         }    
         else
@@ -543,7 +555,7 @@ function autoMap() {
                 mapsClicked();
             }
             //Get Impatient/Abandon if: (need prestige / _NEED_ to do void maps / on lead in odd world.) AND (a new army is ready, OR _need_ to void map OR lead farming and we're almost done with the zone) (handle shouldDoWatchMaps elsewhere below)
-            if ((!getPageSetting('PowerSaving') || (getPageSetting('PowerSaving') == 2) && doVoids) && game.global.switchToMaps && !shouldDoWatchMaps &&
+            if (doVoids && game.global.switchToMaps && !shouldDoWatchMaps &&
                 (needPrestige || doVoids ||
                     (game.global.challengeActive == 'Lead' && game.global.world % 2 == 1) ||
                     (!enoughDamage && enoughHealth && game.global.lastClearedCell < 9) ||

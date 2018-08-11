@@ -17,9 +17,9 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 ////////////////////////////////////////
 
 var local = false;
-//local = true;
-var ver = 16;
-var verDate = "10.8.18";
+local = true;
+var ver = 17;
+var verDate = "11.8.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
     , basepath = (local ? 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/')
@@ -79,15 +79,10 @@ function initializeAutoTrimps() {
 
 var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
-changelogList.push({date: "13/06/2018", version: "v0.3", description: ver, isNew: true});
+changelogList.push({date: verDate, version: ver, description: "", isNew: true});
 changelogList.push({date: "28/06/2018", version: "v0.2", description: "Backup your game before using this or any AT fork for the first time (and often)! Please Trimps responsibly!", isNew: true});
-changelogList.push({date: "28/06/2018", version: "v0.2", description: "PRaiding. BWRaiding. Stop Coords to get next Amal. Never lose Amal. Heirloom Swapping. No Nurseries in Ice. Massive overhaul to AS3 windstacking he/hr% based. Stall Coords/items for more stacking. Calculate cell by cell. AutoTrimps->Display->General Spam for less spam.", isNew: true});
+changelogList.push({date: "28/06/2018", version: "v0.2", description: "PRaiding. BWRaiding. Stop Coords to get next Amal. Never lose Amal. Heirloom Swapping. No Nurseries in Ice. Massive overhaul to AS windstacking he/hr% based. Stall Coords/items for more stacking. Calculate cell by cell. AutoTrimps->Display->General Spam for less spam.", isNew: true});
 changelogList.push({date: "13/06/2018", version: "v0.1", description: "War was beginning ", isNew: false});
-
-//changelogList.push({date: "05/06/2018", version: "v2.2.1", description: "Updated Heirloom calc, should be 4.8 ready. Ratios will be updated soon. ", isNew: true});
-//changelogList.push({date: "28/05/2018", version: "v2.2", description: "Added single use prestige raiding, BW raiding, looting II dump, amals are now calcd properly. ", isNew: true});
-//changelogList.push({date: "4/2", version: "v2.1.6.9b", description: "Import Export, Modules Load code Improvements. Multiple Buttons/Settings Were Combined. AutoPerks code was changed but still functions the same, except for a new algorithm that reduces the time to allocate for high helium players to near-instantaneous. Please test new algo with MODULES[\"perks\"].useAlgo2=true; .You can also clear all perks then allocate and have it work now.  AutoMaps no longer considered as being in Lead challenge during Chall^2. ", isNew: true});
-//changelogList.push({date: "3/23", version: "v2.1.6.9", description: "Game's <u>Map at Zone</u> can be used with AT now, to run maps forever. AutoMaps setting was combined with RunUniqueMaps (variable has changed from boolean false,true to a value 0,1,2). Settings file has been migrated as such. New: Map SpecialMod is sort of working, at least. Geneticist Infinity bugfix. New AGU Settings for 60% Void (fixed). Many Graphs fixes. AutoMaps changes. Equipment Cap, see README at <a target='#' href='https://github.com/genbtc/AutoTrimps/blob/gh-pages/README.md'>GitHub</a> DarkTheme fix. Scientists Fix. Zek450 Perks Preset Changed. Ongoing Development...", isNew: false});
 
 function assembleChangelog(date,version,description,isNew) {
     return (isNew)
@@ -223,7 +218,7 @@ function mainLoop() {
         highestPrestigeOwned = 0;
     }
     heirloomFlag = heirloomsShown;
-    //Stuff to do  Every new Zone
+    //Stuff to do Every new Zone
     if (aWholeNewWorld) {
         // Auto-close dialogues.
         switch (document.getElementById('tipTitle').innerHTML) {
@@ -238,6 +233,9 @@ function mainLoop() {
         setTitle(); // Set the browser title
         
         buildWorldArray();
+        setEmptyStats();
+        allSaveData[allSaveData.length-1].cmp = stanceStats.cmp;
+        allSaveData[allSaveData.length-1].stacks = stanceStats.stacks;
         perked = false;
     }
     setScienceNeeded();  //determine how much science is needed
@@ -271,12 +269,12 @@ function mainLoop() {
     if (aWholeNewWorld && getPageSetting('FinishC2')>0 && game.global.runningChallengeSquared) finishChallengeSquared(); // "Finish Challenge2" (other.js)
 
     if (getPageSetting('UseScryerStance'))  useScryerStance();  //"Use Scryer Stance"   (scryer.js)
-    else if (getPageSetting('AutoStance')) autoStance();    //"Auto Stance #3"         (")
+    else if (getPageSetting('AutoStance')) autoStance();    //"Auto Stance"         (")
     if (getPageSetting('UseAutoGen')) autoGenerator();          //"Auto Generator ON" (magmite.js)
-    ATselectAutoFight();  //  pick the right version of Fight/AutoFight/BetterAutoFight/BAF2 (fight.js)       
-    var forcePrecZ = (getPageSetting('ForcePresZ')<0) || (game.global.world<getPageSetting('ForcePresZ'));
-    if (getPageSetting('DynamicPrestige2')>0 && forcePrecZ) prestigeChanging2(); //"Dynamic Prestige" (dynprestige.js)
-    else autoTrimpSettings.Prestige.selected = document.getElementById('Prestige').value; //just make sure the UI setting and the internal setting are aligned.
+    //ATselectAutoFight();  //  pick the right version of Fight/AutoFight/BetterAutoFight/BAF2 (fight.js)       //<--------- remove the settings
+    var forcePrecZ = (getPageSetting('ForcePresZ')<0) || (game.global.world<getPageSetting('ForcePresZ'));                                                      //dagger push etc
+    if (getPageSetting('DynamicPrestige2')>0 && forcePrecZ) prestigeChanging2(); //"Dynamic Prestige" (dynprestige.js)                                          //dagger push etc
+    else autoTrimpSettings.Prestige.selected = document.getElementById('Prestige').value; //just make sure the UI setting and the internal setting are aligned. //dagger push etc
     if (getPageSetting('AutoMagmiteSpender2')==2 && !magmiteSpenderChanged)  autoMagmiteSpender();   //Auto Magmite Spender (magmite.js)
     if (getPageSetting('AutoNatureTokens')) autoNatureTokens();     //Nature     (other.js)
     //

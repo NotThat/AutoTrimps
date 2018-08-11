@@ -18,7 +18,7 @@ function buyUpgradesCaller(){
 
 //Buys all available non-equip upgrades listed in var upgradeList
 function buyUpgrades() {
-    //debug("buyUpgrades buyWeaponsModeAS3 " + buyWeaponsModeAS3 + " baseDamage " + baseDamage.toExponential(2));
+    //debug("buyUpgrades buyWeaponsMode " + buyWeaponsMode + " baseDamage " + baseDamage.toExponential(2));
     if (getPageSetting('BuyUpgradesNew') != 2){ //skip this calculation if AT isnt allowed to buy coords
         var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();    
         buyCoords = true;
@@ -34,7 +34,7 @@ function buyUpgrades() {
                     buyCoords = true;
             }
 
-            if(AutoMapsCoordOverride) //we dont want to farm maps for damage when we have unspent coordinations, so allow automaps to override AS3
+            if(AutoMapsCoordOverride) //we dont want to farm maps for damage when we have unspent coordinations, so allow automaps to override AS
                 buyCoords = true;
         }
         
@@ -70,7 +70,7 @@ function buyUpgrades() {
         if (upgrade == 'Shieldblock' && !getPageSetting('BuyShieldblock')) continue;
         if (upgrade == 'Gigastation' && (game.global.lastWarp ? game.buildings.Warpstation.owned < (Math.floor(game.upgrades.Gigastation.done * getPageSetting('DeltaGigastation')) + getPageSetting('FirstGigastation')) : game.buildings.Warpstation.owned < getPageSetting('FirstGigastation'))) continue;
         //skip bloodlust during scientist challenges and while we have autofight enabled.
-        if (upgrade == 'Bloodlust' && game.global.challengeActive == 'Scientist' && getPageSetting('BetterAutoFight')) continue;
+        if (upgrade == 'Bloodlust' && game.global.challengeActive == 'Scientist') continue;
         //skip potency when autoBreedTimer is disabled
         if (upgrade == 'Potency' && getPageSetting('GeneticistTimer') >= 0) continue;
 

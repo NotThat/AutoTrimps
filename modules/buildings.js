@@ -195,11 +195,11 @@ function buyBuildings() {
     //Gyms:
     if (!game.buildings.Gym.locked && (getPageSetting('MaxGym') > game.buildings.Gym.owned || getPageSetting('MaxGym') == -1)) {
         var skipGym = false;
-        if (getPageSetting('DynamicGyms')) {
-            //getBattleStats calculation comes from battlecalc.js and shows the tooltip-table block amount. calcBadGuyDmg is in that file also
-            if (!game.global.preMapsActive && getBattleStats("block", true) > calcBadGuyDmg(getCurrentEnemy(), null, true,true))
-                skipGym = true;
-        }
+        //if (getPageSetting('DynamicGyms')) {
+        //    //getBattleStats calculation comes from battlecalc.js and shows the tooltip-table block amount. calcBadGuyDmg is in that file also
+        //    if (!game.global.preMapsActive && getBattleStats("block", true) > calcBadGuyDmg(getCurrentEnemy(), null, true,true))
+        //        skipGym = true;
+        //}
         //still buy gyms if we are farming for voids
         if (doVoids && voidCheckPercent > 0)
             skipGym = false;

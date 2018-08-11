@@ -30,7 +30,7 @@ document.getElementById("graphParent").innerHTML += '<div id="graphFooter" style
 var $graphFooter = document.getElementById('graphFooterLine1');
 //$graphFooter.innerHTML += '\
 //Create the dropdown for what graph to show    (these correspond to headings in setGraph() and have to match)
-var graphList = ['Army Ratio', 'Helium - He/Hr', 'Helium - Total', 'Helium - He/Hr Instant', 'Helium - He/Hr Delta', 'HeHr % / LifetimeHe', 'He % / LifetimeHe', 'Clear Time', 'Cumulative Clear Time', 'Run Time', 'Map Bonus', 'Void Maps', 'Void Map History', 'Loot Sources', 'Coordinations', 'GigaStations', 'Unused Gigas', 'Last Warpstation', 'Trimps', 'Nullifium Gained', 'Dark Essence', 'Dark Essence PerHour', 'OverkillCells', 'Magmite', 'Magmamancers', 'Fluffy XP', 'Fluffy XP PerHour', 'Nurseries'];
+var graphList = ['Efficiency and Stacks', 'Helium - He/Hr', 'Helium - Total', 'Helium - He/Hr Instant', 'Helium - He/Hr Delta', 'HeHr % / LifetimeHe', 'He % / LifetimeHe', 'Clear Time', 'Cumulative Clear Time', 'Run Time', 'Map Bonus', 'Void Maps', 'Void Map History', 'Loot Sources', 'Coordinations', 'GigaStations', 'Unused Gigas', 'Last Warpstation', 'Trimps', 'Nullifium Gained', 'Dark Essence', 'Dark Essence PerHour', 'OverkillCells', 'Magmite', 'Magmamancers', 'Fluffy XP', 'Fluffy XP PerHour', 'Nurseries'];
 var $graphSel = document.createElement("select");
 $graphSel.id = 'graphSelection';
 $graphSel.setAttribute("style", "");
@@ -353,16 +353,10 @@ function getTotalDarkEssenceCount() {
 
 function pushData() {
     //debug('Starting Zone ' + game.global.world, "graphs");
-    //helium/hour % of totalHE, and currentRun/totalLifetime HE
     var getPercent = (game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned)))*100;
     var lifetime = (game.resources.helium.owned / (game.global.totalHeliumEarned-game.resources.helium.owned))*100;
     
-    //parse similarly to display in game. main digit is E number
-    //var realMaxArmy = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();
-    //var flr = Math.floor(Math.log10(realMaxArmy));
-    //var frac = realMaxArmy/Math.pow(10, flr-2)/1000;
-    //var resultForGraph = flr+frac;
-    var resultForGraph = Math.log10(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend());
+    //var resultForGraph = Math.log10(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend());
 
     allSaveData.push({
         totalPortals: game.global.totalPortals,
@@ -389,7 +383,10 @@ function pushData() {
         magmamancers: game.jobs.Magmamancer.owned,
         fluffy: game.global.fluffyExp,
         nursery: game.buildings.Nursery.purchased,
-        armySize: resultForGraph
+        cmp: stanceStats.cmp,
+        stacks: stanceStats.stacks,
+        wantLessDamage: stanceStats.wantLessDamage,
+        wantMoreDamage: stanceStats.wantMoreDamage
     });
     //only keep 15 portals worth of runs to prevent filling storage
     clearData(15);
@@ -588,7 +585,8 @@ function drawGraph(minus,plus) {
 }
 
 function setGraphData(graph) {
-    var title, xTitle, yTitle, yType, valueSuffix, series, formatter, xminFloor=1, yminFloor=null;
+    var title, xTitle, yTitle, yTitle2, yType, yType2, names, valueSuffix, series, formatter, xminFloor=1, yminFloor=null, yminFloor2=null;
+    
     var precision = 0;
     var oldData = JSON.stringify(graphData);
     valueSuffix = '';
@@ -783,7 +781,44 @@ function setGraphData(graph) {
             yTitle = 'Nullifium Gained';
             yType = 'Linear';
             break;
-
+        case 'Efficiency and Stacks':
+            //graphData = allPurposeGraph('cmp',true,"number");
+            
+            var names = [];
+            var arr1 = [];
+            var arr2 = [];
+            for(var i = 0; i < allSaveData[allSaveData.length-1].cmp.length; i++){
+                if(worldArray[i].corrupted === undefined)
+                    names.push(i + "empty");
+                else
+                    names.push(i + worldArray[i].corrupted);
+                arr1.push([names[i], allSaveData[allSaveData.length-1].cmp[i]]);
+                arr2.push([names[i], allSaveData[allSaveData.length-1].stacks[i]]);
+            }
+            //chart1.xAxis[0].tickInterval = 1;
+            graphData = [];
+            //graphData[0] = {name: 'Cell He/hr Efficiency', data: allSaveData[allSaveData.length-1].cmp};
+            //graphData[1] = {name: 'Stacks', data: allSaveData[allSaveData.length-1].stacks, yAxis: 1};
+            //graphData.categories = names;
+            //graphData[0] = {name: 'Cell He/hr Efficiency', data: allSaveData[allSaveData.length-1].cmp, categories: names};
+            //graphData[1] = {name: 'Stacks',                data: allSaveData[allSaveData.length-1].stacks, yAxis: 1, categories: names};
+            graphData[0] = {name: 'He/hr Efficiency', data: arr1};
+            graphData[1] = {name: 'Stacks', data: arr2, yAxis: 1};
+            title = 'Zone Helium Efficiency and Stacks';
+            xTitle = 'Cell';
+            yTitle = 'Helium Efficiency';
+            yTitle2 = 'Stacks';
+            yType2 = 'Linear';
+            yminFloor2 = 0;
+            
+            
+            //formatter = function () {
+            //    return Highcharts.numberFormat(this.y,3);
+            //};
+            //yType = 'Linear';
+            //yminFloor = 0;
+            precision = 3;
+            break;
         case 'Loot Sources':
             graphData = [];
             graphData[0] = {name: 'Metal', data: lootData.metal};
@@ -916,15 +951,6 @@ function setGraphData(graph) {
             xTitle = 'Zone';
             yTitle = 'Coordination';
             yType = 'Linear';
-            break;
-        case 'Army Ratio':
-            graphData = allPurposeGraph('armySize',true,"number");
-            title = 'Army Size to Population Ratio';
-            xTitle = 'Zone';
-            yTitle = 'Population / Army Size (log10)';
-            yType = 'Linear';
-            yminFloor = 1;
-            precision = 3;
             break;
         case 'GigaStations':
             graphData = allPurposeGraph('gigas',true,"number");
@@ -1178,7 +1204,10 @@ function setGraphData(graph) {
     //Makes everything happen.
     if (oldData != JSON.stringify(graphData)) {
         saveSelectedGraphs();
-        setGraph(title, xTitle, yTitle, valueSuffix, formatter, graphData, yType, xminFloor, yminFloor, additionalParams);
+        if (graph != 'Efficiency and Stacks')
+            setGraph(title, xTitle, yTitle, valueSuffix, formatter, graphData, yType, xminFloor, yminFloor, additionalParams);
+        else
+            setGraph2(title, xTitle, yTitle, yTitle2, names, valueSuffix, formatter, graphData, yType, yType2, xminFloor, yminFloor, yminFloor2);
     }
     //put finishing touches on this graph.
     if (graph == 'Helium - He/Hr Delta') {
@@ -1193,6 +1222,37 @@ function setGraphData(graph) {
     if (graph == 'Loot Sources') {
         chart1.xAxis[0].tickInterval = 1;
         chart1.xAxis[0].minorTickInterval = 1;
+    }
+    //put finishing  touches on this graph.
+    if (graph == 'Efficiency and Stacks') {
+        //debug("hi");
+        for(var i = 0; i < stanceStats.wantLessDamage.length; i++){
+            if(stanceStats.wantLessDamage[i]){
+                var p = chart1.series[1].points[i];
+                p.update({
+                    marker: {
+                        radius: 12
+                        
+                    },
+                    color: "#FF0000"
+                });
+                //chart1.series[1].points[i].radius = 16;
+            }
+            if(stanceStats.wantMoreDamage[i]){
+                var p = chart1.series[1].points[i];
+                p.update({
+                    marker: {
+                        radius: 12,
+                        
+                    },
+                    color: "#E500FF"
+                });
+                //chart1.series[1].points[i].radius = 16;
+            }
+                
+        }
+        //chart1.xAxis[0].marker.enabled = true;
+        //chart1.xAxis[0].minorTickInterval = 1;
     }
     //remember what we had (de)selected, if desired.
     if (document.getElementById('rememberCB').checked) {
@@ -1261,6 +1321,123 @@ function setGraph(title, xTitle, yTitle, valueSuffix, formatter, series, yType, 
             pointFormatter: formatter,
             valueSuffix: valueSuffix
         },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle',
+            borderWidth: 0
+        },
+        series: series,
+        additionalParams
+    });
+}
+
+//used for Efficiency and Stacks
+function setGraph2(title, xTitle, yTitle, yTitle2, names, valueSuffix, formatter, series, yType, yType2, xminFloor, yminFloor, yminFloor2, additionalParams) {
+    chart1 = new Highcharts.Chart({
+        chart: {
+            alignTicks: false, //without this ticks will go higher than desired. might want gridLineWidth 0 on yaxis#2
+            renderTo: 'graph',
+            zoomType: 'xy',
+            //move reset button out of the way.
+            resetZoomButton: {
+                position: {
+                    align: 'right',
+                    verticalAlign: 'top',
+                    x: -20,
+                    y: 15
+                },
+                relativeTo: 'chart'
+            }
+        },
+        title: {
+            text: title,
+            x: -20 //center
+        },
+        plotOptions: {
+            series: {
+                lineWidth: 1,
+                animation: false,
+            }
+        },
+        xAxis: {
+            //floor: xminFloor,
+            min: 0,
+            allowDecimals: false,
+            //categories: names, //too crowded
+            title: {
+                text: xTitle
+            },
+        },
+        yAxis: [{ //cmp axis
+            marker: {
+                fillColor: '#000000',
+                lineColor: null // inherit from series
+            },
+            floor: 0,
+            min: 0,
+            tickInterval: 0.5,
+            softMax: 1,
+            //max: null,
+            //endOnTick: false,
+            
+            tooltip: {
+                pointFormatter: formatter,
+                valueSuffix: valueSuffix
+            },
+            title: {
+                text: yTitle
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            },
+            {
+                value: 1,
+                width: 5,
+                color: '#00595B'
+            }],
+            type: yType,
+            dateTimeLabelFormats: { //force all formats to be hour:minute:second
+            second: '%H:%M:%S',
+            minute: '%H:%M:%S',
+            hour: '%H:%M:%S',
+            day: '%H:%M:%S',
+            week: '%H:%M:%S',
+            month: '%H:%M:%S',
+            year: '%H:%M:%S'
+        }}, { //stack yaxis
+            marker: {
+                fillColor: '#000000',
+                lineColor: null // inherit from series
+            },
+            floor: 0,
+            min: 0,
+            max: 200,
+            tickInterval: 50,
+            opposite: true,
+            tooltip: {
+                pointFormat: "Value: {point.y:.0f}"
+            },
+            title: {
+                text: yTitle2
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }],
+            type: yType2,
+            dateTimeLabelFormats: { //force all formats to be hour:minute:second
+            second: '%H:%M:%S',
+            minute: '%H:%M:%S',
+            hour: '%H:%M:%S',
+            day: '%H:%M:%S',
+            week: '%H:%M:%S',
+            month: '%H:%M:%S',
+            year: '%H:%M:%S'
+        }}],
         legend: {
             layout: 'vertical',
             align: 'right',
