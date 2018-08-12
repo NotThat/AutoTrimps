@@ -1264,8 +1264,11 @@ function checkNeedToVoid(){
     var voidMapLevelSetting = getPageSetting('VoidMaps');
     //Add your daily zone mod onto the void maps level
     var dailyVoidMod = getPageSetting('VoidMapsDailyMod');
-    if (dailyVoidMod == 999)
-        dailyVoidMod = 0;
+    if (dailyVoidMod == 999){
+        dailyVoidMod = getPageSetting('AutoFinishDailyNew');
+        if(dailyVoidMod == 999)
+            dailyVoidMod = 0;
+    }
     if (game.global.challengeActive == "Daily")
         voidMapLevelSetting += dailyVoidMod;
     
