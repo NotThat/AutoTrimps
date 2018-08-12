@@ -382,7 +382,7 @@ function initializeAllSettings() {
     createSetting('BWraidingmax', 'Max BW to raid', 'Raids BWs until zone specified. Example: 515, will raid all BWs for all gear until 515. Will skip lower BWs if you have enough damage. Once all gear is obtained, will return to regular farming.', 'value', -1, null, 'Spire');
     createSetting('PRaidSpire', 'Raid +5 in Spire', 'Raid +5 levels for gear in active spires', 'boolean', false, null, 'Spire');
     createSetting('StackSpire4', 'Windstack Spire IV', 'Attempts to maximize windstacks in Spire IV. Recommended you have Raid +5 in Spire enabled when you use this.', 'boolean', false, null, 'Spire');
-
+    createSetting('Spire3Time', 'Daily Spire 3 Time', 'Dailies only. The maximum time in seconds that we willing to spend in Spire 3. If you find yourself missing stacks in early 400s due to too much damage setting this value higher could help. -1 or 0 to disable.', 'value', '50', '-1', 'Spire');
 
 //Combat
     //Subsection1Line1
@@ -392,6 +392,7 @@ function initializeAllSettings() {
     createSetting('WindStackingPctHe', 'He/Hr% Goal', 'For use with AutoStance. Windstacking will use this goal while handling windfarm. You should set this to about x1.5 times your filler He/Hr percent of total. In % units (type 0.5 for 0.5% He/Hr etc)', 'value', '-1', null, 'Combat');
     createSetting('DelayCoordsForWind', 'Stall Coords For Wind', 'With this on, AS will micromanage Coordination for windstacking. Logic is: Buy all Coords utill *Start No Coord Buy* zone, then stop until Amalgamator amount, then let AS micromanage. Will always buy all coords for active spires, Void Map zone BW Raid and Prestige Raids.', 'boolean', true, null, 'Combat');
     createSetting('DelayWeaponsForWind', 'Stall Weapons For Wind', 'With this on, AS will micromanage Weapon purchases for windstacking. Used to lower damage in the early game.', 'boolean', true, null, 'Combat');
+    createSetting('ForceUpdateGraph', 'Live Graph', 'When the graph window is open, it will update on every cell. This is somewhat CPU intensive so its recommended not to leave this permenantly enabled (unless you want to).', 'boolean', false, null, 'Combat');
     //createSetting('ForceAbandon', 'Auto Force-Abandon', '(Trimpicide). If a new fight group is available and anticipation stacks aren\'t maxed, force abandon and grab a new group. Located in the geneticist management script.', 'boolean', true, null, 'Combat');
     createSetting('AutoRoboTrimp', 'AutoRoboTrimp', 'Use RoboTrimps ability starting at this level, and every 5 levels thereafter. (set to 0 to disable. default 60.) 60 is a good choice for mostly everybody.', 'value', '60', null, 'Combat');
 
@@ -881,6 +882,14 @@ function updateCustomButtons() {
     getPageSetting('BWraid')==true ? turnOn("BWraidDailyCOnly"): turnOff("BWraidDailyCOnly");
     getPageSetting('BWraid')==true ? turnOn("BWraidingz"): turnOff("BWraidingz");
     getPageSetting('BWraid')==true ? turnOn("BWraidingmax"): turnOff("BWraidingmax");
+    
+    getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomStaves"): turnOff("HeirloomStaves");
+    getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomHighShield"): turnOff("HeirloomHighShield");
+    getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomLowShield"): turnOff("HeirloomLowShield");
+    getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomPushShield"): turnOff("HeirloomPushShield");
+    
+    
+    
     /*//Make Scryer settings a little more user friendly
     if (getPageSetting('ScryerUseinVoidMaps2') !=0) { setPageSetting("ScryerUseinMaps2", "2"); }
     if (getPageSetting('ScryerUseinSpire2') !=1 && isActiveSpireAT()) { setPageSetting("ScryerSkipCorrupteds2", "2"); } */

@@ -141,6 +141,9 @@ function autoStance() {
         if(cellNum != 0)
             saveStats(cellNum);
         lastCell = cellNum;
+        
+        if(windZone() && getPageSetting('ForceUpdateGraph') && document.getElementById('graphParent').style.display === "block") //graph window is open
+            drawGraph(); //update the graph. maybe we want this every cell instead of every attack?
     }
     
     if (game.global.world == getPageSetting('VoidMaps') || BWRaidNowLogic() || PRaidingActive || !getPageSetting('DelayWeaponsForWind'))
@@ -166,12 +169,12 @@ function autoStance() {
     
     if(baseDamage < 0 || game.global.soldierCurrentAttack < 0){
         var wrongDamage = game.global.soldierCurrentAttack;
-        if(!game.global.preMapsActive){
-            if (!game.global.switchToMaps){
-                mapsClicked();
-            }
-        }
-        mapsClicked();
+        if(!game.global.preMapsActive && !game.global.switchToMaps)
+            mapsClicked();
+        if(!game.global.preMapsActive)
+            mapsClicked();
+        if(game.global.preMapsActive)
+            mapsClicked();
         calcBaseDamageinS();
         checkShield();
         trimpicides++;
@@ -181,27 +184,35 @@ function autoStance() {
     }
     
     var stackSpire = (game.global.world == 500) && getPageSetting('StackSpire4') && (game.global.spireDeaths <= 8);
-    if(game.global.spireActive && !stackSpire && !game.global.mapsActive){
+    if(game.global.spireActive && !stackSpire && !game.global.mapsActive && !game.global.preMapsActive && game.global.soldierHealth > 0){
         if(game.global.spireDeaths <= 2 && hiddenBreedTimer > maxAnti && (game.global.antiStacks < maxAnti-1 || (!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping')))){
             if(!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping')){
-                debug("damage bug. current applied shield attack is " + effectiveShieldAtkMult.toFixed(2) + ", should be " + goodShieldAtkMult.toFixed(2));
+                debug("game damage bug. current applied shield attack is " + effectiveShieldAtkMult.toFixed(2) + ", should be " + goodShieldAtkMult.toFixed(2));
             }
             debug("Spire: Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks" : "") + ((!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping')) ? " equip good shield" : ""));
             wantedAnticipation = maxAnti;
-            if (!game.global.preMapsActive && !game.global.mapsActive && game.global.soldierHealth > 0){
-                if (!game.global.switchToMaps){
-                    mapsClicked();
-                }
+            if (!game.global.switchToMaps)
                 mapsClicked();
-            }
+            if(!game.global.preMapsActive)
+                mapsClicked();
+            if(game.global.preMapsActive)
+                mapsClicked();
             trimpicides++;
         }
         if (game.global.soldierHealth <= 0 && game.global.spireDeaths <= 1)
             fightManual();
         
         allowBuyingCoords = true;
-        if(game.global.world == 400 && game.global.challengeActive == "Daily") //a bit more conservative here so we can more easily farm low 400s
-            getDamageCaller(1.5*dmgNeededToOK(20), false, true);
+        if(game.global.world == 400 && game.global.challengeActive == "Daily"){ //a bit more conservative here so we can more easily farm low 400s
+            var timeGoal = getPageSetting('Spire3Time'); //how long we wish to spend in spire3
+            if (timeGoal < 1 || isNaN(timeGoal)) timeGoal = 1;
+            var totalHealth = 0;
+            for (var i = 0; i < 100; i++)
+                totalHealth += worldArray[i].maxHealth;
+            var desiredDamage = Math.min(totalHealth/(8*timeGoal), 1.5*dmgNeededToOK(cellNum));
+            getDamageCaller(desiredDamage, false);
+            //getDamageCaller(1.5*dmgNeededToOK(20), false, true);
+        }
         else
             getDamageCaller(1.5*dmgNeededToOK(cellNum), false, true);
         return;
@@ -226,14 +237,14 @@ function autoStance() {
     allowBuyingCoords = !getPageSetting('DelayCoordsForWind'); //dont buy coords unless we explicitly permit it. automaps() can also allow it if player runs a map for ratio.
 
     if (game.global.soldierHealth <= 0){ 
-        if(amalgamatorsCounter < game.jobs.Amalgamator.owned){ //we just got a new amalgamator. get back to fighting
+        /*if(amalgamatorsCounter < game.jobs.Amalgamator.owned){ //we just got a new amalgamator. get back to fighting
             if(amalgamatorsCounter > 0) { //dont do this the first time
                 debug("New Amalgamator. Sending army to fight.");
                 fightManual();
             }
             amalgamatorsCounter = game.jobs.Amalgamator.owned;
-        }
-        else if (game.global.challengeActive == "Trapper" || (game.global.breedBack <= 0 && hiddenBreedTimer > wantedAnticipation) || (DHratio > easyRatioThreshold && typeof game.global.dailyChallenge.empower === 'undefined')){
+        }*/
+        if (game.global.challengeActive == "Trapper" || (game.global.breedBack <= 0 && (hiddenBreedTimer > wantedAnticipation || typeof game.global.dailyChallenge.empower === 'undefined')) || DHratio > easyRatioThreshold){
             if(typeof game.global.dailyChallenge.bogged !== 'undefined' && parseFloat(DHratio) > 10){ //bogged is special because death occurs all the time
                 equipLowDmgShield();
             }
@@ -292,7 +303,10 @@ function autoStance() {
                 if (!game.global.switchToMaps){
                     mapsClicked();
                 }
-                mapsClicked();
+                if(!game.global.preMapsActive)
+                    mapsClicked();
+                if(game.global.preMapsActive)
+                    mapsClicked();
             }
             trimpicides++;
         }
@@ -430,7 +444,7 @@ function autoStance() {
             var nextZoneDHratio = parseFloat(DHratio) / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2); //if this is low, we'll want to map at next zone, 
             var careAboutArmyReadyFlag = (game.global.world % 5 === 0 || nextZoneDHratio <= poisonMult * windMult);
             var timeFlag = timeEstimate > 50 || parseFloat(DHratio)/2 > easyRatioThreshold || !careAboutArmyReadyFlag;
-            if(!goodCellFlag && timeFlag){
+            if(!goodCellFlag && timeFlag && zoneWorth >= 0.1){
                 if(wantToSwapShieldFlag)
                     shieldCheckedFlag = false;
                 debug("timeEstimate = " + timeEstimate.toFixed(0) +"s");
@@ -511,7 +525,7 @@ function autoStance() {
                         
                         if(wantToSwapShieldFlag)
                             shieldCheckedFlag = false;
-                        debug("trimpiciding " + minAnticipationStacks + " wantToSwapShield " + wantToSwapShieldFlag);
+                        //debug("trimpiciding " + minAnticipationStacks + " wantToSwapShield " + wantToSwapShieldFlag);
                         wantedAnticipation = minAnticipationStacks;
                         getTargetAntiStack(minAnticipationStacks, true);
                         trimpicides++;
@@ -531,16 +545,14 @@ function autoStance() {
     //check dmg last atk
     var lastDamageDealt = -1;
     var critSpan = document.getElementById("critSpan").textContent;
-    if(worldArray[cellNum].health !== lastMobHP){
-        var lastDamageDealt = lastMobHP - worldArray[cellNum].health;
-        lastMobHP = worldArray[cellNum].health;
-    }
     
     //if(zoneWorth > 0)
         stancePrintout(cellNum, stacks, nextStartingStacksCurrent, cmpActual, expectedNumHitsS, expectedNumHitsX, expectedNumHitsD, corruptedtmp, lastDamageDealt, critSpan);
         
     //bookkeeping
     if(worldArray[cellNum].health !== lastMobHP){ //an attack has occured, 1 "turn"
+        var lastDamageDealt = lastMobHP - worldArray[cellNum].health;
+        lastMobHP = worldArray[cellNum].health;
         if(stacksAtDeath == 200) wastedStacksAtEnd++;
         if(lastNextStartingStacksCurrent == 200) wastedStacksAtStart++;
     }
@@ -683,7 +695,7 @@ function getTargetAntiStack(target, firstRun){
     }
     
     if(firstRun){
-        debug("desiredShield " + desiredShield + " goodShieldActuallyEquipped " + goodShieldActuallyEquipped);
+        //debug("desiredShield " + desiredShield + " goodShieldActuallyEquipped " + goodShieldActuallyEquipped);
         trimpicide = true;
         var deltaGenes = getDeltaGenes(minAnticipationStacks); //calculates how many geneticists we need to fire to be below minAnticipationStacks
         if(deltaGenes > 0){ //if we need to fire geneticists
@@ -695,11 +707,8 @@ function getTargetAntiStack(target, firstRun){
         return false;
     }
 
-    if(game.global.preMapsActive){
-       if (!game.global.switchToMaps){
-            mapsClicked();
-        }
-    }
+    if(game.global.preMapsActive)
+        mapsClicked();
     
     if(game.global.breedBack <= 0){ //breedback keeps track of our bred trimps. it starts from armysize/2 and counts down. when breedback trimps have been bred the geneticist bonus kicks in. that's what we're after.
         trimpicide = false; //we're done here
@@ -710,10 +719,12 @@ function getTargetAntiStack(target, firstRun){
     }
     
     if (!game.global.preMapsActive && !game.global.mapsActive && game.global.soldierHealth > 0){ //we are in the world with an army that has too many anticipation stacks
-        if (!game.global.switchToMaps){
+        if (!game.global.switchToMaps)
             mapsClicked();
-        }
-        mapsClicked();
+        if(!game.global.preMapsActive)
+            mapsClicked();
+        if(game.global.preMapsActive)
+            mapsClicked();
     }
     return false;
 }
@@ -738,7 +749,7 @@ function switchOnGA(){
         toggleGeneticistassist();
         currentStep = steps.indexOf(game.global.GeneticistassistSetting);
     }
-    debug("Turned on AutoGeneticist");
+    //debug("Turned on AutoGeneticist");
 }
 
 function switchOffGA(){
@@ -753,7 +764,7 @@ function switchOffGA(){
         toggleGeneticistassist(); 
         currentStep = steps.indexOf(game.global.GeneticistassistSetting);
     }
-    debug("Turned off AutoGeneticist");
+    //debug("Turned off AutoGeneticist");
 }
 
 function stackConservingTrimpicide(){
@@ -764,12 +775,12 @@ function stackConservingTrimpicide(){
 }
 
 function trimpicideNow(){
-    if(!game.global.preMapsActive){
-        if (!game.global.switchToMaps){
-            mapsClicked();
-        }
-    }
-    mapsClicked();
+    if(!game.global.preMapsActive && !game.global.switchToMaps)
+        mapsClicked();
+    if(!game.global.preMapsActive)
+        mapsClicked();
+    if(game.global.preMapsActive)
+        mapsClicked();
 }
 
 function fireGeneticists(howMany){
@@ -946,6 +957,10 @@ function calcOmniHelium(){ //rewardResource()
     var fluffyBonus = Fluffy.isRewardActive("helium");
     var l = 1 + (fluffyBonus * 0.25);
     var heliumy = game.singleRunBonuses.heliumy.owned ? 1.25 : 1;
+    
+    if(game.global.world == 500){
+        
+    }
     
     m = a*b*c*d*e*f*g*h*i*j*k*l*heliumy; //Omnipotrimp helium
     hr = m * 60 * 60 * 1/(Math.pow(0.95, 20) - 0.1); //if we kill Omni every attack how much he/hr we'll have

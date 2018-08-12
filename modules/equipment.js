@@ -10,7 +10,7 @@ MODULES["equipment"].equipHealthDebugMessage = false;    //this repeats a messag
 
 var verbose = false;
 
-var buyWeaponsMode; //0: dont buy anything, only prestige once if it lowers damage. 1: prestige till -1 and level 2: 2: buy levels only, prestige if level > 81 or another weapon is higher prestige 3: get all
+var buyWeaponsMode; //0: dont buy anything, only prestige once if it lowers damage. 1: prestige till -1 and level 2: 2: buy levels only, prestige if level > 81 or another weapon is higher prestige 3: get all 4: get max levels at current prestiges only
 
 var equipmentList = { 
     'Dagger': {
@@ -167,7 +167,7 @@ function evaluateEquipmentEfficiency(equipName) {
                 if(Cost * 100 < game.resources.metal.owned)
                     Wall = false;
             }
-            else if (buyWeaponsMode === 2) Wall = false; //prestiging equipment isnt allowed, so allow buying levels
+            else if (buyWeaponsMode == 2 || buyWeaponsMode == 4) Wall = false; //prestiging equipment isnt allowed, so allow buying levels
             
             //buyWeaponsMode; //1: prestige till -1 and level 2: buy levels only 3: get all
 
@@ -367,7 +367,7 @@ function autoLevelEquipment(lowerDamage, fastMode) {
 
 
 //BuyWeaponsNew - GUI gets converted to BuyWeaponUpgrades
-//if(buyWeaponsMode == 1 && getPageSetting('DelayWeaponsForWind')); //1: prestige till -1 and level 2: 2: buy levels only 3: get all
+//if(buyWeaponsMode == 1 && getPageSetting('DelayWeaponsForWind')); //1: prestige till -1 and level 2: 2: buy levels only 3: get all 4: buy all the levels and no prestige
 //PRESTIGE and UPGRADE SECTION:
     for (var equipName in equipmentList) {
         var equip = equipmentList[equipName];
@@ -456,7 +456,11 @@ function autoLevelEquipment(lowerDamage, fastMode) {
                                 allow = false;
                             }
                             //if (game.equipment[equipName].level > 81 && !(game.global.world == 400 && game.global.challengeActive == "Daily")) //spire3 special case on dailies, grab every level we can afford so hopefully we prestige+1 after and farm low 400s more easier
-                            if (game.equipment[equipName].level > 9 && game.global.gridArray[0].name == "Liquimp") //fast on liquidated
+                            if (game.global.gridArray[0].name == "Liquimp" && game.equipment[equipName].level > 9) //fast on liquidated
+                                allow = true;
+                            else if (game.global.world == 300 && game.equipment[equipName].level > 40)
+                                allow = true;
+                            else if (game.global.world == 400 && getPageSetting('Spire3Time') < 6 && game.equipment[equipName].level > 40)
                                 allow = true;
                         }
                         else if(buyWeaponsMode === 3){
@@ -467,6 +471,8 @@ function autoLevelEquipment(lowerDamage, fastMode) {
                                     allow = true;
                             //}
                         }
+                        else if(buyWeaponsMode == 4)
+                            allow = false;
                         if(game.upgrades[equipmentList[equipName].Upgrade].done > highestPrestigeOwned)
                             highestPrestigeOwned = game.upgrades[equipmentList[equipName].Upgrade].done;
                     }
@@ -494,7 +500,6 @@ function autoLevelEquipment(lowerDamage, fastMode) {
     //equipmentList[equipName].Upgrade
     //equipmentList[equipName].Stat == 'attack'
     //BuyWeaponsNew - GUI gets converted to BuyWeaponUpgrades
-    //if(buyWeaponsMode == 1 && getPageSetting('DelayWeaponsForWind')); //1: prestige till 1 before max prestige and level 2: prestige only 3: buy everything
     //(same function)
 //LEVELING EQUIPMENT SECTION:
     preBuy();
@@ -665,6 +670,21 @@ function getDamageCaller(dmg, lowerDamage, noCrit){
     }
     
     getDamage(dmg, lowerDamage, noCrit);
+    
+    if (game.global.world == 400 && game.global.challengeActive == "Daily" && getPageSetting('Spire3Time') > 1){
+        var backup = buyWeaponsMode;
+        buyWeaponsMode = 4;
+        var maxLoop = 50;
+        var dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage);
+        var dmgLast = 0;
+        while (dmgLast != dmgToCheck && maxLoop-- > 0){
+            dmgLast = dmgToCheck;
+            autoLevelEquipmentCaller();
+            calcBaseDamageinS(); 
+            dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage);
+        }
+        buyWeaponsMode = backup;
+    }
     
     if (!originallyEquippedShield){
         equipLowDmgShield(); //always start calculations with the good shield
