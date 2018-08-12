@@ -1263,8 +1263,10 @@ function checkNeedToVoid(){
     //FIND VOID MAPS LEVEL:
     var voidMapLevelSetting = getPageSetting('VoidMaps');
     //Add your daily zone mod onto the void maps level
-    var dailyVoidMod = getPageSetting('AutoFinishDailyNew');
-    if (game.global.challengeActive == "Daily" && getPageSetting('AutoFinishDailyNew') != 999 && getPageSetting('DailyVoidMod'))
+    var dailyVoidMod = getPageSetting('VoidMapsDailyMod');
+    if (dailyVoidMod == 999)
+        dailyVoidMod = 0;
+    if (game.global.challengeActive == "Daily")
         voidMapLevelSetting += dailyVoidMod;
     
     //decimal void maps are possible, using string function to avoid false float precision (0.29999999992). javascript can compare ints to strings anyway.
