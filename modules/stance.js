@@ -546,9 +546,6 @@ function autoStance() {
     var lastDamageDealt = -1;
     var critSpan = document.getElementById("critSpan").textContent;
     
-    //if(zoneWorth > 0)
-        stancePrintout(cellNum, stacks, nextStartingStacksCurrent, cmpActual, expectedNumHitsS, expectedNumHitsX, expectedNumHitsD, corruptedtmp, lastDamageDealt, critSpan);
-        
     //bookkeeping
     if(worldArray[cellNum].health !== lastMobHP){ //an attack has occured, 1 "turn"
         var lastDamageDealt = lastMobHP - worldArray[cellNum].health;
@@ -560,6 +557,9 @@ function autoStance() {
     stacksAtDeath = stacks;
     shieldUsedAtCellDeath = (highDamageHeirloom ? 1 : 0);
     lastNextStartingStacksCurrent = nextStartingStacksCurrent;
+    
+    //if(zoneWorth > 0)
+        stancePrintout(cellNum, stacks, nextStartingStacksCurrent, cmpActual, expectedNumHitsS, expectedNumHitsX, expectedNumHitsD, corruptedtmp, lastDamageDealt, critSpan);
 }
 
 function saveStats(cellNum){
