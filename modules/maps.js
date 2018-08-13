@@ -176,6 +176,7 @@ function calcDmg(){
     
     DHratio = (ourBaseDamage*0.25 / enemyHealth);
     enoughDamage = DHratio > threshhold;
+    nextZoneDHratio = DHratio / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2);
     
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
@@ -216,8 +217,19 @@ function autoMap() {
         return;
     
     }
-    if(game.global.mapsActive && game.global.antiStacks < maxAnti-1 && hiddenBreedTimer > maxAnti) //if we need stacks, get them
-        mapsClicked();
+    //check if we want to trimpicide for stacks and/or shield
+    var wantToSwapShieldFlag = (!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping'));
+    if(game.global.mapsActive && hiddenBreedTimer > maxAnti && (wantToSwapShieldFlag || game.global.antiStacks < maxAnti-1) && typeof game.global.dailyChallenge.bogged === 'undefined'){
+        debug("Maps: Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks " : "") + (wantToSwapShieldFlag ? " equip good shield" : ""));
+        if(getCurrentMapObject().location == "Void"){
+            mapsClicked(true);
+            cancelTooltip()
+        }
+        else
+            mapsClicked();
+        trimpicides++;
+        return;
+    }
     
     updateAutoMapsStatus("", "Advancing"); //default msg. any other trigger will override this later
     currWorldZone = game.global.world;

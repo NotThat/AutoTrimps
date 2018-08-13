@@ -3,7 +3,7 @@
 // @version      2.1.6.9b-genbtc-4-2-2018
 // @updateURL    https://github.com/genbtc/AutoTrimps/AutoTrimps2.js
 // @description  Automate all the trimps!
-// @author       zininzinin, spindrjr, belaith, ishakaru, genBTC, Unihedron, coderPatsy, Kfro, Zeker0
+// @author       zininzinin, spindrjr, belaith, ishakaru, genBTC, Unihedron, coderPatsy, Kfro, Zeker0, Meowchan
 // @include      *trimps.github.io*
 // @include      *kongregate.com/games/GreenSatellite/trimps
 // @grant        none
@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = 19;
-var verDate = "12.8.18";
+var ver = 20;
+var verDate = "13.8.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
     , basepath = (local ? 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/')
@@ -184,6 +184,7 @@ var poisonMult;
 var enemyHealth=1;
 var threshhold=1;
 var DHratio = 0;
+var nextZoneDHratio = 0;
 var maxAnti = (game.talents.patience.purchased ? 45 : 30);
 var wantedAnticipation = maxAnti;
 var highestPrestigeOwned = 0;

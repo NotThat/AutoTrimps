@@ -788,7 +788,9 @@ function setGraphData(graph) {
             var arr1 = [];
             var arr2 = [];
             for(var i = 0; i < allSaveData[allSaveData.length-1].cmp.length; i++){
-                if(worldArray[i].corrupted === undefined)
+                if(!worldArray[i])
+                    names.push(i);
+                else if(worldArray[i].corrupted === undefined)
                     names.push(i + "empty");
                 else
                     names.push(i + worldArray[i].corrupted);

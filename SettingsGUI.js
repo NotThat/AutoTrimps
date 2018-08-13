@@ -381,8 +381,8 @@ function initializeAllSettings() {
     createSetting('BWraidDailyCOnly', 'BW Raiding Daily/C2 Only', 'Only BW raid in dailies and challenges', 'boolean', false, null, 'Spire');
     createSetting('BWraidingz', 'Z to BW Raid', 'Raids BWs at zone specified. Example: 495, will raid all BWs for all gear starting from 495. Will skip lower BWs if you have enough damage. Once all gear is obtained, will return to regular farming.', 'value', -1, null, 'Spire');
     createSetting('BWraidingmax', 'Max BW to raid', 'Raids BWs until zone specified. Example: 515, will raid all BWs for all gear until 515. Will skip lower BWs if you have enough damage. Once all gear is obtained, will return to regular farming.', 'value', -1, null, 'Spire');
-    createSetting('PRaidSpire', 'Raid +5 in Spire', 'Raid +5 levels for gear in active spires', 'boolean', false, null, 'Spire');
-    createSetting('StackSpire4', 'Windstack Spire IV', 'Attempts to maximize windstacks in Spire IV. Recommended you have Raid +5 in Spire enabled when you use this.', 'boolean', false, null, 'Spire');
+    createSetting('PRaidSpire', 'Raid +5 in Spire', 'Raid +5 levels for gear in active spires. Overrides Map Raiding Start.', 'boolean', false, null, 'Spire');
+    //createSetting('StackSpire4', 'Windstack Spire IV', 'Attempts to maximize windstacks in Spire IV. Recommended you have Raid +5 in Spire enabled when you use this.', 'boolean', false, null, 'Spire');
     createSetting('Spire3Time', 'Daily Spire 3 Time', 'Dailies only. The maximum time in seconds that we willing to spend in Spire 3. If you find yourself missing stacks in early 400s due to too much damage setting this value higher could help. -1 or 0 to disable.', 'value', '50', '-1', 'Spire');
 
 //Combat

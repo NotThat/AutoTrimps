@@ -143,7 +143,7 @@ function autoStance() {
         lastCell = cellNum;
         
         if(windZone() && getPageSetting('ForceUpdateGraph') && document.getElementById('graphParent').style.display === "block") //graph window is open
-            drawGraph(); //update the graph. maybe we want this every cell instead of every attack?
+            drawGraph(); //update the graph
     }
     
     if (game.global.world == getPageSetting('VoidMaps') || BWRaidNowLogic() || PRaidingActive || !getPageSetting('DelayWeaponsForWind'))
@@ -183,12 +183,13 @@ function autoStance() {
         return; 
     }
     
-    var stackSpire = (game.global.world == 500) && getPageSetting('StackSpire4') && (game.global.spireDeaths <= 8);
-    if(game.global.spireActive && !stackSpire && !game.global.mapsActive && !game.global.preMapsActive && game.global.soldierHealth > 0){
-        if(game.global.spireDeaths <= 2 && hiddenBreedTimer > maxAnti && (game.global.antiStacks < maxAnti-1 || (!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping')))){
-            if(!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping')){
+    var stackSpire = (game.global.world == 500) && getPageSetting('StackSpire4') && (game.global.spireDeaths <= 5);
+    if(game.global.spireActive && !stackSpire){ //in spire and we arent stacking it
+        if(game.global.mapsActive || game.global.preMapsActive)
+            return;
+        if(game.global.spireDeaths === 0 && hiddenBreedTimer > maxAnti && (game.global.antiStacks < maxAnti-1 || (!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping')))){ //1 death if we need stacks and/or heirloom swap
+            if(!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping'))
                 debug("game damage bug. current applied shield attack is " + effectiveShieldAtkMult.toFixed(2) + ", should be " + goodShieldAtkMult.toFixed(2));
-            }
             debug("Spire: Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks" : "") + ((!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping')) ? " equip good shield" : ""));
             wantedAnticipation = maxAnti;
             if (!game.global.switchToMaps)
@@ -199,11 +200,11 @@ function autoStance() {
                 mapsClicked();
             trimpicides++;
         }
-        if (game.global.soldierHealth <= 0 && game.global.spireDeaths <= 1)
+        if (game.global.soldierHealth <= 0 && game.global.spireDeaths <= 2 && !isActiveSpireAT()) //if not activespireAT, we can give 2 deaths for speedup. probably wont need the lives
             fightManual();
         
         allowBuyingCoords = true;
-        if(game.global.world == 400 && game.global.challengeActive == "Daily"){ //a bit more conservative here so we can more easily farm low 400s
+        if(game.global.world == 400 && game.global.challengeActive == "Daily"){ //spire3 special case in dailies. a bit more conservative here so we can more easily farm low 400s
             var timeGoal = getPageSetting('Spire3Time'); //how long we wish to spend in spire3
             if (timeGoal < 1 || isNaN(timeGoal)) timeGoal = 1;
             var totalHealth = 0;
@@ -211,11 +212,15 @@ function autoStance() {
                 totalHealth += worldArray[i].maxHealth;
             var desiredDamage = Math.min(totalHealth/(8*timeGoal), 1.5*dmgNeededToOK(cellNum));
             getDamageCaller(desiredDamage, false);
-            //getDamageCaller(1.5*dmgNeededToOK(20), false, true);
         }
         else
             getDamageCaller(1.5*dmgNeededToOK(cellNum), false, true);
-        return;
+        
+        //spire gets its own fightManual() condition
+        if (game.global.soldierHealth <= 0 && game.global.challengeActive == "Trapper" || (game.global.breedBack <= 0 && (hiddenBreedTimer > wantedAnticipation || typeof game.global.dailyChallenge.empower === 'undefined')))
+            fightManual();
+        
+        return; //beyond this point, only spire is a stacked spire4
     }
     
     if (game.options.menu.liquification.enabled && game.talents.liquification.purchased && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
@@ -237,15 +242,8 @@ function autoStance() {
     allowBuyingCoords = !getPageSetting('DelayCoordsForWind'); //dont buy coords unless we explicitly permit it. automaps() can also allow it if player runs a map for ratio.
 
     if (game.global.soldierHealth <= 0){ 
-        /*if(amalgamatorsCounter < game.jobs.Amalgamator.owned){ //we just got a new amalgamator. get back to fighting
-            if(amalgamatorsCounter > 0) { //dont do this the first time
-                debug("New Amalgamator. Sending army to fight.");
-                fightManual();
-            }
-            amalgamatorsCounter = game.jobs.Amalgamator.owned;
-        }*/
-        if (game.global.challengeActive == "Trapper" || (game.global.breedBack <= 0 && (hiddenBreedTimer > wantedAnticipation || typeof game.global.dailyChallenge.empower === 'undefined')) || DHratio > easyRatioThreshold){
-            if(typeof game.global.dailyChallenge.bogged !== 'undefined' && parseFloat(DHratio) > 10){ //bogged is special because death occurs all the time
+        if (game.global.challengeActive == "Trapper" || (game.global.breedBack <= 0 && (hiddenBreedTimer > wantedAnticipation || typeof game.global.dailyChallenge.empower === 'undefined')) || (DHratio > easyRatioThreshold && !stackSpire)){
+            if(typeof game.global.dailyChallenge.bogged !== 'undefined' && parseFloat(DHratio) > 10 && !stackSpire){ //bogged is special because death occurs all the time
                 equipLowDmgShield();
             }
             fightManual();
@@ -341,7 +339,6 @@ function autoStance() {
         var nextStartingStacks = Math.min(1 + Math.ceil(stacks * getRetainModifier("Wind") + pbHitstmp + expectedNumHitsD * (pbMult + getRetainModifier("Wind")) + Math.ceil(worldArray[cellNum+1].health/ourAvgDmgD)), 200);
         var nextStartingStacksCurrent = Math.min(1 + Math.ceil((stacks+1) * getRetainModifier("Wind") + pbHitstmp), 200);
         if(cellNum == 80){
-            var nextZoneDHratio = parseFloat(DHratio) / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2); //if this is low, we'll want to map at next zone, therefor we dont count transfer from omni
             if(nextZoneDHratio <= poisonMult * windMult && worldArray[99].geoRelativeCellWorth > 0){
                 worldArray[99].geoRelativeCellWorth = 0; //need to update previous cells as well
                 if(local)
@@ -419,7 +416,7 @@ function autoStance() {
         if(wantToSwapShieldFlag)
             desiredShield = "good"; 
         //shared requirements:
-        if(hiddenBreedTimer > maxAnti && (effectiveShieldAtkMult < 3 || game.global.antiStacks < maxAnti-1) && !stackSpire && typeof game.global.dailyChallenge.bogged === 'undefined'){
+        if(hiddenBreedTimer > maxAnti && (wantToSwapShieldFlag || game.global.antiStacks < maxAnti-1) && !stackSpire && typeof game.global.dailyChallenge.bogged === 'undefined'){
             //scenario 1:
             if(DHratio < 3){
                 if(wantToSwapShieldFlag)
@@ -441,7 +438,6 @@ function autoStance() {
                 }
             }
             var timeEstimate = timeEstimator(cellNum, true); //rough estimate of how long it will take to finish zone
-            var nextZoneDHratio = parseFloat(DHratio) / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2); //if this is low, we'll want to map at next zone, 
             var careAboutArmyReadyFlag = (game.global.world % 5 === 0 || nextZoneDHratio <= poisonMult * windMult);
             var timeFlag = timeEstimate > 50 || parseFloat(DHratio)/2 > easyRatioThreshold || !careAboutArmyReadyFlag;
             if(!goodCellFlag && timeFlag && zoneWorth >= 0.1){
@@ -908,6 +904,23 @@ function buildWorldArray(){
     maxDesiredRatio = maxStacksBaseDamageD/(maxHP * 0.2); //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
     
     calcOmniHelium();
+    // && getPageSetting('StackSpire4')){
+    if(game.global.world == 500){ //special case
+        var heliumAmount = 0;
+        for(var i = 1; i <= 100; i++){
+            if(i == 20 || i == 50 || i == 60 || i == 70 || i == 80)
+                heliumAmount = 0;
+            else if (i == 40)
+                heliumAmount = rewardResourceAT("helium", 15, 99, i);
+            else if (i == 90)
+                heliumAmount = rewardResourceAT("helium", 30, 99, i);
+            else if (i == 100)
+                heliumAmount = rewardResourceAT("helium", 100, 99, i);
+            else
+                heliumAmount = rewardResourceAT("helium", 0.5*Math.pow(1.01,i), 99, i);
+            //debug("i: " + i + " " + heliumAmount.toExponential(2));
+        }
+    }
 
     worldArray[99].geoRelativeCellWorth = (game.global.world % 5 === 0 ? 0 : 1); //approximation of stack transfer worth into next zone    
     worldArray[99].PBWorth = 0; //PB doesnt get carried over to next zone
@@ -938,6 +951,43 @@ function buildWorldArray(){
     return true;
 }
 
+function rewardResourceAT(what, baseAmt, level, cellNum){ //before wind stacks, after spire row bonus. same calculation as the game, only without actually giving helium.
+    var amt = 0;
+    level = scaleLootLevel(level);
+    
+    level = Math.round((level - 1900) / 100);
+    level *= 1.35;
+    if (level < 0) level = 0;
+    amt += Math.round(baseAmt * Math.pow(1.23, Math.sqrt(level)));
+    amt += Math.round(baseAmt * level);
+	
+    //Add Looting
+    if (game.portal.Looting.level) amt += (amt * game.portal.Looting.level * game.portal.Looting.modifier);
+    if (game.portal.Looting_II.level) amt *= (1 + (game.portal.Looting_II.level * game.portal.Looting_II.modifier));
+    var spireRowBonus = (game.talents.stillRowing.purchased) ? 0.03 : 0.02;
+    if (game.global.spireRows > 0) amt *= 1 + (spireRowBonus * (30 + Math.floor(cellNum/10)));
+    if (game.global.totalSquaredReward > 0 && what == "helium") amt *= ((game.global.totalSquaredReward / 1000) + 1);
+    if (game.global.challengeActive == "Toxicity"){
+            var toxMult = (game.challenges.Toxicity.lootMult * game.challenges.Toxicity.stacks) / 100;
+            amt *= (1 + toxMult);
+    }
+
+    /*if (getEmpowerment() == "Wind"){
+        if (what == "helium"){
+            if (!game.global.mapsActive){
+                amt *= (1 + game.empowerments.Wind.getCombatModifier());
+            }
+        }
+    }*/
+    if (game.singleRunBonuses.heliumy.owned) amt *= 1.25;
+    if (game.global.sLevel >= 5) amt *= Math.pow(1.005, game.global.world);
+    if (game.goldenUpgrades.Helium.currentBonus > 0) amt *= 1 + game.goldenUpgrades.Helium.currentBonus;
+    var fluffyBonus = Fluffy.isRewardActive("helium");
+    amt += (amt * (fluffyBonus * 0.25));
+    amt = Math.floor(amt);
+    return amt;
+};
+
 function calcOmniHelium(){ //rewardResource()
     var zone = game.global.world;
     var AA = 1.35*(zone-19);
@@ -958,10 +1008,6 @@ function calcOmniHelium(){ //rewardResource()
     var l = 1 + (fluffyBonus * 0.25);
     var heliumy = game.singleRunBonuses.heliumy.owned ? 1.25 : 1;
     
-    if(game.global.world == 500){
-        
-    }
-    
     m = a*b*c*d*e*f*g*h*i*j*k*l*heliumy; //Omnipotrimp helium
     hr = m * 60 * 60 * 1/(Math.pow(0.95, 20) - 0.1); //if we kill Omni every attack how much he/hr we'll have
 
@@ -976,9 +1022,6 @@ function updateOmniThreshhold() {
     else
         dailyMult = 1 + getDailyHeliumValue(countDailyWeight()) / 100;
     
-    //if(dailyMult > 1){
-    //    pctTotal = pctTotal*dailyMult;
-    //}
     Goal = getPageSetting('WindStackingPctHe');
     if(Goal == -1) Goal = 0.5;
     OmniThreshhold = Goal/pctTotal; //this is how many Omnis' worth of helium we need to get on each attack in order to meet our he%/hr quota
