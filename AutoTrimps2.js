@@ -79,10 +79,11 @@ function initializeAutoTrimps() {
 
 var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
-changelogList.push({date: verDate, version: ver, description: "", isNew: true});
-changelogList.push({date: "28/06/2018", version: "v0.2", description: "Backup your game before using this or any AT fork for the first time (and often)! Please Trimps responsibly!", isNew: true});
-changelogList.push({date: "28/06/2018", version: "v0.2", description: "PRaiding. BWRaiding. Stop Coords to get next Amal. Never lose Amal. Heirloom Swapping. No Nurseries in Ice. Massive overhaul to AS windstacking he/hr% based. Stall Coords/items for more stacking. Calculate cell by cell. AutoTrimps->Display->General Spam for less spam.", isNew: true});
-changelogList.push({date: "13/06/2018", version: "v0.1", description: "War was beginning ", isNew: false});
+//changelogList.push({date: verDate, version: ver, description: "", isNew: true});
+//changelogList.push({date: "28/06/2018", version: "v0.2", description: "Backup your game before using this or any AT fork for the first time (and often)! Please Trimps responsibly!", isNew: true});
+changelogList.push({date: "", version: "", description: "Backup your game before using this or any AT fork for the first time (and often)! Please Trimps responsibly!<br>", isNew: false});
+//changelogList.push({date: "28/06/2018", version: "", description: "PRaiding. BWRaiding. Stop Coords to get next Amal. Never lose Amal. Heirloom Swapping. No Nurseries in Ice. Massive overhaul to AS windstacking he/hr% based. Stall Coords/items for more stacking. Calculate cell by cell. AutoTrimps->Display->General Spam for less spam.", isNew: false});
+changelogList.push({date: "13/06/2018", version: "", description: "War was beginning ", isNew: false});
 
 function assembleChangelog(date,version,description,isNew) {
     return (isNew)
@@ -100,8 +101,8 @@ function printChangelog() {
         '<b>Ongoing Development</b> - <u>Report any bugs/problems please</u>!\
         <br>Talk with the dev: <b>meowchan_#0720</b> @ <a target="#" href="https://discord.gg/0VbWe0dxB9kIfV2C">AutoTrimps Discord Channel</a>'
     ,   action = 'cancelTooltip()'
-    ,   title = 'Script Update Notice<br>' + ATversion
-    ,   acceptBtnText = "Thank you for playing AutoTrimps. Accept and Continue."
+    ,   title = "AutoTrimps - Meowchan's Fork<br>" + "v" + ver + " " + verDate
+    ,   acceptBtnText = "Thank you for playing AutoTrimps!"
     ,   hideCancel = true;
     tooltip('confirm', null, 'update', body+footer, action, title, acceptBtnText, null, hideCancel);
 }
