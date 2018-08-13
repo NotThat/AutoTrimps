@@ -151,7 +151,18 @@ function autoStance() {
         if(windZone() && getPageSetting('ForceUpdateGraph') && document.getElementById('graphParent').style.display === "block"){ //graph window is open    
             if(!chart1 || !chart1.series[0] || chart1.series[0].points.length === 0)
                 drawGraph(); //draw initial graph
-            updateLastPoint(lastCell);
+            
+            
+            if(cellNum > lastCell + 1){ //we overkilled some cells
+                for(var i = lastCell + 1; i < cellNum; i++){
+                    updateLastPoint(i);
+                }
+            }
+            else
+                updateLastPoint(lastCell);
+            
+            
+            
         }
         
         /*if(stackSpire){
