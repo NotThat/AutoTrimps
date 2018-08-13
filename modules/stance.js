@@ -34,11 +34,12 @@ var effectiveShieldAtkMult = 1;
 var lowShieldPB = 0;
 var goodShieldActuallyEquipped; //bugfix
 var lastMobHP = -1;
+var stackSpireNoMoreDamageCell = -1;
 
 //stats keeping
 var stanceStats = [];
-var lastCell = -1;
-var lastCmp = 0;
+setEmptyStats();
+
 var stacksAtDeath = 0;
 var wastedStacksAtEnd = 0;
 var wastedStacksAtStart = 0;
@@ -135,15 +136,29 @@ function autoStance() {
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     var nextCell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum + 1] : game.global.gridArray[cellNum + 1];
+    
+    var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 5);
 
-    if(lastCell == -1) lastCell = cellNum; //first run
+    if(lastCell == -1){ //new save load or new zone
+        setEmptyStats(); //also clears graph data
+        lastCell = cellNum; 
+    }
+    
     if(lastCell != cellNum && !game.global.mapsActive && windZone()){ //new enemy
         if(cellNum != 0)
             saveStats(cellNum);
-        lastCell = cellNum;
         
-        if(windZone() && getPageSetting('ForceUpdateGraph') && document.getElementById('graphParent').style.display === "block") //graph window is open
-            drawGraph(); //update the graph
+        if(windZone() && getPageSetting('ForceUpdateGraph') && document.getElementById('graphParent').style.display === "block"){ //graph window is open    
+            if(!chart1 || !chart1.series[0] || chart1.series[0].points.length === 0)
+                drawGraph(); //draw initial graph
+            updateLastPoint(lastCell);
+        }
+        
+        /*if(stackSpire){
+            debug("Spire Bonus should be: " + checkSpireValue(lastCell, stanceStats.stacks[lastCell], true).toExponential(2));
+            debug("Regular should be: " + checkSpireValue(lastCell, stanceStats.stacks[lastCell], false).toExponential(2));
+        }*/
+        lastCell = cellNum;
     }
     
     if (game.global.world == getPageSetting('VoidMaps') || BWRaidNowLogic() || PRaidingActive || !getPageSetting('DelayWeaponsForWind'))
@@ -182,8 +197,18 @@ function autoStance() {
         debug("Trimpiciding to set things straight.");
         return; 
     }
+    /*if(effectiveShieldAtkMult > goodShieldAtkMult*1.05){
+        debug("Game damage bug. We currently have " + (100*effectiveShieldAtkMult/goodShieldAtkMult).toFixed(2) +"% of the damage that we should.");
+        debug("Trimpiciding to make things straight.");
+        if(!game.global.preMapsActive && !game.global.switchToMaps)
+            mapsClicked();
+        if(!game.global.preMapsActive)
+            mapsClicked();
+        if(game.global.preMapsActive)
+            mapsClicked();        
+    }*/
     
-    var stackSpire = (game.global.world == 500) && getPageSetting('StackSpire4') && (game.global.spireDeaths <= 5);
+    
     if(game.global.spireActive && !stackSpire){ //in spire and we arent stacking it
         if(game.global.mapsActive || game.global.preMapsActive)
             return;
@@ -219,6 +244,9 @@ function autoStance() {
         //spire gets its own fightManual() condition
         if (game.global.soldierHealth <= 0 && game.global.challengeActive == "Trapper" || (game.global.breedBack <= 0 && (hiddenBreedTimer > wantedAnticipation || typeof game.global.dailyChallenge.empower === 'undefined')))
             fightManual();
+        
+        if(windZone())
+            stacksAtDeath = game.empowerments.Wind.currentDebuffPower; //bookkeeping
         
         return; //beyond this point, only spire is a stacked spire4
     }
@@ -317,7 +345,7 @@ function autoStance() {
         maxDesiredStacks = 196; //still want max stacks for healthy/end cells
     
     var stacks = game.empowerments.Wind.currentDebuffPower;
-    var missingStacks = Math.max(maxDesiredStacks-stacks, -5); //196-186=10
+    var missingStacks = Math.max(maxDesiredStacks-stacks, -5);
     
     var ourAvgDmgS = baseDamage;
     var ourAvgDmgX = ourAvgDmgS * 2;
@@ -379,7 +407,7 @@ function autoStance() {
     //var cmp = (worldArray[cellNum].baseWorth + (stacks < 200 ? worldArray[cellNum].geoRelativeCellWorth : 0) + (nextStartingStacks < 190 ? worldArray[cellNum].PBWorth : 0)) * game.empowerments.Wind.getModifier() * dailyMult; //this uses nextStartingStacks which includes an approximation of how many more hits we need
     //var cmpActual = (worldArray[cellNum].baseWorth + (stacks < 200 ? worldArray[cellNum].geoRelativeCellWorth : 0) + (nextStartingStacksCurrent < 200 ? worldArray[cellNum].PBWorth : 0)) * game.empowerments.Wind.getModifier() * dailyMult; //this is precise (used for display and record-keeping purposes)
     
-    if(worldArray[cellNum].corrupted == "corruptDodge") {cmp *= 0.7; cmpActual *= 0.7;} //dodge cells are worth less
+    if(worldArray[cellNum].corrupted == "corruptDodge" && !stackSpire) {cmp *= 0.7; cmpActual *= 0.7;} //dodge cells are worth less
     cmp       *= game.empowerments.Wind.getModifier() * dailyMult / OmniThreshhold; //cmp is in OmniThreshhold units
     cmpActual *= game.empowerments.Wind.getModifier() * dailyMult / OmniThreshhold;
     
@@ -388,14 +416,39 @@ function autoStance() {
     //we have high shield here
     var currRatio = parseFloat(DHratio);
     var limit = 10;
-    if (currRatio < limit) //if DHratio falls below limit, we allow buying of gear and coordinates to get it
+    if(stackSpire){ //getDamageCaller(worldArray[(game.global.lastClearedCell + 1)].maxHealth / 500, true, false);
+        if(cellNum < 99){
+            if(checkForGoodCell(cellNum))
+                getDamageCaller(worldArray[cellNum+1].maxHealth / 200, true, false);
+            else{
+                getDamageCaller(worldArray[cellNum+1].maxHealth*2, true, false);
+                maxCoords = game.upgrades.Coordination.done + 1;
+            }
+        }
+        else
+            getDamageCaller(worldArray[cellNum].maxHealth / 20, true, false);
+        
+        //stackSpire trimpicide
+        var needDamageFlag = baseDamage < worldArray[cellNum].maxHealth / 400;
+        var wantToSwapShieldFlag = (!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping'));
+        if(needDamageFlag && hiddenBreedTimer > maxAnti && (wantToSwapShieldFlag || game.global.antiStacks < maxAnti-1) && typeof game.global.dailyChallenge.bogged === 'undefined'){
+            debug("Need more damage for spire. Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks" : "") + (wantToSwapShieldFlag ? " equip good shield" : ""));
+            wantedAnticipation = maxAnti;
+            stackConservingTrimpicide();
+            trimpicides++;
+        }
+    }
+    else if (currRatio < limit) //if DHratio falls below limit, we allow buying of gear and coordinates to get it
         getDamageCaller(8*baseDamage * limit / currRatio * goodShieldAtkMult/effectiveShieldAtkMult, false);
     
     wantMoreDamage = false; //book keeping
     wantLessDamage = false; //book keeping
     
+    if(stacks < 185 && nextStartingStacks < 180 && zoneWorth > 0.8 && expectedNumHitsS < missingStacks-5 && (stackSpire ? worldArray[cellNum].finalWorth > 1 : worldArray[cellNum].baseWorth > 0 && cmp > 1))
+        wantLessDamage = true;
+    
     var boggedFlag = (typeof game.global.dailyChallenge.bogged !== 'undefined' && parseFloat(DHratio) > 10);
-    var rushFlag = !boggedFlag && (worldArray[cellNum].corrupted == "healthyBleed" || worldArray[cellNum].corrupted == "corruptBleed" || worldArray[cellNum].corrupted == "corruptDodge");
+    var rushFlag = !stackSpire && !boggedFlag && (worldArray[cellNum].corrupted == "healthyBleed" || worldArray[cellNum].corrupted == "corruptBleed" || worldArray[cellNum].corrupted == "corruptDodge");
     if(expectedNumHitsD > missingStacks || cmp < 1 || rushFlag){ //we need more damage, or this cell isnt worth our time                
         
         //when we use high damage shield to hit a cell it could lower its cmp a bit if our main shield has less plaguebringer than our low shield. lets adjust cell PBWorth accordingly.
@@ -421,7 +474,7 @@ function autoStance() {
             if(DHratio < 3){
                 if(wantToSwapShieldFlag)
                     shieldCheckedFlag = false;
-                debug("Zone is hard. Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks |" : "") + (wantToSwapShieldFlag ? " equip good shield" : ""));
+                debug("Zone is hard. Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks" : "") + (wantToSwapShieldFlag ? " equip good shield" : ""));
                 wantedAnticipation = maxAnti;
                 stackConservingTrimpicide();
                 trimpicides++;
@@ -444,7 +497,7 @@ function autoStance() {
                 if(wantToSwapShieldFlag)
                     shieldCheckedFlag = false;
                 debug("timeEstimate = " + timeEstimate.toFixed(0) +"s");
-                debug("Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks |" : "") + (wantToSwapShieldFlag ? " equip good shield" : ""));
+                debug("Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks" : "") + (wantToSwapShieldFlag ? " equip good shield" : ""));
                 wantedAnticipation = maxAnti;
                 stackConservingTrimpicide();
                 trimpicides++;
@@ -454,9 +507,9 @@ function autoStance() {
         
         if(zoneWorth < 0.1) //wind zone suxxx full OK
             getDamageCaller(1.5*requiredDmgToOK, false, true);
-        if(stackSpire){
-            //getDamageCaller(cell.health/10, false, true);
-            getDamageCaller(8*baseDamage * limit / currRatio * goodShieldAtkMult/effectiveShieldAtkMult, false);
+        if(stackSpire && expectedNumHitsD > missingStacks && stackSpireNoMoreDamageCell != cellNum){
+            getDamageCaller(1.2*8*baseDamage, false, true);
+            stackSpireNoMoreDamageCell = cellNum;
         }
     }
     else if (expectedNumHitsX > missingStacks)
@@ -498,20 +551,14 @@ function autoStance() {
             }
             
             if(chosenFormation == 4 && (maxDesiredRatio > 1 || stackSpire)){
-                if(stackSpire)
-                    getDamageCaller(enemyMaxHealth/300, true); //attempt to lower our damage
-                else
-                    //getDamageCaller(baseDamage/maxDesiredRatio, true); //attempt to lower our damage
-                    getDamageCaller(baseDamage * limit / currRatio * effectiveShieldAtkMult, true);
                 
-                if(stacks < 185 && nextStartingStacks < 180 && zoneWorth > 0.8 && worldArray[cellNum].baseWorth > 0){
-                    wantLessDamage = true;
-                }
+                getDamageCaller(baseDamage * limit / currRatio * effectiveShieldAtkMult, true); //attempt to lower our damage
+                
                 var wantToSwapShieldFlag = (goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping') && (maxDesiredRatio > 2 || stackSpire));
                 if(wantToSwapShieldFlag)
                     desiredShield = "low";
                 
-                if (zoneWorth > 0.8 && DHratio >= 3 && !stackSpire && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99) && typeof game.global.dailyChallenge.bogged === 'undefined'){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
+                if (zoneWorth > 0.8 && game.global.antiStacks > 1 && DHratio >= 3 && !stackSpire && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99) && typeof game.global.dailyChallenge.bogged === 'undefined'){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
                     minAnticipationStacks = Math.ceil(Math.max(1, (5 + maxAnti)/maxDesiredRatio - 5)); //find desired stacks to reach maxDesiredRatio
                     var ourNewLowDamage = baseDamage*(1 + 0.2 * minAnticipationStacks)/((1 + 0.2 * game.global.antiStacks) * (wantToSwapShieldFlag ? 5 : 1));
                     var before = Math.min(stacks      + expectedNumHitsS, 200); //stacks if we dont trimpicide
@@ -521,7 +568,6 @@ function autoStance() {
                         
                         if(wantToSwapShieldFlag)
                             shieldCheckedFlag = false;
-                        //debug("trimpiciding " + minAnticipationStacks + " wantToSwapShield " + wantToSwapShieldFlag);
                         wantedAnticipation = minAnticipationStacks;
                         getTargetAntiStack(minAnticipationStacks, true);
                         trimpicides++;
@@ -549,7 +595,6 @@ function autoStance() {
         if(stacksAtDeath == 200) wastedStacksAtEnd++;
         if(lastNextStartingStacksCurrent == 200) wastedStacksAtStart++;
     }
-    lastCmp = worldArray[cellNum].finalWorth;
     stacksAtDeath = stacks;
     shieldUsedAtCellDeath = (highDamageHeirloom ? 1 : 0);
     lastNextStartingStacksCurrent = nextStartingStacksCurrent;
@@ -559,44 +604,34 @@ function autoStance() {
 }
 
 function saveStats(cellNum){
-    //stanceStats = {cmp : [], stacks : [], wastedStacksAtEnd : [], wastedStacksAtStart : [], shieldUsedAtCellDeath : [], trimpicides : [], timeDead : 0}; //keep track of how well we're doing
-    //var zoneShifter = 100*(game.global.world-1); //a bit too many cells for poor highcharts
-    var zoneShifter = 0;
-    if(worldArray[lastCell].baseWorth === 0) //dont count empty cells
-        stanceStats.cmp[zoneShifter+lastCell] = 0;
-    else
-        stanceStats.cmp[zoneShifter+lastCell] = parseFloat(lastCmp.toFixed(2));
-    stanceStats.stacks[zoneShifter+lastCell] = stacksAtDeath;
-    stanceStats.wastedStacksAtEnd[zoneShifter+lastCell] = wastedStacksAtEnd;
-    stanceStats.wastedStacksAtStart[zoneShifter+lastCell] = wastedStacksAtStart;
-    stanceStats.shieldUsedAtCellDeath[zoneShifter+lastCell] = shieldUsedAtCellDeath;
-    stanceStats.trimpicides[zoneShifter+lastCell] = trimpicides;
-    stanceStats.wantLessDamage[zoneShifter+lastCell] = wantLessDamage;
-    stanceStats.wantMoreDamage[zoneShifter+lastCell] = wantMoreDamage;
+    stanceStats.cmp[lastCell] = parseFloat(worldArray[lastCell].finalWorth.toFixed(2));
+    stanceStats.stacks[lastCell] = stacksAtDeath;
+    stanceStats.wastedStacksAtEnd[lastCell] = wastedStacksAtEnd;
+    stanceStats.wastedStacksAtStart[lastCell] = wastedStacksAtStart;
+    stanceStats.shieldUsedAtCellDeath[lastCell] = shieldUsedAtCellDeath;
+    stanceStats.trimpicides[lastCell] = trimpicides;
+    stanceStats.wantLessDamage[lastCell] = wantLessDamage;
+    stanceStats.wantMoreDamage[lastCell] = wantMoreDamage;
     
     stanceStats.timeDead = timeDead;
     if(cellNum > lastCell + 1){ //we overkilled some cells
         var stacks = Math.min(lastNextStartingStacksCurrent, 200);
         for(var i = lastCell + 1; i < cellNum; i++){
-            if(worldArray[i].baseWorth === 0) //dont count empty cells
-                stanceStats.cmp[zoneShifter+i] = 0;
-            else
-                stanceStats.cmp[zoneShifter+i] = parseFloat(worldArray[i].finalWorth.toFixed(2));
+            stanceStats.cmp[i] = parseFloat(worldArray[i].finalWorth.toFixed(2));
             
-            stanceStats.stacks[zoneShifter+i] = stacks;
+            stanceStats.stacks[i] = stacks;
             stacks = Math.ceil(stacks * getRetainModifier("Wind"));
-            stanceStats.wastedStacksAtEnd[zoneShifter+i] = 0;
-            stanceStats.wastedStacksAtStart[zoneShifter+i] = 0;
-            stanceStats.shieldUsedAtCellDeath[zoneShifter+i] = shieldUsedAtCellDeath;
-            stanceStats.trimpicides[zoneShifter+i] = 0;
-            if(stanceStats.stacks[zoneShifter+i]<190 && worldArray[i].baseWorth > 0 && worldArray[i].finalWorth > 1)
-                stanceStats.wantLessDamage[zoneShifter+i] = true;
+            stanceStats.wastedStacksAtEnd[i] = 0;
+            stanceStats.wastedStacksAtStart[i] = 0;
+            stanceStats.shieldUsedAtCellDeath[i] = shieldUsedAtCellDeath;
+            stanceStats.trimpicides[i] = 0;
+            if(stanceStats.stacks[i]<190 && worldArray[i].baseWorth > 0 && worldArray[i].finalWorth > 1)
+                stanceStats.wantLessDamage[i] = true;
             else
-            stanceStats.wantLessDamage[zoneShifter+i] = false;
-            stanceStats.wantMoreDamage[zoneShifter+i] = false;
+            stanceStats.wantLessDamage[i] = false;
+            stanceStats.wantMoreDamage[i] = false;
         }
     }
-    lastCmp = 0;
     stacksAtDeath = 0;
     wastedStacksAtEnd = 0;
     wastedStacksAtStart = 0;
@@ -609,6 +644,7 @@ function saveStats(cellNum){
 
 //game was loaded from a save mid-zone, set all previous values to 0 for the graph
 function setEmptyStats(){
+    //debug("clearing zone data");
     stanceStats = {cmp: [], stacks: [], wastedStacksAtEnd: [], wastedStacksAtStart: [], shieldUsedAtCellDeath: [], trimpicides: [], wantLessDamage: [], wantMoreDamage: [], timeDead: 0}; //keep track of how well we're doing
     for(var i = 0; i < game.global.lastClearedCell+1; i++){
         stanceStats.cmp[i] = 0;
@@ -621,6 +657,11 @@ function setEmptyStats(){
         stanceStats.wantMoreDamage[i] = false;
         stanceStats.timeDead = 0;
     }
+    //chart1 = null;
+    allSaveData[allSaveData.length-1].cmp = stanceStats.cmp;
+    allSaveData[allSaveData.length-1].stacks = stanceStats.stacks;
+    if(getPageSetting('ForceUpdateGraph') && document.getElementById('graphParent').style.display === "block")
+        drawGraph();  
 }
 
 function stancePrintout(cellNum, stacks, nextStartingStacks, cmp, expectedNumHitsS, expectedNumHitsX, expectedNumHitsD, corruptedtmp, lastDamageDealt, critSpan){
@@ -819,7 +860,7 @@ function buildWorldArray(){
     maxHP = -1;
     
     for (var i = 0; i < 100; i++){
-        var enemy = {mutation : "", finalWorth : "", corrupted : "", name : "", health : "", maxHealth : "", stacks : "", pbHits : "", nextPBDmg : "", baseWorth : "", geoRelativeCellWorth : "", PBWorth : ""};
+        var enemy = {mutation: "", finalWorth: "", corrupted: "", name: "", health: "", maxHealth: "", baseHelium: "", spireBonus: "", pbHits: "", nextPBDmg: "", baseWorth: "", geoRelativeCellWorth: "", PBWorth: ""};
         enemy.name = game.global.gridArray[i].name;
         enemy.mutation = game.global.gridArray[i].mutation;
         if(enemy.mutation == "Healthy") 
@@ -904,10 +945,22 @@ function buildWorldArray(){
     maxDesiredRatio = maxStacksBaseDamageD/(maxHP * 0.2); //we use this number to figure out coordination purchases and weapon prestige/leveling to balance our damage
     
     calcOmniHelium();
-    // && getPageSetting('StackSpire4')){
+
     if(game.global.world == 500){ //special case
-        var heliumAmount = 0;
+        var heliumAmount = 0; //spire bonus helium
+        var regularHelium = 0; //normal helium from corrupted/healthy/omni(omni?)
+        
+        var spireRowBonus = (game.talents.stillRowing.purchased) ? 0.03 : 0.02;
+        
         for(var i = 1; i <= 100; i++){
+            if(worldArray[i-1].mutation == "Magma" || worldArray[i-1].mutation === undefined)
+                regularHelium = 0;
+            else if(worldArray[i-1].mutation == "Corruption")
+                regularHelium = m * 0.15 * (1 + spireRowBonus * (30+Math.floor(i/10))) / (1 + spireRowBonus * 30);
+            else if(worldArray[i-1].mutation == "Healthy")
+                regularHelium = m * 0.45 * (1 + spireRowBonus * (30+Math.floor(i/10))) / (1 + spireRowBonus * 30);
+            if(i == 100) //omni
+                regularHelium = m * (1 + spireRowBonus * (30+Math.floor(i/10))) / (1 + spireRowBonus * 30);
             if(i == 20 || i == 50 || i == 60 || i == 70 || i == 80)
                 heliumAmount = 0;
             else if (i == 40)
@@ -918,7 +971,11 @@ function buildWorldArray(){
                 heliumAmount = rewardResourceAT("helium", 100, 99, i);
             else
                 heliumAmount = rewardResourceAT("helium", 0.5*Math.pow(1.01,i), 99, i);
-            //debug("i: " + i + " " + heliumAmount.toExponential(2));
+            var totalMNormalized = (regularHelium + heliumAmount) / m;
+            //debug("Cell " + i + " spire bonus: " + heliumAmount.toExponential(2) + " regularHelium: " + regularHelium.toExponential(2) + " m normalized " + totalMNormalized.toFixed(2));
+            worldArray[i-1].baseHelium = regularHelium;
+            worldArray[i-1].spireBonus = heliumAmount;
+            worldArray[i-1].baseWorth = totalMNormalized;
         }
     }
 
@@ -933,14 +990,6 @@ function buildWorldArray(){
 
     stanceStats = {cmp: [], stacks: [], wastedStacksAtEnd: [], wastedStacksAtStart: [], shieldUsedAtCellDeath: [], trimpicides: [], wantLessDamage: [], wantMoreDamage: [], timeDead: 0}; //keep track of how well we're doing
     
-    //cell cmp
-    //stacks on cell death
-    //wasted stacks at end (hitting cell with 200 stacks)
-    //wasted stacks at start of next cell (hitting cell when next cell has 200 stacks already)
-    //shield used on cell death
-    //trimpicides
-    //time dead waiting for breeding
-    
     calculateZoneWorth(0);
     
     if(!isNaN(m) && !game.global.runningChallengeSquared)
@@ -949,6 +998,16 @@ function buildWorldArray(){
         debug("Zone " + game.global.world);
     
     return true;
+}
+
+function checkSpireValue(cellNum, stacks, bonus){
+    if(game.global.world != 500)
+        return 0;
+    var windMult = (1 + 0.001 * game.empowerments.Wind.level * stacks);
+    if(bonus)
+        return worldArray[cellNum].spireBonus * windMult;
+    else
+        return worldArray[cellNum].baseHelium * windMult;
 }
 
 function rewardResourceAT(what, baseAmt, level, cellNum){ //before wind stacks, after spire row bonus. same calculation as the game, only without actually giving helium.
@@ -1001,7 +1060,11 @@ function calcOmniHelium(){ //rewardResource()
     var g = 1+0.05*game.portal.Looting.level;
     var h = 1+0.0025*game.portal.Looting_II.level;
     var spireRowBonus = (game.talents.stillRowing.purchased) ? 0.03 : 0.02;
-    var i = 1 + (game.global.spireRows * spireRowBonus);
+    var i;
+    if(game.global.world == 500 && game.global.spireRows >= 30) //always calculate m in spire4 with base rows of 30, so it will always be accurate whether we enter zone 500 or load a save from the middle
+        i = 1 + (30 * spireRowBonus);
+    else
+        i = 1 + (game.global.spireRows * spireRowBonus);
     var j = 1;
     var k = (game.global.totalSquaredReward / 1000) + 1;
     var fluffyBonus = Fluffy.isRewardActive("helium");
@@ -1044,7 +1107,6 @@ function goDefaultStance(chosenFormation){
         setFormation(4);
         return;
     }
-    //if(!game.global.spireActive)
     if(game.upgrades.Dominance.done)
         setFormation(formation);
     else

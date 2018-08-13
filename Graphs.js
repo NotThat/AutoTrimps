@@ -806,7 +806,8 @@ function setGraphData(graph) {
             //graphData[1] = {name: 'Stacks',                data: allSaveData[allSaveData.length-1].stacks, yAxis: 1, categories: names};
             graphData[0] = {name: 'He/hr Efficiency', data: arr1};
             graphData[1] = {name: 'Stacks', data: arr2, yAxis: 1};
-            title = 'Zone Helium Efficiency and Stacks';
+            var name = (game.global.world == 500 ? "Spire IV" : "Zone " + game.global.world);
+            title = name + ' Helium Efficiency and Stacks';
             xTitle = 'Cell';
             yTitle = 'Helium Efficiency';
             yTitle2 = 'Stacks';
@@ -1227,32 +1228,31 @@ function setGraphData(graph) {
     }
     //put finishing  touches on this graph.
     if (graph == 'Efficiency and Stacks') {
-        //debug("hi");
-        for(var i = 0; i < stanceStats.wantLessDamage.length; i++){
-            if(stanceStats.wantLessDamage[i]){
-                var p = chart1.series[1].points[i];
-                p.update({
-                    marker: {
-                        radius: 12
-                        
-                    },
-                    color: "#FF0000"
-                });
-                //chart1.series[1].points[i].radius = 16;
+        if(stanceStats && stanceStats.wantLessDamage)
+            for(var i = 0; i < stanceStats.wantLessDamage.length; i++){
+                if(stanceStats.wantLessDamage[i]){
+                    var p = chart1.series[1].points[i];
+                    p.update({
+                        marker: {
+                            radius: 9
+
+                        },
+                        color: "#FF0000"
+                    });
+                }
+                if(stanceStats.wantMoreDamage[i]){
+                    var p = chart1.series[1].points[i];
+                    p.update({
+                        marker: {
+                            radius: 9
+
+                        },
+                        color: "#E500FF"
+                    });
+                }
             }
-            if(stanceStats.wantMoreDamage[i]){
-                var p = chart1.series[1].points[i];
-                p.update({
-                    marker: {
-                        radius: 12,
-                        
-                    },
-                    color: "#E500FF"
-                });
-                //chart1.series[1].points[i].radius = 16;
-            }
-                
-        }
+        //else
+            //drawGraph();
         //chart1.xAxis[0].marker.enabled = true;
         //chart1.xAxis[0].minorTickInterval = 1;
     }
@@ -1545,6 +1545,43 @@ function lookUpZoneData(zone,portal) {
         if (allSaveData[i].totalPortals != portal) continue;
         if (allSaveData[i].world != zone) continue;
         return allSaveData[i];
+    }
+}
+
+function updateLastPoint(lastCell){
+    if(document.getElementById('graphSelection').value != "Efficiency and Stacks")
+        return;
+    
+    var name = "";
+    if(!worldArray[lastCell])
+        name = lastCell;
+    else if(worldArray[lastCell].corrupted === undefined)
+        name = lastCell + "empty";
+    else
+        name = lastCell + worldArray[lastCell].corrupted;
+    chart1.series[0].addPoint([name, stanceStats.cmp[lastCell]], true, false); //cmp series
+    chart1.series[1].addPoint([name, stanceStats.stacks[lastCell]], true, false); //stacks series
+
+    var p = chart1.series[1].points[chart1.series[1].points.length - 1];
+    
+    
+    if(p === undefined || !((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2))
+        return;
+    if(stanceStats.wantLessDamage[lastCell]){
+        p.update({
+            marker: {
+                radius: 9
+            },
+            color: "#FF0000"
+        });
+    }
+    if(stanceStats.wantMoreDamage[lastCell]){
+        p.update({
+            marker: {
+                radius: 9,
+            },
+            color: "#E500FF"
+        });
     }
 }
 //run the main gatherInfo function 1 time every second

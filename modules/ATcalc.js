@@ -325,3 +325,16 @@ function aboutToDie(){
     }
     return false;
 }
+
+function checkForGoodCell(cellNum){
+    var foundGoodFlag = false;
+    for(var i = cellNum; i < cellNum+10; i++){
+        if(i > 99)
+            break;
+        if(worldArray[i].finalWorth > 1){
+            foundGoodFlag = true;
+            break;
+        }
+    }
+    return foundGoodFlag;
+}

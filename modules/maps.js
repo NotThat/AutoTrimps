@@ -180,7 +180,7 @@ function calcDmg(){
     
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
-    var stackSpire = (game.global.world == 500) && getPageSetting('StackSpire4') && (game.global.spireDeaths <= 8);
+    var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 8) && checkForGoodCell(0);
     if(game.global.mapsActive && !stackSpire){
         if(game.global.world % 100 === 0){ //mapping for prestige in spire4 without spire stacking. we probably want all the damage.
             var requiredDmgToOK = dmgNeededToOKHelper(80, worldArray[80].maxHealth);
@@ -328,9 +328,8 @@ function autoMap() {
     }
     
     //spire specific settings
-    if (game.global.world != 500 || (game.global.lastClearedCell + 1 !== 0)) spireStackFirst = true;
-    var stackSpire = (game.global.world == 500) && getPageSetting('StackSpire4') && (game.global.spireDeaths <= 8);
-    var stackSpireGetMinDamage = stackSpire && (game.global.lastClearedCell + 1 === 0) && spireStackFirst;
+    var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 8);
+    var stackSpireGetMinDamage = stackSpire && (game.global.lastClearedCell + 1 === 0) && (checkForGoodCell(0));
     preSpireFarming = (isActiveSpireAT()) && (spireTime = (new Date().getTime() - game.global.zoneStarted) / 1000 / 60) < getPageSetting('MinutestoFarmBeforeSpire');
     spireMapBonusFarming = getPageSetting('MaxStacksForSpire') && isActiveSpireAT() && game.global.mapBonus < customVars.maxMapBonus;
     if (preSpireFarming || spireMapBonusFarming || stackSpireGetMinDamage)
@@ -617,12 +616,41 @@ function autoMap() {
                 equipLowDmgShield();
                 calcBaseDamageinS();
                 debug("Lowering damage for Spire IV");
+                
+                var deltaGenes = getDeltaGenes(1);
+                if(deltaGenes > 0){ //if we need to fire geneticists
+                    switchOffGA(); //pause autogeneticist  
+                    debug("Automaps: Trimpiciding " + game.global.antiStacks + "->1. Firing " + deltaGenes + " Geneticists. New Geneticists: " + (game.jobs.Geneticist.owned-deltaGenes));
+                    fireGeneticists(deltaGenes);
+                }
+                
                 runMap();                           //--enter map
                 fightManual();                      //--fight
-                mapsClicked();                      //--exit map
+                
+                if(!game.global.preMapsActive && !game.global.switchToMaps)
+                    mapsClicked();
+                if(!game.global.preMapsActive)
+                    mapsClicked();                  //--exit map
+                
+                var start = new Date().getTime();
+                while(game.global.breedBack > 0){
+                    var current = new Date().getTime();
+                    if(current-start > 1000){
+                        debug("error: took too long to breed back army. exiting.");
+                        break;
+                    }
+                }
+                
                 runMap();                           //--enter map
                 fightManual();                      //--fight
-                mapsClicked();                      //--exit map
+                
+                switchOnGA();
+                
+                if(!game.global.preMapsActive && !game.global.switchToMaps)
+                    mapsClicked();
+                if(!game.global.preMapsActive)
+                    mapsClicked();                  //--exit map
+                
                 recycleMap();
                 mapsClicked();                      //--exit to world
                 fightManual();                      //--fight

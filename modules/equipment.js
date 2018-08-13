@@ -343,7 +343,7 @@ function autoLevelEquipment(lowerDamage, fastMode) {
     
     if(game.global.soldierHealth < safetyNet*enemyDamage && game.global.soldierHealth > 1000){ //lets try buying more health if current health < 35% enemy attack, but not if 0 because we're dead
         if (first){
-            debug("need more health");
+            //debug("need more health");
             first = false;
         }
         enoughHealthE = false;
@@ -586,12 +586,11 @@ function areWeAttackLevelCapped() {
 function getDamage(dmg, lowerDamage, noCrit){
     equipMainShield(); //always start calculations with the good shield
     calcBaseDamageinS(); //this incoorperates damage that will only be updated on next cell
-    var modifier = 1;
     //if(!goodShieldActuallyEquipped)
     //    modifier = goodShieldAtkMult; //calculate automaps damage as though we were wearing our good shield, because we can always trimpicide and swap to it
     
     updateAllBattleNumbers(true);
-    var dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage) * modifier;
+    var dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage);
     
     holdingBack = true;
     
@@ -627,7 +626,7 @@ function getDamage(dmg, lowerDamage, noCrit){
         dmgLast = dmgToCheck;
         autoLevelEquipmentCaller(lowerDamage);
         calcBaseDamageinS(); 
-        dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage) * modifier;
+        dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage);
         if (dmgToCheck*8 >= dmg) //have enough damage
             return;
     }
@@ -635,7 +634,7 @@ function getDamage(dmg, lowerDamage, noCrit){
     if (buyWeaponsMode < 2){
         buyWeaponsMode = 2; //allow buying equipment levels but not prestige
         getDamage(dmg, lowerDamage, noCrit);
-        dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage) * modifier;
+        dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage);
     }
     
     if (dmgToCheck*8 >= dmg) //have enough damage
@@ -644,7 +643,7 @@ function getDamage(dmg, lowerDamage, noCrit){
     if (buyWeaponsMode < 3){
         buyWeaponsMode = 3; //allow buying equipment levels and prestiges
         getDamage(dmg, lowerDamage, noCrit);
-        dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage) * modifier;
+        dmgToCheck = (noCrit ? baseDamageNoCrit : baseDamage);
     }
     
     if (dmgToCheck*8 >= dmg) //have enough damage

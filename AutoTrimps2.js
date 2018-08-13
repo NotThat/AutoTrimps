@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = 21;
+var ver = 22;
 var verDate = "13.8.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -190,6 +190,7 @@ var maxAnti = (game.talents.patience.purchased ? 45 : 30);
 var wantedAnticipation = maxAnti;
 var highestPrestigeOwned = 0;
 var allowBuyingCoords = true;
+var lastCell = -1;
 
 ////////////////////////////////////////
 //Main LOGIC Loop///////////////////////
@@ -235,9 +236,10 @@ function mainLoop() {
         setTitle(); // Set the browser title
         
         buildWorldArray();
-        setEmptyStats();
-        allSaveData[allSaveData.length-1].cmp = stanceStats.cmp;
-        allSaveData[allSaveData.length-1].stacks = stanceStats.stacks;
+        setEmptyStats(); //also clears graph data
+        lastCell = -1;
+        AutoMapsCoordOverride = false;
+        maxCoords = -1;
         perked = false;
     }
     setScienceNeeded();  //determine how much science is needed
