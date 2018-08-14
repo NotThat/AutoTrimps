@@ -379,7 +379,7 @@ function initializeAllSettings() {
     //Line 2
     createSetting('BWraid', 'BW Raiding', 'Raids BW at zone specified in BW Raiding min/max.', 'boolean', false, null, 'Spire');
     createSetting('BWraidDailyCOnly', 'BW Raiding Daily/C2 Only', 'Only BW raid in dailies and challenges', 'boolean', false, null, 'Spire');
-    createSetting('BWraidingz', 'Z to BW Raid', 'Raids BWs at zone specified. Example: 495, will raid all BWs for all gear starting from 495. Will skip lower BWs if you have enough damage. Once all gear is obtained, will return to regular farming.', 'value', -1, null, 'Spire');
+    createSetting('BWraidingz', 'BW Raid Zone', 'Raids BWs at zone specified. Example: 495, will raid all BWs for all gear starting from 495. Will skip lower BWs if you have enough damage. Once all gear is obtained, will return to regular farming.', 'value', -1, null, 'Spire');
     createSetting('BWraidingmax', 'Max BW to raid', 'Raids BWs until zone specified. Example: 515, will raid all BWs for all gear until 515. Will skip lower BWs if you have enough damage. Once all gear is obtained, will return to regular farming.', 'value', -1, null, 'Spire');
     createSetting('PRaidSpire', 'Raid +5 in Spire', 'Raid +5 levels for gear in active spires. Overrides Map Raiding Start.', 'boolean', false, null, 'Spire');
     createSetting('StackSpire4', ['Windstack Spire IV: Never','Windstack Spire IV: Dailies', 'Windstack Spire IV: Always'], 'Attempts to maximize windstacks in Spire IV. Recommended you have Raid +5 in Spire enabled when you use this. You also probably want a few more nurseries when using this.', 'multitoggle', 0, null, 'Spire');
@@ -536,7 +536,7 @@ function createSetting(id, name, description, type, defaultValue, list, containe
     btn.id = id;
     var loaded = autoTrimpSettings[id];
     if (type == 'boolean') {
-        if (!(loaded && id == loaded.id))
+        if (!(loaded && id == loaded.id && loaded.type === type))
             autoTrimpSettings[id] = {
                 id: id,
                 name: name,
@@ -554,7 +554,7 @@ function createSetting(id, name, description, type, defaultValue, list, containe
         if (container) document.getElementById(container).appendChild(btnParent);
         else document.getElementById("autoSettings").appendChild(btnParent);
     } else if (type == 'value' || type == 'valueNegative') {
-        if (!(loaded && id == loaded.id))
+        if (!(loaded && id == loaded.id && loaded.type === type))
             autoTrimpSettings[id] = {
                 id: id,
                 name: name,
@@ -572,7 +572,7 @@ function createSetting(id, name, description, type, defaultValue, list, containe
         if (container) document.getElementById(container).appendChild(btnParent);
         else document.getElementById("autoSettings").appendChild(btnParent);
     } else if (type == 'dropdown') {
-        if (!(loaded && id == loaded.id))
+        if (!(loaded && id == loaded.id && loaded.type === type))
             autoTrimpSettings[id] = {
                 id: id,
                 name: name,
@@ -619,7 +619,7 @@ function createSetting(id, name, description, type, defaultValue, list, containe
         else document.getElementById("autoSettings").appendChild(btnParent);
         return; //return means don't store it in autoTrimpSettings at the bottom
     } else if (type == 'multitoggle') {
-        if (!(loaded && id == loaded.id))
+        if (!(loaded && id == loaded.id && loaded.type === type))
             autoTrimpSettings[id] = {
                 id: id,
                 name: name,
@@ -880,9 +880,9 @@ function updateCustomButtons() {
     
     //getPageSetting('BWraid')==true ? turnOn("BWraidDailyCOnly"): turnOff("BWraidDailyCOnly");
     
-    getPageSetting('BWraid')==true ? turnOn("BWraidDailyCOnly"): turnOff("BWraidDailyCOnly");
-    getPageSetting('BWraid')==true ? turnOn("BWraidingz"): turnOff("BWraidingz");
-    getPageSetting('BWraid')==true ? turnOn("BWraidingmax"): turnOff("BWraidingmax");
+    getPageSetting('BWraid') ? turnOn("BWraidDailyCOnly"): turnOff("BWraidDailyCOnly");
+    getPageSetting('BWraid') ? turnOn("BWraidingz"): turnOff("BWraidingz");
+    getPageSetting('BWraid') ? turnOn("BWraidingmax"): turnOff("BWraidingmax");
     
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomStaves"): turnOff("HeirloomStaves");
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomHighShield"): turnOff("HeirloomHighShield");

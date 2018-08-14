@@ -182,7 +182,9 @@ function calcDmg(){
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 8) && checkForGoodCell(0);
     if(game.global.mapsActive && !stackSpire){
-        if(game.global.world % 100 === 0){ //mapping for prestige in spire4 without spire stacking. we probably want all the damage.
+        if(BWRaidNowLogic()) //bwraid, buy all
+            getDamageCaller(cell.health*8*9999, false, false);
+        else if(game.global.world % 100 === 0){ //mapping for prestige in spire4 without spire stacking. we probably want all the damage.
             var requiredDmgToOK = dmgNeededToOKHelper(80, worldArray[80].maxHealth);
             getDamageCaller(requiredDmgToOK*3, false, false);
         }

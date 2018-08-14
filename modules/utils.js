@@ -155,6 +155,8 @@ function setPageSetting(setting, value) {
     if (autoTrimpSettings.hasOwnProperty(setting) == false) {
         return false;
     }
+    //check type match first, otherwise theres a conflict. in this case we make the setting from new
+    //if(autoTrimpSettings[setting].type
     if (autoTrimpSettings[setting].type == 'boolean') {
         // debug('found a boolean');
         autoTrimpSettings[setting].enabled = value;
