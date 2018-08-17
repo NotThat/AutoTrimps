@@ -30,7 +30,7 @@ function buyUpgrades() {
                 else
                     buyCoords = false;
 
-                var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 5);
+                var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 5) && (game.global.challengeActive ? typeof game.global.dailyChallenge.bogged === 'undefined' : true);
                 if (((isActiveSpireAT() || PRaidingActive) && !stackSpire) || game.global.world == getPageSetting('VoidMaps') || BWRaidNowLogic()) //always want all coords for active spires and void maps
                     buyCoords = true;
             }
