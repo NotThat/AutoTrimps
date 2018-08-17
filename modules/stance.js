@@ -240,7 +240,7 @@ function autoStance() {
             fightManual();
         
         allowBuyingCoords = true;
-        if(game.global.world == 400 && game.global.challengeActive == "Daily"){ //spire3 special case in dailies. a bit more conservative here so we can more easily farm low 400s
+        if(game.global.world == 400 && game.global.challengeActive == "Daily" && typeof game.global.dailyChallenge.bogged === 'undefined'){ //spire3 special case in dailies. a bit more conservative here so we can more easily farm low 400s
             var timeGoal = getPageSetting('Spire3Time'); //how long we wish to spend in spire3
             if (timeGoal < 1 || isNaN(timeGoal)) timeGoal = 1;
             var totalHealth = 0;
