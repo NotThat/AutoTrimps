@@ -191,8 +191,10 @@ function calcDmgManual(printout, figureOutShield, number){
         num = num / (baseDamageNoCrit / shield);
         //debug("num is " + num.toFixed(2));
 
-        if(num < (goodShieldAtkMult+1)/2)
+        if(num < (goodShieldAtkMult+1)/2){
             goodShieldActuallyEquipped = false;
+            //debug(num);
+        }
         else if(isNaN(num))
             debug("num is NaN " + num);
         else{

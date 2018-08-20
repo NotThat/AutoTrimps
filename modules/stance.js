@@ -152,7 +152,6 @@ function autoStance() {
             if(!chart1 || !chart1.series[0] || chart1.series[0].points.length === 0)
                 drawGraph(); //draw initial graph
             
-            
             if(cellNum > lastCell + 1){ //we overkilled some cells
                 for(var i = lastCell + 1; i < cellNum; i++){
                     updateLastPoint(i);
@@ -160,9 +159,6 @@ function autoStance() {
             }
             else
                 updateLastPoint(lastCell);
-            
-            
-            
         }
         
         /*if(stackSpire){
