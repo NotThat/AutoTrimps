@@ -382,11 +382,7 @@ function pushData() {
         magmite: game.global.magmite,
         magmamancers: game.jobs.Magmamancer.owned,
         fluffy: game.global.fluffyExp,
-        nursery: game.buildings.Nursery.purchased,
-        cmp: stanceStats.cmp,
-        stacks: stanceStats.stacks,
-        wantLessDamage: stanceStats.wantLessDamage,
-        wantMoreDamage: stanceStats.wantMoreDamage
+        nursery: game.buildings.Nursery.purchased
     });
     //only keep 15 portals worth of runs to prevent filling storage
     clearData(15);
@@ -782,28 +778,23 @@ function setGraphData(graph) {
             yType = 'Linear';
             break;
         case 'Efficiency and Stacks':
-            //graphData = allPurposeGraph('cmp',true,"number");
-            
+       
             var names = [];
             var arr1 = [];
             var arr2 = [];
-            for(var i = 0; i < allSaveData[allSaveData.length-1].cmp.length; i++){
+            
+            for(var i = 0; i <stanceStats.cmp.length; i++){
                 if(!worldArray[i])
                     names.push(i);
                 else if(worldArray[i].corrupted === undefined)
                     names.push(i + "empty");
                 else
                     names.push(i + worldArray[i].corrupted);
-                arr1.push([names[i], allSaveData[allSaveData.length-1].cmp[i]]);
-                arr2.push([names[i], allSaveData[allSaveData.length-1].stacks[i]]);
+                arr1.push([names[i], stanceStats.cmp[i]]);
+                arr2.push([names[i], stanceStats.stacks[i]]);
             }
-            //chart1.xAxis[0].tickInterval = 1;
+            
             graphData = [];
-            //graphData[0] = {name: 'Cell He/hr Efficiency', data: allSaveData[allSaveData.length-1].cmp};
-            //graphData[1] = {name: 'Stacks', data: allSaveData[allSaveData.length-1].stacks, yAxis: 1};
-            //graphData.categories = names;
-            //graphData[0] = {name: 'Cell He/hr Efficiency', data: allSaveData[allSaveData.length-1].cmp, categories: names};
-            //graphData[1] = {name: 'Stacks',                data: allSaveData[allSaveData.length-1].stacks, yAxis: 1, categories: names};
             graphData[0] = {name: 'He/hr Efficiency', data: arr1};
             graphData[1] = {name: 'Stacks', data: arr2, yAxis: 1};
             var name = (game.global.world == 500 ? "Spire IV" : "Zone " + game.global.world);

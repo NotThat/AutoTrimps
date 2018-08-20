@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = 27;
+var ver = 28;
 var verDate = "20.8.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -236,18 +236,6 @@ function mainLoop() {
         setTitle(); // Set the browser title
         
         buildWorldArray();
-        if(allSaveData.length >= 1){
-            allSaveData[allSaveData.length-1].stacks = [];
-            allSaveData[allSaveData.length-1].cmp = [];
-            allSaveData[allSaveData.length-1].wantLessDamage = [];
-            allSaveData[allSaveData.length-1].wantMoreDamage = [];
-        }
-        if(allSaveData.length >= 2){
-            allSaveData[allSaveData.length-2].stacks = [];
-            allSaveData[allSaveData.length-2].cmp = [];
-            allSaveData[allSaveData.length-2].wantLessDamage = [];
-            allSaveData[allSaveData.length-2].wantMoreDamage = [];
-        }
         setEmptyStats(); //also clears graph data
         lastCell = -1;
         AutoMapsCoordOverride = false;

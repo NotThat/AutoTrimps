@@ -664,9 +664,7 @@ function setEmptyStats(){
         stanceStats.wantMoreDamage[i] = false;
         stanceStats.timeDead = 0;
     }
-    //chart1 = null;
-    allSaveData[allSaveData.length-1].cmp = stanceStats.cmp;
-    allSaveData[allSaveData.length-1].stacks = stanceStats.stacks;
+
     if(getPageSetting('ForceUpdateGraph') && document.getElementById('graphParent').style.display === "block")
         drawGraph();  
 }
