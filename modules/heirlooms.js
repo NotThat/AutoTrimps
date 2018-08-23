@@ -536,6 +536,8 @@ function equipMainShield(){
         highDamageHeirloom = true;
         return true;
     }
+    if(heirloomsShown) //dont do anything while heirlooms window is open. under rate circumstances bad things could happen if both user and AT are handling heirlooms at the same time
+        return false;
     var loom = findMainShield();
     if (loom == null) return false;
     newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");
@@ -556,6 +558,8 @@ function equipLowDmgShield(){
         highDamageHeirloom = false;
         return true;
     }
+    if(heirloomsShown) //dont do anything while heirlooms window is open. under rate circumstances bad things could happen if both user and AT are handling heirlooms at the same time
+        return false;
     var loom = findLowDmgShield();
     if (loom == null) return false;
     newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");

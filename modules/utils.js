@@ -113,10 +113,14 @@ function serializeSettings() {
         const el = autoTrimpSettings[k];
         switch (el.type) {
         case 'boolean':
+            //if(el.enabled === undefined)
+            //    return v[k] = false, v;
             return v[k] = el.enabled, v;
         case 'value':
         case 'valueNegative':
         case 'multitoggle':
+            //if(el.value === undefined)
+            //    return v[k] = -1, v;
             return v[k] = el.value, v;
         case 'dropdown':
             return v[k] = el.selected, v;
