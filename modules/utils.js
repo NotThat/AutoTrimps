@@ -88,7 +88,7 @@ PrestigeSkip1_2 = PrestigeSkipMode + PrestigeSkip2
 ScryerDieToUseS += ScryerDieZ
 (+more since 5 days ago)
 */
-    if (versionIsOlder(oldVer, '2.1.7.0')) {
+    /*if (versionIsOlder(oldVer, '2.1.7.0')) {
         //example:*untested*
         var X='BuyBuildings';
         var Y='BuyStorage';
@@ -102,7 +102,7 @@ ScryerDieToUseS += ScryerDieZ
         newOne.value+= oldTwo.enabled ? 1 : 0;
         delete oldOne;
         delete oldTwo;      
-    }
+    }*/
     autoTrimpSettings = oldSettings;
 }
 

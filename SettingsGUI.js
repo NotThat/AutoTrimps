@@ -392,7 +392,7 @@ function initializeAllSettings() {
     createSetting('WindStackingPctHe', 'He/Hr% Goal', 'For use with AutoStance. Windstacking will use this goal while handling windfarm. You should set this to about x1.5 times your filler He/Hr percent of total. In % units (type 0.5 for 0.5% He/Hr etc)', 'value', '-1', null, 'Combat');
     createSetting('DelayCoordsForWind', 'Stall Coords For Wind', 'With this on, AS will micromanage Coordination for windstacking. Logic is: Buy all Coords utill *Start No Coord Buy* zone, then stop until Amalgamator amount, then let AS micromanage. Will always buy all coords for active spires, Void Map zone BW Raid and Prestige Raids.', 'boolean', true, null, 'Combat');
     createSetting('DelayWeaponsForWind', 'Stall Weapons For Wind', 'With this on, AS will micromanage Weapon purchases for windstacking. Used to lower damage in the early game.', 'boolean', true, null, 'Combat');
-    createSetting('ForceUpdateGraph', 'Live Graph', 'When the graph window is open, it will update on every cell. This is somewhat CPU intensive so its recommended not to leave this permenantly enabled (unless you want to).', 'boolean', false, null, 'Combat');
+    createSetting('ForceUpdateGraph', 'Live Graph', 'When the graph window is open, it will update on every cell.', 'boolean', false, null, 'Combat');
     //createSetting('ForceAbandon', 'Auto Force-Abandon', '(Trimpicide). If a new fight group is available and anticipation stacks aren\'t maxed, force abandon and grab a new group. Located in the geneticist management script.', 'boolean', true, null, 'Combat');
     createSetting('AutoRoboTrimp', 'AutoRoboTrimp', 'Use RoboTrimps ability starting at this level, and every 5 levels thereafter. (set to 0 to disable. default 60.) 60 is a good choice for mostly everybody.', 'value', '60', null, 'Combat');
 
@@ -581,6 +581,11 @@ function createSetting(id, name, description, type, defaultValue, list, containe
                 selected: loaded === undefined ? defaultValue : loaded,
                 list: list
             };
+        //make sure the saved selected dropdown option actually exists
+        if(autoTrimpSettings[id].list.indexOf(autoTrimpSettings[id].selected) == -1)
+            autoTrimpSettings[id].selected = defaultValue;
+        if(autoTrimpSettings[id].list.indexOf(autoTrimpSettings[id].selected) == -1)
+            debug("error: autoTrimpSettings["+id+"] value " +autoTrimpSettings[id].selected+ " unrecognized");
         var btn = document.createElement("select");
         btn.id = id;
         if (game.options.menu.darkTheme.enabled == 2) btn.setAttribute("style", "color: #C8C8C8; font-size: 1.0vw;");
