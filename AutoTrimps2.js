@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = 33;
+var ver = 34;
 var verDate = "26.8.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -33,6 +33,7 @@ function delayStart() {
         console.log("waiting for game to load...");
         return;
     }
+    console.log("Variables loaded.");
     stop = true;
     setTimeout(function(){initializeAutoTrimps(); if (!local) printChangelog(); setTimeout(delayStartAgain, startupDelay);}, 2500);
 }
