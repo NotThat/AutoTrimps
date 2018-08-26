@@ -78,9 +78,62 @@ function buyJobs() {
     var freeWorkers = Math.ceil(game.resources.trimps.realMax() / 2) - game.resources.trimps.employed;
     var breeding = (game.resources.trimps.owned - game.resources.trimps.employed);
     var totalDistributableWorkers = freeWorkers + game.jobs.Farmer.owned + game.jobs.Miner.owned + game.jobs.Lumberjack.owned;
-    var farmerRatio = parseInt(getPageSetting('FarmerRatio'));
-    var lumberjackRatio = parseInt(getPageSetting('LumberjackRatio'));
-    var minerRatio = parseInt(getPageSetting('MinerRatio'));
+    
+    
+    
+    
+    var farmerRatio = 1;
+    var lumberjackRatio = 1;
+    var minerRatio = 1;
+    
+    
+    if(getPageSetting('BuyJobsNew')==1){ //auto worker ratios
+        var ratioSet;
+        if (MODULES["jobs"].customRatio) {
+            ratioSet = MODULES["jobs"].customRatio;
+        } else if (game.buildings.Tribute.owned > 3000 && mutations.Magma.active()) {
+            ratioSet = MODULES["jobs"].autoRatio6;
+        } else if (game.buildings.Tribute.owned > 1500) {
+            ratioSet = MODULES["jobs"].autoRatio5;
+        } else if (game.buildings.Tribute.owned > 1000) {
+            ratioSet = MODULES["jobs"].autoRatio4;
+        } else if (game.resources.trimps.realMax() > 3000000) {
+            ratioSet = MODULES["jobs"].autoRatio3;
+        } else if (game.resources.trimps.realMax() > 300000) {
+            ratioSet = MODULES["jobs"].autoRatio2;
+        } else {
+            ratioSet = MODULES["jobs"].autoRatio1;
+        }
+        //Override normal ratios with challenge specific ones
+        if (game.global.challengeActive == 'Watch'){
+            ratioSet = MODULES["jobs"].autoRatio1;
+        } else if (game.global.challengeActive == 'Metal'){
+            ratioSet = [4,5,0]; //this challenge likes workers split half and half between farmers and lumbers (idk why)
+        }
+        farmerRatio     = ratioSet[0];
+        lumberjackRatio = ratioSet[1];
+        minerRatio      = ratioSet[2];
+    }
+    else if(getPageSetting('BuyJobsNew')==2){ //manual
+        farmerRatio = parseInt(getPageSetting('FarmerRatio'));
+        lumberjackRatio = parseInt(getPageSetting('LumberjackRatio'));
+        minerRatio = parseInt(getPageSetting('MinerRatio'));
+    }
+    else{
+        debug("Error: BuyJobs() BuyJobsNew = " + getPageSetting('BuyJobsNew'));
+        return;
+    }
+        
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
     var totalRatio = farmerRatio + lumberjackRatio + minerRatio;
     var scientistRatio = totalRatio / MODULES["jobs"].scientistRatio;
     if (game.jobs.Farmer.owned < 100) {
