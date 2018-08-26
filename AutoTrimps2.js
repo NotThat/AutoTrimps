@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = 30;
-var verDate = "24.8.18";
+var ver = 31;
+var verDate = "26.8.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
     , basepath = (local ? 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/')
@@ -191,6 +191,9 @@ var wantedAnticipation = maxAnti;
 var highestPrestigeOwned = 0;
 var allowBuyingCoords = true;
 var lastCell = -1;
+
+var lowShieldName = "LowDmgShield"; //edit these to change the names used (visual only).
+var highShieldName = "HighDmgShield";
 
 ////////////////////////////////////////
 //Main LOGIC Loop///////////////////////

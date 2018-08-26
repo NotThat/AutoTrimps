@@ -1,6 +1,3 @@
-var lowShieldName = "LowDmgShield"; //edit these to change the names used (visual only).
-var highShieldName = "HighDmgShield";
-
 ////MODULES["heirlooms"] = {};
 ////////////////////////////////////////
 //Heirloom Functions////////////////////
