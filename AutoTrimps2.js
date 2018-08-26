@@ -33,7 +33,7 @@ function delayStart() {
         //console.log("waiting for game to load...");
         return;
     }
-    console.log("Variables loaded.");
+    //console.log("Variables loaded.");
     stop = true;
     setTimeout(function(){initializeAutoTrimps(); if (!local) printChangelog(); setTimeout(delayStartAgain, startupDelay);}, 2500);
 }
