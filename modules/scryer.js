@@ -107,7 +107,7 @@ function useScryerStance() {
             setFormation(4);
         wantToScry = true;
     } else {
-        autoStance();
+        //autoStance();
         wantToScry = false;
         return;
     }
