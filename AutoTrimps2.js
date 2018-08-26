@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = 31;
+var ver = 32;
 var verDate = "26.8.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -27,10 +27,12 @@ var atscript = document.getElementById('AutoTrimps-script')
   ;  
     
 function delayStart() {
-    initializeAutoTrimps();
-    if (!local)
-        printChangelog();
-    setTimeout(delayStartAgain, startupDelay);
+    if(typeof game === 'undefined' || typeof loadPageVariables === 'undefined'){ //game hasnt initialized yet
+        setTimeout(delayStart, startupDelay);
+        console.log("waiting for game to load...");
+        return;
+    }
+    setTimeout(function(){initializeAutoTrimps(); if (!local) printChangelog(); setTimeout(delayStartAgain, startupDelay);}, 2500);
 }
 
 //This should redirect the script to wherever its being mirrored from.
@@ -116,7 +118,7 @@ function printLowerLevelPlayerNotice() {
 //Magic Numbers
 //toggleSetting('pauseGame');
 var runInterval = 100;      //How often to loop through logic
-var startupDelay = 2500;    //How long to wait for everything to load
+var startupDelay = 2500;    //How long to wait for everything to load. if its too short, will produce console errors. particularly on kongregate which loads more stuff than github.
 
 //Start Loops
 setTimeout(delayStart, startupDelay);
@@ -131,10 +133,10 @@ function delayStartAgain(){
     MODULESdefault = JSON.parse(JSON.stringify(MODULES));
     setInterval(mainLoop, runInterval);
     setInterval(guiLoop, runInterval*10);
-    if (autoTrimpSettings.PrestigeBackup !== undefined && autoTrimpSettings.PrestigeBackup.selected != "")
+    /*if (autoTrimpSettings.PrestigeBackup !== undefined && autoTrimpSettings.PrestigeBackup.selected != "")
         document.getElementById('Prestige').value = autoTrimpSettings.PrestigeBackup.selected;
     if (document.getElementById('Prestige').value === "")
-        document.getElementById('Prestige').value = "Off";
+        document.getElementById('Prestige').value = "Off";*/
 
 }
 
@@ -296,7 +298,7 @@ function mainLoop() {
 //GUI Updates happen on this thread, every 1000ms
 function guiLoop() {
     updateCustomButtons();
-    //MODULESdefault = JSON.parse(JSON.stringify(MODULES));
+    MODULESdefault = JSON.parse(JSON.stringify(MODULES));
     //Store the diff of our custom MODULES vars in the localStorage bin.
     safeSetItems('storedMODULES', JSON.stringify(compareModuleVars()));
     //Swiffy UI/Display tab

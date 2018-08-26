@@ -374,6 +374,14 @@ function compareModuleVars() {
         var vars = Object.keys(MODULES[mods[i]]);
         for (var j in vars) {
             var vj = vars[j];
+            /*if(typeof MODULES[mod] === 'undefined')
+                debug("hi");
+            if(typeof MODULESdefault[mod] === 'undefined')
+                debug("hi");
+            if(typeof MODULES[mod][vj] === 'undefined')
+                debug("hi");
+            if(typeof MODULESdefault[mod][vj] === 'undefined')
+                debug("hi");*/
             var a = MODULES[mod][vj];
             var b = MODULESdefault[mod][vj];
             if (JSON.stringify(a)!=JSON.stringify(b)) {
