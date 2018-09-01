@@ -277,6 +277,7 @@ function autoStance() {
     allowBuyingCoords = !getPageSetting('DelayCoordsForWind'); //dont buy coords unless we explicitly permit it. automaps() can also allow it if player runs a map for ratio.
 
     if (game.global.soldierHealth <= 0){ 
+        debug(game.global.breedBack.toFixed(2));
         if (game.global.challengeActive == "Trapper" || (game.global.breedBack <= 0 && (hiddenBreedTimer > wantedAnticipation || typeof game.global.dailyChallenge.empower === 'undefined')) || (DHratio > easyRatioThreshold && !stackSpire)){
             if(typeof game.global.dailyChallenge.bogged !== 'undefined' && parseFloat(DHratio) > 10 && !stackSpire){ //bogged is special because death occurs all the time
                 equipLowDmgShield();
@@ -1089,7 +1090,7 @@ function calcOmniHelium(){ //rewardResource()
 function updateOmniThreshhold() {
     pctTotal = (100*hr/game.global.totalHeliumEarned); //which is this much he/hr% out of our total helium
     
-    if (getDailyHeliumValue(countDailyWeight()) / 100 == 2) //no daily
+    if (countDailyWeight() === 0) //no daily
         dailyMult = 1;
     else
         dailyMult = 1 + getDailyHeliumValue(countDailyWeight()) / 100;
