@@ -161,7 +161,7 @@ function calcDmg(){
         }
     }
     
-    if(DHratio < 0.00001)
+    if(DHratio < 0.0001)
         formattedRatio = DHratio.toExponential(2);
     else if (DHratio < 1)
         formattedRatio = DHratio.toFixed(3);
@@ -369,7 +369,9 @@ function autoMap() {
                     selectedMap = theMap.id;
                     break;
                 }
-                if (theMap.name == 'Dimension of Anger' && document.getElementById("portalBtn").style.display == "none" && !game.talents.portal.purchased) {
+                //game.global.portalActive
+                //if (theMap.name == 'Dimension of Anger' && document.getElementById("portalBtn").style.display == "none" && !game.talents.portal.purchased) {
+                if (theMap.name == 'Dimension of Anger' && !game.global.portalActive) {
                     var theMapDifficulty = Math.ceil(theMap.difficulty / 2);
                     if (game.global.world < 20 + theMapDifficulty) continue;
                     selectedMap = theMap.id;

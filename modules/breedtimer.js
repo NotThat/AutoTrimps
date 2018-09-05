@@ -192,8 +192,13 @@ function handleGA(){
     var GATimer = -1;
     if(getPageSetting('GASetting')){ //AT controls GA timer
         GATimer = (game.talents.patience.purchased ? 45 : 30);
-        if (typeof game.global.dailyChallenge.bogged != 'undefined'){ //fixed %dmg taken every attack
-            GATimer = Math.floor(100/(4*game.global.dailyChallenge.bogged.strength));
+        if (typeof game.global.dailyChallenge.bogged != 'undefined' || game.global.challengeActive == "Nom"){ //fixed %dmg taken every attack
+            var stacks = 0;
+            if (game.global.challengeActive == "Nom")
+                stacks = 5;
+            else
+                stacks = game.global.dailyChallenge.bogged.strength;
+            GATimer = Math.floor(100/(4*stacks));
         }
         if (typeof game.global.dailyChallenge.plague != 'undefined' || game.global.challengeActive == "Electricity"){ //%dmg taken per stack, 1 stack every attack
             var stacks = 0;

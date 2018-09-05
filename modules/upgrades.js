@@ -31,7 +31,7 @@ function buyUpgrades() {
             var coordinationMult = 1+0.25*Math.pow(0.98, game.portal.Coordinated.level);
             var currentSendAfter = game.resources.trimps.getCurrentSend()*coordinationMult;
             var popArmyRatioAfter = game.resources.trimps.realMax()/currentSendAfter;
-            if (popArmyRatioAfter <= 1001){
+            if (popArmyRatioAfter <= 1001 && game.jobs.Amalgamator.owned > 0){
                 debug("Skipping coordination to preserve Amalgamator!");
                 buyCoords = false;
             }

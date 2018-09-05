@@ -1074,7 +1074,7 @@ function setGraphData(graph) {
                         loop--;
                     }
                 }*/
-                    if (currentZone != allSaveData[i].world - 1) {
+                    if (currentZone != allSaveData[i].world - 1 && i > 0) {
                         //console.log(allSaveData[i].totalPortals + " / " + allSaveData[i].world);
                         var loop = allSaveData[i].world - 1 - currentZone;
                         while (loop > 0) {

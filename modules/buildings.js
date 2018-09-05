@@ -103,7 +103,7 @@ function buyGemEfficientHousing() {
     var gemHousing = ["Hotel", "Resort", "Gateway", "Collector", "Warpstation"];
     var unlockedHousing = [];
     for (var house in gemHousing) {
-        if (game.buildings[gemHousing[house]].locked === 0 && getPageSetting("Max"+gemHousing[house]) > 0) {
+        if (game.buildings[gemHousing[house]].locked === 0 && (house == 4 || getPageSetting("Max"+gemHousing[house]) > 0)) {
             unlockedHousing.push(gemHousing[house]);
         }
     }
