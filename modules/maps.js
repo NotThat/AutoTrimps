@@ -175,12 +175,6 @@ function autoMap() {
     //if (game.global.gridArray.length === 0) //world not ready yet
     //    return;
     
-    if(!checkedShields){
-        equipLowDmgShield();
-        equipMainShield();
-        checkedShields = true;
-    }
-    
     var AS = getPageSetting('AutoStance');
     var ASMode;
     if(AS < 2)       ASMode = "Advancing";
@@ -687,6 +681,10 @@ function updateAutoMapsStatus(get, msg, final) {
 
 //returns true when done
 function PrestigeRaid() {
+    if(game.global.highestLevelCleared < 210){
+        //debug("Prestige Raiding is unlocked until HZE 210.", "maps");
+        return true;
+    }
     var StartZone = getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid. -1 to ignore
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map

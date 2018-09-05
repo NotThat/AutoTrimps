@@ -951,12 +951,6 @@ function buildWorldArray(){
     if(minHP == game.global.getEnemyHealth(50, "", true) * mutations.Healthy.statScale(14) * 7.5 || maxHP == -1)
         debug("error! minHP = " + minHP + " maxHP = " + maxHP);
     
-    if(!checkedShields){ //we havent checked low shield pb yet. these also store stats for later
-        equipLowDmgShield();
-        equipMainShield();
-        checkedShields = true;
-    }
-    
     var pbMult = (lowPB > -1 ? lowPB : game.heirlooms.Shield.plaguebringer.currentBonus / 100); //weaker shield should have more PB. PB isnt that good of a damage modifier.    
     
     calcOmniHelium();

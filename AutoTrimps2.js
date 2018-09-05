@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "1.17";
+var ver = "1.18";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -42,7 +42,6 @@ function delayStart() {
     lowCritDamage  = getPlayerCritDamageMult();
     lowATK         = 1;
     lowPB          = 0;
-    //console.log("Variables loaded.");
     stop = true;
     setTimeout(function(){initializeAutoTrimps(); if (!local) printChangelog(); setTimeout(delayStartAgain, startupDelay);}, 2500);
 }
@@ -158,35 +157,10 @@ function delayStartAgain(){
         return function(makeUp, now) {
             var result = cached_function.apply(this, arguments);
             mainLoop(makeUp);
-            stuffHappened = true;
             return result;
         };
     })();
-    //ATReady = true;
 }
-
-//var stuffHappened = false;
-//var ATReady = false;
-/*var fpsToConsole = true; fpsToConsole = false;
-var requestCounter = 0;
-var requestCounterLast = 0;
-function frameCounter() {
-    requestAnimationFrame(frameCounter);
-    requestCounter++;
-    //if(requestCounter % 6 === 0){
-    if(stuffHappened){
-        stuffHappened = false;
-        //updateLabels(); //game gui
-        if(fpsToConsole){
-            var fpds = requestCounter - requestCounterLast;
-            console.log(fpds);
-            requestCounterLast = requestCounter;
-        }
-    }
-    if(requestCounter % 60 === 0 && ATReady)
-        guiLoop(); //AT specific gui
-}
-frameCounter();*/
 
 ////////////////////////////////////////
 //Global Main vars /////////////////////
@@ -259,8 +233,8 @@ var lastFluffXp = -1;
 var lastFluffDmg = 1;
 
 var currMap;
-
 var statusMsg = "";
+
 var ATmakeUp = false;
 ////////////////////////////////////////
 //Main LOGIC Loop///////////////////////
@@ -299,6 +273,13 @@ function mainLoop(makeUp) {
         highestPrestigeOwned = 0;
     }
     heirloomFlag = heirloomsShown;
+    
+    if(!checkedShields){
+        equipLowDmgShield();
+        equipMainShield();
+        checkedShields = true;
+    }
+    
     //Stuff to do Every new Zone
     if (aWholeNewWorld) {
         // Auto-close dialogues.
@@ -315,11 +296,6 @@ function mainLoop(makeUp) {
         buildWorldArray();
         setEmptyStats(); //also clears graph data
         
-        if(!checkedShields){
-            equipLowDmgShield();
-            equipMainShield();
-            checkedShields = true;
-        }
         lastCell = -1;
         lastFluffXp = -1;
         lastFluffDmg = 1;
