@@ -136,6 +136,7 @@ function delayStartAgain(){
     game.global.addonUser = true;
     game.global.autotrimps = true;
     heirloomCache = game.global.heirloomsExtra.length;
+    maxAnti = (game.talents.patience.purchased ? 45 : 30;
     MODULESdefault = JSON.parse(JSON.stringify(MODULES));
     
     //Actually Start mainLoop and guiLoop - defunct
@@ -226,7 +227,7 @@ var threshhold=1;
 var DHratio = 0;
 var formattedRatio = "";
 var nextZoneDHratio = 0;
-var maxAnti = (game.talents.patience.purchased ? 45 : 30);
+var maxAnti;
 var wantedAnticipation = maxAnti;
 var highestPrestigeOwned = 0;
 var allowBuyingCoords = true;
