@@ -136,7 +136,7 @@ function delayStartAgain(){
     game.global.addonUser = true;
     game.global.autotrimps = true;
     heirloomCache = game.global.heirloomsExtra.length;
-    maxAnti = (game.talents.patience.purchased ? 45 : 30;
+    maxAnti = (game.talents.patience.purchased ? 45 : 30);
     MODULESdefault = JSON.parse(JSON.stringify(MODULES));
     
     //Actually Start mainLoop and guiLoop - defunct
