@@ -146,7 +146,7 @@ function calcDmg(){
             getDamageCaller(requiredDmgToOK*3, false, true);
         }
         else{   
-            if(getCurrentMapObject().location == "Void"){
+            if(currMap.location == "Void"){
                 var requiredDmgToOK = dmgNeededToOKHelper(cellNum, cell.health);
                 getDamageCaller(requiredDmgToOK*30*8, false, true); //doing voids in S stance
             }
@@ -198,7 +198,7 @@ function autoMap() {
     //check if we want to trimpicide for stacks
     if(game.global.soldierHealth > 0 && game.global.mapsActive && hiddenBreedTimer > maxAnti && game.global.antiStacks < maxAnti-1 && typeof game.global.dailyChallenge.bogged === 'undefined'){
         debug("Maps: Trimpiciding to get max stacks", "trimpicide");
-        if(getCurrentMapObject().location == "Void"){
+        if(currMap.location == "Void"){
             mapsClicked(true);
             cancelTooltip()
         }
@@ -209,7 +209,7 @@ function autoMap() {
     
     if (game.global.mapsActive){
         wantGoodShield = true; //always want good shield in maps
-        if(getCurrentMapObject().location == "Void" && useScryhard2()){
+        if(currMap.location == "Void" && useScryhard2()){
             goDefaultStance(4); //S
         }
         else
@@ -447,18 +447,23 @@ function autoMap() {
         
         if (doVoids){
             //selectedMap = findVoidMap();
-            if(game.global.mapsActive && getCurrentMapObject().location === "Void"){
-                selectedMap = getCurrentMapObject();
+            if(game.global.mapsActive && currMap.location === "Void"){
+                selectedMap = currMap.id;
             }
             else
-                selectedMap = findFirstVoidMap();
+                selectedMap = findFirstVoidMap(); //returns object or false
+
+            if(!selectedMap){
+                debug("No void found. Continuing.");
+                return;
+            }
         }
         else if (preSpireFarming) { //if preSpireFarming x minutes is true, switch over from wood maps to metal maps.
             statusMsg = "Spire Farm: ";
             var spiremaplvl = (game.talents.mapLoot.purchased && MODULES["maps"].SpireFarm199Maps) ? game.global.world - 1 : game.global.world;
             if (game.global.mapsActive) {
-                if(getCurrentMapObject().level === spiremaplvl)
-                    selectedMap = getCurrentMapObject().id;
+                if(currMap.level === spiremaplvl)
+                    selectedMap = currMap.id;
             }
             else if (game.global.mapsOwnedArray[highestMap].level >= spiremaplvl && game.global.mapsOwnedArray[highestMap].location == ((customVars.preferGardens && game.global.decayDone) ? 'Plentiful' : 'Mountain'))
                 selectedMap = game.global.mapsOwnedArray[highestMap].id;
@@ -480,7 +485,7 @@ function autoMap() {
     
     //#1 in a map, figure out repeat button
     if (game.global.mapsActive) {
-        if(getCurrentMapObject().location == "Void"){
+        if(currMap.location == "Void"){
             if(doVoids && !game.global.repeatMap)
                 repeatClicked(); //enable repeat
             if(!doVoids && game.global.repeatMap)
@@ -498,7 +503,7 @@ function autoMap() {
 
             var repeatChoice = 1; //0 - forever 1 - map bonus 2 - items 3 - any
             
-            var specials = addSpecials(true, true, getCurrentMapObject());
+            var specials = addSpecials(true, true, currMap);
             if(specials > 0) //we still need prestige from our current map
                 repeatChoice = 2;
             
@@ -566,7 +571,7 @@ function autoMap() {
                     selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id; //the map we just created
                 } 
             }
-            selectMap(selectedMap);
+            selectMap(selectedMap.id);
             if(!spireMapBonusFarming && stackSpireGetMinDamage){ //equip low shield - enter map, go to premaps. enter map - manual fight - go to premaps - exit to world - manual fight
                 debug("Lowering damage for Spire IV");
                 var deltaGenes = getDeltaGenes(1);
@@ -599,23 +604,25 @@ function autoMap() {
                 return;
             }
             else{
-                var themapobj = game.global.mapsOwnedArray[getMapIndex(selectedMap)];
-                if(typeof themapobj === 'undefined')
-                    themapobj = getCurrentMapObject();
-                var levelText = " Level: " + themapobj.level;
-                var voidorLevelText = themapobj.location == "Void" ? " Void: " : levelText;
+                if(typeof selectedMap === 'undefined'){
+                    debug("maps: selectedMap === 'undefined' error. resuming.");
+                    return;
+                }
+                var levelText = " Level: " + selectedMap.level;
+                var voidorLevelText = selectedMap.location == "Void" ? " Void: " : levelText;
                 var stanceText = "";
-                if(themapobj.location == "Void" && useScryhard2()){
+                if(selectedMap.location == "Void" && useScryhard2()){
                     goDefaultStance(4);
                     stanceText = " in S";
                 }
                 else {
                     goDefaultStance(2);
-                    if (themapobj.location == "Void")
+                    if (selectedMap.location == "Void")
                         stanceText = " not in S";
                 }
-                debug("Running selected " + selectedMap + voidorLevelText + " Name: " + themapobj.name + stanceText, "maps", 'th-large');
+                debug("Running selected " + selectedMap.id + voidorLevelText + " Name: " + selectedMap.name + stanceText, "maps", 'th-large');
                 runMap();
+                currMap = selectedMap;
             }
         }
     }
@@ -714,15 +721,15 @@ function PrestigeRaid() {
         //do we need prestige from this map?
         var last = game.global.mapGridArray[game.global.mapGridArray.length - 1].special;
         if(last != "" && last != "Any" && last != "gems"){ //last cell is robotrimp or prestige item. addSpecials() is more cpu
-            var map = getCurrentMapObject();
-            if(getCurrentMapObject().location === "Bionic")
-                statusMsg = "BW Raiding: "+ addSpecials(true, true, getCurrentMapObject());
+            var map = currMap;
+            if(currMap.location === "Bionic")
+                statusMsg = "BW Raiding: "+ addSpecials(true, true, currMap);
             else{
                 statusMsg = "Prestige Raid: " + getRemainingSpecials(maxDesiredLevel);
             }
             //if this is last run we need of the map, turn off repeat button
             var levelFromThisRun = Math.max(Math.floor(dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-1].special, true)), Math.floor(dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-2].special, true)))
-            if (levelFromThisRun == getCurrentMapObject().level && game.global.repeatMap) 
+            if (levelFromThisRun == currMap.level && game.global.repeatMap) 
                 repeatClicked();
         }
         else{
@@ -797,9 +804,8 @@ function PrestigeRaid() {
     //debug("havePrestigeUpTo = " + havePrestigeUpTo + " | minDesiredLevel = " + minDesiredLevel + " | maxDesiredLevel = " + maxDesiredLevel);
     
     runMap();
-    
-    var map = game.global.mapsOwnedArray[getMapIndex(game.global.currentMapId)];
-    statusMsg = "Prestige Raid: " + addSpecials(true, true, map);
+    currMap = map;
+    statusMsg = "Prestige Raid: " + addSpecials(true, true, currMap);
 
     if (!game.global.repeatMap) {
         repeatClicked();
@@ -1246,8 +1252,8 @@ function checkNeedToVoid(){
 
 function findFirstVoidMap(){
     for (var map in game.global.mapsOwnedArray){
-        if(map.location === "Void")
-            return map;
+        if(game.global.mapsOwnedArray[map].location === "Void")
+            return game.global.mapsOwnedArray[map];
     }
     return false;
 }

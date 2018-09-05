@@ -272,15 +272,14 @@ function BWraiding() {
         mapsClicked(true);
     
     if(game.global.mapsActive){ //already in a map
-        if(nextBionicMap == getCurrentMapObject()){ //doing our BW map
+        if(nextBionicMap == currMap){ //doing our BW map
             if (!game.global.repeatMap) {
                 repeatClicked();
             } 
             while (game.options.menu.repeatUntil.enabled != 2) {
                 toggleSetting('repeatUntil'); //repeat for all items
             }
-            var map = game.global.mapsOwnedArray[getMapIndex(game.global.currentMapId)];
-            statusMsg = "BW Raiding: "+ addSpecials(true, true, map);
+            statusMsg = "BW Raiding: "+ addSpecials(true, true, currMap);
         }
         else { //we're in another map
             if (game.global.repeatMap) {
@@ -293,14 +292,14 @@ function BWraiding() {
 
     selectMap(nextBionicMap.id);
     runMap();
+    currMap = nextBionicMap;
     if (!game.global.repeatMap) {
         repeatClicked();
     } 
     while (game.options.menu.repeatUntil.enabled != 2) {
         toggleSetting('repeatUntil'); //repeat for all items
     }
-    var map = game.global.mapsOwnedArray[getMapIndex(game.global.currentMapId)];
-    statusMsg = "BW Raiding: "+ addSpecials(true, true, map);
+    statusMsg = "BW Raiding: "+ addSpecials(true, true, currMap);
     return false;
  }
 
