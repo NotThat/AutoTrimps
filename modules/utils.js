@@ -276,7 +276,8 @@ function message3(messageString, type, lootIcon, extraClass, extraTag, htmlPrefi
             return;
         }
     }*/
-    messageString = ((game.options.menu && game.options.menu.timestamps.enabled && game.options.menu.timestamps.enabled == 1) ? getCurrentTime() : updatePortalTimer(true)) + " " + messageString;
+    //messageString = ((game.options.menu && game.options.menu.timestamps.enabled && game.options.menu.timestamps.enabled == 1) ? getCurrentTime() : updatePortalTimer(true)) + " " + messageString;
+    //messageString = messageString;
     
     if (!htmlPrefix){
         if (lootIcon && lootIcon.charAt(0) == "*") {
