@@ -76,9 +76,6 @@ function calcDmg(){
         equipMainShield();
         calcBaseDamageinS(); //baseDamage = our displayed damage in S
     }
-    
-    if(!shieldCheckedFlag) //our shield atk% gets locked for the duration of the cell. each cell we need to check again which shield's atk% is applied. :(
-        checkShield();
 
     ourBaseDamage = baseDamage*8;
     if(!goodShieldActuallyEquipped)
@@ -171,8 +168,8 @@ function calcDmg(){
     
     threshhold = poisonMult * windMult * remainingCells * 0.01;
 
-    if(!enoughHealth)
-        debug("missing health");
+    //if(!enoughHealth)
+    //    debug("missing health");
     
     DHratio = (ourBaseDamage*0.25 / enemyHealth);
     enoughDamage = DHratio > threshhold;
@@ -219,10 +216,9 @@ function autoMap() {
         return;
     
     }
-    //check if we want to trimpicide for stacks and/or shield
-    var wantToSwapShieldFlag = (!goodShieldActuallyEquipped && getPageSetting('HeirloomSwapping'));
-    if(game.global.mapsActive && hiddenBreedTimer > maxAnti && (wantToSwapShieldFlag || game.global.antiStacks < maxAnti-1) && typeof game.global.dailyChallenge.bogged === 'undefined'){
-        debug("Maps: Trimpiciding to" + (game.global.antiStacks < maxAnti-1 ? " get max stacks " : "") + (wantToSwapShieldFlag ? " equip good shield" : ""));
+    //check if we want to trimpicide for stacks
+    if(game.global.mapsActive && hiddenBreedTimer > maxAnti && game.global.antiStacks < maxAnti-1 && typeof game.global.dailyChallenge.bogged === 'undefined'){
+        debug("Maps: Trimpiciding to get max stacks");
         if(getCurrentMapObject().location == "Void"){
             mapsClicked(true);
             cancelTooltip()

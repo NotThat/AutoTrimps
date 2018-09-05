@@ -11,7 +11,7 @@ function calcCritModifier(critChance, critDamage){
     return 5*calcCritModifier(critChance-1, critDamage);
 }
 
-function calcDmgManual(printout, figureOutShield, number){
+function calcDmgManual(printout){
     var dmg = 6;
     if (printout) debug("base " + dmg);
 
@@ -82,12 +82,7 @@ function calcDmgManual(printout, figureOutShield, number){
         if (printout) debug("robo " + robo.toFixed(2) + " dmg " + dmg.toExponential(2));
     }
     
-    var shield = 1;
-    if(figureOutShield) //used to check which shield the game uses for current cell/trimps army
-        shield = calcHeirloomBonus("Shield", "trimpAttack", 1);
-    else
-        shield = goodShieldActuallyEquipped ? effectiveShieldAtkMult : 1;
-        
+    var shield = calcHeirloomBonus("Shield", "trimpAttack", 1);
     dmg *= shield;
     if (printout) debug("shield " + shield.toFixed(2) + " dmg " + dmg.toExponential(2));
     
@@ -186,25 +181,6 @@ function calcDmgManual(printout, figureOutShield, number){
         }
     }
     
-    if(figureOutShield){
-        var num = number;
-        num = num / (baseDamageNoCrit / shield);
-        //debug("num is " + num.toFixed(2));
-
-        if(num < (goodShieldAtkMult+1)/2){
-            goodShieldActuallyEquipped = false;
-            //debug(num);
-        }
-        else if(isNaN(num))
-            debug("num is NaN " + num);
-        else{
-            goodShieldActuallyEquipped = true;
-            //if (num >= 10.8 || num <= 10)
-            //    debug("error shield atk num = " + num.toFixed(2));
-        }
-        effectiveShieldAtkMult = num;
-    }
-    
     var critMult = calcCritModifier(getPlayerCritChance(), getPlayerCritDamageMult());
     dmg *= critMult;
     if (printout) debug ("critchance " + getPlayerCritChance() + " critMult " + getPlayerCritDamageMult() + " final " + critMult.toFixed(2) + " dmg " + dmg.toExponential(2));
@@ -267,21 +243,6 @@ function getShieldStats(){
     if(original)
         equipMainShield();
     calcBaseDamageinS();
-}
-
-function checkShield(){
-    if (game.global.soldierHealth <= 0) //damage may or may not be accurate if army is dead
-        return;
-    
-    var str = calculateDamage(game.global.soldierCurrentAttack, true, true);
-    str = str.substr(0,str.indexOf('-'));
-    var min = parseFloat(str) / ((game.global.titimpLeft > 0 && game.global.mapsActive) ? 2 : 1); // *we dont care about titimp damage;
-    if(isNaN(min))
-        return false; //no displayed damage, we're probably in premaps.
-    calcDmgManual(false, true, min);
-    shieldCheckedFlag = true;
-    //debug("goodShieldActuallyEquipped = " + goodShieldActuallyEquipped + " highDamageHeirloom = " + highDamageHeirloom);
-    calcBaseDamageinS(); //need to redo damage calculations in case we realized we use different shield
 }
 
 function aboutToDie(){

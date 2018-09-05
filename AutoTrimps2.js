@@ -18,11 +18,11 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = 36;
-var verDate = "4.9.18";
+var ver = "1";
+var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
-    , basepath = (local ? 'http://localhost:8383/Trimps/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/')
+    , basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/')
   , modulepath = 'modules/'
   ;  
     
@@ -75,6 +75,7 @@ function initializeAutoTrimps() {
     //Load modules:
     //ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'scryer', 'magmite', 'other', 'import-export', 'client-server', 'perks', /* 'perky', */ 'fight-info', 'performance', 'ATcalc'];
     ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'scryer', 'magmite', 'other', 'import-export', 'perks', /* 'perky', */ 'fight-info', 'performance', 'ATcalc'];
+
     for (var m in ATmoduleList) {
         ATscriptLoad(modulepath, ATmoduleList[m]);
     }
@@ -86,7 +87,10 @@ var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
 //changelogList.push({date: verDate, version: ver, description: "", isNew: true});
 //changelogList.push({date: "28/06/2018", version: "v0.2", description: "Backup your game before using this or any AT fork for the first time (and often)! Please Trimps responsibly!", isNew: true});
-changelogList.push({date: "", version: "", description: "Backup your game before using this or any AT fork for the first time (and often)! Please Trimps responsibly!<br>", isNew: false});
+changelogList.push({date: "", version: "", description: "Massive CPU optimizations", isNew: true});
+changelogList.push({date: "", version: "", description: "Combat setting: Helium mode / Dark Essence Mode / Push Mode.", isNew: true});
+changelogList.push({date: "", version: "", description: "AT Control GA - Automatic breed timers (smart enough for bleed/bogged dailies) and optional spire breed timer.", isNew: true});
+changelogList.push({date: "", version: "", description: "Trimpicide on Empower Dailies (toggle-able).", isNew: true});
 //changelogList.push({date: "28/06/2018", version: "", description: "PRaiding. BWRaiding. Stop Coords to get next Amal. Never lose Amal. Heirloom Swapping. No Nurseries in Ice. Massive overhaul to AS windstacking he/hr% based. Stall Coords/items for more stacking. Calculate cell by cell. AutoTrimps->Display->General Spam for less spam.", isNew: false});
 changelogList.push({date: "13/06/2018", version: "", description: "War was beginning ", isNew: false});
 
@@ -119,7 +123,6 @@ function printLowerLevelPlayerNotice() {
 ////////////////////////////////////////
 
 //Magic Numbers
-//toggleSetting('pauseGame');
 var runInterval = 100;      //How often to loop through logic
 var startupDelay = 2500;    //How long to wait for everything to load. if its too short, will produce console errors. particularly on kongregate which loads more stuff than github.
 
@@ -132,16 +135,47 @@ function delayStartAgain(){
     //Set some game ars after we load.
     game.global.addonUser = true;
     game.global.autotrimps = true;
-    //Actually Start mainLoop and guiLoop
     MODULESdefault = JSON.parse(JSON.stringify(MODULES));
-    setInterval(mainLoop, runInterval);
+    
+    //Actually Start mainLoop and guiLoop - defunct
+    //setInterval(mainLoop, runInterval);
     setInterval(guiLoop, runInterval*10);
-    /*if (autoTrimpSettings.PrestigeBackup !== undefined && autoTrimpSettings.PrestigeBackup.selected != "")
-        document.getElementById('Prestige').value = autoTrimpSettings.PrestigeBackup.selected;
-    if (document.getElementById('Prestige').value === "")
-        document.getElementById('Prestige').value = "Off";*/
-
+    
+    //hook up into runGameLoop()
+    runGameLoop = (function(makeUp, now) {
+        var cached_function = runGameLoop;
+        return function(makeUp, now) {
+            var result = cached_function.apply(this, arguments);
+            mainLoop(makeUp);
+            stuffHappened = true;
+            return result;
+        };
+    })();
+    //ATReady = true;
 }
+
+//var stuffHappened = false;
+//var ATReady = false;
+/*var fpsToConsole = true; fpsToConsole = false;
+var requestCounter = 0;
+var requestCounterLast = 0;
+function frameCounter() {
+    requestAnimationFrame(frameCounter);
+    requestCounter++;
+    //if(requestCounter % 6 === 0){
+    if(stuffHappened){
+        stuffHappened = false;
+        //updateLabels(); //game gui
+        if(fpsToConsole){
+            var fpds = requestCounter - requestCounterLast;
+            console.log(fpds);
+            requestCounterLast = requestCounter;
+        }
+    }
+    if(requestCounter % 60 === 0 && ATReady)
+        guiLoop(); //AT specific gui
+}
+frameCounter();*/
 
 ////////////////////////////////////////
 //Global Main vars /////////////////////
@@ -161,13 +195,12 @@ var bestBuilding;
 var scienceNeeded;
 var breedFire = false;
 var hiddenBreedTimer;
+var hiddenBreedTimerLast;
 
 var shouldFarm = false;
 var enoughDamage = true;
 var enoughHealth = true;
 
-var baseDamage = 0;
-var baseDamageOld = 0;
 var baseBlock = 0;
 var baseHealth = 0;
 
@@ -184,12 +217,13 @@ var heirloomFlag = false;
 var heirloomCache = game.global.heirloomsExtra.length;
 var magmiteSpenderChanged = false;
 
-var windMult; 
+var windMult = 1;
 var poisonMultFixed=0.05;
-var poisonMult;
+var poisonMult = 1;
 var enemyHealth=1;
 var threshhold=1;
 var DHratio = 0;
+var formattedRatio = "";
 var nextZoneDHratio = 0;
 var maxAnti = (game.talents.patience.purchased ? 45 : 30);
 var wantedAnticipation = maxAnti;
@@ -197,14 +231,36 @@ var highestPrestigeOwned = 0;
 var allowBuyingCoords = true;
 var lastCell = -1;
 
+var checkedShields = false; //check shield stats on script start
+var highCritChance = 0;
+var highCritDamage = 0;
+var highATK        = 0;
+var highPB         = 0;
+var lowCritChance  = 0;
+var lowCritDamage  = 0;
+var lowATK         = 0;
+var lowPB          = 0;
 var lowShieldName = "LowDmgShield"; //edit these to change the names used (visual only).
 var highShieldName = "HighDmgShield";
+var wantGoodShield = true; //we want to only swap shield maximum once per loop
 
+var lastFluffXp = -1;
+var lastFluffDmg = 1;
+
+var currMap;
+
+var statusMsg = "";
+var ATmakeUp = false;
 ////////////////////////////////////////
 //Main LOGIC Loop///////////////////////
 ////////////////////////////////////////
 ////////////////////////////////////////
-function mainLoop() {
+//makeUp = true when game is in catchup mode, so we can skip some unnecessary visuals
+function mainLoop(makeUp) {
+    
+    //console.log(requestCounter + " " + (requestCounter-requestCounterLast));
+    //requestCounterLast = requestCounter;
+    
     if (ATrunning == false) return;
     if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled || game.global.viewingUpgrades) {
         if(getPageSetting('PauseScript'))
@@ -212,11 +268,14 @@ function mainLoop() {
         return;
     }
     ATrunning = true;
+    ATmakeUp = makeUp;
     if(game.options.menu.showFullBreed.enabled != 1) toggleSetting("showFullBreed");    //more detail
     hiddenBreedTimer = ((game.jobs.Amalgamator.owned > 0) ? Math.floor((new Date().getTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000));
-    addbreedTimerInsideText.innerHTML = hiddenBreedTimer + 's'; //add breed time for next army;
+    if(hiddenBreedTimer != hiddenBreedTimerLast){
+        addbreedTimerInsideText.innerHTML = hiddenBreedTimer + 's'; //add breed time for next army;
+        hiddenBreedTimerLast = hiddenBreedTimer;
+    }
     addToolTipToArmyCount(); //Add hidden tooltip for army count (SettingsGUI.js @ end)
-    //Heirloom:
     if (mainCleanup() // Z1 new world
             || portalWindowOpen // in the portal screen (for manual portallers)
             || (!heirloomsShown && heirloomFlag) // closed heirlooms screen
@@ -242,22 +301,36 @@ function mainLoop() {
         if (getPageSetting('AutoEggs'))
             easterEggClicked();
         setTitle(); // Set the browser title
-        
         buildWorldArray();
         setEmptyStats(); //also clears graph data
+        
+        if(!checkedShields){
+            equipLowDmgShield();
+            equipMainShield();
+            checkedShields = true;
+        }
         lastCell = -1;
+        lastFluffXp = -1;
+        lastFluffDmg = 1;
         AutoMapsCoordOverride = false;
         maxCoords = -1;
         perked = false;
+
     }
     setScienceNeeded();  //determine how much science is needed
+    
+    if(game.global.mapsActive) currMap = getCurrentMapObject();
+    if (Fluffy.isActive() && lastFluffXp != Fluffy.currentExp[1]){
+        lastFluffXp = Fluffy.currentExp[1];
+        lastFluffDmg = Fluffy.getDamageModifier();
+    }
 
     //EXECUTE CORE LOGIC
     if (getPageSetting('ExitSpireCell') >0 || getPageSetting('ExitSpireCellDailyC2') >0) exitSpireCell(); //"Exit Spire After Cell" (other.js)
     //if (getPageSetting('loomprotect') == true) protectloom(); //"Exit Spire After Cell" (other.js)
 
     if (getPageSetting('AutoAllocatePerks')==2) lootdump(); //Loot Dumping (other.js)
-    if (getPageSetting('BuyUpgradesNew') != 0) buyUpgradesCaller();                                //"Buy Upgrades"       (upgrades.js)         
+    if (getPageSetting('BuyUpgradesNew') != 0) buyUpgrades();                                //"Buy Upgrades"       (upgrades.js)         
     
     var agu = getPageSetting('AutoGoldenUpgrades');
     if (agu && agu!='Off') autoGoldenUpgradesAT(agu);                                       //"Golden Upgrades"     (other.js)
@@ -268,19 +341,19 @@ function mainLoop() {
     if (getPageSetting('BuyJobsNew')>0) buyJobs();                                              
     if (getPageSetting('ManualGather2')<=1) manualLabor();  //"Auto Gather/Build"       (gather.js)
       else if (getPageSetting('ManualGather2')==2) manualLabor2();  //"Auto Gather/Build #2"  (")
-      
-    autoMap(); //"Auto Maps"      (automaps.js)
-    //
-    //if (getPageSetting('GeneticistTimer') >= 0) autoBreedTimer(); //"Geneticist Timer" / "Auto Breed Timer"     (autobreedtimer.js)
+     
+    autoMap(); //automaps() is in charge of maps combat
+    updateAutoMapsStatus("", statusMsg, true); //update status
+
     if (autoTrimpSettings.AutoPortal.selected != "Off") autoPortal();   //"Auto Portal" (hidden until level 40) (portal.js)
     
     if (getPageSetting('TrapTrimps') && game.global.trapBuildAllowed && game.global.trapBuildToggled == false) toggleAutoTrap(); //"Trap Trimps"
     if (aWholeNewWorld && getPageSetting('AutoRoboTrimp')) autoRoboTrimp();   //"AutoRoboTrimp" (other.js)
     if (aWholeNewWorld && getPageSetting('FinishC2')>0 && game.global.runningChallengeSquared) finishChallengeSquared(); // "Finish Challenge2" (other.js)
-
     
-    if (getPageSetting('AutoStance')) autoStance();    //"Auto Stance"         (")
-    if (getPageSetting('UseScryerStance'))  useScryerStance();  //"Use Scryer Stance"   (scryer.js)
+    if (getPageSetting('AutoStance')>0) autoStance();    //autostance() is in charge of world combat
+    equipSelectedShield(wantGoodShield);
+    //if (getPageSetting('UseScryerStance'))  useScryerStance();  //"Use Scryer Stance"   (scryer.js)
     
     if (getPageSetting('UseAutoGen')) autoGenerator();          //"Auto Generator ON" (magmite.js)
     //ATselectAutoFight();  //  pick the right version of Fight/AutoFight/BetterAutoFight/BAF2 (fight.js)       //<--------- remove the settings
