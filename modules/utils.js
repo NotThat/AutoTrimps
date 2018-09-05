@@ -246,8 +246,10 @@ function debug(messageStr, type, lootIcon) {
             else
                 console.log(timeStamp() + ' ' + messageStr);
         }
-        //message2(message, "AutoTrimps", lootIcon, type);
-        message3(messageStr, "AutoTrimps", lootIcon, type);
+        if(pendingLogs)
+            message3(messageStr, "AutoTrimps", lootIcon, type);
+        else
+            message2(message, "AutoTrimps", lootIcon, type);
     }
 }
 
