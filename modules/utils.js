@@ -22,8 +22,7 @@ if (!String.prototype.includes) {
 function loadPageVariables() {
     var tmp = JSON.parse(localStorage.getItem('autoTrimpSettings'));
     if (tmp !== null) {
-        pendingLogs.AutoTrimps = []; //adds AT messages slot
-      debug('ATsettings: Checking version...');
+        debug('ATsettings: Checking version...');
         if (tmp['ATversion'] != undefined && !versionIsOlder(tmp['ATversion'], ATversion)) autoTrimpSettings = tmp;
         else { debug("ATsettings: Old version. There was a format change."); updateOldSettings(tmp);};
     }
