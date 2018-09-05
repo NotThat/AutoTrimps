@@ -413,9 +413,10 @@ function autoLevelEquipment(lowerDamage, fastMode, colorStyle) {
 function getDamage(dmg, lowerDamage, noCrit){
     var dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
     
-    if (baseDamageHigh < 0 || game.global.soldierCurrentAttack < 0) {
-        debug("error: getDamage: negative damage " + game.global.soldierCurrentAttack + " " + baseDamageHigh);
-        return;
+    if (baseDamageHigh <= 0 || game.global.soldierCurrentAttack < 0) {
+        debug("error: getDamage: damage " + game.global.soldierCurrentAttack + " " + baseDamageHigh);
+        if (baseDamageHigh < 0 || game.global.soldierCurrentAttack < 0)
+            return;
     }
     
      if(game.global.runningChallengeSquared){
