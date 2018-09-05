@@ -146,7 +146,7 @@ function calcDmg(){
             getDamageCaller(requiredDmgToOK*3, false, true);
         }
         else{   
-            if(currMap.location == "Void"){
+            if(getCurrentMapObject().location == "Void"){
                 var requiredDmgToOK = dmgNeededToOKHelper(cellNum, cell.health);
                 getDamageCaller(requiredDmgToOK*30*8, false, true); //doing voids in S stance
             }
@@ -198,7 +198,7 @@ function autoMap() {
     //check if we want to trimpicide for stacks
     if(game.global.soldierHealth > 0 && game.global.mapsActive && hiddenBreedTimer > maxAnti && game.global.antiStacks < maxAnti-1 && typeof game.global.dailyChallenge.bogged === 'undefined'){
         debug("Maps: Trimpiciding to get max stacks", "trimpicide");
-        if(currMap.location == "Void"){
+        if(getCurrentMapObject().location == "Void"){
             mapsClicked(true);
             cancelTooltip()
         }
@@ -209,7 +209,7 @@ function autoMap() {
     
     if (game.global.mapsActive){
         wantGoodShield = true; //always want good shield in maps
-        if(currMap.location == "Void" && useScryhard2()){
+        if(getCurrentMapObject().location == "Void" && useScryhard2()){
             goDefaultStance(4); //S
         }
         else
@@ -445,8 +445,8 @@ function autoMap() {
         
         if (doVoids){
             //selectedMap = findVoidMap();
-            if(game.global.mapsActive && currMap.location === "Void"){
-                selectedMap = currMap;
+            if(game.global.mapsActive && getCurrentMapObject().location === "Void"){
+                selectedMap = getCurrentMapObject();
             }
             else
                 selectedMap = findFirstVoidMap();
@@ -455,8 +455,8 @@ function autoMap() {
             statusMsg = "Spire Farm: ";
             var spiremaplvl = (game.talents.mapLoot.purchased && MODULES["maps"].SpireFarm199Maps) ? game.global.world - 1 : game.global.world;
             if (game.global.mapsActive) {
-                if(currMap.level === spiremaplvl)
-                    selectedMap = currMap.id;
+                if(getCurrentMapObject().level === spiremaplvl)
+                    selectedMap = getCurrentMapObject().id;
             }
             else if (game.global.mapsOwnedArray[highestMap].level >= spiremaplvl && game.global.mapsOwnedArray[highestMap].location == ((customVars.preferGardens && game.global.decayDone) ? 'Plentiful' : 'Mountain'))
                 selectedMap = game.global.mapsOwnedArray[highestMap].id;
@@ -478,7 +478,7 @@ function autoMap() {
     
     //#1 in a map, figure out repeat button
     if (game.global.mapsActive) {
-        if(currMap.location == "Void"){
+        if(getCurrentMapObject().location == "Void"){
             if(doVoids && !game.global.repeatMap)
                 repeatClicked(); //enable repeat
             if(!doVoids && game.global.repeatMap)
@@ -496,7 +496,7 @@ function autoMap() {
 
             var repeatChoice = 1; //0 - forever 1 - map bonus 2 - items 3 - any
             
-            var specials = addSpecials(true, true, currMap);
+            var specials = addSpecials(true, true, getCurrentMapObject());
             if(specials > 0) //we still need prestige from our current map
                 repeatChoice = 2;
             
@@ -712,15 +712,15 @@ function PrestigeRaid() {
         //do we need prestige from this map?
         var last = game.global.mapGridArray[game.global.mapGridArray.length - 1].special;
         if(last != "" && last != "Any" && last != "gems"){ //last cell is robotrimp or prestige item. addSpecials() is more cpu
-            var map = currMap;
-            if(currMap.location === "Bionic")
-                statusMsg = "BW Raiding: "+ addSpecials(true, true, currMap);
+            var map = getCurrentMapObject();
+            if(getCurrentMapObject().location === "Bionic")
+                statusMsg = "BW Raiding: "+ addSpecials(true, true, getCurrentMapObject());
             else{
                 statusMsg = "Prestige Raid: " + getRemainingSpecials(maxDesiredLevel);
             }
             //if this is last run we need of the map, turn off repeat button
             var levelFromThisRun = Math.max(Math.floor(dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-1].special, true)), Math.floor(dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-2].special, true)))
-            if (levelFromThisRun == currMap.level && game.global.repeatMap) 
+            if (levelFromThisRun == getCurrentMapObject().level && game.global.repeatMap) 
                 repeatClicked();
         }
         else{

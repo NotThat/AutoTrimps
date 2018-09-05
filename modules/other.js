@@ -272,7 +272,7 @@ function BWraiding() {
         mapsClicked(true);
     
     if(game.global.mapsActive){ //already in a map
-        if(nextBionicMap == currMap){ //doing our BW map
+        if(nextBionicMap == getCurrentMapObject()){ //doing our BW map
             if (!game.global.repeatMap) {
                 repeatClicked();
             } 
