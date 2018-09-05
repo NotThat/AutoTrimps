@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "1.9";
+var ver = "1.10";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -34,6 +34,14 @@ function delayStart() {
         return;
     }
     pendingLogs.AutoTrimps = []; //adds AT messages slot
+    highCritChance = getPlayerCritChance();
+    highCritDamage = getPlayerCritDamageMult();
+    highATK        = 1;
+    highPB         = 0;
+    lowCritChance  = getPlayerCritChance();
+    lowCritDamage  = getPlayerCritDamageMult();
+    lowATK         = 1;
+    lowPB          = 0;
     //console.log("Variables loaded.");
     stop = true;
     setTimeout(function(){initializeAutoTrimps(); if (!local) printChangelog(); setTimeout(delayStartAgain, startupDelay);}, 2500);
@@ -235,14 +243,14 @@ var allowBuyingCoords = true;
 var lastCell = -1;
 
 var checkedShields = false; //check shield stats on script start
-var highCritChance = 0;
-var highCritDamage = 0;
-var highATK        = 0;
-var highPB         = 0;
-var lowCritChance  = 0;
-var lowCritDamage  = 0;
-var lowATK         = 0;
-var lowPB          = 0;
+var highCritChance;
+var highCritDamage;
+var highATK;
+var highPB;
+var lowCritChance;
+var lowCritDamage;
+var lowATK;
+var lowPB;
 var lowShieldName = "LowDmgShield"; //edit these to change the names used (visual only).
 var highShieldName = "HighDmgShield";
 var wantGoodShield = true; //we want to only swap shield maximum once per loop
