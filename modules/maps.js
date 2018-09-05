@@ -598,6 +598,8 @@ function autoMap() {
             }
             else{
                 var themapobj = game.global.mapsOwnedArray[getMapIndex(selectedMap)];
+                if(typeof themapobj === 'undefined')
+                    themapobj = getCurrentMapObject();
                 var levelText = " Level: " + themapobj.level;
                 var voidorLevelText = themapobj.location == "Void" ? " Void: " : levelText;
                 var stanceText = "";
