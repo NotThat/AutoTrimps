@@ -305,7 +305,7 @@ function buyJobs() {
         postBuy2(old);
         //debug("Bought " + (firesomedudes/inverse) + ' Magmamancers. Total Owned: ' + game.jobs['Magmamancer'].owned, "magmite", "*users");
         //debug("Bought " + (firesomedudes/inverse) + ' Magmamancers.');
-        debug("Bought Magmamancers.");
+        debug("Bought Magmamancers.", "jobs");
         tierMagmamancers += 1;
     }
     else if (stacks2 < tierMagmamancers) {

@@ -6,7 +6,6 @@ MODULES["breedtimer"].fireGensFloor = 10;       //Dont FIRE below this number (n
 MODULES["breedtimer"].breedFireOn = 6;          //turn breedfire on at X seconds (if BreedFire)
 MODULES["breedtimer"].breedFireOff = 2;         //turn breedfire off at X seconds(if BreedFire)
 MODULES["breedtimer"].killTitimpStacks = 5;     //number of titimp stacks difference that must exist to Force Abandon
-MODULES["breedtimer"].voidCheckPercent = 95;    //Void Check health %, for force-Abandon during voidmap, if it dips below this during the Void  (maybe this should be in automaps module)
 
 //Add breeding box (to GUI on startup):
 var addbreedTimerInsideText;
@@ -53,16 +52,6 @@ function testBreedManager() {
     var realTime = game.global.realBreedTime;
 }
 */
-function controlGeneticistassist(targetTime) {
-    var hasGA = game.global.Geneticistassist;
-    if (hasGA) {
-        //The targetTime GA setting has to match one in the list. [use the last slot]
-        game.global.GeneticistassistSetting = targetTime;
-        game.global.GeneticistassistSteps = [-1,10,30,targetTime];
-        toggleGeneticistassist(true);   //true means updateOnly
-    }
-}
-//controlGeneticistassist(45);
 
 //Controls "Auto Breed Timer" and "Geneticist Timer" - adjust geneticists to reach desired breed timer
 function autoBreedTimer() {
@@ -86,13 +75,12 @@ function autoBreedTimer() {
             newGeneTimerSetting = defaultBreedTimer;
         if (newGeneTimerSetting != targetBreed) {
             setPageSetting('GeneticistTimer',newGeneTimerSetting);
-            //controlGeneticistassist(newGeneTimerSetting);
             debug("Changing the Geneticist Timer to a new value : " + newGeneTimerSetting, "other");
         }
     }
     var inDamageStance = game.upgrades.Dominance.done ? game.global.formation == 2 : game.global.formation == 0;
     var inScryerStance = (game.global.world >= 60 && game.global.highestLevelCleared >= 180) && game.global.formation == 4;
-//HIRING SECTION:
+    //HIRING SECTION:
     //Don't hire geneticists if total breed time remaining is greater than our target breed time
     //Don't hire geneticists if we have already reached 30 anti stacks (put off further delay to next trimp group) //&& (game.global.lastBreedTime/1000 + getBreedTime(true) < targetBreed)
     var time = getBreedTime();
@@ -167,28 +155,6 @@ function autoBreedTimer() {
 }
 
 //Abandon trimps function that should handle all special cases.
-function abandonVoidMap() {
-    var customVars = MODULES["breedtimer"];
-    //do nothing if the button isnt set to on.
-    if (!getPageSetting('ForceAbandon')) return;
-    //exit out of the voidmap if we go back into void-farm-for-health mode (less than 95%, account for some leeway during equipment buying.)
-    if (game.global.mapsActive && getCurrentMapObject().location == "Void") {
-        var targetBreed = parseInt(getPageSetting('GeneticistTimer'));
-        if(voidCheckPercent < customVars.voidCheckPercent) {
-            //only exit if it happened for reasons other than random losses of anti-stacks.
-            if (game.portal.Anticipation.level) {
-                if (targetBreed == 0 || targetBreed == -1)
-                    mapsClicked(true);
-                else if (game.global.antiStacks == targetBreed)
-                    mapsClicked(true);
-            }
-            else
-                mapsClicked(true);
-        }
-        return;
-    }
-}
-//Abandon trimps function that should handle all special cases.
 function forceAbandonTrimps() {
     //do nothing if the button isnt set to on.
     if (!getPageSetting('ForceAbandon')) return;
@@ -220,4 +186,41 @@ function forceAbandonTrimps() {
         mapsClicked();
     }
     debug("Killed your army! (to get " + targetBreed + " Anti-stacks). Trimpicide successful.","other");
+}
+
+function handleGA(){
+    var GATimer = -1;
+    if(getPageSetting('GASetting')){ //AT controls GA timer
+        GATimer = (game.talents.patience.purchased ? 45 : 30);
+        if (typeof game.global.dailyChallenge.bogged != 'undefined'){ //fixed %dmg taken every attack
+            GATimer = Math.floor(100/(4*game.global.dailyChallenge.bogged.strength));
+        }
+        if (typeof game.global.dailyChallenge.plague != 'undefined' || game.global.challengeActive == "Electricity"){ //%dmg taken per stack, 1 stack every attack
+            var stacks = 0;
+            if(typeof game.global.dailyChallenge.plague != 'undefined')
+                stacks = game.global.dailyChallenge.plague.strength;
+            else
+                stacks = game.challenges.Electricity.stacks;
+            switch(stacks){
+                case 1:
+                    GATimer = 3;
+                    break;
+                case 2:
+                case 3:
+                    GATimer = 2;
+                    break
+                default:
+                    GATimer = 1;
+            }
+        }
+    }
+    else if(getPageSetting('GASettingManual') > 0) //manual input
+        GATimer = getPageSetting('GASettingManual');
+    
+    if(isActiveSpireAT() && getPageSetting('GASettingSpire') > 0) //spire manual input
+        GATimer = getPageSetting('GASettingSpire');
+    if(game.global.Geneticistassist && GATimer > 0)
+        game.global.GeneticistassistSteps = [-1, 0.5, 0.6, GATimer];
+
+    switchOnGA(); //under normal uses getTargetAntiStack should turn autoGA back on, but if loading from a save it could stay off
 }

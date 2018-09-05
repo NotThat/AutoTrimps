@@ -2,28 +2,13 @@
 var upgradeList = ['Miners', 'Scientists', 'Coordination', 'Speedminer', 'Speedlumber', 'Speedfarming', 'Speedscience', 'Speedexplorer', 'Megaminer', 'Megalumber', 'Megafarming', 'Megascience', 'Efficiency', 'TrainTacular', 'Trainers', 'Explorers', 'Blockmaster', 'Battle', 'Bloodlust', 'Bounty', 'Egg', 'Anger', 'Formations', 'Dominance', 'Barrier', 'UberHut', 'UberHouse', 'UberMansion', 'UberHotel', 'UberResort', 'Trapstorm', 'Gigastation', 'Shieldblock', 'Potency', 'Magmamancers'];
 var buyCoords = true;
 
-function buyUpgradesCaller(){
-    /*var temp = highDamageHeirloom;
-    if(goodShieldActuallyEquipped) equipMainShield();
-    else equipLowDmgShield();
-    calcBaseDamageinS();*/
-    
-    buyUpgrades();
-    
-    /*if(temp) equipMainShield();
-    else equipLowDmgShield();
-    calcBaseDamageinS();
-    updateAllBattleNumbers(true);*/
-}
-
 //Buys all available non-equip upgrades listed in var upgradeList
 function buyUpgrades() {
-    //debug("buyUpgrades buyWeaponsMode " + buyWeaponsMode + " baseDamage " + baseDamage.toExponential(2));
     if (getPageSetting('BuyUpgradesNew') != 2){ //skip this calculation if AT isnt allowed to buy coords
         var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();    
         buyCoords = true;
         
-        if(getPageSetting('AutoStance') && getPageSetting('DelayCoordsForWind')){
+        if((getPageSetting('AutoStance')==1) && getPageSetting('DelayCoordsForWind')){
             if(!allowBuyingCoords){ //only buy coords if autostance3 allows it
                 if(game.upgrades.Coordination.done < maxCoords)
                     buyCoords = true;
@@ -34,10 +19,10 @@ function buyUpgrades() {
                 if (((isActiveSpireAT() || PRaidingActive) && !stackSpire) || game.global.world == getPageSetting('VoidMaps') || BWRaidNowLogic()) //always want all coords for active spires and void maps
                     buyCoords = true;
             }
-
-            if(AutoMapsCoordOverride) //we dont want to farm maps for damage when we have unspent coordinations, so allow automaps to override AS
-                buyCoords = true;
         }
+
+        if(AutoMapsCoordOverride) //we dont want to farm maps for damage when we have unspent coordinations, so allow automaps to override AS
+            buyCoords = true;
         
         if(game.global.runningChallengeSquared)
             buyCoords = true;
@@ -73,18 +58,15 @@ function buyUpgrades() {
         //skip bloodlust during scientist challenges and while we have autofight enabled.
         if (upgrade == 'Bloodlust' && game.global.challengeActive == 'Scientist') continue;
 
-        //Main logics:
         if (!available) continue;
         if (game.upgrades.Scientists.done < game.upgrades.Scientists.allowed && upgrade != 'Scientists') continue;
         
         if (upgrade == 'Coordination'){
-            //need to make sure next coordination wont fire amalgamator
             if(buyCoords)
                 buyUpgrade(upgrade, true, true);
         }
         else
             buyUpgrade(upgrade, true, true);
         debug('Upgraded ' + upgrade, "upgrades", "*upload2");
-    //loop again.
     }
 }

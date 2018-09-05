@@ -150,15 +150,22 @@ function autoGenerator() {
     var dailyFlag = game.global.challengeActive == "Daily" && getPageSetting('AutoGenDC');
     var c2Flag = game.global.runningChallengeSquared && getPageSetting('AutoGenC2') && game.global.challengeActive != "Trapper";
     if(c2Flag || dailyFlag){
-        changeGeneratorState(FUEL);
+        if(game.global.generatorMode != FUEL)
+            changeGeneratorState(FUEL);
         return;
     }
     
     var amalOverride = getPageSetting('FuelUntilAmal') && game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg');
-    if(game.global.world < fuelFromZ)
-        changeGeneratorState(MI);
-    else if(game.global.world > fuelToZ && !amalOverride)
-        changeGeneratorState(MI);
-    else
-        changeGeneratorState(FUEL);
+    if(game.global.world < fuelFromZ){
+        if(game.global.generatorMode != MI)
+            changeGeneratorState(MI);
+    }
+    else if(game.global.world > fuelToZ && !amalOverride){
+        if(game.global.generatorMode != MI)
+            changeGeneratorState(MI);
+    }
+    else{
+        if(game.global.generatorMode != FUEL)
+            changeGeneratorState(FUEL);
+    }
 }

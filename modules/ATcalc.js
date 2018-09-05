@@ -1,14 +1,13 @@
 function calcCritModifier(critChance, critDamage){
-    ret = 0;
-    if(critChance < 1){
-        ret = critChance * critDamage + 1-critChance;
-        return ret;
-    }
-    if(critChance <=2){
-        ret = (5*(critChance-1) + (2-critChance))*critDamage;
-        return ret;
-    }
-    return 5*calcCritModifier(critChance-1, critDamage);
+    var base = 5;
+    if (Fluffy.isRewardActive("megaCrit")) base += 2;
+    if (game.talents.crit.purchased) base += 1;
+    if(critChance < 1)
+        return critChance * critDamage + (1-critChance);
+    else if(critChance <= 2)
+        return (base*(critChance-1) + (2-critChance))*critDamage;
+    else 
+        return base*calcCritModifier(critChance-1, critDamage);
 }
 
 function calcDmgManual(printout){
@@ -66,15 +65,19 @@ function calcDmgManual(printout){
         dmg *= anti;
         if (printout) debug("anti " + anti + " dmg " + dmg.toExponential(2));
     }
-    if (!game.global.mapsActive && game.global.mapBonus > 0){
-        var mapbonus = ((game.global.mapBonus * .2) + 1);
-        dmg *= mapbonus;
-        if (printout) debug("mapbonus " + mapbonus.toFixed(2) + " dmg " + dmg.toExponential(2));
-    }
     if (game.global.formation !== 0){
         var form = (game.global.formation == 2) ? 4 : 0.5;
         dmg *= form;
         if (printout) debug("formation " + form + " dmg " + dmg.toExponential(2));
+    }
+    if (game.global.titimpLeft > 1 && game.global.mapsActive){
+        dmg *= 2;
+        if (printout) debug("titimpbonus " + "2" + " dmg " + dmg.toExponential(2));
+    }
+    if (!game.global.mapsActive && game.global.mapBonus > 0){
+        var mapbonus = ((game.global.mapBonus * .2) + 1);
+        dmg *= mapbonus;
+        if (printout) debug("mapbonus " + mapbonus.toFixed(2) + " dmg " + dmg.toExponential(2));
     }
     if (game.global.roboTrimpLevel > 0){
         var robo = ((0.2 * game.global.roboTrimpLevel) + 1);
@@ -82,14 +85,28 @@ function calcDmgManual(printout){
         if (printout) debug("robo " + robo.toFixed(2) + " dmg " + dmg.toExponential(2));
     }
     
-    var shield = calcHeirloomBonus("Shield", "trimpAttack", 1);
+    //var shield = calcHeirloomBonus("Shield", "trimpAttack", 1);
+    var shield = highATK;
     dmg *= shield;
     if (printout) debug("shield " + shield.toFixed(2) + " dmg " + dmg.toExponential(2));
     
+    if (game.goldenUpgrades.Battle.currentBonus > 0){
+        var battle = game.goldenUpgrades.Battle.currentBonus + 1;
+        dmg *= battle;
+        if (printout) debug("battle "  + battle.toFixed(2) + " dmg " + dmg.toExponential(2));
+    }
     if (game.talents.voidPower.purchased && game.global.voidBuff){
         var vpAmt = (game.talents.voidPower2.purchased) ? ((game.talents.voidPower3.purchased) ? 65 : 35) : 15;
         dmg *= ((vpAmt / 100) + 1);
         if (printout) debug("void power " + ((vpAmt / 100) + 1).toFixed(2) + " dmg " + dmg.toExponential(2));
+    }
+    if (isScryhardActive()){
+        dmg *= 2;
+        if (printout) debug("scryhard1 " + "2" + " dmg " + dmg.toExponential(2));
+    }
+    if (game.talents.daily.purchased && game.global.challengeActive == "Daily"){
+        dmg *= 1.5;
+        if (printout) debug("legs for days " + "1.5" + " dmg " + dmg.toExponential(2));
     }
     if (game.talents.magmamancer.purchased){
         var magmamancers = game.jobs.Magmamancer.getBonusPercent();
@@ -116,15 +133,20 @@ function calcDmgManual(printout){
         dmg *= sqr;
         if (printout) debug("sqr " + sqr + " dmg " + dmg.toExponential(2));
     }
-    if (game.goldenUpgrades.Battle.currentBonus > 0){
-        var battle = game.goldenUpgrades.Battle.currentBonus + 1;
-        dmg *= battle;
-        if (printout) debug("battle "  + battle.toFixed(2) + " dmg " + dmg.toExponential(2));
-    }
     if (getEmpowerment() == "Ice"){
         var ice = 1 + (1 - game.empowerments.Ice.getCombatModifier());
         dmg *= ice;
         if (printout) debug("ice " + ice.toExponential(2) + " dmg " + dmg.toExponential(2));
+    }
+    if (Fluffy.isActive()){
+        var fluff = lastFluffDmg;
+        dmg *= fluff;
+        if (printout) debug("fluffy " + fluff.toFixed(2) + " dmg " + dmg.toExponential(2));
+    }
+    if (game.jobs.Amalgamator.owned > 0){
+        var amal = game.jobs.Amalgamator.getDamageMult();
+        dmg *= amal;
+        if (printout) debug("amal " + amal + " dmg " + dmg.toExponential(2));
     }
     if (game.singleRunBonuses.sharpTrimps.owned){
         var sharp = 1.5;
@@ -153,26 +175,23 @@ function calcDmgManual(printout){
             if (printout) debug("daily ramp " + ramp.toFixed(2) + " dmg " + dmg.toExponential(2));
         }
     }
-    if (Fluffy.isActive()){
-        var fluff = Fluffy.getDamageModifier();
-        dmg *= fluff;
-        if (printout) debug("fluffy " + fluff.toFixed(2) + " dmg " + dmg.toExponential(2));
-    }
-    if (game.jobs.Amalgamator.owned > 0){
-        var amal = game.jobs.Amalgamator.getDamageMult();
-        dmg *= amal;
-        if (printout) debug("amal " + amal + " dmg " + dmg.toExponential(2));
-    }
     
-    baseDamageNoCrit = dmg*ATgetPlayerNonCritDamageMult();
-    baseDamageCritOnly = baseDamageNoCrit*ATgetPlayerCritDamageMult();
+    var baseModifier = formationToBModifier();
+    var dmgLow = dmg / highATK * lowATK;
+    
+    baseDamageLowNoCrit    = dmgLow * ATgetPlayerNonCritDamageMult(lowCritChance, lowCritDamage) * baseModifier;
+    baseDamageLowCritOnly  = baseDamageLowNoCrit * ATgetPlayerCritDamageMult(lowCritChance, lowCritDamage);
+    
+    baseDamageHighNoCrit   = dmg * ATgetPlayerNonCritDamageMult(highCritChance, highCritDamage) * baseModifier;
+    baseDamageHighCritOnly = baseDamageHighNoCrit * ATgetPlayerCritDamageMult(highCritChance, highCritDamage);
     
     var min = 1;
     var max = 1.2;
     if (game.global.challengeActive == "Daily"){
         if (typeof game.global.dailyChallenge.minDamage !== 'undefined'){
             min = (1-dailyModifiers.minDamage.getMult(game.global.dailyChallenge.minDamage.strength));
-            baseDamageNoCrit *= min;
+            baseDamageLowNoCrit  *= min;
+            baseDamageHighNoCrit *= min;
             if (printout) debug("daily min " + min.toFixed(2));
         }
         if (typeof game.global.dailyChallenge.maxDamage !== 'undefined'){   
@@ -181,14 +200,22 @@ function calcDmgManual(printout){
         }
     }
     
-    var critMult = calcCritModifier(getPlayerCritChance(), getPlayerCritDamageMult());
-    dmg *= critMult;
-    if (printout) debug ("critchance " + getPlayerCritChance() + " critMult " + getPlayerCritDamageMult() + " final " + critMult.toFixed(2) + " dmg " + dmg.toExponential(2));
-    
     var avgRange = (max + min) / 2;
+    
+    var critMultLow = calcCritModifier(lowCritChance, lowCritDamage);
+    dmgLow *= critMultLow;
+    var critMultHigh = calcCritModifier(highCritChance, highCritDamage);
+    dmg *= critMultHigh;
+    if (printout) debug ("critchance " + highCritChance + " critMult " + highCritDamage + " final " + critMultHigh.toFixed(2) + " dmg " + dmg.toExponential(2));
+    
+    dmgLow *= avgRange;
     dmg *= avgRange;
     if (printout) debug("avgRange " + avgRange.toFixed(2) + " dmg " + dmg.toExponential(2));
-    return dmg;
+    
+    baseDamageLow = dmgLow * baseModifier;
+    baseDamageHigh = dmg * baseModifier;
+    
+    return baseDamageHigh;
 }
 function dmgNeededToOK(cellNum){
     if(game.global.mapsActive){ //we dont generate map grid
@@ -197,7 +224,8 @@ function dmgNeededToOK(cellNum){
     }
     var requiredDmgToOK = dmgNeededToOKHelper(cellNum, game.global.gridArray[cellNum].health); //how much dmg we need to fully OK on this attack
     var requiredDmgToOKNext = 1; //calculate damage to OK next attack. this number is more important since our damage on current attack is mostly locked, we need to predict the next attack/cell
-    for (var i = 1+Fluffy.isRewardActive("overkiller"); i >= 1; i--){
+    var maxOverkillCells = 1 + Fluffy.isRewardActive("overkiller") + (game.talents.overkill.purchased ? 1 : 0);
+    for (var i = maxOverkillCells; i >= 1; i--){
         if(cellNum + i >= 100)
             continue;
         var tmp = dmgNeededToOKHelper(cellNum+i, worldArray[cellNum+i].maxHealth);
@@ -210,7 +238,7 @@ function dmgNeededToOK(cellNum){
 
 //calculates how much dmg we need to fully overkill starting on cellNum which has HP health remaining
 function dmgNeededToOKHelper(cellNum, HP){
-    var overkillCells = 1+Fluffy.isRewardActive("overkiller"); //0 / 1 / 2
+    var overkillCells = 1 + Fluffy.isRewardActive("overkiller") + (game.talents.overkill.purchased ? 1 : 0); //0 / 1 / 2
     var overkillPercent = game.portal.Overkill.level * 0.005;
     var requiredDmgToOK = 0;
     var maxCells = (game.global.mapsActive) ? game.global.mapGridArray.length : 100;
@@ -228,21 +256,6 @@ function dmgNeededToOKHelper(cellNum, HP){
         requiredDmgToOK -= Math.min(game.empowerments.Poison.currentDebuffPower, HP);
     
     return requiredDmgToOK;
-}
-
-function getShieldStats(){
-    var original = highDamageHeirloom;
-    if(!getPageSetting('HeirloomSwapping')){
-        goodShieldAtkMult = 1;
-        return;
-    }
-    equipMainShield();
-    goodShieldAtkMult = calcHeirloomBonus("Shield", "trimpAttack", 1);
-    equipLowDmgShield();
-    lowShieldPB = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
-    if(original)
-        equipMainShield();
-    calcBaseDamageinS();
 }
 
 function aboutToDie(){
@@ -265,6 +278,15 @@ function aboutToDie(){
 
     if(game.global.challengeActive == "Daily" && typeof game.global.dailyChallenge.crits !== 'undefined')
         enemyAttack *= dailyModifiers.crits.getMult(game.global.dailyChallenge.crits.strength);
+    
+    if (typeof game.global.dailyChallenge.bogged != 'undefined') //fixed %dmg taken every attack
+        ourHP -= game.global.soldierHealthMax * dailyModifiers.bogged.getMult(game.global.dailyChallenge.bogged.strength);
+    
+    if (typeof game.global.dailyChallenge.plague != 'undefined')
+        ourHP -= game.global.soldierHealthMax * dailyModifiers.plague.getMult(game.global.dailyChallenge.plague.strength, game.global.dailyChallenge.plague.stacks);
+                 
+    if(game.global.challengeActive == "Electricity") //%dmg taken per stack, 1 stack every attack
+        ourHP -= game.global.soldierHealth -= game.global.soldierHealthMax * (game.challenges.Electricity.stacks * 0.1);
 
     if (game.global.gridArray[cellNum].corrupted == "corruptCrit")
         enemyAttack *= 5;
@@ -274,15 +296,13 @@ function aboutToDie(){
         ourHP *= 0.8;
     else if (game.global.gridArray[cellNum].corrupted == "healthyBleed")
         ourHP *= 0.7;
-
+    
     ourHP -= enemyAttack;
 
     if (ourHP <= 1000){ 
-        debug("Trimpiciding to prevent empowering e:" + enemyAttack.toExponential(2) + " us:" + game.global.soldierHealth.toExponential(2) + " ourHP:" + ourHP.toExponential(2));
-       if (!game.global.switchToMaps){
-            mapsClicked();
-        }
-        mapsClicked();
+        //debug("Trimpiciding to prevent empowering e:" + enemyAttack.toExponential(2) + " us:" + game.global.soldierHealth.toExponential(2) + " ourHP:" + ourHP.toExponential(2), "trimpicide");
+        debug("Trimpiciding to prevent empowering.", "trimpicide");
+        mapsClicked(true);
 
         return true;
     }
@@ -300,4 +320,8 @@ function checkForGoodCell(cellNum){
         }
     }
     return foundGoodFlag;
+}
+
+function isScryhardActive(){
+    return isScryerBonusActive() && game.talents.scry.purchased && !game.global.mapsActive && (getCurrentWorldCell().mutation == "Corruption" || getCurrentWorldCell().mutation == "Healthy");
 }

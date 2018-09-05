@@ -64,19 +64,22 @@ function worthOfHeirlooms(){
 //NEW:
 function autoHeirlooms() {
     if(!heirloomsShown){
+        //heirloom code is full of graphical elements which cause slowdowns. 
+        //MODULES["performance"].EnableAFKMode();
+        
         //PART 1: start by dropping ALL carried heirlooms
         var originalLength = game.global.heirloomsCarried.length;
         for(var index=0; index < originalLength; index++) {
-            selectHeirloom(0, 'heirloomsCarried');
-            stopCarryHeirloom();
+            selectHeirloom(0, 'heirloomsCarried', true);
+            newStopCarryHeirloom();
         }
         //PART 2: immediately begin carrying any protected heirlooms.
         var originalLength = game.global.heirloomsExtra.length;
         for(var index=0; index < originalLength; index++) {
             var theLoom = game.global.heirloomsExtra[index];
             if ((theLoom.protected) && (game.global.heirloomsCarried.length < game.global.maxCarriedHeirlooms)){
-                selectHeirloom(index, 'heirloomsExtra');
-                carryHeirloom();
+                selectHeirloom(index, 'heirloomsExtra', true);
+                newCarryHeirloom();
                 index--; originalLength--;  //stop index-skipping/re-ordering (idk how else to do it).
             }
         }
@@ -89,9 +92,11 @@ function autoHeirlooms() {
             valueLoomsOld(); //uses old heirloom valuing method
         else
             valueLoomsNew(); //only care about plagued heirlooms, and only 5/5 staves/shields and 2/5 shields.
+        
+        //MODULES["performance"].DisableAFKMode();
     }
     else if(heirloomsShown && game.global.selectedHeirloom.length > 0){
-        heirloomUpgradeHighlighting();
+        //heirloomUpgradeHighlighting();
     }
 }
 
@@ -100,7 +105,7 @@ function valueLoomsNew(){
     for(loom of game.global.heirloomsExtra){
         counter++;
         if(game.global.heirloomsCarried.length >= game.global.maxCarriedHeirlooms){ //can't carry any more
-            debug("Can't carry any more heirlooms.");
+            debug("Can't carry any more heirlooms.", "heirlooms");
             return;
         }
         if(loom.rarity < 8) //not plagued, ignore it
@@ -111,8 +116,8 @@ function valueLoomsNew(){
         var keepStaves = isValidStaff(loom, true) && getPageSetting('HeirloomStaves');
         if(keepLowShield || keepHighShield || keepPushShield || keepStaves){
             //debug("carrying heirloom " + loom);
-            selectHeirloom(game.global.heirloomsExtra.indexOf(loom), 'heirloomsExtra');
-            carryHeirloom(); //this reshuffles game.global.heirloomsExtra, so lets recall the function for the new array
+            selectHeirloom(game.global.heirloomsExtra.indexOf(loom), 'heirloomsExtra', true);
+            newCarryHeirloom(); //this reshuffles game.global.heirloomsExtra, so lets recall the function for the new array
             valueLoomsNew();
             return;
         }
@@ -130,14 +135,14 @@ function valueLoomsOld(){
         worthOfHeirlooms();
         if (worth2["Shield"].length > 0){
             var carryshield = worth2["Shield"].shift();
-            selectHeirloom(carryshield.index, 'heirloomsExtra');
-            carryHeirloom();
+            selectHeirloom(carryshield.index, 'heirloomsExtra', true);
+            newCarryHeirloom();
         }
         worthOfHeirlooms();
         if (worth2["Staff"].length > 0){
             var carrystaff = worth2["Staff"].shift();
-            selectHeirloom(carrystaff.index, 'heirloomsExtra');
-            carryHeirloom();
+            selectHeirloom(carrystaff.index, 'heirloomsExtra', true);
+            newCarryHeirloom();
         }
     }
     sortHeirlooms();
@@ -155,10 +160,10 @@ function valueLoomsOld(){
         //... and compare the carried against the best worth opposite type in the extra pile. (since part 3 above took care of the bests of each same type)
         if(theLoom.rarity < game.global.heirloomsExtra[index].rarity) {
             if (!theLoom.protected){
-                selectHeirloom(carried, 'heirloomsCarried');
-                stopCarryHeirloom();
-                selectHeirloom(index, 'heirloomsExtra');
-                carryHeirloom();
+                selectHeirloom(carried, 'heirloomsCarried', true);
+                newStopCarryHeirloom();
+                selectHeirloom(index, 'heirloomsExtra', true);
+                newCarryHeirloom();
                 sortHeirlooms();
             }
             //do nothing if the carried thing was protected.
@@ -495,39 +500,37 @@ function protectHeirloom(element, modify){
 }
 
 //wrapper for selectHeirloom, to handle the protect button
-function newSelectHeirloom(number, location, elem){
-    //selectHeirloom(number, location, elem);
-    
-    //copying selectHeirloom() so we can remove populateHeirloomWindow() which is high cpu cost function
-    game.global.selectedHeirloom = [number, location];
-    //populateHeirloomWindow(); //this has high cpu cost, so lets remove the visual only aspect
-    var heirloom = game.global[location];
-    if (number > -1) heirloom = heirloom[number];
-    switch (location){
-        case "StaffEquipped":
-        case "ShieldEquipped":
-            document.getElementById("equippedHeirloomsBtnGroup").style.visibility = "visible";
-            break;
-        case "heirloomsCarried":
-            document.getElementById("carriedHeirloomsBtnGroup").style.visibility = "visible";
-            document.getElementById("equipHeirloomBtn").innerHTML = (typeof game.global[heirloom.type + "Equipped"].name === 'undefined') ? "Equip" : "Swap";
-            break;
-        case "heirloomsExtra":
-            document.getElementById("extraHeirloomsBtnGroup").style.visibility = "visible";
-            document.getElementById("equipHeirloomBtn2").innerHTML = (typeof game.global[heirloom.type + "Equipped"].name === 'undefined') ? "Equip" : "Swap";
-            if (game.global.heirloomsCarried.length < game.global.maxCarriedHeirlooms) swapClass("heirloomBtn", "heirloomBtnActive", document.getElementById("carryHeirloomBtn"));
-            document.getElementById("recycleHeirloomBtn").innerHTML = "Recycle (+" + prettify(getTotalHeirloomRefundValue(heirloom)) + " Nullifium)";
-            break;
-    }
-    displaySelectedHeirloom();
+function newSelectHeirloom(number, location, noScreenUpdate){
+    selectHeirloom(number, location, noScreenUpdate);
+    //game.global.selectedHeirloom = [number, location];
+    //getSelectedHeirloom()
     
     protectHeirloom();
+}
+
+function newCarryHeirloom(){
+	var heirloom = getSelectedHeirloom();
+	if (game.global.heirloomsCarried.length >= game.global.maxCarriedHeirlooms) return;
+	game.global.heirloomsExtra.splice(game.global.selectedHeirloom[0], 1);
+	game.global.heirloomsCarried.push(heirloom);
+	//populateHeirloomWindow();
+}
+
+function newStopCarryHeirloom(){
+	var heirloom = getSelectedHeirloom();
+	game.global.heirloomsCarried.splice(game.global.selectedHeirloom[0], 1);
+	game.global.heirloomsExtra.push(heirloom);
+	//populateHeirloomWindow();
 }
 
 function equipMainShield(){
     if(!getPageSetting('HeirloomSwapping') || !getPageSetting('AutoHeirlooms')) {
         highDamageHeirloom = true;
         return false;
+    }
+    if(game.global.ShieldEquipped.name == highShieldName){
+        highDamageHeirloom = true;
+        return true;
     }
     if(isValidHighShield(game.global.ShieldEquipped, true)){
         highDamageHeirloom = true;
@@ -537,34 +540,61 @@ function equipMainShield(){
         return false;
     var loom = findMainShield();
     if (loom == null) return false;
-    newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");
-    equipHeirloom(); //this is slow
-    //updateAllBattleNumbers(true); //cpu expensive
-    //debug("equip main");
-    highDamageHeirloom = true;
+    
+    newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried", true); //noScreenUpdate skips UI code for faster execution
+    equipHeirloom(true); //noScreenUpdate skips UI code for faster execution
+    highCritChance      = getPlayerCritChance();
+    highCritDamage      = getPlayerCritDamageMult();
+    highATK             = calcHeirloomBonus("Shield", "trimpAttack", 1);
+    highPB              = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
+    highDamageHeirloom  = true;
     return true;
 }
 equipMainShield();
 
 function equipLowDmgShield(){
+    //if (lowPB > -1 && game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp")
+    //    return; //dont equip low shield in liquified zones because it cancels the tooltip
+    
     if(!getPageSetting('HeirloomSwapping') || !getPageSetting('AutoHeirlooms')) {
         highDamageHeirloom = true;
         return false;
     }
+    if(game.global.ShieldEquipped.name == lowShieldName){
+        highDamageHeirloom = false;
+        return true;
+    }
     if(isValidLowShield(game.global.ShieldEquipped, true)){
         highDamageHeirloom = false;
+        lowPB = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
         return true;
     }
     if(heirloomsShown) //dont do anything while heirlooms window is open. under rate circumstances bad things could happen if both user and AT are handling heirlooms at the same time
         return false;
     var loom = findLowDmgShield();
     if (loom == null) return false;
-    newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried");
-    equipHeirloom();
-    //updateAllBattleNumbers(true); //cpu expensive
-    //debug("equip alt");
-    highDamageHeirloom = false;
+    
+    newSelectHeirloom(game.global.heirloomsCarried.indexOf(loom), "heirloomsCarried", true);
+    equipHeirloom(true);
+    lowCritChance       = getPlayerCritChance();
+    lowCritDamage       = getPlayerCritDamageMult();
+    lowATK              = calcHeirloomBonus("Shield", "trimpAttack", 1);
+    lowPB               = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
+    highDamageHeirloom  = false;
     return true;
+}
+
+function equipSelectedShield(good){
+    if(good != highDamageHeirloom){
+        if(good == undefined)
+            debug("error: equipSelectedShield good is undefined!");
+        if(highDamageHeirloom == undefined)
+            debug("error: equipSelectedShield highDamageHeirloom undefined!");
+        if(good)
+            equipMainShield();
+        else
+            equipLowDmgShield();
+    }
 }
 
 function findMainShield(){

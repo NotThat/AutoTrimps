@@ -152,8 +152,8 @@ function findNextBionic(maxLevel) {
             continue;
         }
         
-        if (behindOnPrestige(highestBionicMap.level)){ //if we need prestiges from our map, only take a lower bionic if we need prestiges from it as well
-            if(map.level < highestBionicMap.level && behindOnPrestige(map.level))
+        if (addSpecials(true, true, highestBionicMap) > 0){ //if we need prestiges from our map, only take a lower bionic if we need prestiges from it as well
+            if(map.level < highestBionicMap.level && addSpecials(true, true, map) > 0)
                 highestBionicMap = map;
         }
         else if(map.level > highestBionicMap.level) {//we dont need anything from our bionic, so look for a higher one
@@ -163,12 +163,12 @@ function findNextBionic(maxLevel) {
         
     if (highestBionicMap == null)
         return false;
-    if (highestBionicMap.level == maxLevel && !behindOnPrestige(highestBionicMap.level)) //if we already at max level and dont need gear, stop
+    if (highestBionicMap.level >= maxLevel && addSpecials(true, true, highestBionicMap) === 0) //if we already at max level and dont need gear, stop
     	return false;
     return highestBionicMap;
 }
 
-function calcPrestige(){
+function lastPrestigeZone(){
     var max=1;
     var tmp;
     
@@ -268,15 +268,11 @@ function BWraiding() {
         return true;
     }
     
-    if (!game.global.preMapsActive && !game.global.mapsActive) {  //if we are in world, get to map screen
-        mapsClicked();
-        if (!game.global.switchToMaps) {
-            mapsClicked();
-        }
-    }
+    if (!game.global.preMapsActive && !game.global.mapsActive)  //if we are in world, get to map screen
+        mapsClicked(true);
     
     if(game.global.mapsActive){ //already in a map
-        if(nextBionicMap == getCurrentMapObject()){ //doing our BW map
+        if(nextBionicMap == currMap){ //doing our BW map
             if (!game.global.repeatMap) {
                 repeatClicked();
             } 
@@ -284,13 +280,13 @@ function BWraiding() {
                 toggleSetting('repeatUntil'); //repeat for all items
             }
             var map = game.global.mapsOwnedArray[getMapIndex(game.global.currentMapId)];
-            updateAutoMapsStatus("", "BW Raiding: "+ addSpecials(true, true, map));
+            statusMsg = "BW Raiding: "+ addSpecials(true, true, map);
         }
         else { //we're in another map
             if (game.global.repeatMap) {
                 repeatClicked();
             } 
-            updateAutoMapsStatus("", "Finishing map");
+            statusMsg = "Finishing map";
         }
         return false;
     }
@@ -304,7 +300,7 @@ function BWraiding() {
         toggleSetting('repeatUntil'); //repeat for all items
     }
     var map = game.global.mapsOwnedArray[getMapIndex(game.global.currentMapId)];
-    updateAutoMapsStatus("", "BW Raiding: "+ addSpecials(true, true, map));
+    statusMsg = "BW Raiding: "+ addSpecials(true, true, map);
     return false;
  }
 
@@ -342,4 +338,18 @@ function lootdump() {
 	    debug("Done buying Looting II");
         }
     }
+}
+
+function fightManualAT(){
+    if(wantGoodShield != highDamageHeirloom){
+        if(wantGoodShield == undefined)
+            debug("error: wantGoodShield undefined!");
+        if(highDamageHeirloom == undefined)
+            debug("error: highDamageHeirloom undefined!");
+        if(wantGoodShield)
+            equipMainShield();
+        else
+            equipLowDmgShield();
+    }
+    fightManual();
 }

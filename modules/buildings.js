@@ -1,7 +1,7 @@
 MODULES["buildings"] = {};
 //These can be changed (in the console) if you know what you're doing:
 MODULES["buildings"].nursCostRatio = 0.05; //nursery to warpstation/collector cost ratio. Also for extra gems.
-MODULES["buildings"].storageMainCutoff = 0.85; //when to buy more storage. (85% )
+MODULES["buildings"].storageMainCutoff = 0.8; //when to buy more storage. (80%)
 MODULES["buildings"].storageLowlvlCutoff1 = 0.7; //when to buy more storage at zone 1
 MODULES["buildings"].storageLowlvlCutoff2 = 0.5; //when to buy more storage from zone 2-10   (more leeway so it doesnt fill up)
 
@@ -19,6 +19,11 @@ function safeBuyBuilding(building) {
     //Note: Bypasses any "Max" caps by 1 if they are odd numbers and we can afford the 2nd one.
     if (game.talents.doubleBuild.purchased) {
         game.global.buyAmt = 2;
+        if(game.talents.deciBuild.purchased){
+            game.global.buyAmt = 10;
+            if (!canAffordBuilding(building))
+                game.global.buyAmt = 2;
+        }
         if (!canAffordBuilding(building)) {
             game.global.buyAmt = 1;
             if (!canAffordBuilding(building)) {
@@ -34,9 +39,6 @@ function safeBuyBuilding(building) {
         }
     }
     game.global.firing = false;
-    if (building == 'Gym' && getPageSetting('GymWall')) {
-        game.global.buyAmt = 1;
-    }
     //buy max warpstations when we own <2 (ie: after a new giga)
     //thereafter, buy only 1 warpstation
     if (building == 'Warpstation') {
@@ -62,10 +64,13 @@ function buyFoodEfficientHousing() {
     var foodHousing = ["Hut", "House", "Mansion", "Hotel", "Resort"];
     var unlockedHousing = [];
     for (var house in foodHousing) {
-        if (game.buildings[foodHousing[house]].locked === 0) {
+        if (game.buildings[foodHousing[house]].locked === 0 && getPageSetting("Max"+foodHousing[house]) > 0) {
             unlockedHousing.push(foodHousing[house]);
         }
     }
+    if(unlockedHousing.length === 0)
+        return;
+        
     var buildorder = [];
     for (var house in unlockedHousing) {
         var building = game.buildings[unlockedHousing[house]];
@@ -98,10 +103,13 @@ function buyGemEfficientHousing() {
     var gemHousing = ["Hotel", "Resort", "Gateway", "Collector", "Warpstation"];
     var unlockedHousing = [];
     for (var house in gemHousing) {
-        if (game.buildings[gemHousing[house]].locked === 0) {
+        if (game.buildings[gemHousing[house]].locked === 0 && getPageSetting("Max"+gemHousing[house]) > 0) {
             unlockedHousing.push(gemHousing[house]);
         }
     }
+    if(unlockedHousing.length === 0)
+        return;
+    
     var obj = {};
     for (var house in unlockedHousing) {
         var building = game.buildings[unlockedHousing[house]];
@@ -193,23 +201,8 @@ function buyBuildings() {
     }
     //Buy non-housing buildings:
     //Gyms:
-    if (!game.buildings.Gym.locked && (getPageSetting('MaxGym') > game.buildings.Gym.owned || getPageSetting('MaxGym') == -1)) {
+    if (!game.buildings.Gym.locked) {
         var skipGym = false;
-        //if (getPageSetting('DynamicGyms')) {
-        //    //getBattleStats calculation comes from battlecalc.js and shows the tooltip-table block amount. calcBadGuyDmg is in that file also
-        //    if (!game.global.preMapsActive && getBattleStats("block", true) > calcBadGuyDmg(getCurrentEnemy(), null, true,true))
-        //        skipGym = true;
-        //}
-        //still buy gyms if we are farming for voids
-        if (doVoids && voidCheckPercent > 0)
-            skipGym = false;
-        //(unless gymwall; thats why its after. debateable.)
-        var gymwallpct = getPageSetting('GymWall');
-        if (gymwallpct > 1) {
-            //Gym Wall - allow only gyms that cost 1/n'th less then current wood (try to save wood for nurseries for new z230+ Magma nursery strategy)
-            if (getBuildingItemPrice(game.buildings.Gym, "wood", false, 1) * Math.pow(1 - game.portal.Resourceful.modifier, game.portal.Resourceful.level) > (game.resources.wood.owned / gymwallpct))
-                skipGym = true;
-        }
         //ShieldBlock cost Effectiveness:
         if (game.equipment['Shield'].blockNow) {
             var gymEff = evaluateEquipmentEfficiency('Gym');
@@ -230,34 +223,36 @@ function buyBuildings() {
     var targetBreed = parseInt(getPageSetting('GeneticistTimer'));
 //NURSERIES:
     //NoNurseriesUntil', 'No Nurseries Until z', 'For Magma z230+ purposes. Nurseries get shut down, and wasting nurseries early on is probably a bad idea. Might want to set this to    230+ as well.'
-    var nursminlvl = getPageSetting('NoNurseriesUntil');
+    //var nursminlvl = getPageSetting('NoNurseriesUntil');
     //Activate dynamic Nurseries to buy nurseries from NoNurseriesUntilZone up to portal before zone.
-    function dynamicNurseries() {
-        var maxNursery = getPageSetting('MaxNursery');
-        var finalZone = getPageSetting('HeHrDontPortalBefore')
-        var numZ = finalZone - nursminlvl;
-        var perZ = maxNursery / ((numZ / 10 + 1));
-        return perZ;
-    }
-    var dynNursStop = 0;
-    if (getPageSetting('DynamicNurseries')) {
-        dynNursStop = dynamicNurseries();
-    }
-    var preSpireOverride = getPageSetting('PreSpireNurseries');
+    //function dynamicNurseries() {
+    //    var maxNursery = getPageSetting('MaxNursery');
+    //    var finalZone = getPageSetting('HeHrDontPortalBefore')
+    //    var numZ = finalZone - nursminlvl;
+    //    var perZ = maxNursery / ((numZ / 10 + 1));
+    //    return perZ;
+    //}
+    //var dynNursStop = 0;
+    //if (getPageSetting('DynamicNurseries')) {
+    //    dynNursStop = dynamicNurseries();
+    //}
+    //var preSpireOverride = getPageSetting('PreSpireNurseries');
+
     //override NoNurseriesUntil and MaxNursery if on a Spire >= IgnoreSpiresUntil, or on a world zone < 200 when IgnoreSpiresUntil is set to <= 200
-    var overrideNurseries = preSpireOverride >= 0 && (isActiveSpireAT() || (game.global.world < 200 && getPageSetting('IgnoreSpiresUntil') <= 200));
-    if (game.global.world < nursminlvl && !overrideNurseries) {
+    //var overrideNurseries = preSpireOverride >= 0 && ;
+
+    var nursminlvl = getPageSetting('NoNurseriesUntil');
+    var maxNursery = (isActiveSpireAT() || (game.global.world < 200 && getPageSetting('IgnoreSpiresUntil') <= 200)) ? getPageSetting('PreSpireNurseries') : getPageSetting('MaxNursery');
+    if (game.global.world < nursminlvl || game.buildings.Nursery.owned >= maxNursery || maxNursery <= 0 || (getPageSetting('NoNurseriesIce') && (getEmpowerment() == "Ice") && game.global.world > nursminlvl+5)) {
         postBuy2(oldBuy);
         return;
     }
-    var maxNursery = overrideNurseries ? preSpireOverride : getPageSetting('MaxNursery');
-    if (dynNursStop > 0)
-        maxNursery = dynNursStop;
+
     //only buy nurseries if enabled,   and we need to lower our breed time, or our target breed time is 0, or we aren't trying to manage our breed time before geneticists, and they aren't locked
     //even if we are trying to manage breed timer pre-geneticists, start buying nurseries once geneticists are unlocked AS LONG AS we can afford a geneticist (to prevent nurseries from outpacing geneticists soon after they are unlocked)
-    if ((targetBreed < getBreedTime() || targetBreed <= 0 ||
-        (targetBreed < getBreedTime(true) && game.global.challengeActive == 'Watch') ||
-        (!game.jobs.Geneticist.locked && canAffordJob('Geneticist', false, 1))) && !game.buildings.Nursery.locked) {
+    //if ((targetBreed < getBreedTime() || targetBreed <= 0 ||
+    //    (targetBreed < getBreedTime(true) && game.global.challengeActive == 'Watch') ||
+    //    (!game.jobs.Geneticist.locked && canAffordJob('Geneticist', false, 1))) && !game.buildings.Nursery.locked) {
         var nwr = customVars.nursCostRatio; //nursery to warpstation/collector cost ratio. Also for extra gems.
         var nursCost = getBuildingItemPrice(game.buildings.Nursery, "gems", false, 1);
         var warpCost = getBuildingItemPrice(game.buildings.Warpstation, "gems", false, 1);
@@ -265,17 +260,12 @@ function buyBuildings() {
         var resomod = Math.pow(1 - game.portal.Resourceful.modifier, game.portal.Resourceful.level); //need to apply the resourceful mod when comparing anything other than building vs building.
         //buy nurseries irrelevant of warpstations (after we unlock them) - if we have enough extra gems that its not going to impact anything. note:(we will be limited by wood anyway - might use a lot of extra wood)
         var buyWithExtraGems = (!game.buildings.Warpstation.locked && nursCost * resomod < nwr * game.resources.gems.owned);
-        //do not buy nurseries in Ice zones
-        var noIce = getPageSetting('NoNurseriesIce');
-        var startNurseriesZ = getPageSetting('NoNurseriesUntil');
-        var stopBuyNurseries = noIce && (getEmpowerment() == "Ice") && game.global.world > startNurseriesZ+5;
-        if ((maxNursery > game.buildings.Nursery.owned || maxNursery == -1) && !stopBuyNurseries &&
-            (buyWithExtraGems ||
+        if ((buyWithExtraGems ||
              ((nursCost < nwr * warpCost || game.buildings.Warpstation.locked) &&
               (nursCost < nwr * collCost || game.buildings.Collector.locked || !game.buildings.Warpstation.locked)))) {
                safeBuyBuilding('Nursery');
         }
-    }
+    //}
     postBuy2(oldBuy);
 }
 
@@ -289,18 +279,13 @@ function buyStorage() {
         'Forge': 'metal'
     };
     for (var B in Bs) {
-        var jest = 0;
         var owned = game.resources[Bs[B]].owned;
         var max = game.resources[Bs[B]].max * packMod;
-        max = calcHeirloomBonus("Shield", "storageSize", max);
-        if (game.global.mapsActive && game.unlocks.imps.Jestimp) {
-            jest = simpleSeconds(Bs[B], 45);
-            jest = scaleToCurrentMap(jest);
-        }
+        if (game.heirlooms.Shield.storageSize.currentBonus > 0)
+            max *= (100 + game.heirlooms.Shield.storageSize.currentBonus);
         if ((game.global.world == 1 && owned > max * customVars.storageLowlvlCutoff1) ||
             (game.global.world >= 2 && game.global.world < 10 && owned > max * customVars.storageLowlvlCutoff2) ||
-            (owned + jest > max * customVars.storageMainCutoff)) {
-            // debug('Buying ' + B + '(' + Bs[B] + ') at ' + Math.floor(game.resources[Bs[B]].owned / (game.resources[Bs[B]].max * packMod * 0.99) * 100) + '%');
+            (owned > max * customVars.storageMainCutoff)) {
             if (canAffordBuilding(B) && game.triggers[B].done) {
                 safeBuyBuilding(B);
             }

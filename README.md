@@ -66,7 +66,6 @@ The mainLoop() consists of the following subroutine functions, all of which are 
 -     buyJobs();              //"Buy Jobs"
 -     manualLabor();          //"Auto Gather/Build"
 -     autoMap();              //"Auto Maps"
--     autoBreedTimer();          //"Genetecist Timer" / "Auto Breed Timer"
 -     autoPortal();           //"Auto Portal" (hidden until level 40)
 -     autoHeirlooms();       //"Auto Heirlooms" (genBTC settings area)
 -     autoNull();             //"Auto Upgrade Heirlooms" (genBTC settings area)

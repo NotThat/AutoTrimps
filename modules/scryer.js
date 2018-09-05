@@ -53,7 +53,7 @@ function useScryerStance() {
 //If neither NEVER or FORCE, move on to assessing whether to MAYBE
 //First, calculate damage
 
-    calcBaseDamageinS(); //calculate internal script variables normally processed by autostance.
+    calcBaseDamageinB(); //calculate internal script variables normally processed by autostance.
 
 //Decide whether it is oktoswitch (Suicide)
     var missingHealth = game.global.soldierHealthMax - game.global.soldierHealth;
@@ -85,7 +85,7 @@ function useScryerStance() {
       useoverkill = false;
     //Overkill button being on and being able to overkill in S will override any setting other than never spire & nature zone, regardless.
     if (useoverkill && game.portal.Overkill.level > 0) {
-        var avgDamage = (baseDamage * (1-getPlayerCritChance()) + (baseDamage * getPlayerCritChance() * getPlayerCritDamageMult()));
+        var avgDamage = (baseDamageHigh * (1-getPlayerCritChance()) + (baseDamageHigh * getPlayerCritChance() * getPlayerCritDamageMult()));
         var Sstance = 0.5;
         var ovkldmg = avgDamage * Sstance * (game.portal.Overkill.level*0.005);
         //are we going to overkill in S?
