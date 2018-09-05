@@ -246,10 +246,10 @@ function debug(messageStr, type, lootIcon) {
             else
                 console.log(timeStamp() + ' ' + messageStr);
         }
-        if(pendingLogs)
+        if(typeof pendingLogs !== 'undefined')
             message3(messageStr, "AutoTrimps", lootIcon, type);
         else
-            message2(message, "AutoTrimps", lootIcon, type);
+            message2(messageStr, "AutoTrimps", lootIcon, type);
     }
 }
 
