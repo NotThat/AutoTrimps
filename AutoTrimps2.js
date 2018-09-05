@@ -80,7 +80,7 @@ function initializeAutoTrimps() {
         ATscriptLoad(modulepath, ATmoduleList[m]);
     }
     //
-    debug('AutoTrimps v' + ATversion + ' Loaded!', '*spinner3');
+    debug('AutoTrimps v' + ATversion + ' ' + ver + ' Loaded!', '*spinner3');
 }
 
 var changelogList = [];
