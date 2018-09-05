@@ -181,7 +181,12 @@ function autoMap() {
         checkedShields = true;
     }
     
-    statusMsg = "";
+    var AS = getPageSetting('AutoStance');
+    var ASMode;
+    if(AS < 2)       ASMode = "Advancing";
+    else if(AS == 2) ASMode = "DE";
+    else             ASMode = "Push";
+    statusMsg = ASMode;
     wantGoodShield = true;
     AutoMapsCoordOverride = false;
     calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
@@ -241,7 +246,7 @@ function autoMap() {
             return; 
         }
         else{
-            statusMsg = "Advancing";
+            statusMsg = ASMode;
         }
     }
     
@@ -252,7 +257,7 @@ function autoMap() {
             return; 
         }
         else{
-            statusMsg = "Advancing";
+            statusMsg = ASMode;
         }
     }
     
