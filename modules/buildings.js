@@ -242,7 +242,7 @@ function buyBuildings() {
     //var overrideNurseries = preSpireOverride >= 0 && ;
 
     var nursminlvl = getPageSetting('NoNurseriesUntil');
-    var maxNursery = (isActiveSpireAT() || (game.global.world < 200 && getPageSetting('IgnoreSpiresUntil') <= 200)) ? getPageSetting('PreSpireNurseries') : getPageSetting('MaxNursery');
+    var maxNursery = (isActiveSpireAT() ? getPageSetting('PreSpireNurseries') : getPageSetting('MaxNursery'));
     if (game.global.world < nursminlvl || game.buildings.Nursery.owned >= maxNursery || maxNursery <= 0 || (getPageSetting('NoNurseriesIce') && (getEmpowerment() == "Ice") && game.global.world > nursminlvl+5)) {
         postBuy2(oldBuy);
         return;

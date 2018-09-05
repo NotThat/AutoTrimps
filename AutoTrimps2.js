@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "1.18";
+var ver = "1.19";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -144,7 +144,6 @@ function delayStartAgain(){
     game.global.addonUser = true;
     game.global.autotrimps = true;
     heirloomCache = game.global.heirloomsExtra.length;
-    maxAnti = (game.talents.patience.purchased ? 45 : 30);
     MODULESdefault = JSON.parse(JSON.stringify(MODULES));
     
     //Actually Start mainLoop and guiLoop - defunct
@@ -306,6 +305,7 @@ function mainLoop(makeUp) {
     }
     setScienceNeeded();  //determine how much science is needed
     
+    maxAnti = (game.talents.patience.purchased ? 45 : 30);
     if(game.global.mapsActive) currMap = getCurrentMapObject();
     if (Fluffy.isActive() && lastFluffXp != Fluffy.currentExp[1]){
         lastFluffXp = Fluffy.currentExp[1];

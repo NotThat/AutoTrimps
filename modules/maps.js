@@ -29,6 +29,7 @@ var needToVoid = false;
 var needPrestige = false;
 var skippedPrestige = false;
 var ourBaseDamage = 0;
+var ourBaseDamagePlusOne = 0;
 var shouldDoMaps = false;
 var mapTimeEstimate = 0;
 var preSpireFarming = false;
@@ -81,9 +82,12 @@ function calcDmg(){
     }
     
     if(game.global.mapsActive){
-        ourBaseDamage *= 1 + (0.2 * game.global.mapBonus); //add map bonus
         if (game.global.titimpLeft > 1)
             ourBaseDamage *= 0.5; //remove titimp bonus
+        ourBaseDamagePlusOne = (ourBaseDamage * (1 + (0.2 * (game.global.mapBonus >= 10 ? game.global.mapBonus : (game.global.mapBonus + 1)))));
+        ourBaseDamage *= 1 + (0.2 * game.global.mapBonus); //add map bonus
+
+
     }
     
     const FORMATION_MOD_1 = game.upgrades.Dominance.done ? 2 : 1;
@@ -492,19 +496,23 @@ function autoMap() {
             if(useScryhard2())
                 goDefaultStance(4);
         }
-        else if(selectedMap != game.global.currentMapId){ //if we are not where we want to be, then disable repeat
+        else if(selectedMap != currMap){ //if we are not where we want to be, then disable repeat
             if (game.global.repeatMap)
                 repeatClicked();
         }
-        else{   
+        else{
             if (!game.global.repeatMap) //start with repeat button on
                 repeatClicked();
 
             var repeatChoice = 1; //0 - forever 1 - map bonus 2 - items 3 - any
-            
             var specials = addSpecials(true, true, currMap);
             if(specials > 0) //we still need prestige from our current map
                 repeatChoice = 2;
+            
+            if((DHratio / ourBaseDamage * ourBaseDamagePlusOne) > threshhold)
+                repeatChoice = 2; //psuedo 'repeat off' if we dont need more damage
+            //DHratio = (ourBaseDamage*0.25 / enemyHealth);
+            //enoughDamage = DHratio > threshhold;
             
             if(preSpireFarming)
                 repeatChoice = 0;
@@ -522,6 +530,7 @@ function autoMap() {
                 toggleSetting('repeatUntil');
             }
         }
+        return;
     }
 
     //#2 in the world
