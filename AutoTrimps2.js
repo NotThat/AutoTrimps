@@ -135,6 +135,7 @@ function delayStartAgain(){
     //Set some game ars after we load.
     game.global.addonUser = true;
     game.global.autotrimps = true;
+    heirloomCache = game.global.heirloomsExtra.length;
     MODULESdefault = JSON.parse(JSON.stringify(MODULES));
     
     //Actually Start mainLoop and guiLoop - defunct
@@ -214,7 +215,7 @@ var lastrunworld = 0;
 var aWholeNewWorld = false;
 var needGymystic = true;    //used in setScienceNeeded, buildings.js, equipment.js
 var heirloomFlag = false;
-var heirloomCache = game.global.heirloomsExtra.length;
+var heirloomCache;
 var magmiteSpenderChanged = false;
 
 var windMult = 1;
