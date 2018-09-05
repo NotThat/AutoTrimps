@@ -366,7 +366,7 @@ function autoMap() {
                 if (theMap.name == 'The Wall' && game.upgrades.Bounty.allowed == 0 && !game.talents.bounty.purchased) {
                     var theMapDifficulty = Math.ceil(theMap.difficulty / 2);
                     if (game.global.world < 15 + theMapDifficulty) continue;
-                    selectedMap = theMap.id;
+                    selectedMap = theMap;
                     break;
                 }
                 //game.global.portalActive
@@ -374,21 +374,21 @@ function autoMap() {
                 if (theMap.name == 'Dimension of Anger' && !game.global.portalActive) {
                     var theMapDifficulty = Math.ceil(theMap.difficulty / 2);
                     if (game.global.world < 20 + theMapDifficulty) continue;
-                    selectedMap = theMap.id;
+                    selectedMap = theMap;
                     break;
                 }
                 var dont = game.global.runningChallengeSquared;
                 if (theMap.name == 'The Block' && !game.upgrades.Shieldblock.allowed && ((game.global.challengeActive == "Scientist" || game.global.challengeActive == "Trimp") && !dont || getPageSetting('BuyShieldblock'))) {
                     var theMapDifficulty = Math.ceil(theMap.difficulty / 2);
                     if (game.global.world < 11 + theMapDifficulty) continue;
-                    selectedMap = theMap.id;
+                    selectedMap = theMap;
                     break;
                 }
                 /*var treasure = getPageSetting('TrimpleZ');
                 if (theMap.name == 'Trimple Of Doom' && (!dont && (game.global.challengeActive == "Meditate" || game.global.challengeActive == "Trapper") && game.mapUnlocks.AncientTreasure.canRunOnce && game.global.world >= treasure)) {
                     var theMapDifficulty = Math.ceil(theMap.difficulty / 2);
                     if ((game.global.world < 33 + theMapDifficulty) || treasure > -33 && treasure < 33) continue;
-                    selectedMap = theMap.id;
+                    selectedMap = theMap;
                     if (treasure < 0) // need to reset
                         setPageSetting('TrimpleZ', 0);
                     break;
@@ -398,13 +398,13 @@ function autoMap() {
                     if (theMap.name == 'The Prison' && (game.global.challengeActive == "Electricity" || game.global.challengeActive == "Mapocalypse")) {
                         var theMapDifficulty = Math.ceil(theMap.difficulty / 2);
                         if (game.global.world < 80 + theMapDifficulty) continue;
-                        selectedMap = theMap.id;
+                        selectedMap = theMap;
                         break;
                     }
                     if (theMap.name == 'Bionic Wonderland' && game.global.challengeActive == "Crushed") {
                         var theMapDifficulty = Math.ceil(theMap.difficulty / 2);
                         if (game.global.world < 125 + theMapDifficulty) continue;
-                        selectedMap = theMap.id;
+                        selectedMap = theMap;
                         break;
                     }
                 }
@@ -448,10 +448,10 @@ function autoMap() {
         if (doVoids){
             //selectedMap = findVoidMap();
             if(game.global.mapsActive && currMap.location === "Void"){
-                selectedMap = currMap.id;
+                selectedMap = currMap;
             }
             else
-                selectedMap = findFirstVoidMap(); //returns object or false
+                selectedMap = findFirstVoidMap(); //returns map object or false
 
             if(!selectedMap){
                 debug("No void found. Continuing.");
@@ -463,18 +463,18 @@ function autoMap() {
             var spiremaplvl = (game.talents.mapLoot.purchased && MODULES["maps"].SpireFarm199Maps) ? game.global.world - 1 : game.global.world;
             if (game.global.mapsActive) {
                 if(currMap.level === spiremaplvl)
-                    selectedMap = currMap.id;
+                    selectedMap = currMap;
             }
             else if (game.global.mapsOwnedArray[highestMap].level >= spiremaplvl && game.global.mapsOwnedArray[highestMap].location == ((customVars.preferGardens && game.global.decayDone) ? 'Plentiful' : 'Mountain'))
-                selectedMap = game.global.mapsOwnedArray[highestMap].id;
+                selectedMap = game.global.mapsOwnedArray[highestMap];
         }
         else if (needPrestige) { //if needPrestige, TRY to find current level map as the highest level map we own.
             if (game.global.world == game.global.mapsOwnedArray[highestMap].level)
-                selectedMap = game.global.mapsOwnedArray[highestMap].id;
+                selectedMap = game.global.mapsOwnedArray[highestMap];
             statusMsg = "Prestige: " + getRemainingSpecials(game.global.world);
         }
         else if (siphonMap != -1) //use the siphonology adjusted map
-            selectedMap = game.global.mapsOwnedArray[siphonMap].id;
+            selectedMap = game.global.mapsOwnedArray[siphonMap];
     }
     
     /*
@@ -565,10 +565,10 @@ function autoMap() {
                 if(!flag || !flag2){
                     debug("Can't afford map with parameters. level: " + lvl + " type: " + type, "maps");
                     debug("error in creating map process. Can't afford it? Running existing map instead.", "maps");
-                    selectedMap = game.global.mapsOwnedArray[highestMap].id; //revert to highest existing map
+                    selectedMap = game.global.mapsOwnedArray[highestMap]; //revert to highest existing map
                 }
                 else{
-                    selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1].id; //the map we just created
+                    selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1]; //the map we just created
                 } 
             }
             selectMap(selectedMap.id);
@@ -1321,7 +1321,7 @@ function findVoidMap(){
         //continue to check for doable map?
 
         //only go into the voidmap if we need to.
-        return theMap.id;
+        return theMap;
     }
     return null;
 
