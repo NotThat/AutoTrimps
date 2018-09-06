@@ -10,7 +10,7 @@
 // ==/UserScript==
 //var ATversion = '2.1.6.9b-genbtc-4-2-2018 + KFrowde + Zeker0';
 var ATversion = '2.1.7.1'; //when this increases it forces users setting update to newer version format
-
+//<script type="text/javascript" src="AutoTrimps/AutoTrimps2.js?"></script>
 ////////////////////////////////////////////////////////////////////////////////
 //Main Loader Initialize Function (loads first, load everything else)///////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "1.20";
+var ver = "1.21";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')

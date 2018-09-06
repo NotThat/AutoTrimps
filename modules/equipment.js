@@ -3,8 +3,6 @@ MODULES["equipment"] = {};
 MODULES["equipment"].numHitsSurvived = 10;   //survive X hits in D stance or not enough Health.
 MODULES["equipment"].numHitsSurvivedScry = 80;
 MODULES["equipment"].capDivisor = 10; //Your Equipment cap divided by this will give you the lower cap for liquified and overkilled zones
-MODULES["equipment"].alwaysLvl2 = true; //Always buys the 2nd level of equipment. Its the most effective.
-MODULES["equipment"].equipHealthDebugMessage = false;    //this repeats a message when you don't have enough health. set to false to stop the spam.
 var verbose = false;
 var buyWeaponsMode; //0: dont buy anything, only prestige once if it lowers damage. 1: prestige till -1 and level 2: 2: buy levels only, prestige if level > 81 or another weapon is higher prestige 3: get all 4: get max levels at current prestiges only
 
@@ -205,7 +203,7 @@ function evaluateEquipmentEfficiency(equipName) {
         Factor = 0;
         Wall = true;
     }
-    if (gameResource.level < 25 && MODULES["equipment"].alwaysLvl2 && equip.Stat != "attack") {
+    if (gameResource.level < 25 && equip.Stat != "attack") {
         Factor = 999 - gameResource.prestige;
     }
     //skip buying shields (w/ shieldblock) if we need gymystics
@@ -378,25 +376,21 @@ function autoLevelEquipment(lowerDamage, fastMode, colorStyle) {
                         allow = false;
                     }
                     if(allow){
-                        //debug('Leveling equipment ' + eqName, "equips", '*upload3');
                         buyEquipment(eqName, null, true);
                         boughtSomething = true;
                     }
                 }
             }
             //If we're considering a health item, buy it if we don't have enough health, otherwise we default to buying damage
-            if (BuyArmorLevels && (DaThing.Stat == 'health' || DaThing.Stat == 'block') && (!enoughHealthE || spirecheck)) {
+            if (BuyArmorLevels && (DaThing.Stat == 'health' || DaThing.Stat == 'block') && !enoughHealthE) {
                 if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {
-                    //debug('Leveling equipment ' + eqName, "equips", '*upload3');
                     buyEquipment(eqName, null, true);
                     boughtSomething = true;
                 }
             }
-            //Always LVL 2:
-            var aalvl2 = MODULES["equipment"].alwaysLvl2; //was getPageSetting('AlwaysArmorLvl2');
-            if (BuyArmorLevels && (DaThing.Stat == 'health') && aalvl2 && game.equipment[eqName].level < 25){
+            //Always LVL 25:
+            if (BuyArmorLevels && (DaThing.Stat == 'health') && game.equipment[eqName].level < 25){
                 if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {
-                    //debug('Leveling equipment ' + eqName + " (AlwaysLvl2)", "equips", '*upload3');
                     buyEquipment(eqName, null, true);
                     boughtSomething = true;
                 }
@@ -522,13 +516,11 @@ function dmgToCompare(good, noCrit){
 }
 
 var enoughHealthE;
-var spirecheck;
-function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE + spirecheck
+function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
     //EQUIPMENT HAS ITS OWN DAMAGE CALC SECTION:
-    //Take Spire as a special case.
-    spirecheck = isActiveSpireAT();
-    var enemyDamage;
-    if (spirecheck) {
+    //spire is a special case.
+    var enemyDamage = 0;
+    if (isActiveSpireAT()) {
         var exitcell;
         if(game.global.challengeActive == "Daily")
             exitcell = getPageSetting('ExitSpireCellDailyC2');
@@ -551,7 +543,7 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE + 
         if(game.global.world < 61)
             enemyDamage *= 2;
     }
-    if(game.global.challengeActive == 'Lead') {
+    else if(game.global.challengeActive == 'Lead') {
         enemyDamage *= 2.5;
     }
     
@@ -600,6 +592,5 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE + 
         enoughHealthE = false;
     }
     
-    if (!enoughHealthE && MODULES["equipment"].equipHealthDebugMessage)
-        debug("Equipment module thought there was not enough health","equips");
+    //if (!enoughHealthE) debug("Equipment module thought there was not enough health","equips");
 }

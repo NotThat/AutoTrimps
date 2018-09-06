@@ -292,10 +292,13 @@ function autoMap() {
 
     //Allow automaps to work with in-game Map at Zone option:
     vanillaMapatZone = (game.options.menu.mapAtZone.enabled && game.global.canMapAtZone && !isActiveSpireAT());
+    var shouldDoMapsVanillaRepeat = false;
     if (vanillaMapatZone)
         for (var x = 0; x < game.options.menu.mapAtZone.setZone.length; x++){
-             if (game.global.world == game.options.menu.mapAtZone.setZone[x])
-                 shouldDoMaps = true;
+             if (game.global.world == game.options.menu.mapAtZone.setZone[x]){
+                 shouldDoMapsVanillaRepeat = true;
+                 break;
+             }
         }
     
     //Dynamic Siphonology section (when necessary)
@@ -445,7 +448,7 @@ function autoMap() {
 
 
     //MAPS CREATION pt1:
-    if ((shouldDoMaps || doVoids || needPrestige) && selectedMap == "world") {
+    if ((shouldDoMaps || doVoids || needPrestige || shouldDoMapsVanillaRepeat) && selectedMap == "world") {
         selectedMap = "create";
         
         if (doVoids){
@@ -505,6 +508,10 @@ function autoMap() {
                 repeatClicked();
 
             var repeatChoice = 1; //0 - forever 1 - map bonus 2 - items 3 - any
+            
+            if(shouldDoMapsVanillaRepeat)
+                repeatChoice = 0;
+            
             var specials = addSpecials(true, true, currMap);
             if(specials > 0) //we still need prestige from our current map
                 repeatChoice = 2;
@@ -523,8 +530,10 @@ function autoMap() {
             //turn off repeat if we're running a unique map that isnt BW
             else if (theMap.noRecycle && theMap.name != 'Bionic Wonderland')
                 repeatClicked();
-
+            
+            
             if(specials > 0)            statusMsg = "Prestige: " + specials;
+            else if(repeatChoice === 0) statusMsg = "Mapping at z" + game.global.world;
             else if(repeatChoice == 1)  statusMsg = "Map bonus ";
             while (game.options.menu.repeatUntil.enabled != repeatChoice) { //select the correct repeat until option
                 toggleSetting('repeatUntil');

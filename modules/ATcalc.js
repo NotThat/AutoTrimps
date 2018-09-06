@@ -217,6 +217,67 @@ function calcDmgManual(printout){
     
     return baseDamageHigh;
 }
+
+function calcEnemyAttack(mutation, name, level, oblitMult){
+    var attack;
+    
+    if (mutation && typeof mutations[mutation].attack !== 'undefined')
+        attack = mutations[mutation].attack(level, name);
+    else
+        attack = game.global.getEnemyAttack(level, name);
+    
+    if (game.global.spireActive && checkIfSpireWorld() && !game.global.mapsActive){
+        attack = getSpireStats(level, name, "attack");
+    }
+    if (corrupted == "corruptStrong") attack *= 2;
+    if (corrupted == "healthyStrong") attack *= 2.5;
+    /*if (name.includes("Toxic") || name.includes("Gusty") || name.includes("Frozen")){ //token enemy. expensive to calculate and does it really matter?
+        if (mutation != "Corruption"){
+            attack = mutations.Corruption.attack(level, name);
+        }
+        attack *= 1.2;
+    }*/
+
+    if (game.global.challengeActive){
+        if (game.global.challengeActive == "Obliterated"){
+            attack *= oblitMult;
+        }
+        if (game.global.challengeActive == "Life") {
+            attack *= 6;
+        }
+        else if (game.global.challengeActive == "Toxicity"){
+            attack *= 5;
+        }
+        else if (game.global.challengeActive == "Balance"){
+            attack *= (game.global.mapsActive) ? 2.35 : 1.17;
+        }
+        if (game.global.challengeActive == "Coordinate"){
+            attack *= getBadCoordLevel();
+        }
+        else if (game.global.challengeActive == "Meditate"){
+            attack *= 1.5;
+        }
+        else if (game.global.challengeActive == "Watch") {
+            attack *= 1.25;
+        }
+        else if (game.global.challengeActive == "Scientist" && getScientistLevel() == 5) {
+            attack *= 10;
+        }
+        else if (game.global.challengeActive == "Corrupted"){
+            attack *= 3;
+        }
+        if (game.global.challengeActive == "Daily"){
+            if (typeof game.global.dailyChallenge.badStrength !== 'undefined'){
+                attack *= dailyModifiers.badStrength.getMult(game.global.dailyChallenge.badStrength.strength);
+            }
+            if (typeof game.global.dailyChallenge.empower !== 'undefined' && !game.global.mapsActive){
+                attack *= dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
+            }
+        }
+    }
+    return attack;
+}
+
 function dmgNeededToOK(cellNum){
     if(game.global.mapsActive){ //we dont generate map grid
         debug("error: dmgNeededToOK in map");

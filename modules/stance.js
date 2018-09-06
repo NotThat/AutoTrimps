@@ -6,15 +6,11 @@ var maxCoords = -1;
 var trimpicide = false;
 var minAnticipationStacks;
 var worldArray = [];
-var lastHealthy = 0;
-var lastCorrupt = 0;
 
 var dailyMult = 1;
 var Goal = 0.005;
 var pctTotal;
 var OmniThreshhold;
-var minHP;
-var maxHP = -1;
 var m;
 var hr;
 var highDamageHeirloom = true;
@@ -189,7 +185,7 @@ function autoStance() {
     
     if (game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
         goDefaultStance(); //D if we have it, X otherwise
-        getDamageCaller(maxHP*1000000, false);
+        getDamageCaller(game.global.gridArray[0].maxHealth*1000000, false);
         allowBuyingCoords = true;
         if (game.global.soldierHealth <= 0)
             fightManualAT();
@@ -352,17 +348,9 @@ function autoStance() {
     var ourAvgDmgX = ourAvgDmgS * 2;
     var ourAvgDmgD = ourAvgDmgS * 8;
     
-    var ourAvgDmgSLow = baseDamageLow;
-    var ourAvgDmgXLow = ourAvgDmgSLow * 2;
-    var ourAvgDmgDLow = ourAvgDmgSLow * 8;
-    
     var expectedNumHitsS = enemyHealth / ourAvgDmgS;
     var expectedNumHitsX = enemyHealth / ourAvgDmgX;
     var expectedNumHitsD = enemyHealth / ourAvgDmgD;
-    
-    var expectedNumHitsSLow = enemyHealth / ourAvgDmgSLow;
-    var expectedNumHitsXLow = enemyHealth / ourAvgDmgXLow;
-    var expectedNumHitsDLow = enemyHealth / ourAvgDmgDLow;
     
     //dont wanna worry about last cell all the time, so keep it simple
     var nextPBDmgtmp = (cellNum == 99 || nextCell.plaguebringer === undefined ? 0 : nextCell.plaguebringer);
@@ -554,40 +542,33 @@ function autoStance() {
         
         if (expectedNumHitsS < missingStacks-5){ //we have too much damage, lower our damage
              wantGoodShield = false;
-            //if(equipLowDmgShield()){
-                //need to recalculate damages
-                //calcBaseDamageinB();
-                //updateAllBattleNumbers(true);
-                ourAvgDmgS = baseDamageLow;
-                ourAvgDmgD = ourAvgDmgS * 8;
-                ourAvgDmgX = ourAvgDmgS * 2;
 
-                expectedNumHitsS = enemyHealth / ourAvgDmgS;
-                expectedNumHitsX = enemyHealth / ourAvgDmgX;
-                expectedNumHitsD = enemyHealth / ourAvgDmgD;
+            ourAvgDmgS = baseDamageLow;
+            ourAvgDmgD = ourAvgDmgS * 8;
+            ourAvgDmgX = ourAvgDmgS * 2;
 
-                maxS = enemyMaxHealth / ourAvgDmgS;
-                maxX = enemyMaxHealth / ourAvgDmgX;
-                maxD = enemyMaxHealth / ourAvgDmgD;
-                
-                if (expectedNumHitsD > missingStacks)
-                    chosenFormation = 2;
-                else if (expectedNumHitsX > missingStacks){
-                    if (isScryhardActive())
-                        chosenFormation = 4; //scryhard active
-                    else
-                        chosenFormation = '0';
-                }
+            expectedNumHitsS = enemyHealth / ourAvgDmgS;
+            expectedNumHitsX = enemyHealth / ourAvgDmgX;
+            expectedNumHitsD = enemyHealth / ourAvgDmgD;
+
+            if (expectedNumHitsD > missingStacks)
+                chosenFormation = 2;
+            else if (expectedNumHitsX > missingStacks){
+                if (isScryhardActive())
+                    chosenFormation = 4; //scryhard active
                 else
-                    chosenFormation = 3;
-                
-                //update cell PBWorth to current plaguebringer value
-                /*pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
-                if(cellNum < 99)
-                    worldArray[cellNum].PBWorth = pbMult * (worldArray[cellNum+1].baseWorth + worldArray[cellNum+1].geoRelativeCellWorth);
-                else
-                    worldArray[cellNum].PBWorth = 0;*/
-            //}
+                    chosenFormation = '0';
+            }
+            else
+                chosenFormation = 3;
+
+            //update cell PBWorth to current plaguebringer value
+            /*pbMult = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
+            if(cellNum < 99)
+                worldArray[cellNum].PBWorth = pbMult * (worldArray[cellNum+1].baseWorth + worldArray[cellNum+1].geoRelativeCellWorth);
+            else
+                worldArray[cellNum].PBWorth = 0;*/
+            
             if(chosenFormation == 3 && (DHratio > 10 || stackSpire)){
                 var currDmg = baseDamageLow; //we're going to call getDamageCaller and maybe get damage, but DHratio wont update until next automaps. so keep track our damage changes from here on out
                 
@@ -878,43 +859,55 @@ function buildWorldArray(){
     }
         
     worldArray = []; //create a world array that's safe to write to
-    lastHealthyCell = -1;
     currentBadGuyNum = -1;
     
-    var dailyHPMult = 1;
-    if (game.global.challengeActive == "Daily"){
-        if (typeof game.global.dailyChallenge.badHealth !== 'undefined')
-                dailyHPMult *= dailyModifiers.badHealth.getMult(game.global.dailyChallenge.badHealth.strength);
-        if (typeof game.global.dailyChallenge.empower !== 'undefined')
-            dailyHPMult *= dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
+    if (game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
+        worldArray[0] = {health : game.global.gridArray[0].maxHealth, maxHealth : game.global.gridArray[0].maxHealth};
+        return;
     }
     
-    minHP = game.global.getEnemyHealth(90, "", true) * mutations.Healthy.statScale(14) * 7.5 * dailyHPMult; //initialize to healthyTough enemy on cell 90, because why not
-    maxHP = -1;
+    var dailyHPMult = 1;
+    var dailyATKMult = 1;
+    var oblitMult = 1;
+    if(game.global.challengeActive == "Daily"){
+        if(typeof game.global.dailyChallenge.badHealth !== 'undefined')
+            dailyHPMult *= dailyModifiers.badHealth.getMult(game.global.dailyChallenge.badHealth.strength);
+        if(typeof game.global.dailyChallenge.empower !== 'undefined')
+            dailyHPMult *= dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
+
+        if(typeof game.global.dailyChallenge.badHealth !== 'undefined')
+            dailyATKMult *= dailyModifiers.badHealth.getMult(game.global.dailyChallenge.badHealth.strength);
+        if(typeof game.global.dailyChallenge.empower !== 'undefined')
+            dailyATKMult *= dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
+    }
+    else if(game.global.challengeActive == "Obliterated"){
+        oblitMult = Math.pow(10,12);
+        var zoneModifier = Math.floor(game.global.world / 10);
+        oblitMult *= Math.pow(10, zoneModifier);
+    }
+    
+    var mutationMultCorrupted = mutations.Corruption.statScale(10);
+    var mutationMultHealthy   = mutations.Healthy.statScale(14);
     
     for (var i = 0; i < 100; i++){
         var enemy = {mutation: "", finalWorth: "", corrupted: "", name: "", health: "", maxHealth: "", baseHelium: "", spireBonus: "", pbHits: "", nextPBDmg: "", baseWorth: "", geoRelativeCellWorth: "", PBWorth: ""};
+        
         enemy.name = game.global.gridArray[i].name;
         enemy.mutation = game.global.gridArray[i].mutation;
-        if(enemy.mutation == "Healthy") 
-            lastHealthy = i;
-        else if(enemy.mutation == "Corruption") 
-            lastCorrupt = i;
         enemy.corrupted = game.global.gridArray[i].corrupted;
         
         var mutationMult;
-        switch(enemy.mutation){
-            case "Corruption":
-                mutationMult = mutations.Corruption.statScale(10);
-                enemy.baseWorth = 0.15;
-                break;
-            case "Healthy":
-                mutationMult = mutations.Healthy.statScale(14);
-                enemy.baseWorth = 0.45;
-                break;
-            default:
-                mutationMult = 1;
-                enemy.baseWorth = (enemy.name == "Omnipotrimp" ? 1 : 0);
+        if(enemy.mutation == "Corruption"){
+            enemy.baseWorth = 0.15;
+            mutationMult = mutationMultCorrupted;
+        }
+        else if(enemy.mutation == "Healthy"){
+            enemy.baseWorth = 0.45;
+            mutationMult = mutationMultHealthy;
+        }
+        else{
+            enemy.baseWorth = 0;
+            mutationMult = 1;
         }
         
         enemy.maxHealth = game.global.getEnemyHealth(i, enemy.name, true) * mutationMult; //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
@@ -925,39 +918,19 @@ function buildWorldArray(){
         if (enemy.corrupted == "corruptTough") enemy.maxHealth *= 5;
         if (enemy.corrupted == "healthyTough") enemy.maxHealth *= 7.5;
         
-        if (game.global.challengeActive == "Obliterated"){
-            var oblitMult = Math.pow(10,12);
-            var zoneModifier = Math.floor(game.global.world / 10);
-            oblitMult *= Math.pow(10, zoneModifier);
+        if(game.global.challengeActive == "Obliterated")
             enemy.maxHealth *= oblitMult;
-        }
- 
+
         enemy.health = enemy.maxHealth;
-        if(maxHP < enemy.maxHealth)
-            maxHP = enemy.maxHealth;
-        
-        if(enemy.mutation != undefined && (enemy.mutation == "Corruption" || enemy.mutation == "Healthy") && game.global.world >= mutations.Corruption.start(true)){
-            if(minHP > enemy.maxHealth)
-                minHP = enemy.maxHealth;
-        }
 
         worldArray.push(enemy);
     }
-    worldArray[99].maxHealth = game.global.getEnemyHealth(99, "Omnipotrimp", false) * mutations.Corruption.statScale(10) * dailyHPMult; //ignore imp stat = false
+    //last cell special case
+    worldArray[99].baseWorth = 1;
+    worldArray[99].maxHealth = game.global.getEnemyHealth(99, "Omnipotrimp", false) * mutationMultCorrupted * dailyHPMult; //ignore imp stat = false
     if(game.global.spireActive)
         worldArray[99].maxHealth = getSpireStats(i+1, worldArray[99].name, "health") * dailyHPMult;
     worldArray[99].health = worldArray[99].maxHealth;
-    
-    if (game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
-        minHP = game.global.gridArray[0].maxHealth;
-        maxHP = game.global.gridArray[0].maxHealth;
-        for (var i = 1; i < 100; i++)
-            worldArray[i].finalWorth = 0;
-        return;
-    }
-    
-    if(minHP == game.global.getEnemyHealth(50, "", true) * mutations.Healthy.statScale(14) * 7.5 || maxHP == -1)
-        debug("error! minHP = " + minHP + " maxHP = " + maxHP);
     
     var pbMult = (lowPB > -1 ? lowPB : game.heirlooms.Shield.plaguebringer.currentBonus / 100); //weaker shield should have more PB. PB isnt that good of a damage modifier.    
     
@@ -965,7 +938,7 @@ function buildWorldArray(){
 
     if(game.global.world == 500){ //special case
         var heliumAmount = 0; //spire bonus helium
-        var regularHelium = 0; //normal helium from corrupted/healthy/omni(omni?)
+        var regularHelium = 0; //normal helium from corrupted/healthy/omni
         
         var spireRowBonus = (game.talents.stillRowing.purchased) ? 0.03 : 0.02;
         
