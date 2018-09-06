@@ -20,7 +20,7 @@ function addBreedingBoxTimers() {
     addbreedTimerInside.setAttribute('style', 'display: block;');
     var addbreedTimerInsideIcon = document.createElement("SPAN");
     addbreedTimerInsideIcon.setAttribute('class', "icomoon icon-clock");
-    addbreedTimerInsideText = document.createElement("SPAN"); //updated in the top of mainLoop() each cycle
+    addbreedTimerInsideText = document.createElement("SPAN"); //updated in the top of ATLoop() each cycle
     addbreedTimerInsideText.id = 'hiddenBreedTimer';
     addbreedTimerInside.appendChild(addbreedTimerInsideIcon);
     addbreedTimerInside.appendChild(addbreedTimerInsideText);

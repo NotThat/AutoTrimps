@@ -218,15 +218,14 @@ function calcDmgManual(printout){
     return baseDamageHigh;
 }
 
-function calcEnemyAttack(mutation, name, level, oblitMult){
+
+
+function calcEnemyAttack(mutation, corrupted, atkScale, name, level, oblitMult){
     var attack;
     
-    if (mutation && typeof mutations[mutation].attack !== 'undefined')
-        attack = mutations[mutation].attack(level, name);
-    else
-        attack = game.global.getEnemyAttack(level, name);
+    attack = game.global.getEnemyAttack(level, name) * atkScale * 1.2; //1.2 for max damage (hopefully)
     
-    if (game.global.spireActive && checkIfSpireWorld() && !game.global.mapsActive){
+    if (game.global.spireActive && checkIfSpireWorld()){// && !game.global.mapsActive){
         attack = getSpireStats(level, name, "attack");
     }
     if (corrupted == "corruptStrong") attack *= 2;

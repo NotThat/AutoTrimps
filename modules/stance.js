@@ -862,7 +862,8 @@ function buildWorldArray(){
     currentBadGuyNum = -1;
     
     if (game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
-        worldArray[0] = {health : game.global.gridArray[0].maxHealth, maxHealth : game.global.gridArray[0].maxHealth};
+        var atk = calcEnemyAttack(game.global.gridArray[0].mutation, game.global.gridArray[0].corrupted, 1, game.global.gridArray[0].name, 0, 1);
+        worldArray[0] = {health: game.global.gridArray[0].maxHealth, maxHealth: game.global.gridArray[0].maxHealth, attack: atk};
         return;
     }
     
@@ -886,41 +887,42 @@ function buildWorldArray(){
         oblitMult *= Math.pow(10, zoneModifier);
     }
     
-    var mutationMultCorrupted = mutations.Corruption.statScale(10);
-    var mutationMultHealthy   = mutations.Healthy.statScale(14);
+    var mutationMultCorrupted       = mutations.Corruption.statScale(10);
+    var mutationMultCorruptedAtk    = mutations.Corruption.statScale(3);
+    var mutationMultHealthy         = mutations.Healthy.statScale(14);
+    var mutationMultHealthyAtk      = mutations.Healthy.statScale(5);
     
     for (var i = 0; i < 100; i++){
-        var enemy = {mutation: "", finalWorth: "", corrupted: "", name: "", health: "", maxHealth: "", baseHelium: "", spireBonus: "", pbHits: "", nextPBDmg: "", baseWorth: "", geoRelativeCellWorth: "", PBWorth: ""};
+        var enemy = {mutation: "", finalWorth: "", corrupted: "", name: "", health: "", maxHealth: "", attack: 0, baseHelium: "", spireBonus: "", pbHits: "", nextPBDmg: "", baseWorth: "", geoRelativeCellWorth: "", PBWorth: ""};
         
         enemy.name = game.global.gridArray[i].name;
         enemy.mutation = game.global.gridArray[i].mutation;
         enemy.corrupted = game.global.gridArray[i].corrupted;
         
         var mutationMult;
+        var mutationMultAtk;
         if(enemy.mutation == "Corruption"){
             enemy.baseWorth = 0.15;
-            mutationMult = mutationMultCorrupted;
+            mutationMult    = mutationMultCorrupted;
+            mutationMultAtk = mutationMultCorruptedAtk;
         }
         else if(enemy.mutation == "Healthy"){
             enemy.baseWorth = 0.45;
             mutationMult = mutationMultHealthy;
+            mutationMultAtk = mutationMultHealthyAtk;
         }
         else{
             enemy.baseWorth = 0;
-            mutationMult = 1;
+            mutationMult    = 1;
+            mutationMultAtk = 1;
         }
         
-        enemy.maxHealth = game.global.getEnemyHealth(i, enemy.name, true) * mutationMult; //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
-        if(game.global.spireActive)
-            enemy.maxHealth = getSpireStats(i+1, enemy.name, "health");
-        enemy.maxHealth *= dailyHPMult;
-        
-        if (enemy.corrupted == "corruptTough") enemy.maxHealth *= 5;
-        if (enemy.corrupted == "healthyTough") enemy.maxHealth *= 7.5;
-        
-        if(game.global.challengeActive == "Obliterated")
-            enemy.maxHealth *= oblitMult;
-
+        enemy.attack = calcEnemyAttack(enemy.mutation, enemy.corrupted, mutationMultAtk, enemy.name, i, oblitMult);
+        enemy.maxHealth = game.global.getEnemyHealth(i, enemy.name, true) * mutationMult * dailyHPMult; //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
+        if(game.global.spireActive)                      enemy.maxHealth = getSpireStats(i+1, enemy.name, "health");
+        if(game.global.challengeActive == "Obliterated") enemy.maxHealth *= oblitMult;
+        if (enemy.corrupted == "corruptTough")           enemy.maxHealth *= 5;
+        else if (enemy.corrupted == "healthyTough")      enemy.maxHealth *= 7.5;
         enemy.health = enemy.maxHealth;
 
         worldArray.push(enemy);

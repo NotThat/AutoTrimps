@@ -147,7 +147,7 @@
         if(b != M["performance"].AFKOverlayZone.innerText)      M["performance"].AFKOverlayZone.innerText = b;
         var c =  'Current Helium: ' + prettify(Math.floor(game.resources.helium.owned));
         if(c != M["performance"].AFKOverlayHelium.innerText)    M["performance"].AFKOverlayHelium.innerText = c;
-        var d = 'Current Status: ' + updateAutoMapsStatus(true);
+        var d = updateAutoMapsStatus(true);
         if(d != M["performance"].AFKOverlayStatus.innerHTML)    M["performance"].AFKOverlayStatus.innerHTML = d;
     }
 

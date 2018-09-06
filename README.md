@@ -54,9 +54,9 @@ Read docs/main-doc.txt or docs/TODO.md for more complete info, the below is some
 Since javascript is easily human readable, Much can be learned by reading the source code, starting with this knowledge:
 
 The script was faux-modularized on 12/4/2016, with the modules residing in the '/modules/' dir. This means that although the files are seperate, they are all still required for the script to run. In addition, the interoperability of the modules is still undocumented, and some(most) rely on other modules. Sometime in the future, you will be able to load/use different verisons of the various modules.
-AutoTrimps2.js is the main file that loads the modules, and then runs its mainLoop.
+AutoTrimps2.js is the main file that loads the modules, and then runs its ATLoop.
 
-The mainLoop() consists of the following subroutine functions, all of which are enable-able/disable-able by their buttons.:
+The ATLoop() consists of the following subroutine functions, all of which are enable-able/disable-able by their buttons.:
 -     exitSpireCell();        //"Exit Spire After Cell" (other.js)
 -     workerRatios();         //"Auto Worker Ratios"
 -     buyUpgrades();          //"Buy Upgrades"

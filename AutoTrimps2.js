@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "1.21";
+var ver = "2";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -146,8 +146,8 @@ function delayStartAgain(){
     heirloomCache = game.global.heirloomsExtra.length;
     MODULESdefault = JSON.parse(JSON.stringify(MODULES));
     
-    //Actually Start mainLoop and guiLoop - defunct
-    //setInterval(mainLoop, runInterval);
+    //Actually Start ATLoop and guiLoop - defunct
+    //setInterval(ATLoop, runInterval);
     setInterval(guiLoop, runInterval*10);
     
     //hook up into runGameLoop()
@@ -155,7 +155,7 @@ function delayStartAgain(){
         var cached_function = runGameLoop;
         return function(makeUp, now) {
             var result = cached_function.apply(this, arguments);
-            mainLoop(makeUp);
+            ATLoop(makeUp);
             return result;
         };
     })();
@@ -240,7 +240,7 @@ var ATmakeUp = false;
 ////////////////////////////////////////
 ////////////////////////////////////////
 //makeUp = true when game is in catchup mode, so we can skip some unnecessary visuals
-function mainLoop(makeUp) {
+function ATLoop(makeUp) {
     
     //console.log(requestCounter + " " + (requestCounter-requestCounterLast));
     //requestCounterLast = requestCounter;

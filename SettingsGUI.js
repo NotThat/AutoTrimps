@@ -363,10 +363,10 @@ function initializeAllSettings() {
     createSetting('PAggression', ['PRaid: Light', 'PRaid: Aggressive'], 'How aggressively should AT chase after prestige. Aggressive costs more fragments. If you have a plagued staff with fragment drop then you probably want aggressive mode.', 'multitoggle', 1, null, 'Maps');
     createSetting('PRaidingMaxZones', 'Max Extra Zones', 'Caps maximum extra Zones AT should ever buy chasing prestige. If BW Raid is enabled then will always attempt to prestige raid the highest possible before beginning BW raiding.', 'value', 10, null, 'Maps');
     
-    createSetting('BWraid', 'BW Raiding', 'Raids BW at zone specified in BW Raiding min/max.', 'boolean', false, null, 'Maps');
     createSetting('BWraidDailyCOnly', 'BW Raiding Daily/C2 Only', 'Only BW raid in dailies and challenges', 'boolean', false, null, 'Maps');
-    createSetting('BWraidingz', 'BW Raid Zone', 'Raids BWs at zone specified. Example: 495, will raid all BWs for all gear starting from 495. Will skip lower BWs if you have enough damage. Once all gear is obtained, will return to regular farming.', 'value', -1, null, 'Maps');
-    createSetting('BWraidingmax', 'Max BW to raid', 'Raids BWs until zone specified. Example: 515, will raid all BWs for all gear until 515. Will skip lower BWs if you have enough damage. Once all gear is obtained, will return to regular farming.', 'value', -1, null, 'Maps');
+    createSetting('BWraidingmin', 'BWRaid Start', 'Starting this zone, BWRaid becomes a possibility. BW Always takes place at the last Poison zone.', 'value', 999, null, 'Maps');
+    createSetting('BWraidingmaxLevel', 'BWRaid Max Extra', 'The maximum level difference between world zone and BW map level.', 'value', 20, null, 'Maps');
+    createSetting('BWraidingmax', 'BWRaid Cap', 'The highest level BW map to raid.', 'value', 999, null, 'Maps');
 
 
 
@@ -892,12 +892,6 @@ function updateCustomButtons() {
     
     
     getPageSetting('AutoAllocatePerks')==1 ? turnOn("fastallocate") : turnOff("fastallocate");
-    
-    //getPageSetting('BWraid')==true ? turnOn("BWraidDailyCOnly"): turnOff("BWraidDailyCOnly");
-    
-    getPageSetting('BWraid') ? turnOn("BWraidDailyCOnly"): turnOff("BWraidDailyCOnly");
-    getPageSetting('BWraid') ? turnOn("BWraidingz"): turnOff("BWraidingz");
-    getPageSetting('BWraid') ? turnOn("BWraidingmax"): turnOff("BWraidingmax");
     
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomStaves"): turnOff("HeirloomStaves");
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomHighShield"): turnOff("HeirloomHighShield");

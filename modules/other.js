@@ -140,8 +140,12 @@ function exitSpireCell() {
         endSpire();
 }
 
-function findNextBionic(maxLevel) {
+function findNextBionic() {
     var highestBionicMap = null;
+    var maxLevel = game.global.world + getPageSetting('BWraidingmaxLevel');
+    var cap = getPageSetting('BWraidingmax');
+    if(maxLevel > cap)
+        maxLevel = cap;
 
     for (var map of game.global.mapsOwnedArray){
         if (map.level > maxLevel || map.location !== "Bionic")
@@ -153,17 +157,16 @@ function findNextBionic(maxLevel) {
         }
         
         if (addSpecials(true, true, highestBionicMap) > 0){ //if we need prestiges from our map, only take a lower bionic if we need prestiges from it as well
-            if(map.level < highestBionicMap.level && addSpecials(true, true, map) > 0)
+            if(highestBionicMap.level > map.level && addSpecials(true, true, map) > 0)
                 highestBionicMap = map;
         }
-        else if(map.level > highestBionicMap.level) {//we dont need anything from our bionic, so look for a higher one
-                highestBionicMap = map;
-        }
+        else if(highestBionicMap.level < map.level)//we dont need anything from our bionic, so look for a higher one
+            highestBionicMap = map;
     }
         
     if (highestBionicMap == null)
         return false;
-    if (highestBionicMap.level >= maxLevel && addSpecials(true, true, highestBionicMap) === 0) //if we already at max level and dont need gear, stop
+    if (highestBionicMap.level > maxLevel || addSpecials(true, true, highestBionicMap) === 0) //if we already at max level and dont need gear, stop
     	return false;
     return highestBionicMap;
 }
@@ -247,12 +250,8 @@ function dropsAtZone(itemName, nextLevel){
 }
 
 function BWRaidNowLogic(){
-    if (!(game.global.world == getPageSetting('BWraidingz') && getPageSetting('BWraid')))
-        return false;
-    
-    if (getPageSetting('BWraidDailyCOnly') && !(game.global.runningChallengeSquared || game.global.challengeActive)) //if BWraidDailyCOnly is set then only BW raid dduring dailes/challenges/c2
-        return false;
-    
+    if (game.global.world < getPageSetting('BWraidingmin') || cycleZone() !== 4) return false;
+    if (getPageSetting('BWraidDailyCOnly') && !(game.global.runningChallengeSquared || game.global.challengeActive)) return false;
     return true;
 }
 
@@ -262,7 +261,7 @@ function BWraiding() {
         return true;
     
     //find the lowest bionic map that still has items for us
-    var nextBionicMap = findNextBionic(getPageSetting('BWraidingmax'));
+    var nextBionicMap = findNextBionic();
     if(!nextBionicMap){
         //debug("could not find a bionic map to run. are you zone 125 yet?");
         return true;
@@ -279,7 +278,7 @@ function BWraiding() {
             while (game.options.menu.repeatUntil.enabled != 2) {
                 toggleSetting('repeatUntil'); //repeat for all items
             }
-            statusMsg = "BW Raiding: "+ addSpecials(true, true, currMap);
+            statusMsg = "BW Raiding " + nextBionicMap.level + ": "+ addSpecials(true, true, currMap);
         }
         else { //we're in another map
             if (game.global.repeatMap) {

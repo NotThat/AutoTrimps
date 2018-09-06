@@ -86,14 +86,11 @@ function calcDmg(){
             ourBaseDamage *= 0.5; //remove titimp bonus
         ourBaseDamagePlusOne = (ourBaseDamage * (1 + (0.2 * (game.global.mapBonus >= 10 ? game.global.mapBonus : (game.global.mapBonus + 1)))));
         ourBaseDamage *= 1 + (0.2 * game.global.mapBonus); //add map bonus
-
-
     }
     
     const FORMATION_MOD_1 = game.upgrades.Dominance.done ? 2 : 1;
     
     //get average enemyhealth and damage for the next zone, cell 50, snimp type and multiply it by a max range fluctuation of 1.2
-
     enemyHealth = getEnemyMaxHealth(game.global.world, 50);
     if (game.global.challengeActive == "Toxicity") {
         enemyHealth *= 2;
@@ -250,7 +247,7 @@ function autoMap() {
     
     PRaidingActive = false;
     
-    if (!needPrestige && getPageSetting('BWraid') && (!getPageSetting('BWraidDailyC2Only') || game.global.challengeActive)){
+    if (!needPrestige && BWRaidNowLogic()){
         if(!BWraiding()){ //BW Raiding
             return; 
         }
@@ -685,7 +682,7 @@ function updateAutoMapsStatus(get, msg, final) {
     var hiderStatus = 'He/hr: ' + getPercent.toFixed(4) + '%<br>&nbsp;&nbsp;&nbsp;He: ' + lifetime.toFixed(3) + '%';
 
     if (get) {
-        return statusMsg + ' ' + formattedRatio;
+        return statusMsg;
         //return [status, getPercent, lifetime];
     } 
     else if(final && !ATmakeUp){
@@ -718,15 +715,12 @@ function PrestigeRaid() {
     }
     
     //at the zone where we BW, we want the most gear from normal maps that is possible.
-    if (game.global.world == getPageSetting('BWraidingz') && getPageSetting('BWraid') &&
-        !(getPageSetting('BWraidDailyCOnly') && !(game.global.runningChallengeSquared || game.global.challengeActive)))
-            PRaidMax = 10;
-    
-    if(!BWRaidNowLogic())
-        if (StartZone == -1 || game.global.world < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
-            if(!isActiveSpireAT() || !getPageSetting('PRaidSpire'))
-                return true; 
-        }
+    if (BWRaidNowLogic())
+        PRaidMax = 10;
+    else if (StartZone === -1 || game.global.world < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
+        if(!isActiveSpireAT() || !getPageSetting('PRaidSpire'))
+            return true; 
+    }
     
     var havePrestigeUpTo = lastPrestigeZone(); // check currently owned prestige levels
     findDesiredMapLevel(PRaidMax, PAggro, havePrestigeUpTo); //finds min and max levels we want to raid
@@ -1357,6 +1351,13 @@ function windZone(value){
 
 function poisonZone(){
     return ((game.global.world-236) % 15 <= 4);
+}
+
+
+function cycleZone(){ //poizon - wind - ice
+    if(game.global.world < 236)
+        return -1;
+    return (game.global.world - 236) % 15;
 }
 
 function getRemainingSpecials(maxZone){

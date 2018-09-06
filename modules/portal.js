@@ -103,7 +103,7 @@ function autoPortal() {
 function doPortal(challenge) {
     if(!game.global.portalActive) return;
     if (getPageSetting('AutoMagmiteSpender2')==1) autoMagmiteSpender();
-    // From mainLoop                                        //"AutoHeirlooms OFF"        (Heirlooms.js)
+    // From ATLoop                                        //"AutoHeirlooms OFF"        (Heirlooms.js)
     if (getPageSetting('AutoHeirlooms')) autoHeirlooms();                   //"AH2"                      (")
     if (getPageSetting('AutoUpgradeHeirlooms') && !heirloomsShown) autoNull();  //"Auto Upgrade Heirlooms" (heirlooms.js)
     //Go into portal screen
