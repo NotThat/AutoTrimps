@@ -391,7 +391,7 @@ function initializeAllSettings() {
 //Combat
     //Subsection1Line1
 
-    createSetting('AutoStance', ['Off', 'Helium Mode', 'Dark Essence Mode', 'Push Mode'], 'Combat settings. Helium mode: will attempt to windstack any cell thats worth more than threshold. Dark Essence Mode: Buys all damage and uses S stance. Push Mode: Buys all damage and uses D stance.', 'multitoggle', 0, null, 'Combat');
+    createSetting('AutoStance', ['Off', 'Helium Mode', 'Dark Essence Mode', 'Push Mode', 'Hybrid'], 'Combat settings. Helium mode: will attempt to windstack any cell thats worth more than threshold. Dark Essence Mode: Buys all damage and uses S stance. Push Mode: Buys all damage and uses D stance. Hybrid: Push in Wind/Ice, DE in Poison.', 'multitoggle', 0, null, 'Combat');
     createSetting('WindStackingPctHe', 'He/Hr% Goal', 'For use with AutoStance. Windstacking will use this goal while handling windfarm. You should set this to about x2-3 times your filler He/Hr percent of total. In % units (type 0.5 for 0.5% He/Hr etc)', 'value', '-1', null, 'Combat');
     createSetting('DelayCoordsForWind', 'Stall Coords For Wind', 'With this on, AS will micromanage Coordination for windstacking. Logic is: Buy all Coords utill *Start No Coord Buy* zone, then stop until Amalgamator amount, then let AS micromanage. Will always buy all coords for active spires, Void Map zone BW Raid and Prestige Raids.', 'boolean', true, null, 'Combat');
     createSetting('DelayWeaponsForWind', 'Stall Weapons For Wind', 'With this on, AS will micromanage Weapon purchases for windstacking. Used to lower damage in the early game.', 'boolean', true, null, 'Combat');

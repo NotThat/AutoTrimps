@@ -285,8 +285,16 @@ function autoStance() {
         if(getPageSetting('AutoStance') == 2){ //DE mode
             goDefaultStance(4);
         }
-        else //push mode
-            goDefaultStance(2); //D if we have it, X otherwise
+        else{
+            if((getPageSetting('AutoStance') == 3))  //push mode
+                goDefaultStance(2); //D if we have it, X otherwise
+            else{ //hybrid mode
+            if(poisonZone())
+                goDefaultStance(4);
+            else
+                goDefaultStance(2);
+            }
+        }
         return;
     }
     
