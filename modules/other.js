@@ -156,8 +156,8 @@ function findNextBionic() {
             continue;
         }
         
-        if (addSpecials(true, true, highestBionicMap) > 0){ //if we need prestiges from our map, only take a lower bionic if we need prestiges from it as well
-            if(highestBionicMap.level > map.level && addSpecials(true, true, map) > 0)
+        if (addSpecialsAT(highestBionicMap.level) > 0){ //if we need prestiges from our map, only take a lower bionic if we need prestiges from it as well
+            if(highestBionicMap.level > map.level && addSpecialsAT(map.level) > 0)
                 highestBionicMap = map;
         }
         else if(highestBionicMap.level < map.level)//we dont need anything from our bionic, so look for a higher one
@@ -166,7 +166,7 @@ function findNextBionic() {
         
     if (highestBionicMap == null)
         return false;
-    if (highestBionicMap.level > maxLevel || addSpecials(true, true, highestBionicMap) === 0) //if we already at max level and dont need gear, stop
+    if (highestBionicMap.level > maxLevel) //if we already at max level and dont need gear, stop
     	return false;
     return highestBionicMap;
 }
@@ -248,59 +248,6 @@ function dropsAtZone(itemName, nextLevel){
     
     return (game.upgrades[itemName].allowed+1)/2*10-(calcNext ? 0 : 10)+slotModifier;
 }
-
-function BWRaidNowLogic(){
-    if (game.global.world < getPageSetting('BWraidingmin') || cycleZone() !== 4) return false;
-    if (getPageSetting('BWraidDailyCOnly') && !(game.global.runningChallengeSquared || game.global.challengeActive)) return false;
-    return true;
-}
-
-//returns true when done
-function BWraiding() {
-    if(!BWRaidNowLogic())
-        return true;
-    
-    //find the lowest bionic map that still has items for us
-    var nextBionicMap = findNextBionic();
-    if(!nextBionicMap){
-        //debug("could not find a bionic map to run. are you zone 125 yet?");
-        return true;
-    }
-    
-    if (!game.global.preMapsActive && !game.global.mapsActive)  //if we are in world, get to map screen
-        mapsClicked(true);
-    
-    if(game.global.mapsActive){ //already in a map
-        if(nextBionicMap == currMap){ //doing our BW map
-            if (!game.global.repeatMap) {
-                repeatClicked();
-            } 
-            while (game.options.menu.repeatUntil.enabled != 2) {
-                toggleSetting('repeatUntil'); //repeat for all items
-            }
-            statusMsg = "BW Raiding " + nextBionicMap.level + ": "+ addSpecials(true, true, currMap);
-        }
-        else { //we're in another map
-            if (game.global.repeatMap) {
-                repeatClicked();
-            } 
-            statusMsg = "Finishing map";
-        }
-        return false;
-    }
-
-    selectMap(nextBionicMap.id);
-    runMap();
-    currMap = nextBionicMap;
-    if (!game.global.repeatMap) {
-        repeatClicked();
-    } 
-    while (game.options.menu.repeatUntil.enabled != 2) {
-        toggleSetting('repeatUntil'); //repeat for all items
-    }
-    statusMsg = "BW Raiding: "+ addSpecials(true, true, currMap);
-    return false;
- }
 
 //AutoAllocate Looting II
 function lootdump() {

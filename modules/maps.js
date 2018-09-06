@@ -176,12 +176,6 @@ function autoMap() {
     //if (game.global.gridArray.length === 0) //world not ready yet
     //    return;
     
-    var AS = getPageSetting('AutoStance');
-    var ASMode;
-    if(AS < 2)       ASMode = "Advancing";
-    else if(AS == 2) ASMode = "DE";
-    else             ASMode = "Push";
-    statusMsg = ASMode;
     wantGoodShield = true;
     AutoMapsCoordOverride = false;
     calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
@@ -509,7 +503,8 @@ function autoMap() {
             if(shouldDoMapsVanillaRepeat)
                 repeatChoice = 0;
             
-            var specials = addSpecials(true, true, currMap);
+            var specials = addSpecialsAT(currMap.level);
+            
             if(specials > 0) //we still need prestige from our current map
                 repeatChoice = 2;
             
@@ -686,11 +681,13 @@ function updateAutoMapsStatus(get, msg, final) {
         //return [status, getPercent, lifetime];
     } 
     else if(final && !ATmakeUp){
-        if(status != document.getElementById('autoMapStatus').innerHTML)
-            document.getElementById('autoMapStatus').innerHTML = status;
+        var elemA = document.getElementById('autoMapStatus');
+        if(status != elemA.innerHTML)
+            elemA.innerHTML = status;
         var b = 'Threshhold = ' + threshhold.toFixed(3) + '<br>' + hiderStatus;
-        if(b != document.getElementById('hiderStatus').innerHTML)
-            document.getElementById('hiderStatus').innerHTML = b;
+        var elemB = document.getElementById('hiderStatus');
+        if(b != elemB.innerHTML)
+            elemB.innerHTML = b;
     }
 }
 
@@ -734,13 +731,12 @@ function PrestigeRaid() {
     
     if (game.global.mapsActive){ //if we are in a map
         //do we need prestige from this map?
-        var last = game.global.mapGridArray[game.global.mapGridArray.length - 1].special;
-        if(last != "" && last != "Any" && last != "gems"){ //last cell is robotrimp or prestige item. addSpecials() is more cpu
+        if(addSpecialsAT(currMap.level) > 0){
             var map = currMap;
             if(currMap.location === "Bionic")
-                statusMsg = "BW Raiding: "+ addSpecials(true, true, currMap);
+                statusMsg = "BW Raiding: " + addSpecialsAT(currMap.level);
             else{
-                statusMsg = "Prestige Raid: " + getRemainingSpecials(maxDesiredLevel);
+                statusMsg = "Prestige Raid: " + addSpecialsAT(maxDesiredLevel);
             }
             //if this is last run we need of the map, turn off repeat button
             var levelFromThisRun = Math.max(Math.floor(dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-1].special, true)), Math.floor(dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-2].special, true)))
@@ -754,9 +750,7 @@ function PrestigeRaid() {
         }
         return false;
     }
-    else {
-        //debug("hi");
-        }
+    
     //this code prevents PrestigeRaid() from killing our army and going into map screen under certain conditions:    
     if (game.global.soldierHealth > 1000){//if we have an army currently fighting
         if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
@@ -820,7 +814,7 @@ function PrestigeRaid() {
     
     runMap();
     currMap = map;
-    statusMsg = "Prestige Raid: " + addSpecials(true, true, currMap);
+    statusMsg = "Prestige Raid: " + addSpecialsAT(currMap.level);
 
     if (!game.global.repeatMap) {
         repeatClicked();
@@ -831,6 +825,60 @@ function PrestigeRaid() {
     
     return false;
 }
+
+
+function BWRaidNowLogic(){
+    if (game.global.world < getPageSetting('BWraidingmin') || cycleZone() !== 4) return false;
+    if (getPageSetting('BWraidDailyCOnly') && !(game.global.runningChallengeSquared || game.global.challengeActive)) return false;
+    return true;
+}
+
+//returns true when done
+function BWraiding() {
+    if(!BWRaidNowLogic())
+        return true;
+    
+    //find the lowest bionic map that still has items for us
+    var nextBionicMap = findNextBionic();
+    if(!nextBionicMap){
+        //debug("could not find a bionic map to run. are you zone 125 yet?");
+        return true;
+    }
+    
+    if (!game.global.preMapsActive && !game.global.mapsActive)  //if we are in world, get to map screen
+        mapsClicked(true);
+    
+    if(game.global.mapsActive){ //already in a map
+        if(nextBionicMap == currMap){ //doing our BW map
+            if (!game.global.repeatMap) {
+                repeatClicked();
+            } 
+            while (game.options.menu.repeatUntil.enabled != 2) {
+                toggleSetting('repeatUntil'); //repeat for all items
+            }
+            statusMsg = "BW Raid " + nextBionicMap.level + ": "+ addSpecialsAT(currMap.level);
+        }
+        else { //we're in another map
+            if (game.global.repeatMap) {
+                repeatClicked();
+            } 
+            statusMsg = "Finishing map";
+        }
+        return false;
+    }
+
+    selectMap(nextBionicMap.id);
+    runMap();
+    currMap = nextBionicMap;
+    if (!game.global.repeatMap) {
+        repeatClicked();
+    } 
+    while (game.options.menu.repeatUntil.enabled != 2) {
+        toggleSetting('repeatUntil'); //repeat for all items
+    }
+    statusMsg = "BW Raiding: "+ addSpecialsAT(currMap.level);
+    return false;
+ }
 
 function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect){
     if (!game.global.preMapsActive && !game.global.mapsActive)
@@ -897,7 +945,7 @@ function findMap(level){
         }
     
     //prestigeState: 0 - have something from zone (zone xx5 and we have greatsword and possibly breastplate) 1 - have all but last armor 2 - have everything from zone
-    if(!map1 || addSpecials(true, true, map1) > 1) //if no map of level - nothing to run. if it has multiple items in it, run it
+    if(!map1 || addSpecialsAT(map1.level) > 1) //if no map of level - nothing to run. if it has multiple items in it, run it
         return map1;
     
     //map has 1 item remaining. we can either run it, or run a prestigious map of 1 level higher
@@ -1376,9 +1424,56 @@ function getRemainingSpecials(maxZone){
     if(highestMap == null)
         return 0;
     else
-        return addSpecials(true, true, highestMap);
+        return addSpecialsAT(highestMap.level);
 }
 
 function useScryhard2(){
     return game.talents.scry2.purchased && !game.global.runningChallengeSquared;
+}
+
+function addSpecialsAT(mapLevel){
+    var count = 0;
+    var allowedPres;
+    var prestigeList1 = ['Supershield', 'Dagadder', 'Bootboost'];
+    var prestigeList2 = ['Megamace', 'Hellishmet'];
+    var prestigeList3 = ['Polierarm', 'Pantastic'];
+    var prestigeList4 = ['Axeidic', 'Smoldershoulder'];
+    var prestigeList5 = ['Greatersword', 'Bestplate', 'Harmbalest', 'GambesOP'];
+
+    allowedPres = Math.floor((mapLevel-1)/10) + 1;
+    for (var i in prestigeList1){
+        var tmp = (game.upgrades[prestigeList1[i]].allowed+1)/2;
+        if(tmp < allowedPres)
+            count += (allowedPres - tmp);
+    }
+    
+    allowedPres = Math.floor((mapLevel-2)/10) + 1;
+    for (var i in prestigeList2){
+         var tmp = (game.upgrades[prestigeList2[i]].allowed+1)/2;
+        if(tmp < allowedPres)
+            count += (allowedPres - tmp);
+    }
+    
+    allowedPres = Math.floor((mapLevel-3)/10) + 1;
+    for (var i in prestigeList3){
+        var tmp = (game.upgrades[prestigeList3[i]].allowed+1)/2;
+        if(tmp < allowedPres)
+            count += (allowedPres - tmp);
+    }
+    
+    allowedPres = Math.floor((mapLevel-4)/10) + 1;
+    for (var i in prestigeList4){
+        var tmp = (game.upgrades[prestigeList4[i]].allowed+1)/2;
+        if(tmp < allowedPres)
+            count += (allowedPres - tmp);
+    }
+    
+    allowedPres = Math.floor((mapLevel-5)/10) + 1;
+    for (var i in prestigeList5){
+        var tmp = (game.upgrades[prestigeList5[i]].allowed+1)/2;
+        if(tmp < allowedPres)
+            count += (allowedPres - tmp);
+    }
+    
+    return count;
 }

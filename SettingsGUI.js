@@ -243,7 +243,7 @@ function initializeAllSettings() {
 
 //CORE:
     //Line1:
-    createSetting('ManualGather2', ['Manual Gather/Build', 'Auto Gather/Build', 'Auto Gather/Build #2', 'Science Research OFF'], 'Controls what YOU do. Manual does nothing<br>The Decision between AutoGather 1 or 2 is up to you, and they should be similar. Auto Gathering of Food,Wood,Metal(w/turkimp) & Science. Auto speed-Builds your build queue.<br>You can disable science researching for the achievement: Reach Z120 without using manual research.', 'multitoggle', 1, null, "Core");
+    createSetting('ManualGather2', ['Manual Gather/Build', 'Auto Gather/Build'], 'Controls what YOU do. Manual does nothing.', 'multitoggle', 1, null, "Core");
     createSetting('BuyUpgradesNew', ['Manual Upgrades', 'Buy All Upgrades', 'Upgrades no Coords'], 'Autobuys non-equipment upgrades (equipment is controlled in the Gear tab). The second option does NOT buy coordination (use this <b>ONLY</b> if you know what you\'re doing).', 'multitoggle', 1, null, "Core");
     createSetting('NoCoordBuyStartZ', 'Start no Coord Buy', 'From this zone, stop buying coord upgrades until we get Amalgamator Amount. Disable with -1.', 'value', -1, null, 'Core');
     createSetting('TillWeHaveAmalg', 'Amalgamator Goal', 'The script will not buy any more coordinations starting zone Z, until we have this many Amalgamators. -1 to disable.', 'value', -1, null, 'Core');
@@ -364,7 +364,7 @@ function initializeAllSettings() {
     createSetting('PRaidingMaxZones', 'Max Extra Zones', 'Caps maximum extra Zones AT should ever buy chasing prestige. If BW Raid is enabled then will always attempt to prestige raid the highest possible before beginning BW raiding.', 'value', 10, null, 'Maps');
     
     createSetting('BWraidDailyCOnly', 'BW Raiding Daily/C2 Only', 'Only BW raid in dailies and challenges', 'boolean', false, null, 'Maps');
-    createSetting('BWraidingmin', 'BWRaid Start', 'Starting this zone, BWRaid becomes a possibility. BW Always takes place at the last Poison zone.', 'value', 999, null, 'Maps');
+    createSetting('BWraidingmin', 'BWRaid Start', 'Starting this zone, BWRaid becomes a possibility. BW Raiding always takes place at the last Poison zone.', 'value', 999, null, 'Maps');
     createSetting('BWraidingmaxLevel', 'BWRaid Max Extra', 'The maximum level difference between world zone and BW map level.', 'value', 20, null, 'Maps');
     createSetting('BWraidingmax', 'BWRaid Cap', 'The highest level BW map to raid.', 'value', 999, null, 'Maps');
 
@@ -852,8 +852,10 @@ function updateCustomButtons() {
         if ($item == null) return;
         var state = showHide ? '' : 'none';
         var stateParent = showHide ? 'inline-block' : 'none';
-        $item.style.display = state;
-        $item.parentNode.style.display = stateParent;
+        if($item.style.display !== state)
+            $item.style.display = state;
+        if($item.parentNode.style.display !== stateParent)
+            $item.parentNode.style.display = stateParent;
     }
     function turnOff(elem) {
         toggleElem(elem, false);
@@ -878,18 +880,8 @@ function updateCustomButtons() {
     (heHr) ? turnOn("HeHrDontPortalBefore") : turnOff("HeHrDontPortalBefore");
     //if HeHr is not selected, remove HeHr buffer settingsbox
     (heHr) ? turnOn("HeliumHrBuffer") : turnOff("HeliumHrBuffer");
-    //if ShieldBlock is for sure, remove ShieldBlock from settingsbox (achievement=12 means z100).
-    //(game.achievements.zones.finished < 12) ? turnOn("BuyShieldblock") : function(){turnOff("BuyShieldblock");setPageSetting("BuyShieldblock",false);}();
-    //getPageSetting('AutoStance') ? turnOn("ScryUseinPoison"): turnOff("ScryUseinPoison");
-    //getPageSetting('AutoStance') ? turnOn("ScryUseinWind"): turnOff("ScryUseinWind");
-    //getPageSetting('AutoStance') ? turnOn("ScryUseinIce"): turnOff("ScryUseinIce");
-    //(getPageSetting('AutoStance')==1) ? turnOn("WindStackingPctHe")   : turnOff("WindStackingPctHe");
-    //(getPageSetting('AutoStance')==1) ? turnOn("DelayCoordsForWind")  : turnOff("DelayCoordsForWind");
-    //(getPageSetting('AutoStance')==1) ? turnOn("DelayWeaponsForWind") : turnOff("DelayWeaponsForWind");
+
     getPageSetting('GASetting') ? turnOff("GASettingManual"): turnOn("GASettingManual");
-    //createSetting('GASetting', 'AT Control GA', 'AT Control GA - Allow AT to control GeneticistAssist timer (Recommended). When this is off will use your manually entered Input instead.', 'boolean', true, null, 'Combat');
-    //createSetting('GASettingManual', 'Manual GA Timer', 'AT Uses the 3rd GeneticistAssist slot. You may enter a value for it here, or in the last GA slot yourself (-1 or 0 to disable).', 'value', '-1', null, 'Combat');
-    
     
     getPageSetting('AutoAllocatePerks')==1 ? turnOn("fastallocate") : turnOff("fastallocate");
     
@@ -898,11 +890,6 @@ function updateCustomButtons() {
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomLowShield"): turnOff("HeirloomLowShield");
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomPushShield"): turnOff("HeirloomPushShield");
     
-    
-    
-    /*//Make Scryer settings a little more user friendly
-    if (getPageSetting('ScryerUseinVoidMaps2') !=0) { setPageSetting("ScryerUseinMaps2", "2"); }
-    if (getPageSetting('ScryerUseinSpire2') !=1 && isActiveSpireAT()) { setPageSetting("ScryerSkipCorrupteds2", "2"); } */
     //Show and Hide useless settings to reduce UI clutter
     var turnonofflist = [
       "ManualGather2","BuyUpgradesNew","TrapTrimps","UsePatience",

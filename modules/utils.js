@@ -406,7 +406,7 @@ function postBuy2(old) {
 
 function setTitle() {
     if (aWholeNewWorld)
-        document.title = '(' + game.global.world + ')' + ' Trimps ' + document.getElementById('versionNumber').innerHTML;
+        document.title = game.global.world + ' Trimps';// + document.getElementById('versionNumber').innerHTML;
 }
 
 //HTML For adding a 5th tab to the message window

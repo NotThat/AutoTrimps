@@ -552,6 +552,7 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
         enemyDamage *= game.empowerments.Ice.getCombatModifier();
     }
     enemyDamage *= getCorruptScale("attack");
+    
     var pierceMod = (game.global.brokenPlanet && !game.global.mapsActive) ? getPierceAmt() : 0;
     //change name to make sure these are local to the function
     

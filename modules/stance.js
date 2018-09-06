@@ -232,12 +232,6 @@ function autoStance() {
 
     updateOmniThreshhold();
     
-    if(enemyHealth == -1){ //new zone, game didnt generate first enemy yet, so use our own
-        enemyHealth = worldArray[cellNum].maxHealth;
-        enemyMaxHealth = enemyHealth;
-    }
-    worldArray[cellNum].health = enemyHealth; //is there a reason why we should calculate this earlier?
-    
     allowBuyingCoords = !getPageSetting('DelayCoordsForWind'); //dont buy coords unless we explicitly permit it. automaps() can also allow it if player runs a map for ratio.
 
     if (game.global.soldierHealth <= 0){ 
@@ -257,6 +251,12 @@ function autoStance() {
     
     if(game.global.mapsActive)
         return;
+        
+    if(enemyHealth == -1){ //new zone, game didnt generate first enemy yet, so use our own
+        enemyHealth = worldArray[cellNum].maxHealth;
+        enemyMaxHealth = enemyHealth;
+    }
+    worldArray[cellNum].health = enemyHealth; //is there a reason why we should calculate this earlier?
     
     if(game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting) == 0)
         switchOnGA(); //in rare cases we leave GA disabled, so make sure to turn it back on
@@ -853,7 +853,7 @@ function fireGeneticists(howMany){
 
 function buildWorldArray(){
     if (game.global.gridArray.length === 0){
-        debug("grid is empty. retrying.", "other");
+        //debug("grid is empty. retrying.", "other");
         setTimeout(buildWorldArray, 100);
         return false;
     }

@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "2";
+var ver = "3";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -233,6 +233,7 @@ var lastFluffDmg = 1;
 
 var currMap;
 var statusMsg = "";
+var ASMode;
 
 var ATmakeUp = false;
 ////////////////////////////////////////
@@ -248,11 +249,17 @@ function ATLoop(makeUp) {
     if (ATrunning == false) return;
     if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled || game.global.viewingUpgrades) {
         if(getPageSetting('PauseScript'))
-            updateAutoMapsStatus("", "AT paused");
+            updateAutoMapsStatus("", "AT paused", true);
         return;
     }
     ATrunning = true;
     ATmakeUp = makeUp;
+    var AS = getPageSetting('AutoStance');
+    if(AS < 2)       ASMode = "Advancing";
+    else if(AS == 2) ASMode = "DE";
+    else             ASMode = "Push";
+    statusMsg = ASMode;
+    
     if(game.options.menu.showFullBreed.enabled != 1) toggleSetting("showFullBreed");    //more detail
     hiddenBreedTimer = ((game.jobs.Amalgamator.owned > 0) ? Math.floor((new Date().getTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000));
     if(hiddenBreedTimer != hiddenBreedTimerLast){
@@ -326,8 +333,7 @@ function ATLoop(makeUp) {
       else if (getPageSetting('BuyBuildingsNew')==2) buyBuildings();                      //"Buy Buildings"            (")
       else if (getPageSetting('BuyBuildingsNew')==3) buyStorage();                        //"Buy Storage"              (")
     if (getPageSetting('BuyJobsNew')>0) buyJobs();                                              
-    if (getPageSetting('ManualGather2')<=1) manualLabor();  //"Auto Gather/Build"       (gather.js)
-      else if (getPageSetting('ManualGather2')==2) manualLabor2();  //"Auto Gather/Build #2"  (")
+    if (getPageSetting('ManualGather2')) manualLabor();  //"Auto Gather/Build"       (gather.js)
      
     autoMap(); //automaps() is in charge of maps combat
     updateAutoMapsStatus("", statusMsg, true); //update status

@@ -141,7 +141,7 @@
 
     M["performance"].UpdateAFKOverlay = function UpdateAFKOverlay()
     {
-        var a = 'TRIMPS' + (game.options.menu.pauseGame.enabled != 0 ? ' (PAUSED)' : '') + ' - AFK';
+        var a = 'TRIMPS' + (game.options.menu.pauseGame.enabled != 0 ? ' (PAUSED)' : '');
         if(a != AFKOverlayTitle.innerText)                      AFKOverlayTitle.innerText = a;
         var b = 'Current Zone: ' + game.global.world + '.' + (game.global.lastClearedCell + 1);
         if(b != M["performance"].AFKOverlayZone.innerText)      M["performance"].AFKOverlayZone.innerText = b;
