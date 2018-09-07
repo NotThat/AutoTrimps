@@ -327,10 +327,10 @@ AutoPerks.clickAllocate = function() {
 
     // determine how to spend helium
     var result;
-    if (getPageSetting('fastallocate')==true)
+    //if (getPageSetting('fastallocate')==true)
         result = AutoPerks.spendHelium2(remainingHelium);
-    else
-        result = AutoPerks.spendHelium(remainingHelium);
+    //else
+    //    result = AutoPerks.spendHelium(remainingHelium);
     if (result == false) {
         debug("AutoPerks: Major Error: Make sure all ratios are set properly.","perks");
         return;

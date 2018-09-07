@@ -276,7 +276,7 @@ function autoMap() {
     //spire specific settings
     var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 8);
     var stackSpireGetMinDamage = stackSpire && (game.global.lastClearedCell + 1 === 0) && (checkForGoodCell(0));
-    preSpireFarming = (isActiveSpireAT()) && ((spireTime = (new Date().getTime() - game.global.zoneStarted) / 1000 / 60) < getPageSetting('MinutestoFarmBeforeSpire') || getPageSetting('MinutestoFarmBeforeSpire') < 0);
+    preSpireFarming = (isActiveSpireAT()) && ((spireTime = (Date.now() - game.global.zoneStarted) / 1000 / 60) < getPageSetting('MinutestoFarmBeforeSpire') || getPageSetting('MinutestoFarmBeforeSpire') < 0);
     spireMapBonusFarming = getPageSetting('MaxStacksForSpire') && isActiveSpireAT() && game.global.mapBonus < 10;
     if (preSpireFarming || spireMapBonusFarming || stackSpireGetMinDamage)
         shouldDoMaps = true;
@@ -594,9 +594,9 @@ function autoMap() {
                 fightManual();                      //--fight
                 mapsClicked(true);                  //--exit map
                 
-                var start = new Date().getTime();
+                var start = Date.now();
                 while(game.global.breedBack > 0){
-                    var current = new Date().getTime();
+                    var current = Date.now();
                     if(current-start > 1000){
                         debug("error: took too long to breed back army. exiting.");
                         break;

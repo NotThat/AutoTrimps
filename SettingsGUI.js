@@ -248,7 +248,7 @@ function initializeAllSettings() {
     createSetting('NoCoordBuyStartZ', 'Start no Coord Buy', 'From this zone, stop buying coord upgrades until we get Amalgamator Amount. Disable with -1.', 'value', -1, null, 'Core');
     createSetting('TillWeHaveAmalg', 'Amalgamator Goal', 'The script will not buy any more coordinations starting zone Z, until we have this many Amalgamators. -1 to disable.', 'value', -1, null, 'Core');
     createSetting('AutoAllocatePerks', ['Auto Allocate Off', 'Auto Allocate On', 'Dump into Looting II'], 'Uses the AutoPerks ratio based preset system to automatically allocate your perks to spend whatever helium you have when you AutoPortal. Does not change Fixed Perks: siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, capable. Dump all He into Looting II', 'multitoggle', 0, null, 'Core');
-    createSetting('fastallocate', 'Fast Allocate', 'Turn on if your helium is above 500Qa. Not recommended for low amounts of helium. ', 'boolean', false, null, 'Core');
+    //createSetting('fastallocate', 'Fast Allocate', 'Turn on if your helium is above 500Qa. Not recommended for low amounts of helium. ', 'boolean', false, null, 'Core');
     
     //Line2
     createSetting('AutoStartDaily', 'Auto Start Daily', 'With this on, the Auto Portal options will portal you into and auto-start the daily <b>whenever available</b>. Starts from the oldest available, and works forwards. Falls back to selected challenge when there are no more dailies available.', 'boolean', false, null, 'Core');
@@ -883,7 +883,7 @@ function updateCustomButtons() {
 
     getPageSetting('GASetting') ? turnOff("GASettingManual"): turnOn("GASettingManual");
     
-    getPageSetting('AutoAllocatePerks')==1 ? turnOn("fastallocate") : turnOff("fastallocate");
+    //getPageSetting('AutoAllocatePerks')==1 ? turnOn("fastallocate") : turnOff("fastallocate");
     
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomStaves"): turnOff("HeirloomStaves");
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomHighShield"): turnOff("HeirloomHighShield");

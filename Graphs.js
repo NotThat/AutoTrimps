@@ -361,7 +361,7 @@ function pushData() {
     allSaveData.push({
         totalPortals: game.global.totalPortals,
         heliumOwned: game.resources.helium.owned,
-        currentTime: new Date().getTime(),
+        currentTime: Date.now(),
         portalTime: game.global.portalTime,
         world: game.global.world,
         challenge: game.global.challengeActive,
@@ -394,7 +394,7 @@ function pushData() {
 var graphAnal = [];
 function trackHourlyGraphAnalytics() {
     graphAnal.push({
-        currentTime: new Date().getTime(),
+        currentTime: Date.now(),
         totalPortals: game.global.totalPortals,
         heliumOwned: game.resources.helium.owned,
         highzone: game.global.highestLevelCleared,
@@ -474,7 +474,7 @@ function gatherInfo() {
         //track how many overkill world cells we have beaten in the current level. (game.stats.cellsOverkilled.value for the entire run)
         GraphsVars.OVKcellsInWorld = document.getElementById("grid").getElementsByClassName("cellColorOverkill").length;
     //track time in each zone for better graphs
-    GraphsVars.ZoneStartTime = new Date().getTime() - game.global.zoneStarted;
+    GraphsVars.ZoneStartTime = Date.now() - game.global.zoneStarted;
     //track MapBonus
     GraphsVars.MapBonus = game.global.mapBonus;
 }
