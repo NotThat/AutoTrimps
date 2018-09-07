@@ -574,7 +574,7 @@ function autoStance() {
                 
                 var currRatio = DHratio * currDmg / baseDamageLow; //baseDamageLow maybe higher than currDmg, so adjust currRatio down accordingly
                 
-                if (zoneWorth > 0.8 && game.global.antiStacks > 1 && DHratio >= 3 && !stackSpire && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99) && typeof game.global.dailyChallenge.bogged === 'undefined'){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
+                if (false && zoneWorth > 0.8 && game.global.antiStacks > 1 && DHratio >= 3 && !stackSpire && (worldArray[cellNum].mutation == "Corruption" || worldArray[cellNum].mutation == "Healthy" || cellNum == 99) && typeof game.global.dailyChallenge.bogged === 'undefined'){ //if we still need less damage, consider trimpicide to remove anticipation stacks. never trimpicide against non colored cell
                     var noStacks = 1/(1+0.2*game.global.antiStacks); //modifier for having no stacks
                     var noStacksCurrRatio = currRatio * noStacks; //our ratio without stacks
                     var ratio = limit / noStacksCurrRatio;
