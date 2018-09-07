@@ -826,6 +826,38 @@ function PrestigeRaid() {
     return false;
 }
 
+function findNextBionic() {
+    var highestBionicMap = null;
+    var maxLevel = game.global.world + getPageSetting('BWraidingmaxLevel');
+    var cap = getPageSetting('BWraidingmax');
+    if(maxLevel > cap)
+        maxLevel = cap;
+
+    for (var map of game.global.mapsOwnedArray){
+        if (map.level > maxLevel || map.location !== "Bionic")
+            continue;
+        
+        if(highestBionicMap == null){
+            highestBionicMap = map;
+            continue;
+        }
+        
+        if (addSpecialsAT(highestBionicMap.level) > 0){ //if we need prestiges from our map, only take a lower bionic if we need prestiges from it as well
+            if(highestBionicMap.level > map.level && addSpecialsAT(map.level) > 0)
+                highestBionicMap = map;
+        }
+        else if(highestBionicMap.level < map.level)//we dont need anything from our bionic, so look for a higher one
+            highestBionicMap = map;
+    }
+        
+    if (highestBionicMap == null)
+        return false;
+    if (highestBionicMap.level > maxLevel) //if we already at max level and dont need gear, stop
+    	return false;
+    if (highestBionicMap.level === maxLevel && addSpecialsAT(highestBionicMap.level) === 0) //if we already at max level and dont need gear, stop
+    	return false;
+    return highestBionicMap;
+}
 
 function BWRaidNowLogic(){
     if (game.global.world < getPageSetting('BWraidingmin') || cycleZone() !== 4) return false;
