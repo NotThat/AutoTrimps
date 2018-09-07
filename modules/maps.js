@@ -852,9 +852,9 @@ function findNextBionic() {
         
     if (highestBionicMap == null)
         return false;
-    if (highestBionicMap.level > maxLevel) //if we already at max level and dont need gear, stop
+    if (highestBionicMap.level > maxLevel)
     	return false;
-    if (highestBionicMap.level === maxLevel && addSpecialsAT(highestBionicMap.level) === 0) //if we already at max level and dont need gear, stop
+    if (addSpecialsAT(highestBionicMap.level, true) === 0) //if we already at max level and dont need gear, stop
     	return false;
     return highestBionicMap;
 }
@@ -1463,7 +1463,7 @@ function useScryhard2(){
     return game.talents.scry2.purchased && !game.global.runningChallengeSquared;
 }
 
-function addSpecialsAT(mapLevel){
+function addSpecialsAT(mapLevel, isBionic){
     var count = 0;
     var allowedPres;
     var prestigeList1 = ['Supershield', 'Dagadder', 'Bootboost'];
@@ -1506,6 +1506,9 @@ function addSpecialsAT(mapLevel){
         if(tmp < allowedPres)
             count += (allowedPres - tmp);
     }
+    
+    if(isBionic && (game.global.bionicOwned - Math.floor((350-125) / 15)) <= 1)
+        count++;
     
     return count;
 }
