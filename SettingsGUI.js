@@ -398,7 +398,7 @@ function initializeAllSettings() {
     createSetting('GASetting', 'AT Control GA', 'AT Control GA - Allow AT to control GeneticistAssist timer. Also handles bogged dailies (Recommended). When this is off will use your manually entered Input instead.', 'boolean', true, null, 'Combat');
     createSetting('GASettingManual', 'Manual GA Timer', 'AT Uses the 3rd GeneticistAssist slot. You may enter a value for it here, or in the last GA slot yourself (-1 or 0 to disable).', 'value', '-1', null, 'Combat');
     createSetting('AutoRoboTrimp', 'AutoRoboTrimp', 'Use RoboTrimps ability starting at this level, and every 5 levels thereafter. (set to 0 to disable. default 60.) 60 is a good choice for mostly everybody.', 'value', '60', null, 'Combat');
-    createSetting('EmpowerTrimpicide', 'Empower Trimpicide', 'AT will Trimpicide whenever your army is about to die during Empower dailies. Note that AT accomplishes this by clicking the map button in the same way an attentive human could. You can turn this off if you feel its too much.', 'boolean', true, null, 'Combat');
+    createSetting('EmpowerTrimpicide', 'Empower Trimpicide', 'AT will Trimpicide whenever your army is about to die during Empower dailies. In dailies with empower AND bleed/plague, will not trimpicide in high value zones in order to conserve stacks.', 'boolean', true, null, 'Combat');
 
 
 //Scryer
@@ -480,6 +480,7 @@ function initializeAllSettings() {
 
 //Display settings:
     //Subsection1Line1
+    createSetting('PauseMsgsVisible', 'Pause Warning', 'Toggle whether to show the big pause message', 'boolean', true, null, 'Display');
     createSetting('EnhanceGrids', 'Enhance Grids', 'Apply slight visual enhancements to world and map grids that highlights with drop shadow all the exotic, powerful, skeletimps and other special imps.', 'boolean', false, null, 'Display');
     createSetting('EnableAFK', 'Go AFK Mode', '(Action Button). Go AFK uses a Black Screen, and suspends ALL the Trimps GUI visual update functions (updateLabels) to improve performance by not doing unnecessary stuff. This feature is primarily just a CPU and RAM saving mode. Everything will resume when you come back and press the Back button. Console debug output is also disabled. The blue color means this is not a settable setting, just a button. You can now also click the Zone # (World Info) area to go AFK now.', 'action', 'MODULES["performance"].EnableAFKMode()', null, 'Display');
     document.getElementById('battleSideTitle').setAttribute('onclick','MODULES["performance"].EnableAFKMode()');

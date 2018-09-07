@@ -666,7 +666,7 @@ function updateAutoMapsStatus(get, msg, final) {
             status += spiretimeStr + ' left<br>';
         }
     } else if (spireMapBonusFarming) status += 'Spire Bonus<br>';
-    else if (doVoids) status += 'VMs Left: ' + game.global.totalVoidMaps + "<br>";
+    else if (doVoids) status = 'VMs Left: ' + game.global.totalVoidMaps + "<br>";
     else if (skippedPrestige) status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b><br>'; // Show skipping prestiges
 
     status = status + "Ratio = " + formattedRatio;

@@ -165,7 +165,7 @@ function autoStance() {
     handleGA(); //controlls GA (when settings allow) and activates GA #3
     
     var enemyHealth = cell.health;  //current health
-    var enemyMaxHealth = cell.maxHealth; //in future can do some prediction with plaguebringer and expected minimum enemy max health of world zone
+    //var enemyMaxHealth = cell.maxHealth; //in future can do some prediction with plaguebringer and expected minimum enemy max health of world zone
     
     if(baseDamageHigh < 0 || game.global.soldierCurrentAttack < 0){
         var wrongDamage = game.global.soldierCurrentAttack;
@@ -179,9 +179,15 @@ function autoStance() {
         return; 
     }
     
-    if(getPageSetting('EmpowerTrimpicide') && game.global.soldierHealth > 0 && typeof game.global.dailyChallenge.empower !== 'undefined' && !game.global.preMapsActive && !game.global.mapsActive)
-        if(aboutToDie()) //dont die in world on empowered dailies
-            return;
+    if(getPageSetting('EmpowerTrimpicide') && game.global.soldierHealth > 0 && typeof game.global.dailyChallenge.empower !== 'undefined' && !game.global.preMapsActive && !game.global.mapsActive){
+        if(aboutToDie()){ //dont die in world on empowered dailies
+            if((typeof game.global.dailyChallenge.bogged === 'undefined' && typeof game.global.dailyChallenge.plague === 'undefined') || zoneWorth <= 2){
+                debug("Trimpiciding to prevent empowering.", "trimpicide");
+                mapsClicked(true);
+                return;
+            }
+        }
+    }
     
     if (game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
         goDefaultStance(); //D if we have it, X otherwise
@@ -252,10 +258,9 @@ function autoStance() {
     if(game.global.mapsActive)
         return;
         
-    if(enemyHealth == -1){ //new zone, game didnt generate first enemy yet, so use our own
+    if(enemyHealth == -1) //new zone, game didnt generate first enemy yet, so use our own
         enemyHealth = worldArray[cellNum].maxHealth;
-        enemyMaxHealth = enemyHealth;
-    }
+    
     worldArray[cellNum].health = enemyHealth; //is there a reason why we should calculate this earlier?
     
     if(game.global.GeneticistassistSteps.indexOf(game.global.GeneticistassistSetting) == 0)
@@ -333,7 +338,6 @@ function autoStance() {
             }
             trimpicides++;
         }
-        
         return;
     }
     
@@ -499,31 +503,25 @@ function autoStance() {
                 chosenFormation = 4;
             if(enemyHealth < baseDamageHighNoCrit){
                 chosenFormation = 3;
-                //if(equipLowDmgShield()){ //consider low shield
-                    //calcBaseDamageinB();
-                    if(enemyHealth < baseDamageLowNoCrit*8){ //we will hold onto low shield, so recalc values
-                        wantGoodShield = false;
-                        chosenFormation = 2;
-                        //updateAllBattleNumbers(true);
-                        //debug("enemyHealth " + enemyHealth.toExponential(2) + " baseDamageNoCrit " + baseDamageNoCrit.toExponential(2));
-                        ourAvgDmgS = baseDamageLow;
-                        ourAvgDmgD = ourAvgDmgS * 8;
-                        ourAvgDmgX = ourAvgDmgS * 2;
+                if(enemyHealth < baseDamageLowNoCrit*8){ //we will hold onto low shield, so recalc values
+                    wantGoodShield = false;
+                    chosenFormation = 2;
+                    //updateAllBattleNumbers(true);
+                    //debug("enemyHealth " + enemyHealth.toExponential(2) + " baseDamageNoCrit " + baseDamageNoCrit.toExponential(2));
+                    ourAvgDmgS = baseDamageLow;
+                    ourAvgDmgD = ourAvgDmgS * 8;
+                    ourAvgDmgX = ourAvgDmgS * 2;
 
-                        expectedNumHitsS = enemyHealth / ourAvgDmgS;
-                        expectedNumHitsX = enemyHealth / ourAvgDmgX;
-                        expectedNumHitsD = enemyHealth / ourAvgDmgD;
-                        if(enemyHealth < baseDamageLowNoCrit*2)
-                            chosenFormation = 4;
-                        if(enemyHealth < baseDamageLowNoCrit)
-                            chosenFormation = 3;
-                    }
-                    else{
-                        wantGoodShield = true;
-                        //equipMainShield();
-                        //calcBaseDamageinB();
-                    }
-                //}
+                    expectedNumHitsS = enemyHealth / ourAvgDmgS;
+                    expectedNumHitsX = enemyHealth / ourAvgDmgX;
+                    expectedNumHitsD = enemyHealth / ourAvgDmgD;
+                    if(enemyHealth < baseDamageLowNoCrit*2)
+                        chosenFormation = 4;
+                    if(enemyHealth < baseDamageLowNoCrit)
+                        chosenFormation = 3;
+                }
+                else
+                    wantGoodShield = true;
             }
         }
         if(stackSpire && expectedNumHitsD > missingStacks && stackSpireNoMoreDamageCell != cellNum){
@@ -895,9 +893,10 @@ function buildWorldArray(){
     for (var i = 0; i < 100; i++){
         var enemy = {mutation: "", finalWorth: "", corrupted: "", name: "", health: "", maxHealth: "", attack: 0, baseHelium: "", spireBonus: "", pbHits: "", nextPBDmg: "", baseWorth: "", geoRelativeCellWorth: "", PBWorth: ""};
         
-        enemy.name = game.global.gridArray[i].name;
-        enemy.mutation = game.global.gridArray[i].mutation;
-        enemy.corrupted = game.global.gridArray[i].corrupted;
+        //enemy.name    = game.global.gridArray[i].name; //the player has no access to imp names before reaching them, so neither do we
+        enemy.name      = game.global.gridArray[0].name;
+        enemy.mutation  = game.global.gridArray[i].mutation;
+        //enemy.corrupted = game.global.gridArray[i].corrupted;
         
         var mutationMult;
         var mutationMultAtk;
@@ -905,11 +904,13 @@ function buildWorldArray(){
             enemy.baseWorth = 0.15;
             mutationMult    = mutationMultCorrupted;
             mutationMultAtk = mutationMultCorruptedAtk;
+            enemy.corrupted = "corruptTough";
         }
         else if(enemy.mutation == "Healthy"){
             enemy.baseWorth = 0.45;
             mutationMult = mutationMultHealthy;
             mutationMultAtk = mutationMultHealthyAtk;
+            enemy.corrupted = "healthyTough";
         }
         else{
             enemy.baseWorth = 0;
@@ -917,12 +918,14 @@ function buildWorldArray(){
             mutationMultAtk = 1;
         }
         
-        enemy.attack = calcEnemyAttack(enemy.mutation, enemy.corrupted, mutationMultAtk, enemy.name, i, oblitMult);
-        enemy.maxHealth = game.global.getEnemyHealth(i, enemy.name, true) * mutationMult * dailyHPMult; //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
+        //enemy.attack = calcEnemyAttack(enemy.mutation, enemy.corrupted, mutationMultAtk, enemy.name, i, oblitMult);
+        enemy.maxHealth =  game.global.getEnemyHealth(i, enemy.name, true) * mutationMult * dailyHPMult; //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
         if(game.global.spireActive)                      enemy.maxHealth = getSpireStats(i+1, enemy.name, "health");
         if(game.global.challengeActive == "Obliterated") enemy.maxHealth *= oblitMult;
-        if (enemy.corrupted == "corruptTough")           enemy.maxHealth *= 5;
-        else if (enemy.corrupted == "healthyTough")      enemy.maxHealth *= 7.5;
+        //if (enemy.corrupted == "corruptTough")         enemy.maxHealth *= 5;   //the player has no access to corruption type before reaching them, and neither do we
+        //else if (enemy.corrupted == "healthyTough")    enemy.maxHealth *= 7.5; //the player has no access to corruption type before reaching them, and neither do we
+        if(enemy.mutation == "Corruption")               enemy.maxHealth *= 5;   //so we take the worst possible case.
+        else if(enemy.mutation == "Healthy")             enemy.maxHealth *= 7.5;
         enemy.health = enemy.maxHealth;
 
         worldArray.push(enemy);

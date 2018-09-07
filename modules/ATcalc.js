@@ -359,14 +359,10 @@ function aboutToDie(){
     
     ourHP -= enemyAttack;
 
-    if (ourHP <= 1000){ 
-        //debug("Trimpiciding to prevent empowering e:" + enemyAttack.toExponential(2) + " us:" + game.global.soldierHealth.toExponential(2) + " ourHP:" + ourHP.toExponential(2), "trimpicide");
-        debug("Trimpiciding to prevent empowering.", "trimpicide");
-        mapsClicked(true);
-
+    if (ourHP <= 1000)
         return true;
-    }
-    return false;
+    else
+        return false;
 }
 
 function checkForGoodCell(cellNum){
