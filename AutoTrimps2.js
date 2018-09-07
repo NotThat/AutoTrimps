@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "7";
+var ver = "8";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -148,7 +148,7 @@ function delayStartAgain(){
     
     //Actually Start ATLoop and guiLoop - defunct
     //setInterval(ATLoop, runInterval);
-    //setInterval(guiLoop, runInterval*10);
+    setInterval(guiLoop, runInterval*10);
     
     //hook up into runGameLoop()
     runGameLoop = (function(makeUp, now) {
