@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "12.1";
+var ver = "12.2";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -26,7 +26,8 @@ var atscript = document.getElementById('AutoTrimps-script')
   , modulepath = 'modules/'
   ;  
     
-var initialized = false;    
+var initialized = false;
+var allLoaded = false;
 var ATmoduleListComplete = [];
 function startAT() {
     //first we wait for the game to load
@@ -45,10 +46,11 @@ function startAT() {
         initialized = true;
     }
     
-    /*if(typeof updateCustomButtons === 'undefined'){
-        setTimeout(startAT, 100);
+    if(!allLoaded){
+        allLoaded = true;
+        setTimeout(startAT, 100); //one last time for compiler to recognize all loaded vars
         return;
-    }*/
+    }
     
     for (var script in ATmoduleListComplete){
         var found = false;
