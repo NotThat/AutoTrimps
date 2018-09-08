@@ -41,6 +41,21 @@ function delayStart() {
     lowCritDamage  = getPlayerCritDamageMult();
     lowATK         = 1;
     lowPB          = 0;
+    
+    //HTML For adding a 5th tab to the message window
+    var ATbutton = document.createElement("button");
+    ATbutton.innerHTML = 'AutoTrimps';
+    ATbutton.setAttribute('id', 'AutoTrimpsFilter');
+    ATbutton.setAttribute('type', 'button');
+    ATbutton.setAttribute('onclick', "filterMessage2('AutoTrimps')");
+    ATbutton.setAttribute('class', "btn btn-success logFlt");
+    //
+    var tab = document.createElement("DIV");
+    tab.setAttribute('class', 'btn-group');
+    tab.setAttribute('role', 'group');
+    tab.appendChild(ATbutton);
+    document.getElementById('logBtnGroup').appendChild(tab);
+    
     if (!local) 
         printChangelog();
     //setTimeout(   function(){initializeAutoTrimps(); setTimeout(delayStartAgain, startupDelay);}   , 2500);
