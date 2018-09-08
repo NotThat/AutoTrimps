@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "12.5";
-var verDate = "5.9.18";
+var ver = "13";
+var verDate = "8.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
     , basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/')
@@ -32,14 +32,13 @@ var ATmoduleListComplete = [];
 function startAT() {
     //first we wait for the game to load
     if((typeof game === 'undefined' || typeof loadPageVariables === 'undefined' || typeof game.options === 'undefined' || typeof game.options.menu === 'undefined' || typeof pendingLogs === 'undefined' || document.getElementById('logBtnGroup') === null)){ //game hasnt initialized yet
-        //setTimeout(delayStart, startupDelay);
         setTimeout(startAT, 100);
         return;
     }
     
     if(!initialized){
-        pendingLogs.AutoTrimps = []; //adds AT messages slot
-        initializeAutoTrimps(); //loads modules asynchronously, so wait a bit before going further
+        pendingLogs.AutoTrimps = []; //adds AT messages slot. needed before we can call debug()
+        initializeAutoTrimps(); //loads modules asynchronously
         ATmoduleListComplete = ATmoduleList;
         ATmoduleListComplete.push('SettingsGUI');
         ATmoduleListComplete.push('Graphs');
@@ -144,7 +143,7 @@ function ATscriptUnload(id) {
 }
 ATscriptLoad(modulepath, 'utils');    //Load stuff needed to load other stuff:
 
-//This starts up after 2.5 seconds.
+//This starts up after game is loaded
 function initializeAutoTrimps() {
     loadPageVariables();            //get autoTrimpSettings
     ATscriptLoad('','SettingsGUI');   //populate Settings GUI
@@ -175,6 +174,7 @@ function assembleChangelog(date,version,description,isNew) {
     ? (`<b class="AutoEggs">${date} ${version} </b><b style="background-color:#32CD32"> New:</b> ${description}<br>`)
     : (`<b>${date} ${version} </b> ${description}<br>`);
 }
+
 function printChangelog() {
     var body="";
     for (var i in changelogList) {
@@ -191,6 +191,7 @@ function printChangelog() {
     ,   hideCancel = true;
     tooltip('confirm', null, 'update', body+footer, action, title, acceptBtnText, null, hideCancel);
 }
+
 function printLowerLevelPlayerNotice() {
     tooltip('confirm', null, 'update', 'The fact that it works at all is misleading new players into thinking its perfect. Its not. If your highest zone is under z60, you have not unlocked the stats required, and have not experienced the full meta with its various paradigm shifts. If you are just starting, my advice is to play along naturally and use AutoTrimps as a tool, not a crutch. Play with the settings as if it was the game, Dont expect to go unattended, if AT chooses wrong, and make the RIGHT choice yourself. Additionally, its not coded to run one-time challenges for you, only repeatable ones for helium. During this part of the game, content is king - automating literally removes the fun of the game. If you find that many flaws in the automation exist for you, level up. Keep in mind the challenge of maintaining the code is that it has to work for everyone. AT cant see the future and doesnt run simulations, it exists only in the present moment. Post any suggestions on how it can be better, or volunteer to adapt the code, or produce some sort of low-level player guide with what youve learned.<br>Happy scripting! -genBTC','cancelTooltip()', '<b>LowLevelPlayer Notes:</b><br><b>PSA: </b><u>AutoTrimps was not designed for new/low-level players.</u>', "I understand I am on my own and I Accept and Continue.", null, true);
 }
@@ -261,6 +262,7 @@ var lowPB;
 var lowShieldName = "LowDmgShield"; //edit these to change the names used (visual only).
 var highShieldName = "HighDmgShield";
 var wantGoodShield = true; //we want to only swap shield maximum once per loop
+var goodBadShieldRatio = 1;
 
 var lastFluffXp = -1;
 var lastFluffDmg = 1;
@@ -457,8 +459,5 @@ function throwErrorfromMain() {
 
 //Magic Numbers
 var runInterval = 100;      //How often to loop through logic
-var startupDelay = 2500;    //How long to wait for everything to load. if its too short, will produce console errors. particularly on kongregate which loads more stuff than github.
 
-//Start Loops
-//setTimeout(delayStart, startupDelay);
 startAT();

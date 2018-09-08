@@ -470,3 +470,7 @@ window.onerror = function catchErrors(msg, url, lineNo, columnNo, error) {
 function throwErrorfromModule() {
     throw new Error("We have successfully read the thrown error message out of a module");
 }
+
+function log1point25(val) {
+  return Math.log(val) / Math.log(1.25);
+}

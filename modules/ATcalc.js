@@ -214,6 +214,7 @@ function calcDmgManual(printout){
     
     baseDamageLow = dmgLow * baseModifier;
     baseDamageHigh = dmg * baseModifier;
+    goodBadShieldRatio = baseDamageHigh / baseDamageLow;
     
     return baseDamageHigh;
 }

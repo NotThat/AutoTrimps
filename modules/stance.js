@@ -303,26 +303,31 @@ function autoStance() {
     if(!windZone()){ 
         goDefaultStance(); //D if we have it, X otherwise
         
-        allowBuyingCoords = true;
         if(windZone(game.global.world + 1) && cellNum > 50 && zoneWorth > 0.5) //if next zone is a wind zone, dont instantly buy the coordination in case we want to save it.
             allowBuyingCoords = false;
         
         //here we need to decide how much damage we want in non wind zones.
         //this depends on zoneWorth. if its low we want full overkill
         //if its high, we aim to reach the first wind zone with limit DHratio.
-        if(zoneWorth < 1 || game.global.world < 236)
+        if(zoneWorth < 1 || game.global.world < 236){
+            allowBuyingCoords = true;
             getDamageCaller(1.5*requiredDmgToOK, false, true);
+        }
         else{
-            var limit = 20;
+            var limit = 20 * (goodBadShieldRatio / 20);
             var zonesToWind = (150000 - game.global.world) % 15 + 1; //how many zones to go until we hit wind
             var maxDHratio = limit * Math.pow(2, zonesToWind); //maximum DHratio we want right now
             var currDHratio = DHratio;
             
             var wantDmg = 8*baseDamageHigh*maxDHratio/currDHratio; //unfortunately we can not hit exact damages because of the game bug
-            if(local){
-                var parsedMaxDHratio = (maxDHratio > 10000 ? maxDHratio.toExponential(2) : maxDHratio.toFixed(0));
-                debug(game.global.world + " maxDHratio: " + parsedMaxDHratio + " wantDmg: " + wantDmg.toExponential(2) + " current: " + (8*baseDamageHigh).toExponential(2));
-            }
+            if(local)
+                debug("wanted now: " + maxDHratio.toExponential(2) + " goal 1st wind: " + limit.toFixed(0));
+            
+            if(DHratio > maxDHratio)
+                allowBuyingCoords = false;
+            else
+                allowBuyingCoords = true;
+            
             getDamageCaller(wantDmg, false, true);
         }
         

@@ -226,7 +226,7 @@ function evaluateEquipmentEfficiency(equipName) {
 
 var resourcesNeeded;
 var Best;
-function autoLevelEquipment(lowerDamage, fastMode, colorStyle) {
+function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
     var boughtSomething = false;
     resourcesNeeded = {"food": 0, "wood": 0, "metal": 0, "science": 0, "gems": 0};  //list of amount of resources needed for stuff we want to afford
     Best = {};
@@ -244,11 +244,20 @@ function autoLevelEquipment(lowerDamage, fastMode, colorStyle) {
 //PRESTIGE SECTION:
     for (var equipName in equipmentList) {
         var equip = equipmentList[equipName];
+        if(buyDamage){
+            if(equip.Stat !== "attack")
+                continue;
+        }
+        else{ //buy health only
+            if(equip.Stat === "attack")
+                continue;
+        }
         var gameResource = equip.Equip ? game.equipment[equipName] : game.buildings[equipName];
         if (!gameResource.locked) {
             var $equipName = document.getElementById(equipName);
             if(colorStyle) $equipName.style.color = 'white';   //reset
-            var evaluation = evaluateEquipmentEfficiency(equipName);
+            //var evaluation = evaluateEquipmentEfficiency(equipName);
+            var evaluation = evalObjAT[equipName];
             var BKey = equip.Stat + equip.Resource;
 
             if (Best[BKey].Factor === 0 || Best[BKey].Factor < evaluation.Factor) {
@@ -314,10 +323,8 @@ function autoLevelEquipment(lowerDamage, fastMode, colorStyle) {
                         }
                         else if(buyWeaponsMode === 3){
                             //if (game.upgrades[upgrade].done === highestPrestigeOwned){
-                                if(equipCost(gameResource, equip)*100 < game.resources.metal.owned) //keep buying levels until they cost 0.1% of total metal
+                                if(equipCost(gameResource, equip)*100 < game.resources.metal.owned && !fastMode) //keep buying levels until they cost 0.1% of total metal
                                     allow = false;
-                                if(fastMode)
-                                    allow = true;
                             //}
                         }
                         else if(buyWeaponsMode == 4)
@@ -335,6 +342,7 @@ function autoLevelEquipment(lowerDamage, fastMode, colorStyle) {
                         preBuy();
                         buyUpgrade(upgrade, true, true);
                         postBuy();
+                        evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName); //update equipment eval
                         boughtSomething = true;
                     }
                 }
@@ -345,9 +353,7 @@ function autoLevelEquipment(lowerDamage, fastMode, colorStyle) {
             }
         }
     }
-    //game.upgrades[p].allowed
-    //equipmentList[equipName].Upgrade
-    //equipmentList[equipName].Stat == 'attack'
+
     //LEVELING EQUIPMENT SECTION:
     preBuy();
     game.global.buyAmt = 1; //needed for buyEquipment()
@@ -369,7 +375,7 @@ function autoLevelEquipment(lowerDamage, fastMode, colorStyle) {
             if(eqName != 'Gym')
                 if (verbose) debug("leveling Z" + game.global.world + " " + eqName + "("+game.upgrades[equipmentList[eqName].Upgrade].done + "/" + game.equipment[eqName].level+") buyWeaponsMode " + buyWeaponsMode); 
             //If we're considering an attack item, we want to buy weapons if we don't have enough damage, or if we don't need health (so we default to buying some damage)
-            if (BuyWeaponLevels && DaThing.Stat == 'attack'){ 
+            if (buyDamage && BuyWeaponLevels && DaThing.Stat == 'attack'){ 
                 if (DaThing.Equip && canAffordBuilding(eqName, null, null, true)) {
                     var allow = true;
                     if(getPageSetting('AutoStance')==1 && getPageSetting('DelayWeaponsForWind') && (buyWeaponsMode === 0)){
@@ -377,21 +383,24 @@ function autoLevelEquipment(lowerDamage, fastMode, colorStyle) {
                     }
                     if(allow){
                         buyEquipment(eqName, null, true);
+                        evalObjAT[equipName] = evaluateEquipmentEfficiency(eqName);
                         boughtSomething = true;
                     }
                 }
             }
             //If we're considering a health item, buy it if we don't have enough health, otherwise we default to buying damage
-            if (BuyArmorLevels && (DaThing.Stat == 'health' || DaThing.Stat == 'block') && !enoughHealthE) {
+            if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health' || DaThing.Stat == 'block')) {
                 if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {
                     buyEquipment(eqName, null, true);
+                    evalObjAT[equipName] = evaluateEquipmentEfficiency(eqName);
                     boughtSomething = true;
                 }
             }
             //Always LVL 25:
-            if (BuyArmorLevels && (DaThing.Stat == 'health') && game.equipment[eqName].level < 25){
+            if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health') && game.equipment[eqName].level < 25){
                 if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {
                     buyEquipment(eqName, null, true);
+                    evalObjAT[equipName] = evaluateEquipmentEfficiency(eqName);
                     boughtSomething = true;
                 }
             }
@@ -404,88 +413,89 @@ function autoLevelEquipment(lowerDamage, fastMode, colorStyle) {
     return boughtSomething;
 }
 
+function getDamageLoop(dmg, lowerDamage, noCrit, maxLoop){
+    var dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
+    var dmgLast = 0;
+    
+    while (dmgLast != dmgToCheck && maxLoop-- > 0){
+        if(game.global.soldierHealth < wantedHP)
+            autoLevelEquipment(lowerDamage, false, true); //buy health only
+        
+        if (dmgToCheck*8 >= dmg) //have enough damage
+            return true;
+        
+        dmgLast = dmgToCheck;
+        autoLevelEquipment(lowerDamage, true, true); //buy damage only autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle)
+        dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
+    }
+    return false;
+}
+
 function getDamage(dmg, lowerDamage, noCrit){
     var dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
-    
-    if (baseDamageHigh <= 0 || game.global.soldierCurrentAttack < 0) {
+    var maxLoop = 500;
+            
+    if (baseDamageHigh < 0 || game.global.soldierCurrentAttack < 0) {
         debug("error: getDamage: damage " + game.global.soldierCurrentAttack + " " + baseDamageHigh);
         if (baseDamageHigh < 0 || game.global.soldierCurrentAttack < 0)
             return;
     }
+    else if(baseDamageHigh === 0){
+        calcBaseDamageinB();
+        if(baseDamageHigh === 0)
+            debug("error: baseDamageHigh is zero. Buying damage.");
+    }
     
-     if(game.global.runningChallengeSquared){
+    if(game.global.runningChallengeSquared){
         buyWeaponsMode = 3;
-
-        var dmgLast = 0;
-        var maxLoop = 50;
-        
-        while (dmgLast != dmgToCheck && maxLoop-- > 0){
-            dmgLast = dmgToCheck;
-            autoLevelEquipment(lowerDamage, true)
-            dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
-            if (dmgToCheck*8 >= dmg) //have enough damage
-                return;
-        }
-    }
-    
-    if (!game.global.spireActive && game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
-        if(dmgToCheck*8 >= dmg){
-            buyWeaponsMode = 0;
-        }
-        else
-            buyWeaponsMode = 3;
-        autoLevelEquipment(lowerDamage, true)
-        return;
-    }
-    
-    if (dmgToCheck*8 >= dmg) //we have enough damage, run autoLevelEquipment once for armor/gyms only
-        buyWeaponsMode = 0;
-    
-    var dmgLast = 0;
-    var maxLoop = 50;
-    
-    while (dmgLast != dmgToCheck && maxLoop-- > 0){
-        dmgLast = dmgToCheck;
-        autoLevelEquipment(lowerDamage);
-        dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
-        if (dmgToCheck*8 >= dmg) //have enough damage
+        if(getDamageLoop(dmg, lowerDamage, noCrit, maxLoop))
             return;
     }
     
-    if (buyWeaponsMode < 2){
-        buyWeaponsMode = 2; //allow buying equipment levels but not prestige
-        getDamage(dmg, lowerDamage, noCrit);
-        dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
+    if (!game.global.spireActive && game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
+        if(dmgToCheck*8 >= dmg) buyWeaponsMode = 0;
+        else buyWeaponsMode = 3;
+        //autoLevelEquipment(lowerDamage, true, true);
+        getDamageLoop(dmg, lowerDamage, noCrit, maxLoop);
+        return;
     }
     
-    if (dmgToCheck*8 >= dmg) //have enough damage
+    buyWeaponsMode = 0;
+    if(getDamageLoop(dmg, lowerDamage, noCrit, maxLoop))
         return;
     
-    if (buyWeaponsMode < 3){
-        buyWeaponsMode = 3; //allow buying equipment levels and prestiges
-        getDamage(dmg, lowerDamage, noCrit);
-        dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
+    buyWeaponsMode = 2; //allow buying equipment levels but not prestige
+    if(getDamageLoop(dmg, lowerDamage, noCrit, maxLoop))
+        return;
+    
+    if(game.upgrades.Coordination.done < game.upgrades.Coordination.allowed){
+        if (game.global.mapsActive) AutoMapsCoordOverride = true;
+        else allowBuyingCoords = true;
+        
+        var wantHowManyCoords = log1point25(dmgToCheck*8/dmg); //how many coords we want for desired damage
+        var newMaxCoords = game.upgrades.Coordination.done + Math.ceil(wantHowManyCoords);
+        if(maxCoords < newMaxCoords){
+            maxCoords = newMaxCoords;
+            debug("Autostance3: allowing buying coord Wind #" + maxCoords + " on " + ((game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1), "equips");
+        }
     }
     
-    if (dmgToCheck*8 >= dmg) //have enough damage
+    buyWeaponsMode = 3; //allow buying equipment levels and prestiges
+    if(getDamageLoop(dmg, lowerDamage, noCrit, maxLoop))
         return;
-    
-    if (game.global.mapsActive)
-        AutoMapsCoordOverride = true;
-    else
-        allowBuyingCoords = true;
-    
-    maxCoords = game.upgrades.Coordination.done + 1;
-    if(game.upgrades.Coordination.done == maxCoords)
-        debug("Autostance3: allowing buying coord Wind #" + maxCoords + " on " + ((game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1), "equips");
 }
 
+var evalObjAT = {};
 var BuyWeaponUpgrades = ((getPageSetting('BuyWeaponsNew')==1) || (getPageSetting('BuyWeaponsNew')==2));
 var BuyArmorUpgrades = ((getPageSetting('BuyArmorNew')==1) || (getPageSetting('BuyArmorNew')==2));
 function getDamageCaller(dmg, lowerDamage, noCrit){
     BuyWeaponUpgrades = ((getPageSetting('BuyWeaponsNew')==1) || (getPageSetting('BuyWeaponsNew')==2));
     BuyArmorUpgrades = ((getPageSetting('BuyArmorNew')==1) || (getPageSetting('BuyArmorNew')==2));
     calcEnemyDamage();
+    
+    for (var equipName in equipmentList) //update equipment evaluations
+        evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName);
+    
     getDamage(dmg, lowerDamage, noCrit);
     
     if (game.global.world === 400 && game.global.challengeActive === "Daily" && getPageSetting('Spire3Time') > 1){
@@ -515,7 +525,7 @@ function dmgToCompare(good, noCrit){
     }
 }
 
-var enoughHealthE;
+var wantedHP = 1;
 function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
     //EQUIPMENT HAS ITS OWN DAMAGE CALC SECTION:
     //spire is a special case.
@@ -553,31 +563,32 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
     }
     enemyDamage *= getCorruptScale("attack");
     
-    var pierceMod = (game.global.brokenPlanet && !game.global.mapsActive) ? getPierceAmt() : 0;
+    //var pierceMod = (game.global.brokenPlanet && !game.global.mapsActive) ? getPierceAmt() : 0;
     //change name to make sure these are local to the function
     
     const FORMATION_MOD_1 = game.upgrades.Dominance.done ? 2 : 1;
     //const FORMATION_MOD_2 = game.upgrades.Dominance.done ? 4 : 1;
-    var numHits = MODULES["equipment"].numHitsSurvived;    //this can be changed.
-    var numHitsScry = MODULES["equipment"].numHitsSurvivedScry;
-    var min_zone = getPageSetting('ScryerMinZone');
-    var max_zone = getPageSetting('ScryerMaxZone');
-    var valid_min = game.global.world >= min_zone;
-    var valid_max = max_zone <= 0 || game.global.world < max_zone;
+    //var numHits = MODULES["equipment"].numHitsSurvived;    //this can be changed.
+    //var numHitsScry = MODULES["equipment"].numHitsSurvivedScry;
+    //var min_zone = getPageSetting('ScryerMinZone');
+    //var max_zone = getPageSetting('ScryerMaxZone');
+    //var valid_min = game.global.world >= min_zone;
+    //var valid_max = max_zone <= 0 || game.global.world < max_zone;
     //asks if we can survive x number of hits in either D stance or X stance.
-    enoughHealthE = (baseHealth/FORMATION_MOD_1 > numHits * (enemyDamage - baseBlock/FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock/FORMATION_MOD_1 : enemyDamage * pierceMod)) &&
-        (!(valid_min && valid_max) || (baseHealth/2 > numHitsScry * (enemyDamage - baseBlock/2 > 0 ? enemyDamage - baseBlock/2 : enemyDamage * pierceMod)));
+    //var enoughHealthE = (baseHealth/FORMATION_MOD_1 > numHits * (enemyDamage - baseBlock/FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock/FORMATION_MOD_1 : enemyDamage * pierceMod)) &&
+    //    (!(valid_min && valid_max) || (baseHealth/2 > numHitsScry * (enemyDamage - baseBlock/2 > 0 ? enemyDamage - baseBlock/2 : enemyDamage * pierceMod)));
     var first = true;
     var safetyNet = 2.65;
     if(!game.global.preMapsActive && (getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed"))
         safetyNet = 3.65;
     
+    wantedHP = safetyNet*enemyDamage;
     if(game.global.soldierHealth < safetyNet*enemyDamage && game.global.soldierHealth > 1000){ //lets try buying more health if current health < 35% enemy attack, but not if 0 because we're dead
         if (first){
             //debug("need more health");
             first = false;
         }
-        enoughHealthE = false;
+        //enoughHealthE = false;
         //numTab(3);
         //removed temporarily while tracking negative dmg bug
         /*buyEquipment('Boots', false, true);
@@ -590,7 +601,7 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
     else if (game.global.soldierHealth > (safetyNet+1)*enemyDamage && game.global.soldierHealth > 1000 && !first){
         debug("enough health");
         first = true;
-        enoughHealthE = false;
+        //enoughHealthE = false;
     }
     
     //if (!enoughHealthE) debug("Equipment module thought there was not enough health","equips");

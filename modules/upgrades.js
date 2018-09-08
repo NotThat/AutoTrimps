@@ -3,7 +3,7 @@ var upgradeList = ['Miners', 'Scientists', 'Coordination', 'Speedminer', 'Speedl
 var buyCoords = true;
 
 //Buys all available non-equip upgrades listed in var upgradeList
-function buyUpgrades() {
+function buyUpgrades(coordsOnly) {
     if (getPageSetting('BuyUpgradesNew') != 2){ //skip this calculation if AT isnt allowed to buy coords
         var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();    
         buyCoords = true;
@@ -46,6 +46,16 @@ function buyUpgrades() {
         }
         if (game.global.challengeActive == "Trapper") //no amalgamators in trapper
             buyCoords = true;
+    }
+    
+    if(coordsOnly){
+        /*if(getPageSetting('BuyUpgradesNew') == 2 || !canAffordCoordinationTrimps() || !buyCoords)
+            return;
+        var gameUpgrade = game.upgrades['Coordination'];
+        var available = (gameUpgrade.allowed > gameUpgrade.done && canAffordTwoLevel(gameUpgrade));
+        
+        
+        return;*/
     }
     
     for (var upgrade in upgradeList) {
