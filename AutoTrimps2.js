@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "11.3";
+var ver = "11.4";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -27,6 +27,7 @@ var atscript = document.getElementById('AutoTrimps-script')
   ;  
     
 function delayStart() {
+    //first we wait for the game to load
     if((typeof game === 'undefined' || typeof loadPageVariables === 'undefined' || typeof game.options === 'undefined' || typeof game.options.menu === 'undefined' || typeof pendingLogs === 'undefined' || document.getElementById('logBtnGroup') === null)){ //game hasnt initialized yet
         //setTimeout(delayStart, startupDelay);
         setTimeout(delayStart, 100);
@@ -59,9 +60,18 @@ function delayStart() {
     if (!local) 
         printChangelog();
     //setTimeout(   function(){initializeAutoTrimps(); setTimeout(delayStartAgain, startupDelay);}   , 2500);
-    initializeAutoTrimps();
-    addBreedingBoxTimers();
-    delayStartAgain();
+    initializeAutoTrimps(); //loads modules asynchronously, so wait a bit before going further
+    ATWaitModules();
+    //setTimeout(delayStartAgain, 2500);
+    //delayStartAgain();
+}
+
+function ATWaitModules(){
+    var expectedScriptsAmount = ATmoduleList.length + 2; //all modules + graphs and settings
+    
+    
+    setTimeout(delayStartAgain, 2500);
+    //delayStartAgain();
 }
 
 //This should redirect the script to wherever its being mirrored from.
@@ -105,7 +115,6 @@ function initializeAutoTrimps() {
     for (var m in ATmoduleList) {
         ATscriptLoad(modulepath, ATmoduleList[m]);
     }
-    //
     debug('AutoTrimps v' + ATversion + ' ' + ver + ' Loaded!', '*spinner3');
 }
 

@@ -27,7 +27,7 @@ function addBreedingBoxTimers() {
     addbreedTimerContainer.appendChild(addbreedTimerInside);
     breedbarContainer.appendChild(addbreedTimerContainer);
 }
-//addBreedingBoxTimers();
+addBreedingBoxTimers();
 
 //Add GUI popup for hovering over the army group size and translate that to breeding time
 function addToolTipToArmyCount() {
