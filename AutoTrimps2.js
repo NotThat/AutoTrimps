@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "11";
+var ver = "11.1";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -27,7 +27,7 @@ var atscript = document.getElementById('AutoTrimps-script')
   ;  
     
 function delayStart() {
-    if((typeof game === 'undefined' || typeof loadPageVariables === 'undefined' || typeof game.options === 'undefined' || typeof game.options.menu === 'undefined' || typeof pendingLogs === 'undefined')){ //game hasnt initialized yet
+    if((typeof game === 'undefined' || typeof loadPageVariables === 'undefined' || typeof game.options === 'undefined' || typeof game.options.menu === 'undefined' || typeof pendingLogs === 'undefined' || !document.getElementById('logBtnGroup'))){ //game hasnt initialized yet
         //setTimeout(delayStart, startupDelay);
         setTimeout(delayStart, 100);
         return;
