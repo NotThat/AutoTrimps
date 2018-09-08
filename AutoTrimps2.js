@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "12.4";
+var ver = "12.5";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -54,7 +54,7 @@ function startAT() {
                 found = true;
         }
         if(!found){
-            setTimeout(startAT, 2500);
+            setTimeout(startAT, 100);
             return;
         }
     }
@@ -66,7 +66,7 @@ function startAT() {
         return;
     }
     
-    //code to  run on script launch:
+    //code to run on script launch:
     if (!local) printChangelog();
     
     highCritChance = getPlayerCritChance();
@@ -102,6 +102,7 @@ function startAT() {
     
     //Start guiLoop
     setInterval(guiLoop, runInterval*10);
+    setInterval(pauseRemovalLoop, runInterval); //TODO: this cleaner. hookup to game maybe?
     
     //hook up into runGameLoop()
     runGameLoop = (function(makeUp, now) {
@@ -112,8 +113,6 @@ function startAT() {
             return result;
         };
     })();
-    
-    setInterval(pauseRemovalLoop, runInterval); //TODO: this cleaner. hookup to game maybe?
 }
 
 //This should redirect the script to wherever its being mirrored from.
