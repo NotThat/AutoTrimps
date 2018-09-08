@@ -3,21 +3,9 @@ MODULES["maps"] = {};
 
 var remainingCells = 100;
 
-MODULES["maps"].farmingCutoff = 16; //above this the game will farm.
-MODULES["maps"].numHitsSurvived = 8; //survive X hits in D stance or not enough Health.
-MODULES["maps"].LeadfarmingCutoff = 10; //lead has its own farmingCutoff
-MODULES["maps"].NurseryMapLevel = 50; //with blacksmithery, run map for nursery on this level
-MODULES["maps"].MapTierZone = [72, 47, 16]; //descending order for these.
-//                 .MapTier?Sliders = [size,difficulty,loot,biome];
-MODULES["maps"].MapTier0Sliders = [9, 9, 9, 'Mountain']; //Zone 72+ (old: 9/9/9 Metal)
-MODULES["maps"].MapTier1Sliders = [9, 9, 9, 'Depths']; //Zone 47-72 (old: 9/9/4 Metal)
-MODULES["maps"].MapTier2Sliders = [9, 9, 9, 'Random']; //Zone 16-47 (old: 9/9/0 Random)
-MODULES["maps"].MapTier3Sliders = [9, 9, 9, 'Random']; //Zone 6-16 (old: 9/0/0 Random)
 MODULES["maps"].preferGardens = !getPageSetting('PreferMetal'); //prefer run Garden maps instead of ^^ if we have Decay done
 MODULES["maps"].wantHealthMapBonus = 10; //cap how many maps are run during Want More Health mode
 MODULES["maps"].SpireFarm199Maps = true; //this will farm spire on 199 maps instead of 200 maps when Map Reducer is bought
-MODULES["maps"].watchChallengeMaps = [15, 25, 35, 50]; //during 'watch' challenge, run maps on these levels:
-MODULES["maps"].UnearnedPrestigesRequired = 2;
 //- init as default value (10). user can set if they want.
 
 //Initialize Global Vars
@@ -253,25 +241,6 @@ function autoMap() {
     //BEGIN AUTOMAPS DECISIONS:
     shouldDoMaps = !enoughDamage && game.global.mapBonus < 10;
     var selectedMap = "world";
-
-    //during 'watch' challenge, run maps on these levels:
-    var watchmaps = customVars.watchChallengeMaps;
-    var shouldDoWatchMaps = false;
-    if (game.global.challengeActive == 'Watch' && watchmaps.indexOf(game.global.world) > -1 && game.global.mapBonus < 1) {
-        shouldDoMaps = true;
-        shouldDoWatchMaps = true;
-    }
-    
-    //Run a single map to get nurseries when 1. it's still locked,
-    // 2. blacksmithery is purchased,
-    // but not when 3A. home detector is purchased, or 3B. we don't need nurseries
-    if (game.buildings.Nursery.locked && game.talents.blacksmith.purchased && !(game.talents.housing.purchased ||
-            (getPageSetting('PreSpireNurseries') < 0 ?
-                !(getPageSetting('MaxNursery') && game.global.world >= getPageSetting('NoNurseriesUntil')) :
-                !getPageSetting('PreSpireNurseries'))) && game.global.world >= customVars.NurseryMapLevel) {
-        shouldDoMaps = true;
-        shouldDoWatchMaps = true; //TODO coding: this is overloaded - not ideal.
-    }
     
     //spire specific settings
     var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 8);
@@ -516,9 +485,6 @@ function autoMap() {
             if(preSpireFarming)
                 repeatChoice = 0;
             
-            //turn off repeat maps if we doing Watch maps.
-            if (shouldDoWatchMaps && game.global.repeatMap)
-                repeatClicked();
             //turn off repeat if we're running a unique map that isnt BW
             else if (theMap.noRecycle && theMap.name != 'Bionic Wonderland')
                 repeatClicked();
@@ -539,15 +505,6 @@ function autoMap() {
         if (selectedMap != "world") {
             //we want to run a map
             mapsClicked(true);
-            //Get Impatient/Abandon if: (need prestige / _NEED_ to do void maps / on lead in odd world.) AND (a new army is ready, OR _need_ to void map OR lead farming and we're almost done with the zone) (handle shouldDoWatchMaps elsewhere below)
-            //if (doVoids && !shouldDoWatchMaps && (needPrestige || doVoids || (game.global.challengeActive == 'Lead' && game.global.world % 2 == 1) || (!enoughDamage && game.global.lastClearedCell < 9)) &&
-            //    ((game.resources.trimps.realMax() <= game.resources.trimps.owned + 1) || (game.global.challengeActive == 'Lead' && game.global.lastClearedCell > 93) || (doVoids && game.global.lastClearedCell > 93))){
-            //        mapsClicked();
-           // }
-        }
-        //forcibly run watch maps (or click to restart voidmap?)
-        if (shouldDoWatchMaps) {
-            mapsClicked();
         }
     } 
     

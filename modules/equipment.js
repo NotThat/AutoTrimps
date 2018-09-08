@@ -1,7 +1,5 @@
 MODULES["equipment"] = {};
 //These can be changed (in the console) if you know what you're doing:
-MODULES["equipment"].numHitsSurvived = 10;   //survive X hits in D stance or not enough Health.
-MODULES["equipment"].numHitsSurvivedScry = 80;
 MODULES["equipment"].capDivisor = 10; //Your Equipment cap divided by this will give you the lower cap for liquified and overkilled zones
 var verbose = false;
 var buyWeaponsMode; //0: dont buy anything, only prestige once if it lowers damage. 1: prestige till -1 and level 2: 2: buy levels only, prestige if level > 81 or another weapon is higher prestige 3: get all 4: get max levels at current prestiges only
@@ -563,46 +561,14 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
     }
     enemyDamage *= getCorruptScale("attack");
     
-    //var pierceMod = (game.global.brokenPlanet && !game.global.mapsActive) ? getPierceAmt() : 0;
-    //change name to make sure these are local to the function
-    
     const FORMATION_MOD_1 = game.upgrades.Dominance.done ? 2 : 1;
-    //const FORMATION_MOD_2 = game.upgrades.Dominance.done ? 4 : 1;
-    //var numHits = MODULES["equipment"].numHitsSurvived;    //this can be changed.
-    //var numHitsScry = MODULES["equipment"].numHitsSurvivedScry;
-    //var min_zone = getPageSetting('ScryerMinZone');
-    //var max_zone = getPageSetting('ScryerMaxZone');
-    //var valid_min = game.global.world >= min_zone;
-    //var valid_max = max_zone <= 0 || game.global.world < max_zone;
-    //asks if we can survive x number of hits in either D stance or X stance.
-    //var enoughHealthE = (baseHealth/FORMATION_MOD_1 > numHits * (enemyDamage - baseBlock/FORMATION_MOD_1 > 0 ? enemyDamage - baseBlock/FORMATION_MOD_1 : enemyDamage * pierceMod)) &&
-    //    (!(valid_min && valid_max) || (baseHealth/2 > numHitsScry * (enemyDamage - baseBlock/2 > 0 ? enemyDamage - baseBlock/2 : enemyDamage * pierceMod)));
+
     var first = true;
     var safetyNet = 2.65;
     if(!game.global.preMapsActive && (getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed"))
         safetyNet = 3.65;
     
     wantedHP = safetyNet*enemyDamage;
-    if(game.global.soldierHealth < safetyNet*enemyDamage && game.global.soldierHealth > 1000){ //lets try buying more health if current health < 35% enemy attack, but not if 0 because we're dead
-        if (first){
-            //debug("need more health");
-            first = false;
-        }
-        //enoughHealthE = false;
-        //numTab(3);
-        //removed temporarily while tracking negative dmg bug
-        /*buyEquipment('Boots', false, true);
-        buyEquipment('Helmet', false, true);
-        buyEquipment('Pants', false, true);
-        buyEquipment('Shoulderguards', false, true);
-        buyEquipment('Breastplate', false, true);
-        buyEquipment('Gambeson', false, true);*/
-    }
-    else if (game.global.soldierHealth > (safetyNet+1)*enemyDamage && game.global.soldierHealth > 1000 && !first){
-        debug("enough health");
-        first = true;
-        //enoughHealthE = false;
-    }
-    
-    //if (!enoughHealthE) debug("Equipment module thought there was not enough health","equips");
+
+
 }
