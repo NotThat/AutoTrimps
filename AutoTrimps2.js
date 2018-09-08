@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "10";
+var ver = "11";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -26,11 +26,10 @@ var atscript = document.getElementById('AutoTrimps-script')
   , modulepath = 'modules/'
   ;  
     
-var stop = false;
 function delayStart() {
-    if(!stop && (typeof game === 'undefined' || typeof loadPageVariables === 'undefined' || typeof game.options === 'undefined' || typeof game.options.menu === 'undefined' || typeof pendingLogs === 'undefined')){ //game hasnt initialized yet
-        setTimeout(delayStart, startupDelay);
-        //console.log("waiting for game to load...");
+    if((typeof game === 'undefined' || typeof loadPageVariables === 'undefined' || typeof game.options === 'undefined' || typeof game.options.menu === 'undefined' || typeof pendingLogs === 'undefined')){ //game hasnt initialized yet
+        //setTimeout(delayStart, startupDelay);
+        setTimeout(delayStart, 100);
         return;
     }
     pendingLogs.AutoTrimps = []; //adds AT messages slot
@@ -42,8 +41,11 @@ function delayStart() {
     lowCritDamage  = getPlayerCritDamageMult();
     lowATK         = 1;
     lowPB          = 0;
-    stop = true;
-    setTimeout(function(){initializeAutoTrimps(); if (!local) printChangelog(); setTimeout(delayStartAgain, startupDelay);}, 2500);
+    if (!local) 
+        printChangelog();
+    //setTimeout(   function(){initializeAutoTrimps(); setTimeout(delayStartAgain, startupDelay);}   , 2500);
+    initializeAutoTrimps();
+    delayStartAgain();
 }
 
 //This should redirect the script to wherever its being mirrored from.
@@ -129,13 +131,6 @@ function printLowerLevelPlayerNotice() {
 ////////////////////////////////////////
 //Main DELAY Loop///////////////////////
 ////////////////////////////////////////
-
-//Magic Numbers
-var runInterval = 100;      //How often to loop through logic
-var startupDelay = 2500;    //How long to wait for everything to load. if its too short, will produce console errors. particularly on kongregate which loads more stuff than github.
-
-//Start Loops
-setTimeout(delayStart, startupDelay);
 
 function delayStartAgain(){
     if (game.achievements.zones.finished < 8)   //z60
@@ -421,3 +416,11 @@ function userscripts()
 function throwErrorfromMain() {
     throw new Error("We have successfully read the thrown error message out of the main file");
 }
+
+//Magic Numbers
+var runInterval = 100;      //How often to loop through logic
+var startupDelay = 2500;    //How long to wait for everything to load. if its too short, will produce console errors. particularly on kongregate which loads more stuff than github.
+
+//Start Loops
+//setTimeout(delayStart, startupDelay);
+delayStart();
