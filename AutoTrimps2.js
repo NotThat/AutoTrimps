@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "12";
+var ver = "12.1";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -304,7 +304,7 @@ function ATLoop(makeUp) {
     
     if(game.options.menu.showFullBreed.enabled != 1) toggleSetting("showFullBreed");    //more detail
     hiddenBreedTimer = ((game.jobs.Amalgamator.owned > 0) ? Math.floor((Date.now() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000));
-    if(hiddenBreedTimer != hiddenBreedTimerLast){
+    if(hiddenBreedTimer != hiddenBreedTimerLast && typeof addbreedTimerInsideText !== 'undefined'){
         addbreedTimerInsideText.innerHTML = hiddenBreedTimer + 's'; //add breed time for next army;
         hiddenBreedTimerLast = hiddenBreedTimer;
     }
