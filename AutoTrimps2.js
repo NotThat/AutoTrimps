@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "12.2";
+var ver = "12.3";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -46,12 +46,6 @@ function startAT() {
         initialized = true;
     }
     
-    if(!allLoaded){
-        allLoaded = true;
-        setTimeout(startAT, 100); //one last time for compiler to recognize all loaded vars
-        return;
-    }
-    
     for (var script in ATmoduleListComplete){
         var found = false;
         //debug(ATmoduleList[script]);
@@ -64,6 +58,12 @@ function startAT() {
             setTimeout(startAT, 2500);
             return;
         }
+    }
+    
+    if(!allLoaded){
+        allLoaded = true;
+        setTimeout(startAT, 100); //one last time for compiler to recognize all loaded vars
+        return;
     }
     
     debug(typeof updateCustomButtons);
