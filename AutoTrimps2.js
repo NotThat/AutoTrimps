@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "11.4";
+var ver = "12";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -26,14 +26,45 @@ var atscript = document.getElementById('AutoTrimps-script')
   , modulepath = 'modules/'
   ;  
     
-function delayStart() {
+var initialized = false;    
+var ATmoduleListComplete = [];
+function startAT() {
     //first we wait for the game to load
     if((typeof game === 'undefined' || typeof loadPageVariables === 'undefined' || typeof game.options === 'undefined' || typeof game.options.menu === 'undefined' || typeof pendingLogs === 'undefined' || document.getElementById('logBtnGroup') === null)){ //game hasnt initialized yet
         //setTimeout(delayStart, startupDelay);
-        setTimeout(delayStart, 100);
+        setTimeout(startAT, 100);
         return;
     }
-    pendingLogs.AutoTrimps = []; //adds AT messages slot
+    
+    if(!initialized){
+        pendingLogs.AutoTrimps = []; //adds AT messages slot
+        initializeAutoTrimps(); //loads modules asynchronously, so wait a bit before going further
+        ATmoduleListComplete = ATmoduleList;
+        ATmoduleListComplete.push('SettingsGUI');
+        ATmoduleListComplete.push('Graphs');
+        initialized = true;
+    }
+    
+    /*if(typeof updateCustomButtons === 'undefined'){
+        setTimeout(startAT, 100);
+        return;
+    }*/
+    
+    for (var script in ATmoduleListComplete){
+        var found = false;
+        //debug(ATmoduleList[script]);
+        for (var i = 0; i < document.scripts.length; i++){
+            //debug(document.scripts[i].src);
+            if(document.scripts[i].src.indexOf(ATmoduleListComplete[script]) > -1)
+                found = true;
+        }
+        if(!found){
+            setTimeout(startAT, 2500);
+            return;
+        }
+    }
+    
+    debug(typeof updateCustomButtons);
     highCritChance = getPlayerCritChance();
     highCritDamage = getPlayerCritDamageMult();
     highATK        = 1;
@@ -57,21 +88,29 @@ function delayStart() {
     tab.appendChild(ATbutton);
     document.getElementById('logBtnGroup').appendChild(tab);
     
-    if (!local) 
-        printChangelog();
-    //setTimeout(   function(){initializeAutoTrimps(); setTimeout(delayStartAgain, startupDelay);}   , 2500);
-    initializeAutoTrimps(); //loads modules asynchronously, so wait a bit before going further
-    ATWaitModules();
-    //setTimeout(delayStartAgain, 2500);
-    //delayStartAgain();
-}
-
-function ATWaitModules(){
-    var expectedScriptsAmount = ATmoduleList.length + 2; //all modules + graphs and settings
+    if (!local); //printChangelog();
     
+    if (game.achievements.zones.finished < 8)   //z60
+        printLowerLevelPlayerNotice();
+    //Set some game ars after we load.
+    game.global.addonUser = true;
+    game.global.autotrimps = true;
+    heirloomCache = game.global.heirloomsExtra.length;
+    MODULESdefault = JSON.parse(JSON.stringify(MODULES));
     
-    setTimeout(delayStartAgain, 2500);
-    //delayStartAgain();
+    //Start guiLoop
+    setInterval(guiLoop, runInterval*10);
+    
+    //hook up into runGameLoop()
+    runGameLoop = (function(makeUp, now) {
+        var cached_function = runGameLoop;
+        return function(makeUp, now) {
+            var result = cached_function.apply(this, arguments);
+            ATLoop(makeUp);
+            return result;
+        };
+    })();
+    setInterval(ATLoopInterval, runInterval);
 }
 
 //This should redirect the script to wherever its being mirrored from.
@@ -152,34 +191,6 @@ function printChangelog() {
 }
 function printLowerLevelPlayerNotice() {
     tooltip('confirm', null, 'update', 'The fact that it works at all is misleading new players into thinking its perfect. Its not. If your highest zone is under z60, you have not unlocked the stats required, and have not experienced the full meta with its various paradigm shifts. If you are just starting, my advice is to play along naturally and use AutoTrimps as a tool, not a crutch. Play with the settings as if it was the game, Dont expect to go unattended, if AT chooses wrong, and make the RIGHT choice yourself. Additionally, its not coded to run one-time challenges for you, only repeatable ones for helium. During this part of the game, content is king - automating literally removes the fun of the game. If you find that many flaws in the automation exist for you, level up. Keep in mind the challenge of maintaining the code is that it has to work for everyone. AT cant see the future and doesnt run simulations, it exists only in the present moment. Post any suggestions on how it can be better, or volunteer to adapt the code, or produce some sort of low-level player guide with what youve learned.<br>Happy scripting! -genBTC','cancelTooltip()', '<b>LowLevelPlayer Notes:</b><br><b>PSA: </b><u>AutoTrimps was not designed for new/low-level players.</u>', "I understand I am on my own and I Accept and Continue.", null, true);
-}
-////////////////////////////////////////
-//Main DELAY Loop///////////////////////
-////////////////////////////////////////
-
-function delayStartAgain(){
-    if (game.achievements.zones.finished < 8)   //z60
-        printLowerLevelPlayerNotice();
-    //Set some game ars after we load.
-    game.global.addonUser = true;
-    game.global.autotrimps = true;
-    heirloomCache = game.global.heirloomsExtra.length;
-    MODULESdefault = JSON.parse(JSON.stringify(MODULES));
-    
-    //Actually Start ATLoop and guiLoop - defunct
-    //setInterval(ATLoop, runInterval);
-    setInterval(guiLoop, runInterval*10);
-    
-    //hook up into runGameLoop()
-    runGameLoop = (function(makeUp, now) {
-        var cached_function = runGameLoop;
-        return function(makeUp, now) {
-            var result = cached_function.apply(this, arguments);
-            ATLoop(makeUp);
-            return result;
-        };
-    })();
-    setInterval(ATLoopInterval, runInterval);
 }
 
 ////////////////////////////////////////
@@ -448,4 +459,4 @@ var startupDelay = 2500;    //How long to wait for everything to load. if its to
 
 //Start Loops
 //setTimeout(delayStart, startupDelay);
-delayStart();
+startAT();
