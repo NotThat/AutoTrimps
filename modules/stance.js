@@ -721,10 +721,10 @@ function stancePrintout(cellNum, stacks, nextStartingStacks, cmp, expectedNumHit
             letter = 'S';
             break;
     }
-    var shield = (highDamageHeirloom ? "+" : "-");
+    //var shield = (highDamageHeirloom ? "+" : "-");
     var want = (wantGoodShield ? "+" : "-");
     if(lastDamageDealtA > 0){
-        var msg = shield+want+game.global.world + "." + cellNumA + " " + stacksA+"W"+"("+nextStartingStacksA+") "+cmpA.toFixed(2)+" " + critText +"C " + expectedNumHitsSA.toFixed(0)+"/" + expectedNumHitsXA.toFixed(0)+"/" + expectedNumHitsDA.toFixed(0) + " " + game.global.antiStacks + letter + " " + corruptedtmpA;
+        var msg = want+game.global.world + "." + cellNumA + " " + stacksA+"W"+"("+nextStartingStacksA+") "+cmpA.toFixed(2)+" " + critText +"C " + expectedNumHitsSA.toFixed(0)+"/" + expectedNumHitsXA.toFixed(0)+"/" + expectedNumHitsDA.toFixed(0) + " " + game.global.antiStacks + letter + " " + corruptedtmpA;
         if (!(lastDebug == msg))
             debug(msg, "wind");
         lastDebug = msg;
