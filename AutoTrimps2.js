@@ -88,7 +88,7 @@ function startAT() {
     tab.appendChild(ATbutton);
     document.getElementById('logBtnGroup').appendChild(tab);
     
-    if (!local); //printChangelog();
+    if (!local) printChangelog();
     
     if (game.achievements.zones.finished < 8)   //z60
         printLowerLevelPlayerNotice();
