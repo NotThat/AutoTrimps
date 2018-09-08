@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "12.3";
+var ver = "12.4";
 var verDate = "5.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -46,11 +46,10 @@ function startAT() {
         initialized = true;
     }
     
+    //wait until all the scripts are loaded into page
     for (var script in ATmoduleListComplete){
         var found = false;
-        //debug(ATmoduleList[script]);
         for (var i = 0; i < document.scripts.length; i++){
-            //debug(document.scripts[i].src);
             if(document.scripts[i].src.indexOf(ATmoduleListComplete[script]) > -1)
                 found = true;
         }
@@ -60,13 +59,16 @@ function startAT() {
         }
     }
     
+    //one last time for compiler to recognize all loaded vars
     if(!allLoaded){
         allLoaded = true;
-        setTimeout(startAT, 100); //one last time for compiler to recognize all loaded vars
+        setTimeout(startAT, 100);
         return;
     }
     
-    debug(typeof updateCustomButtons);
+    //code to  run on script launch:
+    if (!local) printChangelog();
+    
     highCritChance = getPlayerCritChance();
     highCritDamage = getPlayerCritDamageMult();
     highATK        = 1;
@@ -90,8 +92,6 @@ function startAT() {
     tab.appendChild(ATbutton);
     document.getElementById('logBtnGroup').appendChild(tab);
     
-    if (!local) printChangelog();
-    
     if (game.achievements.zones.finished < 8)   //z60
         printLowerLevelPlayerNotice();
     //Set some game ars after we load.
@@ -112,7 +112,8 @@ function startAT() {
             return result;
         };
     })();
-    setInterval(ATLoopInterval, runInterval);
+    
+    setInterval(pauseRemovalLoop, runInterval); //TODO: this cleaner. hookup to game maybe?
 }
 
 //This should redirect the script to wherever its being mirrored from.
@@ -271,7 +272,7 @@ var ASMode;
 
 var ATmakeUp = false;
 
-function ATLoopInterval(){
+function pauseRemovalLoop(){
    if(!getPageSetting('PauseMsgsVisible')){
         var pauseMsgs = document.getElementsByClassName('pauseMsg');
         var log = document.getElementById('log');
