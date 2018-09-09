@@ -24,32 +24,32 @@ head.appendChild(queuescript);
 
 //--------------------------------------
 //Ratio Presets - Perk proportions:
-// (in perk order): [looting,toughness,power,motivation,pheromones,artisanistry,carpentry,resilience,coordinated,resourceful,overkill,cunning,curious];
-var preset_ZXV = [20, 0.5, 1, 1.5, 0.5, 1.5, 8, 1, 25, 2, 3, 1, 1];
-var preset_ZXVnew = [50, 0.75, 1, 3, 0.75, 3, 10, 1.5, 60, 2, 5, 1, 1];
-var preset_ZXV3 = [100, 1, 3, 3, 1, 3, 40, 2, 100, 1, 3, 1, 1];
-var preset_TruthEarly = [30, 4, 4, 4, 4, 2, 24, 8, 60, 2, 3, 1, 1];
-var preset_TruthLate = [120, 4, 4, 4, 4, 2, 24, 8, 60, 2, 3, 1, 1];
-var preset_nsheetz = [42, 1.75, 5, 4, 1.5, 5, 29, 3.5, 100, 1, 5, 1, 1];
-var preset_nsheetzNew= [160, 1.5, 5, 2.5, 1.5, 3.5, 18, 3, 100, 1, 10, 1, 1];
-var preset_HiderHehr = [90, 4, 12, 10, 1, 8, 8, 1, 20, 0.1, 3, 1, 1];
-var preset_HiderBalance = [75, 4, 8, 4, 1, 4, 24, 1, 75, 0.5, 3, 1, 1];
-var preset_HiderMore = [20, 4, 10, 12, 1, 8, 8, 1, 40, 0.1, 0.5, 1, 1];
-var preset_genBTC = [100, 8, 8, 4, 4, 5, 18, 8, 14, 1, 1, 1, 1];
-var preset_genBTC2 = [96, 19, 15.4, 8, 8, 7, 14, 19, 11, 1, 1, 1, 1];
-var preset_Zek4501 = [300, 1, 30, 2, 4, 2, 9, 8, 17, 0.1, 1, 320, 1];
-var preset_Zek4502 = [350, 1, 40, 2, 3, 2, 5, 8, 2, 0.1, 1, 300, 20];
-var preset_Zek450 = [450, 0.9, 48, 3.35, 1, 2.8, 7.8, 1.95, 4, 0.04, 1, 120, 175];
+// (in perk order): [looting,toughness,power,motivation,pheromones,artisanistry,carpentry,resilience,coordinated,resourceful,overkill,cunning,curious, classy];
+var preset_ZXV = [20, 0.5, 1, 1.5, 0.5, 1.5, 8, 1, 25, 2, 3, 1, 1, 1];
+var preset_ZXVnew = [50, 0.75, 1, 3, 0.75, 3, 10, 1.5, 60, 2, 5, 1, 1, 1];
+var preset_ZXV3 = [100, 1, 3, 3, 1, 3, 40, 2, 100, 1, 3, 1, 1, 1];
+var preset_TruthEarly = [30, 4, 4, 4, 4, 2, 24, 8, 60, 2, 3, 1, 1, 1];
+var preset_TruthLate = [120, 4, 4, 4, 4, 2, 24, 8, 60, 2, 3, 1, 1, 1];
+var preset_nsheetz = [42, 1.75, 5, 4, 1.5, 5, 29, 3.5, 100, 1, 5, 1, 1, 1];
+var preset_nsheetzNew= [160, 1.5, 5, 2.5, 1.5, 3.5, 18, 3, 100, 1, 10, 1, 1, 1];
+var preset_HiderHehr = [90, 4, 12, 10, 1, 8, 8, 1, 20, 0.1, 3, 1, 1, 1];
+var preset_HiderBalance = [75, 4, 8, 4, 1, 4, 24, 1, 75, 0.5, 3, 1, 1, 1];
+var preset_HiderMore = [20, 4, 10, 12, 1, 8, 8, 1, 40, 0.1, 0.5, 1, 1, 1];
+var preset_genBTC = [100, 8, 8, 4, 4, 5, 18, 8, 14, 1, 1, 1, 1, 1];
+var preset_genBTC2 = [96, 19, 15.4, 8, 8, 7, 14, 19, 11, 1, 1, 1, 1, 1];
+var preset_Zek4501 = [300, 1, 30, 2, 4, 2, 9, 8, 17, 0.1, 1, 320, 1, 1];
+var preset_Zek4502 = [350, 1, 40, 2, 3, 2, 5, 8, 2, 0.1, 1, 300, 20, 20];
+var preset_Zek450 = [450, 0.9, 48, 3.35, 1, 2.8, 7.8, 1.95, 4, 0.04, 1, 120, 175, 120];
 //
-var preset_space = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+var preset_space = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 //
-var preset_Zek059 = [7, 0.6, 3, 0.8, 0.3, 3, 25, 0.6, 0, 0, 0, 0, 0];
-var preset_Zek100 = [9.8, 1.8, 3.2, 2.6, 0.7, 2.9, 25, 1.8, 0, 0, 0, 0, 0];
-var preset_Zek180 = [13, 1.3, 4, 2.6, 0.7, 2.9, 25, 1.3, 35, 0.05, 1, 0, 0];
-var preset_Zek229 = [11.2, 0.58, 2.37, 1.464, 0.3, 2.02, 12.2, 0.58, 37, 0.22, 2.2, 0, 0];
-var preset_Zek299 = [16.8, 3, 1.9, 1.1, 1.2, 1, 17.1, 3, 100, 0.06, 0.8, 0, 0];
-var preset_Zek399 = [135, 6.1, 18.5, 6.5, 2.5, 6, 17, 6.1, 25, 0.08, 1, 0, 0];
-var preset_Zek449 = [245, 5.85, 29, 1.95, 2.8, 6, 6.1, 5.85, 15, 0.05, 1, 57, 0];
+var preset_Zek059 = [7, 0.6, 3, 0.8, 0.3, 3, 25, 0.6, 0, 0, 0, 0, 0, 0];
+var preset_Zek100 = [9.8, 1.8, 3.2, 2.6, 0.7, 2.9, 25, 1.8, 0, 0, 0, 0, 0, 0];
+var preset_Zek180 = [13, 1.3, 4, 2.6, 0.7, 2.9, 25, 1.3, 35, 0.05, 1, 0, 0, 0];
+var preset_Zek229 = [11.2, 0.58, 2.37, 1.464, 0.3, 2.02, 12.2, 0.58, 37, 0.22, 2.2, 0, 0, 0];
+var preset_Zek299 = [16.8, 3, 1.9, 1.1, 1.2, 1, 17.1, 3, 100, 0.06, 0.8, 0, 0, 0];
+var preset_Zek399 = [135, 6.1, 18.5, 6.5, 2.5, 6, 17, 6.1, 25, 0.08, 1, 0, 0, 0];
+var preset_Zek449 = [245, 5.85, 29, 1.95, 2.8, 6, 6.1, 5.85, 15, 0.05, 1, 57, 0, 0];
 //gather these into an array of objects. this is one important object.
 var presetList = [preset_ZXV,preset_ZXVnew,preset_ZXV3,preset_TruthEarly,preset_TruthLate,preset_nsheetz,preset_nsheetzNew,preset_HiderHehr,preset_HiderBalance,preset_HiderMore,preset_genBTC,preset_genBTC2,preset_Zek4501,preset_Zek4502,preset_Zek450,preset_space,preset_Zek059,preset_Zek100,preset_Zek180,preset_Zek229,preset_Zek299,preset_Zek399,preset_Zek449,preset_Zek450,preset_space];
 //Specific ratios labeled above must be given the matching ID below.
@@ -138,23 +138,23 @@ AutoPerks.displayGUI = function() {
     //Line 2 of the UI
     apGUI.$ratiosLine2 = document.createElement("DIV");
     apGUI.$ratiosLine2.setAttribute('style', 'display: inline-block; text-align: left; width: 100%');
-    var listratiosLine2 = ["Pheromones","Motivation","Power","Looting","Cunning","Curious"];
+    var listratiosLine2 = ["Pheromones","Motivation","Power","Looting","Cunning","Curious", "Classy"];
     for (var i in listratiosLine2)
         AutoPerks.createInput(listratiosLine2[i],apGUI.$ratiosLine2);
     //Create dump perk dropdown
-    apGUI.$dumpperklabel = document.createElement("Label");
-    apGUI.$dumpperklabel.id = 'DumpPerk Label';
-    apGUI.$dumpperklabel.innerHTML = "Dump Perk:";
-    apGUI.$dumpperklabel.setAttribute('style', 'margin-right: 1vw; color: white; font-size: 0.9vw;');
-    apGUI.$dumpperk = document.createElement("select");
-    apGUI.$dumpperk.id = 'dumpPerk';
-    apGUI.$dumpperk.setAttribute('onchange', 'AutoPerks.saveDumpPerk()');
+    //apGUI.$dumpperklabel = document.createElement("Label");
+    //apGUI.$dumpperklabel.id = 'DumpPerk Label';
+    //apGUI.$dumpperklabel.innerHTML = "Dump Perk:";
+    //apGUI.$dumpperklabel.setAttribute('style', 'margin-right: 1vw; color: white; font-size: 0.9vw;');
+    //apGUI.$dumpperk = document.createElement("select");
+    //apGUI.$dumpperk.id = 'dumpPerk';
+    //apGUI.$dumpperk.setAttribute('onchange', 'AutoPerks.saveDumpPerk()');
     var oldstyle = 'text-align: center; width: 8vw; font-size: 0.8vw; font-weight: lighter; ';
-    if(game.options.menu.darkTheme.enabled != 2) apGUI.$dumpperk.setAttribute("style", oldstyle + " color: black;");
-    else apGUI.$dumpperk.setAttribute('style', oldstyle);
+    //if(game.options.menu.darkTheme.enabled != 2) apGUI.$dumpperk.setAttribute("style", oldstyle + " color: black;");
+    //else apGUI.$dumpperk.setAttribute('style', oldstyle);
     //Add the dump perk dropdown to UI Line 2
-    apGUI.$ratiosLine2.appendChild(apGUI.$dumpperklabel);
-    apGUI.$ratiosLine2.appendChild(apGUI.$dumpperk);
+    //apGUI.$ratiosLine2.appendChild(apGUI.$dumpperklabel);
+    //apGUI.$ratiosLine2.appendChild(apGUI.$dumpperk);
     //Create ratioPreset dropdown
     apGUI.$ratioPresetLabel = document.createElement("Label");
     apGUI.$ratioPresetLabel.id = 'Ratio Preset Label';
@@ -193,7 +193,7 @@ AutoPerks.displayGUI = function() {
     //Main LOGIC Loop///////////////////////
     ////////////////////////////////////////
     AutoPerks.initializePerks();// Init all the new vars
-    AutoPerks.populateDumpPerkList();
+    //AutoPerks.populateDumpPerkList();
 }
 
 //populate dump perk dropdown list
@@ -451,9 +451,9 @@ AutoPerks.spendHelium = function(helium) {
     debug("AutoPerks1: Pass One Complete. Loops ran: " + i, "perks");
 
     //Begin selectable dump perk code
-    var $selector = document.getElementById('dumpPerk');
-    if ($selector != null && $selector.value != "None") {
-        var heb4dump = helium;
+    //var $selector = document.getElementById('dumpPerk');
+    //if ($sel ector != null && $selector.value != "None") {
+        /*var heb4dump = helium;
         var index = $selector.selectedIndex;
         var dumpPerk = AutoPerks.getPerkByName($selector[index].innerHTML);
         //debug(AutoPerks.capitaliseFirstLetter(dumpPerk.name) + " level pre-dump: " + dumpPerk.level,"perks");
@@ -466,7 +466,8 @@ AutoPerks.spendHelium = function(helium) {
         }
         var dumpresults = heb4dump - helium;
         debug("AutoPerks1: Dump Perk " + AutoPerks.capitaliseFirstLetter(dumpPerk.name) + " level post-dump: "+ dumpPerk.level + " Helium Dumped: " + prettify(dumpresults) + " He.", "perks");        
-    } //end dump perk code.
+    */
+    //} //end dump perk code.
     
     var heB4round2 = helium;
     //Repeat the process for spending round 2. This spends any extra helium we have that is less than the cost of the last point of the dump-perk.
@@ -561,22 +562,39 @@ AutoPerks.spendHelium2 = function(helium) {
     debug("AutoPerks2: Pass One Complete. Loops ran: " + i, "perks");
 
     //Begin selectable dump perk code
-    var $selector = document.getElementById('dumpPerk');
-    if ($selector != null && $selector.value != "None") {
-        var heb4dump = helium;
-        var index = $selector.selectedIndex;
-        var dumpPerk = AutoPerks.getPerkByName($selector[index].innerHTML);
+    //var $selector = document.getElementById('dumpPerk');
+    //if ($selector != null && $selector.value != "None") {
+        //var heb4dump = helium;
+        var dumpPerk = AutoPerks.getPerkByName("Looting_II");//Looting_II
+        //helium = 0;
+        
+        var currLevel = parseFloat(dumpPerk.level);//parseFloat(game.portal.Looting_II.level);
+        var totalSpent = parseFloat(dumpPerk.spent);//parseFloat(game.portal.Looting_II.heliumSpent);
+        var totalUnspent = helium;//parseFloat(game.global.heliumLeftover); //this is for mid-run allocation
+                                                     //var totalUnspent = game.resources.helium.owned + game.global.heliumLeftover; //this is for portal allocation
+        var amt = Math.floor(1/100*(Math.sqrt(2)*Math.sqrt(totalSpent+totalUnspent+451250)-950)) - currLevel;
+        var cost = (((currLevel - 1) * currLevel) / 2 * 10000) + (100000 * currLevel);
+        helium -= cost;
+        //game.portal["Looting_II"]
+        dumpPerk.spent += cost;
+        dumpPerk.level += amt;
+        //getAdditivePrice
+        
+        
+        //var index = $selector.selectedIndex;
+        //var dumpPerk = AutoPerks.getPerkByName($selector[index].innerHTML);
+        
         //debug(AutoPerks.capitaliseFirstLetter(dumpPerk.name) + " level pre-dump: " + dumpPerk.level,"perks");
-        if(dumpPerk.level < dumpPerk.max) {
+        /*if(dumpPerk.level < dumpPerk.max) {
             for(price = AutoPerks.calculatePrice(dumpPerk, dumpPerk.level); price < helium && dumpPerk.level < dumpPerk.max; price = AutoPerks.calculatePrice(dumpPerk, dumpPerk.level)) {
                 helium -= price;
                 dumpPerk.spent += price;
                 dumpPerk.level++;
             }
-        }
-        var dumpresults = heb4dump - helium;
-        debug("AutoPerks2: Dump Perk " + AutoPerks.capitaliseFirstLetter(dumpPerk.name) + " level post-dump: "+ dumpPerk.level + " Helium Dumped: " + prettify(dumpresults) + " He.", "perks");        
-    } //end dump perk code.
+        }*/
+        //var dumpresults = heb4dump - helium;
+        //debug("AutoPerks2: Dump Perk " + AutoPerks.capitaliseFirstLetter(dumpPerk.name) + " level post-dump: "+ dumpPerk.level + " Helium Dumped: " + prettify(dumpresults) + " He.", "perks");        
+    //} //end dump perk code.
     
     var heB4round2 = helium;
     //Repeat the process for spending round 2. This spends any extra helium we have that is less than the cost of the last point of the dump-perk.
@@ -789,6 +807,7 @@ AutoPerks.initializePerks = function () {
     var capable = new AutoPerks.FixedPerk("capable", 100000000, 0, 10, "fluffy");
     var cunning = new AutoPerks.VariablePerk("cunning", 100000000000, false,      11, 0.05);
     var curious = new AutoPerks.VariablePerk("curious", 100000000000000, false,   12, 0.05);
+    var classy = new AutoPerks.VariablePerk("classy", 100000000000000000, false,   13, 0.05);
     //Tier2 perks
     var toughness_II = new AutoPerks.ArithmeticPerk("toughness_II", 20000, 500, 0.01, toughness);
     var power_II = new AutoPerks.ArithmeticPerk("power_II", 20000, 500, 0.01, power);
@@ -797,7 +816,7 @@ AutoPerks.initializePerks = function () {
     var looting_II = new AutoPerks.ArithmeticPerk("looting_II", 100000, 10000, 0.0025, looting);
 
     //gather these into an array of objects
-    AutoPerks.perkHolder = [siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, looting, toughness, power, motivation, pheromones, artisanistry, carpentry, resilience, coordinated, resourceful, overkill, capable, cunning, curious, toughness_II, power_II, motivation_II, carpentry_II, looting_II];
+    AutoPerks.perkHolder = [siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, looting, toughness, power, motivation, pheromones, artisanistry, carpentry, resilience, coordinated, resourceful, overkill, capable, cunning, curious, classy, toughness_II, power_II, motivation_II, carpentry_II, looting_II];
     //initialize basics on all.
     for(var i in AutoPerks.perkHolder) {
         AutoPerks.perkHolder[i].level = 0; //errors out here if a new perk is added to the game.
