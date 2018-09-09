@@ -47,9 +47,6 @@ var prestigeState = 0;
 var status = "";
 
 function calcDmg(){    
-    //if(!highDamageHeirloom) //automaps() calculates using the good shield
-    //    equipMainShield();
-
     calcBaseDamageinB();
     
     ourBaseDamage = baseDamageHigh*8;
@@ -75,8 +72,6 @@ function calcDmg(){
         ourBaseDamagePlusOne = (ourBaseDamage * (1 + (0.2 * (game.global.mapBonus >= 10 ? game.global.mapBonus : (game.global.mapBonus + 1)))));
         ourBaseDamage *= 1 + (0.2 * game.global.mapBonus); //add map bonus
     }
-    
-    const FORMATION_MOD_1 = game.upgrades.Dominance.done ? 2 : 1;
     
     //get average enemyhealth and damage for the next zone, cell 50, snimp type and multiply it by a max range fluctuation of 1.2
     enemyHealth = getEnemyMaxHealth(game.global.world, 50);

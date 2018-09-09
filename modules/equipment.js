@@ -416,7 +416,7 @@ function getDamageLoop(dmg, lowerDamage, noCrit, maxLoop){
     var dmgLast = 0;
     
     while (dmgLast != dmgToCheck && maxLoop-- > 0){
-        if(game.global.soldierHealth < wantedHP)
+        if(game.global.soldierHealth < wantedHP && game.global.soldierHealth > 1)
             autoLevelEquipment(lowerDamage, false, true); //buy health only
         
         if (dmgToCheck*8 >= dmg) //have enough damage
@@ -560,8 +560,6 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
         enemyDamage *= game.empowerments.Ice.getCombatModifier();
     }
     enemyDamage *= getCorruptScale("attack");
-    
-    const FORMATION_MOD_1 = game.upgrades.Dominance.done ? 2 : 1;
 
     var first = true;
     var safetyNet = 2.65;

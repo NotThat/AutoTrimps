@@ -786,7 +786,7 @@ function getDeltaGenes(target){
 }
 
 function switchOnGA(){
-    if(game.global.world < 71 || game.jobs.Geneticist.locked === 1){
+    if(game.global.world < 71 || !game.global.Geneticistassist){
         //debug("AutoGeneticist isnt unlocked yet!");
         return;
     }

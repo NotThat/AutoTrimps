@@ -189,6 +189,9 @@ function forceAbandonTrimps() {
 }
 
 function handleGA(){
+    if(game.global.world < 71 || !game.global.Geneticistassist)
+        return;
+    
     var GATimer = -1;
     if(getPageSetting('GASetting')){ //AT controls GA timer
         GATimer = (game.talents.patience.purchased ? 45 : 30);
