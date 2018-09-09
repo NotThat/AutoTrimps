@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "16.1";
+var ver = "16.2";
 var verDate = "9.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -61,7 +61,7 @@ function startAT() {
     //one last time for compiler to recognize all loaded vars
     if(!allLoaded){
         allLoaded = true;
-        setTimeout(startAT, 2500);
+        setTimeout(startAT, 1000);
         return;
     }
     
@@ -381,7 +381,6 @@ function ATLoop(makeUp) {
     if (getPageSetting('BuyJobsNew')>0) buyJobs();                                              
     if (getPageSetting('ManualGather2')) manualLabor();  //"Auto Gather/Build"       (gather.js)
      
-    getDamageCaller(0); //buys health if we need it
     autoMap(); //automaps() is in charge of maps combat
     updateAutoMapsStatus("", statusMsg, true); //update status
 

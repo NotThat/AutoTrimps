@@ -109,6 +109,7 @@ function calcBaseDamageinB() {
 
 function autoStance() {
     if (game.global.gridArray.length === 0) return false; //zone didnt initialize yet
+    getDamageCaller(0); //buys health if we need it
     if(game.global.autoBattle && game.global.pauseFight) pauseFight(); //autofight on
     
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
