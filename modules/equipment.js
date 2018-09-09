@@ -387,7 +387,7 @@ function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
                 }
             }
             //If we're considering a health item, buy it if we don't have enough health, otherwise we default to buying damage
-            if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health' || DaThing.Stat == 'block')) {
+            if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health' || DaThing.Stat == 'block') && game.global.soldierHealth < wantedHP && game.global.soldierHealth > 1) {
                 if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {
                     buyEquipment(eqName, null, true);
                     evalObjAT[equipName] = evaluateEquipmentEfficiency(eqName);
@@ -416,7 +416,7 @@ function getDamageLoop(dmg, lowerDamage, noCrit, maxLoop){
     var dmgLast = 0;
     
     while (dmgLast != dmgToCheck && maxLoop-- > 0){
-        if(game.global.soldierHealth < wantedHP && game.global.soldierHealth > 1)
+        //if(game.global.soldierHealth < wantedHP && game.global.soldierHealth > 1)
             autoLevelEquipment(lowerDamage, false, true); //buy health only
         
         if (dmgToCheck*8 >= dmg) //have enough damage
@@ -567,6 +567,4 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
         safetyNet = 3.65;
     
     wantedHP = safetyNet*enemyDamage;
-
-
 }
