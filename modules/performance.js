@@ -92,7 +92,7 @@
 
     // Helium
     M["performance"].AFKOverlayHelium = document.createElement('p');
-    M["performance"].AFKOverlayHelium.innerText = 'Current helium: -';
+    M["performance"].AFKOverlayHelium.innerText = 'Current he%/hr: -';
     M["performance"].AFKOverlayHelium.className = 'at-afk-helium'
 
     // Status
@@ -145,7 +145,10 @@
         if(a != AFKOverlayTitle.innerText)                      AFKOverlayTitle.innerText = a;
         var b = 'Current Zone: ' + game.global.world + '.' + (game.global.lastClearedCell + 1);
         if(b != M["performance"].AFKOverlayZone.innerText)      M["performance"].AFKOverlayZone.innerText = b;
-        var c =  'Current Helium: ' + prettify(Math.floor(game.resources.helium.owned));
+        //var c =  'Current Helium: ' + prettify(Math.floor(game.resources.helium.owned));
+        //var c =  'Current Helium: ' + prettify((game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned))) * 100);
+        var c =  'Current He%/Hr: ' + ((game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned))) * 100).toFixed(4) + '%';
+        
         if(c != M["performance"].AFKOverlayHelium.innerText)    M["performance"].AFKOverlayHelium.innerText = c;
         var d = updateAutoMapsStatus(true);
         if(d != M["performance"].AFKOverlayStatus.innerHTML)    M["performance"].AFKOverlayStatus.innerHTML = d;

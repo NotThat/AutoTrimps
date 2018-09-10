@@ -414,19 +414,23 @@ function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
 function getDamageLoop(dmg, lowerDamage, noCrit, maxLoop){
     var dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
     var dmgLast = 0;
+    var boughtHP = false;
     
-    while (dmgLast != dmgToCheck && maxLoop-- > 0){
+    while ((boughtHP || dmgLast != dmgToCheck) && maxLoop-- > 0){
         //if(game.global.soldierHealth < wantedHP && game.global.soldierHealth > 1)
-            autoLevelEquipment(lowerDamage, false, true); //buy health only
+            boughtHP = autoLevelEquipment(lowerDamage, false, true); //buy health only
         
-        if (dmgToCheck*8 >= dmg) //have enough damage
-            return true;
+        //if (dmgToCheck*8 >= dmg) //have enough damage
+        //    return true;
         
         dmgLast = dmgToCheck;
         autoLevelEquipment(lowerDamage, true, true); //buy damage only autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle)
         dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
     }
-    return false;
+    if (dmgToCheck*8 >= dmg) //have enough damage
+        return true;
+    else
+        return false;
 }
 
 function getDamage(dmg, lowerDamage, noCrit){
@@ -528,7 +532,7 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
     //EQUIPMENT HAS ITS OWN DAMAGE CALC SECTION:
     //spire is a special case.
     var enemyDamage = 0;
-    if (isActiveSpireAT()) {
+    if (game.global.spireActive) {
         /*var exitcell;
         if(game.global.challengeActive == "Daily")
             exitcell = getPageSetting('ExitSpireCellDailyC2');
