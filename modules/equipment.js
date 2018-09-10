@@ -529,14 +529,14 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
     //spire is a special case.
     var enemyDamage = 0;
     if (isActiveSpireAT()) {
-        var exitcell;
+        /*var exitcell;
         if(game.global.challengeActive == "Daily")
             exitcell = getPageSetting('ExitSpireCellDailyC2');
         else
             exitcell = getPageSetting('ExitSpireCell');
         var cell = (!game.global.mapsActive && !game.global.preMapsActive) ? game.global.lastClearedCell : 50;
         if (exitcell > 1)
-            cell = exitcell;
+            cell = exitcell;*/
         cell = 100;
         enemyDamage = getSpireStats(cell, "Snimp", "attack");
         enemyDamage = calcDailyAttackMod(enemyDamage); //daily mods: badStrength,badMapStrength,bloodthirst
