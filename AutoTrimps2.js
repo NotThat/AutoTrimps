@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "17";
-var verDate = "9.9.18";
+var ver = "17.1";
+var verDate = "10.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
     , basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/')
@@ -162,10 +162,10 @@ var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
 //changelogList.push({date: verDate, version: ver, description: "", isNew: true});
 //changelogList.push({date: "28/06/2018", version: "v0.2", description: "Backup your game before using this or any AT fork for the first time (and often)! Please Trimps responsibly!", isNew: true});
-changelogList.push({date: "", version: "", description: "Massive CPU optimizations", isNew: true});
-changelogList.push({date: "", version: "", description: "Combat setting: Helium mode / Dark Essence Mode / Push Mode.", isNew: true});
-changelogList.push({date: "", version: "", description: "AT Control GA - Automatic breed timers (smart enough for bleed/bogged dailies) and optional spire breed timer.", isNew: true});
-changelogList.push({date: "", version: "", description: "Trimpicide on Empower Dailies (toggle-able).", isNew: true});
+changelogList.push({date: "10.9.2018", version: "", description: "AutoAllocate is working", isNew: true});
+//changelogList.push({date: "", version: "", description: "Combat setting: Helium mode / Dark Essence Mode / Push Mode.", isNew: true});
+//changelogList.push({date: "", version: "", description: "AT Control GA - Automatic breed timers (smart enough for bleed/bogged dailies) and optional spire breed timer.", isNew: true});
+//changelogList.push({date: "", version: "", description: "Trimpicide on Empower Dailies (toggle-able).", isNew: true});
 //changelogList.push({date: "28/06/2018", version: "", description: "PRaiding. BWRaiding. Stop Coords to get next Amal. Never lose Amal. Heirloom Swapping. No Nurseries in Ice. Massive overhaul to AS windstacking he/hr% based. Stall Coords/items for more stacking. Calculate cell by cell. AutoTrimps->Display->General Spam for less spam.", isNew: false});
 changelogList.push({date: "13/06/2018", version: "", description: "War was beginning ", isNew: false});
 

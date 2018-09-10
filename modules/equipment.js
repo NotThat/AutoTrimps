@@ -537,6 +537,7 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
         var cell = (!game.global.mapsActive && !game.global.preMapsActive) ? game.global.lastClearedCell : 50;
         if (exitcell > 1)
             cell = exitcell;
+        //cell = 100;
         enemyDamage = getSpireStats(cell, "Snimp", "attack");
         enemyDamage = calcDailyAttackMod(enemyDamage); //daily mods: badStrength,badMapStrength,bloodthirst
     }
@@ -561,7 +562,6 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
     }
     enemyDamage *= getCorruptScale("attack");
 
-    var first = true;
     var safetyNet = 2.65;
     if(!game.global.preMapsActive && (getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed"))
         safetyNet = 3.65;

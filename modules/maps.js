@@ -22,6 +22,7 @@ var shouldDoMaps = false;
 var mapTimeEstimate = 0;
 var preSpireFarming = false;
 var spireMapBonusFarming = false;
+var stackSpireOneTime = true;
 var spireTime = 0;
 var vanillaMapatZone = false;
 
@@ -40,7 +41,6 @@ var minDesiredLevel;
 var lastMsg; //stores last message, stops spam to console
 var AutoMapsCoordOverride = false;
 var PRaidingActive = false; //used for coordination purchase during praids
-var spireStackFirst = true;
 
 var prestigeState = 0;
 
@@ -239,7 +239,7 @@ function autoMap() {
     
     //spire specific settings
     var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 8);
-    var stackSpireGetMinDamage = stackSpire && (game.global.lastClearedCell + 1 === 0) && (checkForGoodCell(0));
+    var stackSpireGetMinDamage = stackSpire && stackSpireOneTime && (game.global.lastClearedCell + 1 === 0) && (checkForGoodCell(0));
     preSpireFarming = (isActiveSpireAT()) && ((spireTime = (Date.now() - game.global.zoneStarted) / 1000 / 60) < getPageSetting('MinutestoFarmBeforeSpire') || getPageSetting('MinutestoFarmBeforeSpire') < 0);
     spireMapBonusFarming = getPageSetting('MaxStacksForSpire') && isActiveSpireAT() && game.global.mapBonus < 10;
     if (preSpireFarming || spireMapBonusFarming || stackSpireGetMinDamage)
@@ -338,23 +338,22 @@ function autoMap() {
                     selectedMap = theMap;
                     break;
                 }
-                var dont = game.global.runningChallengeSquared;
-                if (theMap.name == 'The Block' && !game.upgrades.Shieldblock.allowed && ((game.global.challengeActive == "Scientist" || game.global.challengeActive == "Trimp") && !dont || getPageSetting('BuyShieldblock'))) {
+                if (theMap.name == 'The Block' && !game.upgrades.Shieldblock.allowed && ((game.global.challengeActive == "Scientist" || game.global.challengeActive == "Trimp") && !game.global.runningChallengeSquared || getPageSetting('BuyShieldblock'))) {
                     var theMapDifficulty = Math.ceil(theMap.difficulty / 2);
                     if (game.global.world < 11 + theMapDifficulty) continue;
                     selectedMap = theMap;
                     break;
                 }
-                /*var treasure = getPageSetting('TrimpleZ');
-                if (theMap.name == 'Trimple Of Doom' && (!dont && (game.global.challengeActive == "Meditate" || game.global.challengeActive == "Trapper") && game.mapUnlocks.AncientTreasure.canRunOnce && game.global.world >= treasure)) {
-                    var theMapDifficulty = Math.ceil(theMap.difficulty / 2);
-                    if ((game.global.world < 33 + theMapDifficulty) || treasure > -33 && treasure < 33) continue;
-                    selectedMap = theMap;
-                    if (treasure < 0) // need to reset
-                        setPageSetting('TrimpleZ', 0);
-                    break;
-                }*/
-                if (!dont) {
+                if (!game.global.runningChallengeSquared) {
+                    var treasure = getPageSetting('TrimpleZ');
+                    if (theMap.name == 'Trimple Of Doom' && (game.global.challengeActive == "Meditate" || game.global.challengeActive == "Trapper") && game.mapUnlocks.AncientTreasure.canRunOnce && game.global.world >= treasure) {
+                        var theMapDifficulty = Math.ceil(theMap.difficulty / 2);
+                        if ((game.global.world < 33 + theMapDifficulty) || treasure > -33 && treasure < 33) continue;
+                        selectedMap = theMap;
+                        if (treasure < 0) // need to reset
+                            setPageSetting('TrimpleZ', 0);
+                        break;
+                    }
                     //run the prison only if we are 'cleared' to run level 80 + 1 level per 200% difficulty. Could do more accurate calc if needed
                     if (theMap.name == 'The Prison' && (game.global.challengeActive == "Electricity" || game.global.challengeActive == "Mapocalypse")) {
                         var theMapDifficulty = Math.ceil(theMap.difficulty / 2);
@@ -407,10 +406,8 @@ function autoMap() {
         selectedMap = "create";
         
         if (doVoids){
-            //selectedMap = findVoidMap();
-            if(game.global.mapsActive && currMap.location === "Void"){
+            if(game.global.mapsActive && currMap.location === "Void")
                 selectedMap = currMap;
-            }
             else
                 selectedMap = findFirstVoidMap(); //returns map object or false
 
@@ -484,7 +481,6 @@ function autoMap() {
             else if (theMap.noRecycle && theMap.name != 'Bionic Wonderland')
                 repeatClicked();
             
-            
             if(specials > 0)            statusMsg = "Prestige: " + specials;
             else if(repeatChoice === 0) statusMsg = "Mapping at z" + game.global.world;
             else if(repeatChoice == 1)  statusMsg = "Map bonus ";
@@ -497,10 +493,8 @@ function autoMap() {
 
     //#2 in the world
     else if (!game.global.preMapsActive && !game.global.mapsActive) { 
-        if (selectedMap != "world") {
-            //we want to run a map
+        if (selectedMap != "world") //we want to run a map
             mapsClicked(true);
-        }
     } 
     
     //#3 in premap screen
@@ -510,17 +504,17 @@ function autoMap() {
         } else {
             if (selectedMap == "create") {
                 var lvl = (needPrestige ? game.global.world : siphlvl);
+                var flag;
                 if(needPrestige)
-                    var flag = decideMapParams(lvl, lvl, "Prestigious", enoughDamage); //cheap or no cheap
+                    flag = decideMapParams(lvl, lvl, "Prestigious", enoughDamage); //cheap or no cheap
                 else if(preSpireFarming){
                     lvl = spiremaplvl;
-                    var flag = decideMapParams(lvl, lvl, "LMC", false, 1);
+                    flag = decideMapParams(lvl, lvl, "LMC", false, 1);
                 }
                 else if(preferFAMaps)
-                    var flag = decideMapParams(lvl, lvl, "FA", enoughDamage); //cheap or no cheap
+                    flag = decideMapParams(lvl, lvl, "FA", enoughDamage); //cheap or no cheap
                 else
-                    var flag = decideMapParams(lvl, lvl, "LMC", enoughDamage); //cheap or no cheap
-                
+                    flag = decideMapParams(lvl, lvl, "LMC", enoughDamage); //cheap or no cheap
                 
                 var flag2 = createAMap(lvl, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
                 if(!flag || !flag2){
@@ -536,32 +530,33 @@ function autoMap() {
             if(!spireMapBonusFarming && stackSpireGetMinDamage){ //equip low shield - enter map, go to premaps. enter map - manual fight - go to premaps - exit to world - manual fight
                 debug("Lowering damage for Spire IV");
                 var deltaGenes = getDeltaGenes(1);
-                if(deltaGenes > 0){ //if we need to fire geneticists
+                if(deltaGenes > 0 && game.global.antiStacks >= 3){ //if we need to fire geneticists
                     switchOffGA(); //pause autogeneticist  
                     debug("Automaps: Trimpiciding " + game.global.antiStacks + "->1. Firing " + deltaGenes + " Geneticists. New Geneticists: " + (game.jobs.Geneticist.owned-deltaGenes));
                     fireGeneticists(deltaGenes);
-                }
-                
-                runMap();                           //--enter map
-                fightManual();                      //--fight
-                mapsClicked(true);                  //--exit map
-                
-                var start = Date.now();
-                while(game.global.breedBack > 0){
-                    var current = Date.now();
-                    if(current-start > 1000){
-                        debug("error: took too long to breed back army. exiting.");
-                        break;
+                    
+                    runMap();                           //--enter map
+                    fightManual();                      //--fight
+                    mapsClicked(true);                  //--exit map
+
+                    var start = Date.now();
+                    while(game.global.breedBack > 0){
+                        var current = Date.now();
+                        if(current-start > 1000){
+                            debug("error: took too long to breed back army. exiting.");
+                            break;
+                        }
                     }
+                    runMap();                           //--enter map
+                    fightManual();                      //--fight
+                    switchOnGA();
+                    mapsClicked(true);                  //--exit map
+                    recycleMap();                    
                 }
-                runMap();                           //--enter map
-                fightManual();                      //--fight
-                switchOnGA();
-                mapsClicked(true);                  //--exit map
-                recycleMap();
+                
                 mapsClicked();                      //--exit to world
                 fightManual();                      //--fight
-                spireStackFirst = false;
+                stackSpireOneTime = false;
                 return;
             }
             else{
@@ -1303,75 +1298,6 @@ function findFirstVoidMap(){
             return game.global.mapsOwnedArray[map];
     }
     return false;
-}
-
-function findVoidMap(){
-    //voidArray: make an array with all our voidmaps, so we can sort them by real-world difficulty level
-    var voidArray = [];
-    //values are easiest to hardest. (hardest has the highest value)
-    var prefixlist = {
-        'Deadly': 10,
-        'Heinous': 11,
-        'Poisonous': 20,
-        'Destructive': 30
-    };
-    var prefixkeys = Object.keys(prefixlist);
-    var suffixlist = {
-        'Descent': 7.077,
-        'Void': 8.822,
-        'Nightmare': 9.436,
-        'Pit': 10.6
-    };
-    var suffixkeys = Object.keys(suffixlist);
-    for (var map in game.global.mapsOwnedArray) {
-        var theMap = game.global.mapsOwnedArray[map];
-        if (theMap.location == 'Void') {
-            for (var pre in prefixkeys) {
-                if (theMap.name.includes(prefixkeys[pre]))
-                    theMap.sortByDiff = 1 * prefixlist[prefixkeys[pre]];
-            }
-            for (var suf in suffixkeys) {
-                if (theMap.name.includes(suffixkeys[suf]))
-                    theMap.sortByDiff += 1 * suffixlist[suffixkeys[suf]];
-            }
-            voidArray.push(theMap);
-        }
-    }
-    //sort the array (harder/highvalue last):
-    var voidArraySorted = voidArray.sort(function(a, b) {
-        return b.sortByDiff - a.sortByDiff; //i want destructives first for health purchase
-        //return a.sortByDiff - b.sortByDiff;
-    });
-    for (var map in voidArraySorted) {
-        var theMap = voidArraySorted[map];
-        //if we are on toxicity, don't clear until we will have max stacks at the last cell.
-        if (game.global.challengeActive == 'Toxicity' && game.challenges.Toxicity.stacks < (1500 - theMap.size)) break;
-        doVoids = true;
-        //check to make sure we won't get 1-shot in nostance by boss
-        var eAttack = getEnemyMaxAttack(game.global.world, theMap.size, 'Voidsnimp', theMap.difficulty);
-        if (game.global.world >= 181 || (game.global.challengeActive == "Corrupted" && game.global.world >= 60))
-            eAttack *= (getCorruptScale("attack") / 2).toFixed(1);
-        //TODO: Account for magmated voidmaps. (not /2)
-        //TODO: Account for daily.
-        var ourHealth = baseHealth;
-        if (game.global.challengeActive == 'Balance') {
-            var stacks = game.challenges.Balance.balanceStacks ? (game.challenges.Balance.balanceStacks > theMap.size) ? theMap.size : game.challenges.Balance.balanceStacks : false;
-            eAttack *= 2;
-            if (stacks) {
-                for (i = 0; i < stacks; i++) {
-                    ourHealth *= 1.01;
-                }
-            }
-        }
-        if (game.global.challengeActive == 'Toxicity') eAttack *= 5;
-        //break to prevent finishing map to finish a challenge?
-        //continue to check for doable map?
-
-        //only go into the voidmap if we need to.
-        return theMap;
-    }
-    return null;
-
 }
 
 function windZone(value){
