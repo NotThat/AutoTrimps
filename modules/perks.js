@@ -565,7 +565,7 @@ AutoPerks.spendHelium2 = function(helium) {
     //var $selector = document.getElementById('dumpPerk');
     //if ($selector != null && $selector.value != "None") {
         //var heb4dump = helium;
-        var dumpPerk = AutoPerks.getPerkByName("Looting_II");//Looting_II
+        var dumpPerk = AutoPerks.getPerkByName("Looting_II");
         //helium = 0;
         
         var currLevel = parseFloat(dumpPerk.level);//parseFloat(game.portal.Looting_II.level);

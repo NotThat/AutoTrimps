@@ -358,11 +358,11 @@ function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
     var BuyWeaponLevels = ((getPageSetting('BuyWeaponsNew')==1) || (getPageSetting('BuyWeaponsNew')==3));
     var BuyArmorLevels = ((getPageSetting('BuyArmorNew')==1) || (getPageSetting('BuyArmorNew')==3));
     for (var stat in Best) {
-        var eqName = Best[stat].Name;
-        var $eqName = document.getElementById(eqName);
-        if (eqName !== '') {
-            var DaThing = equipmentList[eqName];
-            if (eqName == 'Gym' && needGymystic) {
+        var equipName = Best[stat].Name;
+        var $eqName = document.getElementById(equipName);
+        if (equipName !== '') {
+            var DaThing = equipmentList[equipName];
+            if (equipName == 'Gym' && needGymystic) {
                 if(colorStyle) $eqName.style.color = 'white';
                 if(colorStyle) $eqName.style.border = '1px solid white';
                 continue;
@@ -370,35 +370,36 @@ function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
                 if(colorStyle) $eqName.style.color = Best[stat].Wall ? 'orange' : 'red';
                 if(colorStyle) $eqName.style.border = '2px solid red';
             }
-            if(eqName != 'Gym')
-                if (verbose) debug("leveling Z" + game.global.world + " " + eqName + "("+game.upgrades[equipmentList[eqName].Upgrade].done + "/" + game.equipment[eqName].level+") buyWeaponsMode " + buyWeaponsMode); 
+            if(equipName != 'Gym')
+                if (verbose) debug("leveling Z" + game.global.world + " " + equipName + "("+game.upgrades[equipmentList[equipName].Upgrade].done + "/" + game.equipment[equipName].level+") buyWeaponsMode " + buyWeaponsMode); 
             //If we're considering an attack item, we want to buy weapons if we don't have enough damage, or if we don't need health (so we default to buying some damage)
             if (buyDamage && BuyWeaponLevels && DaThing.Stat == 'attack'){ 
-                if (DaThing.Equip && canAffordBuilding(eqName, null, null, true)) {
+                if (DaThing.Equip && canAffordBuilding(equipName, null, null, true)) {
                     var allow = true;
                     if(getPageSetting('AutoStance')==1 && getPageSetting('DelayWeaponsForWind') && (buyWeaponsMode === 0)){
                         allow = false;
                     }
                     if(allow){
-                        buyEquipment(eqName, null, true);
-                        evalObjAT[equipName] = evaluateEquipmentEfficiency(eqName);
+                        buyEquipment(equipName, null, true);
+                        evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName);
                         boughtSomething = true;
                     }
                 }
             }
             //If we're considering a health item, buy it if we don't have enough health, otherwise we default to buying damage
             if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health' || DaThing.Stat == 'block') && game.global.soldierHealth < wantedHP && game.global.soldierHealth > 1) {
-                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {
-                    buyEquipment(eqName, null, true);
-                    evalObjAT[equipName] = evaluateEquipmentEfficiency(eqName);
-                    boughtSomething = true;
+                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(equipName, null, null, true)) {
+                    buyEquipment(equipName, null, true);
+                    //debug("bought " + equipName, "equips");
+                    evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName);
+                    boughtSomething = true; 
                 }
             }
             //Always LVL 25:
-            if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health') && game.equipment[eqName].level < 25){
-                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(eqName, null, null, true)) {
-                    buyEquipment(eqName, null, true);
-                    evalObjAT[equipName] = evaluateEquipmentEfficiency(eqName);
+            if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health') && game.equipment[equipName].level < 25){
+                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(equipName, null, null, true)) {
+                    buyEquipment(equipName, null, true);
+                    evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName);
                     boughtSomething = true;
                 }
             }
@@ -537,7 +538,7 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
         var cell = (!game.global.mapsActive && !game.global.preMapsActive) ? game.global.lastClearedCell : 50;
         if (exitcell > 1)
             cell = exitcell;
-        //cell = 100;
+        cell = 100;
         enemyDamage = getSpireStats(cell, "Snimp", "attack");
         enemyDamage = calcDailyAttackMod(enemyDamage); //daily mods: badStrength,badMapStrength,bloodthirst
     }
