@@ -334,10 +334,9 @@ function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
                     var upgrade = equipmentList[equipName].Upgrade;
                     if (upgrade != "Gymystic" && allow)
                         debug('Upgrading ' + upgrade + " - Prestige " + game.equipment[equipName].prestige, "equips", '*upload');
-                    else if (allow)
-                        debug('Upgrading ' + upgrade + " # " + game.upgrades[upgrade].allowed, "equips", '*upload');
                     if(allow){ //we want to prioritize buying levels over buying prestiges. only buy prestige if next weapon level isnt trivially affordeed
                         preBuy();
+                        debug('Upgrading ' + upgrade + " # " + game.upgrades[upgrade].allowed + " buyWeaponsMode " + buyWeaponsMode, "equips", '*upload');
                         buyUpgrade(upgrade, true, true);
                         postBuy();
                         evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName); //update equipment eval

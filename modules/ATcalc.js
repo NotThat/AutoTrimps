@@ -123,6 +123,10 @@ function calcDmgManual(printout){
         dmg *= str;
         if (printout) debug("strength in health " + str.toFixed(2) + " dmg " + dmg.toExponential(2));
     }
+    if (game.global.mapsActive && game.talents.bionic2.purchased && currMap.level > game.global.world){
+        dmg *= 1.5;
+        if (printout) debug("Bionic Magnet II + 50% dmg " + dmg.toExponential(2));
+    }
     if (mutations.Magma.active()){
         var magMult = mutations.Magma.getTrimpDecay();
         dmg *= magMult;

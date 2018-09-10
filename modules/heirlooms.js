@@ -64,16 +64,13 @@ function worthOfHeirlooms(){
 //NEW:
 function autoHeirlooms() {
     if(!heirloomsShown){
-        //heirloom code is full of graphical elements which cause slowdowns. 
-        //MODULES["performance"].EnableAFKMode();
-        
-        //PART 1: start by dropping ALL carried heirlooms
+        //start by dropping ALL carried heirlooms
         var originalLength = game.global.heirloomsCarried.length;
         for(var index=0; index < originalLength; index++) {
             selectHeirloom(0, 'heirloomsCarried', true);
             newStopCarryHeirloom();
         }
-        //PART 2: immediately begin carrying any protected heirlooms.
+        //immediately begin carrying any protected heirlooms.
         var originalLength = game.global.heirloomsExtra.length;
         for(var index=0; index < originalLength; index++) {
             var theLoom = game.global.heirloomsExtra[index];
@@ -83,21 +80,17 @@ function autoHeirlooms() {
                 index--; originalLength--;  //stop index-skipping/re-ordering (idk how else to do it).
             }
         }
+        //selectively decide which heirlooms to carry
+        if(!getPageSetting('HeirloomEvalNew')) valueLoomsOld(); //uses old heirloom valuing method
+        else valueLoomsNew(); //only care about plagued heirlooms, and only 5/5 staves/shields and 2/5 shields.
         
-        //dont want to carry anything extra
-        //if(getPageSetting('dontCarryJunkHeirlooms'))
-        //    return;
-        
-        if(!getPageSetting('HeirloomEvalNew'))
-            valueLoomsOld(); //uses old heirloom valuing method
-        else
-            valueLoomsNew(); //only care about plagued heirlooms, and only 5/5 staves/shields and 2/5 shields.
-        
-        //MODULES["performance"].DisableAFKMode();
+        //protect all heirlooms in our carried slots
+        for(var index=0; index < game.global.heirloomsCarried.length; index++) 
+            game.global.heirloomsCarried[index].protected = true;
     }
-    else if(heirloomsShown && game.global.selectedHeirloom.length > 0){
-        //heirloomUpgradeHighlighting();
-    }
+    /*else if(heirloomsShown && game.global.selectedHeirloom.length > 0){
+        heirloomUpgradeHighlighting();
+    }*/
 }
 
 function valueLoomsNew(){
@@ -481,7 +474,7 @@ function protectHeirloom(element, modify){
     var heirloomlocation = selheirloom[1];
     var heirloom = game.global[heirloomlocation];
     if (selheirloom[0] != -1)
-        var heirloom = heirloom[selheirloom[0]];
+        heirloom = heirloom[selheirloom[0]];
     //hard way ^^, easy way>>
     //var heirloom = getSelectedHeirloom();
     if (modify)    //sent by onclick of protect button, to toggle the state.

@@ -69,6 +69,9 @@ function calcDmg(){
     if(game.global.mapsActive){
         if (game.global.titimpLeft > 1)
             ourBaseDamage *= 0.5; //remove titimp bonus
+        if (game.talents.bionic2.purchased && currMap.level > game.global.world)
+            ourBaseDamage = ourBaseDamage / 1.5; //remove bionic2
+        
         ourBaseDamagePlusOne = (ourBaseDamage * (1 + (0.2 * (game.global.mapBonus >= 10 ? game.global.mapBonus : (game.global.mapBonus + 1)))));
         ourBaseDamage *= 1 + (0.2 * game.global.mapBonus); //add map bonus
     }

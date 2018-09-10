@@ -968,8 +968,8 @@ function checkPortalSettings() {
     var voidmaps = getPageSetting('VoidMaps');
     if (voidmaps >= portalLevel)
         tooltip('confirm', null, 'update', 'WARNING: Your void maps are set to complete after your autoPortal, and therefore will not be done at all! Please Change Your Settings Now. This Box Will Not Go away Until You do. Remember you can choose \'Custom\' autoPortal along with challenges for complete control over when you portal. <br><br> Estimated autoPortal level: ' + portalLevel, 'cancelTooltip()', 'Void Maps Conflict');
-    if ((leadCheck || game.global.challengeActive == 'Lead') && (voidmaps % 2 == 0 && portalLevel <= 181))
-        tooltip('confirm', null, 'update', 'WARNING: Voidmaps run during Lead on an Even zone do not receive the 2x Helium Bonus for Odd zones, and are also tougher. You should probably fix this.', 'cancelTooltip()', 'Lead Challenge Void Maps');
+    //if ((leadCheck || game.global.challengeActive == 'Lead') && (voidmaps % 2 == 0 && portalLevel <= 181))
+    //    tooltip('confirm', null, 'update', 'WARNING: Voidmaps run during Lead on an Even zone do not receive the 2x Helium Bonus for Odd zones, and are also tougher. You should probably fix this.', 'cancelTooltip()', 'Lead Challenge Void Maps');
     return portalLevel;
 }
 
