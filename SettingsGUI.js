@@ -891,6 +891,9 @@ function updateCustomButtons() {
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomHighShield"): turnOff("HeirloomHighShield");
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomLowShield"): turnOff("HeirloomLowShield");
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomPushShield"): turnOff("HeirloomPushShield");
+    getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomHighPushShield"): turnOff("HeirloomHighPushShield");
+    
+    
     
     //Show and Hide useless settings to reduce UI clutter
     var turnonofflist = [
