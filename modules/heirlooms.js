@@ -103,11 +103,13 @@ function valueLoomsNew(){
         }
         if(loom.rarity < 8) //not plagued, ignore it
             continue;
-        var keepLowShield = isValidLowShield(loom, true) && getPageSetting('HeirloomLowShield');
+        var keepStaves     = isValidStaff(loom, true) && getPageSetting('HeirloomStaves');
         var keepHighShield = isValidHighShield(loom, true) && getPageSetting('HeirloomHighShield');
+        var keepLowShield  = isValidLowShield(loom, true) && getPageSetting('HeirloomLowShield');
         var keepPushShield = isValidPushShield(loom, true) && getPageSetting('HeirloomPushShield');
-        var keepStaves = isValidStaff(loom, true) && getPageSetting('HeirloomStaves');
-        if(keepLowShield || keepHighShield || keepPushShield || keepStaves){
+        var keepHighPush   = isValidHighShield(loom, true) && isValidPushShield(loom, true) && getPageSetting('HeirloomHighPushShield');
+        
+        if(keepLowShield || keepHighShield || keepPushShield || keepStaves || keepHighPush){
             //debug("carrying heirloom " + loom);
             selectHeirloom(game.global.heirloomsExtra.indexOf(loom), 'heirloomsExtra', true);
             newCarryHeirloom(); //this reshuffles game.global.heirloomsExtra, so lets recall the function for the new array

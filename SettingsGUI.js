@@ -456,6 +456,7 @@ function initializeAllSettings() {
     createSetting('HeirloomHighShield', 'Keep 5/5 Shields', 'Will hold onto any Plagued shield capable of having crit chance + crit damage + attack + Plaguebringer + VMDC. Used as main shield.', 'boolean', true, null, 'Heirlooms');
     createSetting('HeirloomLowShield', 'Keep 2/5 Shields', 'Will hold onto any Plagued shield capable of having Plaguebringer+VMDC and no damage mods. Used for shield swaps for windstacking.', 'boolean', true, null, 'Heirlooms');
     createSetting('HeirloomPushShield', 'Keep Push Shields', 'Will hold onto any Plagued shield capable of having crit chance + crit damage + attack + Plaguebringer + health. Used as a push shield for spire/C2s/HZE.', 'boolean', true, null, 'Heirlooms');
+    createSetting('HeirloomHighPushShield', 'Keep High & Push', 'Will hold onto any Plagued shield capable of becoming either a 5/5 shield or a push shield. For example crit chance + crit damage + attack and 2 empty mods.', 'boolean', true, null, 'Heirlooms');
     
 
 //Golden Upgrade Strategies:
