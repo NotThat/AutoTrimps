@@ -627,7 +627,8 @@ function updateAutoMapsStatus(get, msg, final) {
     var hiderStatus = 'He/hr: ' + getPercent.toFixed(4) + '%<br>&nbsp;&nbsp;&nbsp;He: ' + lifetime.toFixed(3) + '%';
 
     if (get) {
-        return statusMsg;
+        if (doVoids) return 'VMs Left: ' + game.global.totalVoidMaps;
+        else return statusMsg;
         //return [status, getPercent, lifetime];
     } 
     else if(final && !ATmakeUp){
