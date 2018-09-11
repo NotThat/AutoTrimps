@@ -39,7 +39,7 @@ function automationMenuInit() {
     newContainer.setAttribute("style", "display: block; font-size: 1.1vw; text-align: center; background-color: rgba(0,0,0,0.3);");
     
     
-    newContainer.setAttribute("onmouseover", 'tooltip(\"Damage to Health ratio\", \"customText\", event, \"When DH ratio goes below the threshhold it will trigger mapping for up to 10 map bonus.<p><b>poisonMult: </b>\" + poisonMult + \"<br><b>windMult: </b>\" + windMult +\"<br><b>Cells Remaining: </b>\" + remainingCells.toFixed(0) + \"<br><b>DH ratio: </b>\" + formattedRatio + \"<br><b>Threshhold = </b>\" + threshhold.toFixed(3) + \"<br>")');
+    newContainer.setAttribute("onmouseover", 'tooltip(\"Damage to Health ratio\", \"customText\", event, \" When DH ratio goes below the threshhold it will trigger mapping for up to 10 map bonus.<p><b>poisonMult: </b>\" + poisonMult + \"<br><b>windMult: </b>\" + windMult +\"<br><b>Cells Remaining: </b>\" + remainingCells.toFixed(0) + \"<br><b>DH ratio: </b>\" + formattedRatio + \"<br><b>Threshhold = </b>\" + threshhold.toFixed(3) + \"<br>")');
     newContainer.setAttribute("onmouseout", 'tooltip("hide")');
     abutton = document.createElement("SPAN");
     abutton.id = 'autoMapStatus';
@@ -49,7 +49,7 @@ function automationMenuInit() {
     //create hiderStatus - He/hr percent (in world sidebar)
     newContainer = document.createElement("DIV");
     newContainer.setAttribute("style", "display: block; font-size: 1vw; text-align: center; margin-top: 2px; background-color: rgba(0,0,0,0.3);");
-    newContainer.setAttribute("onmouseover", 'tooltip(\"Helium/Hr Info\", \"customText\", event, \"1st is Current He/hr % out of Lifetime He(not including current+unspent).<br> 0.5% is an ideal peak target. This can tell you when to portal... <br>2nd is Current run Total He earned / Lifetime He(not including current)<br>\" + getDailyHeHrStats())');
+    newContainer.setAttribute("onmouseover", 'tooltip(\"Helium/Hr Info\", \"customText\", event, \"Current He/hr % out of lifetime Helium.<br> Current Helium out of lifetime Helium: " + ((game.resources.helium.owned / (game.global.totalHeliumEarned - game.resources.helium.owned)) * 100).toFixed(3) + "%.<br>\" + getDailyHeHrStats())');
     newContainer.setAttribute("onmouseout", 'tooltip("hide")');
     abutton = document.createElement("SPAN");
     abutton.id = 'hiderStatus';

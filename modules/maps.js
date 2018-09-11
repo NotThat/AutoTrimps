@@ -243,7 +243,7 @@ function autoMap() {
     //spire specific settings
     var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 8);
     var stackSpireGetMinDamage = stackSpire && stackSpireOneTime && (game.global.lastClearedCell + 1 === 0) && (checkForGoodCell(0));
-    preSpireFarming = (isActiveSpireAT()) && ((spireTime = (Date.now() - game.global.zoneStarted) / 1000 / 60) < getPageSetting('MinutestoFarmBeforeSpire') || getPageSetting('MinutestoFarmBeforeSpire') < 0);
+    preSpireFarming = (isActiveSpireAT()) && ((spireTime = (Date.now() - game.global.zoneStarted) / 1000 / 60) < getPageSetting('MinutestoFarmBeforeSpire') || getPageSetting('MinutestoFarmBeforeSpire') < 0) && getPageSetting('MinutestoFarmBeforeSpire') !== 0;
     spireMapBonusFarming = getPageSetting('MaxStacksForSpire') && isActiveSpireAT() && game.global.mapBonus < 10;
     if (preSpireFarming || spireMapBonusFarming || stackSpireGetMinDamage)
         shouldDoMaps = true;
@@ -481,7 +481,7 @@ function autoMap() {
                 repeatChoice = 0;
             
             //turn off repeat if we're running a unique map that isnt BW
-            else if (theMap.noRecycle && theMap.name != 'Bionic Wonderland')
+            else if (currMap.noRecycle && currMap.name != 'Bionic Wonderland')
                 repeatClicked();
             
             if(specials > 0)            statusMsg = "Prestige: " + specials;
@@ -623,8 +623,9 @@ function updateAutoMapsStatus(get, msg, final) {
 
     //hider he/hr% status
     var getPercent = (game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned))) * 100;
-    var lifetime = (game.resources.helium.owned / (game.global.totalHeliumEarned - game.resources.helium.owned)) * 100;
-    var hiderStatus = 'He/hr: ' + getPercent.toFixed(4) + '%<br>&nbsp;&nbsp;&nbsp;He: ' + lifetime.toFixed(3) + '%';
+    //var lifetime = ((game.resources.helium.owned / (game.global.totalHeliumEarned - game.resources.helium.owned)) * 100);
+    //var hiderStatus = 'He/hr: ' + getPercent.toFixed(4) + '%<br>&nbsp;&nbsp;&nbsp;He: ' + lifetime.toFixed(3) + '%';
+    var hiderStatus = 'He/hr: ' + getPercent.toFixed(4) + '%';// + '%<br>&nbsp;&nbsp;&nbsp;He: ' + lifetime.toFixed(3) + '%';
 
     if (get) {
         if (doVoids) return 'VMs Left: ' + game.global.totalVoidMaps;

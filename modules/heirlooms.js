@@ -103,9 +103,9 @@ function valueLoomsNew(){
         }
         if(loom.rarity < 8) //not plagued, ignore it
             continue;
-        var keepStaves     = isValidStaff(loom, true) && getPageSetting('HeirloomStaves');
+        var keepStaves     = isValidStaff(loom, true)      && getPageSetting('HeirloomStaves');
         var keepHighShield = isValidHighShield(loom, true) && getPageSetting('HeirloomHighShield');
-        var keepLowShield  = isValidLowShield(loom, true) && getPageSetting('HeirloomLowShield');
+        var keepLowShield  = isValidLowShield(loom, true)  && getPageSetting('HeirloomLowShield');
         var keepPushShield = isValidPushShield(loom, true) && getPageSetting('HeirloomPushShield');
         var keepHighPush   = isValidHighShield(loom, true) && isValidPushShield(loom, true) && getPageSetting('HeirloomHighPushShield');
         
