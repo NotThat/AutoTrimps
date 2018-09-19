@@ -548,9 +548,6 @@ function equipMainShield(){
 equipMainShield();
 
 function equipLowDmgShield(){
-    //if (lowPB > -1 && game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp")
-    //    return; //dont equip low shield in liquified zones because it cancels the tooltip
-    
     if(!getPageSetting('HeirloomSwapping') || !getPageSetting('AutoHeirlooms')) {
         highDamageHeirloom = true;
         return false;

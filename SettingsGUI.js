@@ -38,22 +38,32 @@ function automationMenuInit() {
     newContainer = document.createElement("DIV");
     newContainer.setAttribute("style", "display: block; font-size: 1.1vw; text-align: center; background-color: rgba(0,0,0,0.3);");
     
-    
-    newContainer.setAttribute("onmouseover", 'tooltip(\"Damage to Health ratio\", \"customText\", event, \" When DH ratio goes below the threshhold it will trigger mapping for up to 10 map bonus.<p><b>poisonMult: </b>\" + poisonMult + \"<br><b>windMult: </b>\" + windMult +\"<br><b>Cells Remaining: </b>\" + remainingCells.toFixed(0) + \"<br><b>DH ratio: </b>\" + formattedRatio + \"<br><b>Threshhold = </b>\" + threshhold.toFixed(3) + \"<br>")');
+    //status
+    newContainer.setAttribute("onmouseover", 'tooltip(\"Current Status\", \"customText\", event, \" You\'ve found a secret! Visit the Trimps Discord to reclaim it.")');
     newContainer.setAttribute("onmouseout", 'tooltip("hide")');
     abutton = document.createElement("SPAN");
     abutton.id = 'autoMapStatus';
     newContainer.appendChild(abutton);
     fightButtonCol.appendChild(newContainer);
 
-    //create hiderStatus - He/hr percent (in world sidebar)
+    //DHratio
+    newContainer = document.createElement("DIV");
+    newContainer.setAttribute("style", "display: block; font-size: 1vw; text-align: center; margin-top: 2px; background-color: rgba(0,0,0,0.3);");
+    newContainer.setAttribute("onmouseover", 'tooltip(\"Damage to Health Ratio\", \"customText\", event, \"      threshold = " + threshold.toFixed(3))');
+    newContainer.setAttribute("onmouseout", 'tooltip("hide")');
+    abutton1 = document.createElement("SPAN");
+    abutton1.id = 'hiderStatus1';
+    newContainer.appendChild(abutton1);
+    fightButtonCol.appendChild(newContainer);
+    
+    //He/hr percent (in world sidebar)
     newContainer = document.createElement("DIV");
     newContainer.setAttribute("style", "display: block; font-size: 1vw; text-align: center; margin-top: 2px; background-color: rgba(0,0,0,0.3);");
     newContainer.setAttribute("onmouseover", 'tooltip(\"Helium/Hr Info\", \"customText\", event, \"Current He/hr % out of lifetime Helium.<br> Current Helium out of lifetime Helium: " + ((game.resources.helium.owned / (game.global.totalHeliumEarned - game.resources.helium.owned)) * 100).toFixed(3) + "%.<br>\" + getDailyHeHrStats())');
     newContainer.setAttribute("onmouseout", 'tooltip("hide")');
-    abutton = document.createElement("SPAN");
-    abutton.id = 'hiderStatus';
-    newContainer.appendChild(abutton);
+    abutton2 = document.createElement("SPAN");
+    abutton2.id = 'hiderStatus2';
+    newContainer.appendChild(abutton2);
     fightButtonCol.appendChild(newContainer);
 
     //make timer clock toggle paused mode when clicked (bottom right)
@@ -246,14 +256,12 @@ function initializeAllSettings() {
     createSetting('ManualGather2', ['Manual Gather/Build', 'Auto Gather/Build'], 'Controls what YOU do. Manual does nothing.', 'multitoggle', 1, null, "Core");
     createSetting('BuyUpgradesNew', ['Manual Upgrades', 'Buy All Upgrades', 'Upgrades no Coords'], 'Autobuys non-equipment upgrades (equipment is controlled in the Gear tab). The second option does NOT buy coordination (use this <b>ONLY</b> if you know what you\'re doing).', 'multitoggle', 1, null, "Core");
     createSetting('NoCoordBuyStartZ', 'Start no Coord Buy', 'From this zone, stop buying coord upgrades until we get Amalgamator Amount. Disable with -1.', 'value', -1, null, 'Core');
-    createSetting('TillWeHaveAmalg', 'Amalgamator Goal', 'The script will not buy any more coordinations starting zone Z, until we have this many Amalgamators. -1 to disable.', 'value', -1, null, 'Core');
+    createSetting('TillWeHaveAmalg', 'Amalgamator Goal', 'Starting zone Z, will not buy any more coordinations until we have this many Amalgamators. -1 to disable.', 'value', -1, null, 'Core');
     createSetting('AutoAllocatePerks', ['Auto Allocate Off', 'Auto Allocate On', 'Dump into Looting II'], 'Uses the AutoPerks ratio based preset system to automatically allocate your perks to spend whatever helium you have when you AutoPortal. Does not change Fixed Perks: siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, capable. Dump all He into Looting II', 'multitoggle', 0, null, 'Core');
     //createSetting('fastallocate', 'Fast Allocate', 'Turn on if your helium is above 500Qa. Not recommended for low amounts of helium. ', 'boolean', false, null, 'Core');
     
     //Line2
     createSetting('AutoStartDaily', 'Auto Start Daily', 'With this on, the Auto Portal options will portal you into and auto-start the daily <b>whenever available</b>. Starts from the oldest available, and works forwards. Falls back to selected challenge when there are no more dailies available.', 'boolean', false, null, 'Core');
-    createSetting('AutoFinishDailyNew', 'Portal Daily Modifier', 'Modifies your normal auto portal zone in dailies. Accepts negative numbers as well, which will make you portal sooner on dailies. To disable AutoPortal during a daily, turn off the AutoPortal option or set this to <b>999</b>.', 'valueNegative', 999, null, 'Core');
-    createSetting('VoidMapsDailyMod', 'VMs Daily Modifier', 'Adds this value to your normal VM map in dailies. Accepts negative values as well. <b>Disabling this will use your portal daily modifier instead.</b> Disable with 999', 'valueNegative', 999, null, 'Core');
     createSetting('FinishC2', 'Finish Challenge2', 'Finish / Abandon Challenge2 (any) when this zone is reached, if you are running one. For manual use. Recommended: Zones ending with 0 for most Challenge2. Disable with -1. Does not affect Non-Challenge2 runs.', 'value', -1, null, 'Core');
     document.getElementById('FinishC2').parentNode.insertAdjacentHTML('afterend','<br>');
     
@@ -265,6 +273,10 @@ function initializeAllSettings() {
     createSetting('CustomAutoPortal', 'Custom Portal', 'Automatically portal AFTER clearing this level.(ie: setting to 200 would portal when you first reach level 201)', 'value', '999', null, "Core");
     createSetting('HeHrDontPortalBefore', 'Don\'t Portal Before', 'Do NOT allow Helium per Hour AutoPortal setting to portal BEFORE this level is reached. It is an additional check that prevents drops in helium/hr from triggering autoportal. Set to 0 or -1 to completely disable this check. (only shows up with Helium per Hour set)', 'value', '999', null, "Core");
     createSetting('HeliumHrBuffer', 'He/Hr Portal Buffer %', 'IMPORTANT SETTING. When using the He/Hr Autoportal, it will portal if your He/Hr drops by this amount of % lower than your best for current run, default is 0% (ie: set to 5 to portal at 95% of your best). Now with stuck protection - Allows portaling midzone if we exceed set buffer amount by 5x. (ie a normal 2% buffer setting would now portal mid-zone you fall below 10% buffer).', 'value', '0', null, 'Core');
+    createSetting('AutoFinishDailyNew', 'Portal Daily Modifier', 'Modifies your normal auto portal zone in dailies. Accepts negative numbers as well, which will make you portal sooner on dailies. To disable AutoPortal during a daily, turn off the AutoPortal option or set this to <b>999</b>.', 'valueNegative', 999, null, 'Core');
+    createSetting('VoidMapsDailyMod', 'VMs Daily Modifier', 'Adds this value to your normal VM map in dailies. Accepts negative values as well. <b>Disabling this will use your portal daily modifier instead.</b> Disable with 999', 'valueNegative', 999, null, 'Core');
+    
+    
     createSetting('PauseScript', 'Pause AutoTrimps', 'Pause AutoTrimps Script (not including the graphs module)', 'boolean', null, null, 'Core');
     //code to locate the pause button at lower right
     var $pauseScript = document.getElementById('PauseScript');
@@ -500,7 +512,7 @@ function initializeAllSettings() {
     createSetting('SpamMaps', 'Maps Spam', 'Maps Spam = Buy,Pick,Run Maps,Recycle,CantAfford', 'boolean', true, null, 'Display');
     createSetting('SpamHeirlooms', 'Heirlooms Spam', 'Heirlooms Spam = cant carry any more heirlooms', 'boolean', true, null, 'Display');
     createSetting('SpamTrimpicide', 'Trimpicide Spam', 'Trimpicide Spam = Where Trimps go to die', 'boolean', true, null, 'Display');
-    createSetting('SpamOther', 'Other Spam', 'Other Spam = mostly Better Auto Fight (disable with: MODULES[\\"fight\\"].enableDebug=false ), Trimpicide & AutoBreed/Gene Timer changes, AnalyticsID, etc - a catch all. ', 'boolean', true, null, 'Display');
+    createSetting('SpamOther', 'Amal Spam', 'Skipping cooordination to preserve Amalgamator! spam', 'boolean', true, null, 'Display');
     createSetting('SpamBuilding', 'Building Spam', 'Building Spam = all buildings, even storage', 'boolean', false, null, 'Display');
     createSetting('SpamJobs', 'Job Spam', 'Job Spam = All jobs, in scientific notation', 'boolean', false, null, 'Display');
     //Line2
@@ -882,6 +894,9 @@ function updateCustomButtons() {
     (heHr) ? turnOn("HeHrDontPortalBefore") : turnOff("HeHrDontPortalBefore");
     //if HeHr is not selected, remove HeHr buffer settingsbox
     (heHr) ? turnOn("HeliumHrBuffer") : turnOff("HeliumHrBuffer");
+    (autoTrimpSettings.AutoPortal.selected == "Off") ? turnOff("AutoFinishDailyNew") : turnOn("AutoFinishDailyNew");
+    (autoTrimpSettings.AutoPortal.selected == "Off") ? turnOff("VoidMapsDailyMod")   : turnOn("VoidMapsDailyMod");
+    
 
     getPageSetting('GASetting') ? turnOff("GASettingManual"): turnOn("GASettingManual");
     

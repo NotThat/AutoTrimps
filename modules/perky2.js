@@ -1,22 +1,24 @@
 /// <reference path="./trimps.ts"/>
 
 var Perk = {
-	locked = true,
-	level = 0,
-	min_level = 0,
-	cost = 0,
-	gain = 0,
-	bonus = 1,
+	locked: true,
+	level: 0,
+	min_level: 0,
+	cost: 0,
+	gain: 0,
+	bonus: 1,
 
-	constructor(
+	//constructor(
+        /*Perk = function(
 		base_cost,
 		cost_increment,
-		scaling: (level: number) => number,
+		//scaling: (level: number) => number,
+                scaling = function(level) {},//=> number,
 		max_level = Infinity,
 		cost_exponent = 1.3,
 	) {
 		this.cost = base_cost;
-	}
+	},*/
         
         
         /*
@@ -25,13 +27,13 @@ var Perk = {
                 }
          */
 
-	levellable = function(he_left) {
+	levellable: function(he_left) {
 		return !this.locked &&
 			this.level < this.max_level &&
 			this.cost * max(1, floor(this.level / 1e12)) <= he_left;
-	}
+	},
 
-	level_up = function(amount) {
+	level_up: function(amount) {
 		this.level += amount;
 		this.bonus = this.scaling(this.level);
 		if (this.cost_increment) {
@@ -43,21 +45,32 @@ var Perk = {
 			this.cost = ceil(this.level / 2 + this.base_cost * pow(this.cost_exponent, this.level));
 			return spent;
 		}
-	}
+	},
 
-	spent = function(log = false) {
+	spent: function(log = false) {
 		if (this.cost_increment)
 			return this.level * (this.base_cost + this.cost - this.cost_increment) / 2;
 		let total = 0;
 		for (let x = 0; x < this.level; ++x)
 			total += ceil(x / 2 + this.base_cost * pow(this.cost_exponent, x));
 		return total;
-	}
+	},
 
-	log_ratio = function() {
+	log_ratio: function() {
 		return this.cost_increment ? (this.scaling(1) - this.scaling(0)) / this.bonus
 		                           : log(this.scaling(this.level + 1) / this.bonus);
 	}
+};
+
+Perk.constructor = function(
+    base_cost,
+    cost_increment,
+    //scaling: (level: number) => number,
+    scaling = function(level) {},//=> number,
+    max_level = Infinity,
+    cost_exponent = 1.3,
+) {
+    this.cost = base_cost;
 }
 
 function validate_fixed() {
@@ -69,7 +82,8 @@ function validate_fixed() {
 	}
 }
 
-let presets: {[key: string]: string[]} = {
+//let presets : {[key: string]: string[]} = {
+let presets = {
 	early:      [  '5',  '4',  '3'],
 	broken:     [  '7',  '3',  '1'],
 	mid:        [ '16',  '5',  '1'],
@@ -91,7 +105,7 @@ let presets: {[key: string]: string[]} = {
 	income:     [  '0',  '0',  '0'],
 }
 
-function select_preset(name: string, manually: boolean = true) {
+function select_preset(name, manually = true) {
 	delete localStorage['weight-he'];
 	delete localStorage['weight-atk'];
 	delete localStorage['weight-hp'];
@@ -109,7 +123,7 @@ function auto_preset() {
 	$('#weight-xp').value = localStorage['weight-xp'] || xp;
 }
 
-function handle_respec(respec: boolean) {
+function handle_respec(respec) {
 	let owned = game ? game.resources.helium.owned : 0;
 	$('#helium').value = (input('helium') + owned * (respec ? -1 : 1)).toString();
 }
@@ -132,7 +146,7 @@ function update_dg() {
 	let fuel = 0;
 	let time = 0;
 
-	function tick(mult: number) {
+	function tick(mult) {
 		housing += mult * eff * sqrt(min(capa, fuel));
 		fuel -= burn;
 	}
@@ -166,7 +180,7 @@ function read_save() {
 	let zone = input('zone');
 
 	if (!localStorage.preset) {
-		$$('#preset > *').forEach(function (option: HTMLOptionElement) {
+		$$('#preset > *').forEach(function (option) {
 			option.selected = parseInt(option.innerHTML.replace('z', '')) < game.global.highestLevelCleared;
 		});
 		auto_preset();
@@ -316,7 +330,7 @@ function parse_inputs() {
 	return result;
 }
 
-function display(results: any) {
+function display(results) {
 	let [he_left, perks] = results;
 	let perk_size = game ? game.options.menu.smallPerks.enabled : 0;
 	let size = $('#perks').clientWidth / (5 + perk_size);
@@ -355,15 +369,18 @@ function main() {
 
 function toggle_info() {
 	localStorage.more = localStorage.more ? '' : 'more';
-	$$('.perk').forEach((elem: HTMLElement) => elem.classList.toggle('more'));
+	$$('.perk').forEach((elem) => elem.classList.toggle('more'));
 	$('#info').innerText = localStorage.more ? 'Less info' : 'More info';
 }
 
-function parse_perks(fixed: string, unlocks: string) {
-	const add = (x: number) => (level: number) => 1 + x * 0.01 * level;
-	const mult = (x: number) => (level: number) => pow(1 + x * 0.01, level);
+function parse_perks(fixed, unlocks) {
+	//const add = (x: number) => (level: number) => 1 + x * 0.01 * level;
+	//const mult = (x: number) => (level: number) => pow(1 + x * 0.01, level);
+        
+        const add = (x) => (level) => 1 + x * 0.01 * level;
+	const mult = (x) => (level) => pow(1 + x * 0.01, level);
 
-	let perks: {[key: string]: Perk} = {
+	let perks = {
 		Looting_II:     new Perk(100e3, 10e3, add(0.25)),
 		Carpentry_II:   new Perk(100e3, 10e3, add(0.25)),
 		Motivation_II:  new Perk(50e3,  1e3,  add(1)),
@@ -427,20 +444,22 @@ function parse_perks(fixed: string, unlocks: string) {
 	return perks;
 }
 
-function optimize(params: any) {
-	let {total_he, zone, fluffy, perks, weight, mod} = params;
+//function optimize(params) {
+function optimize(total_he, zone, fluffy, perks, weight, mod) {
 	let he_left = total_he;
-	let {
+	let 
 		Looting_II, Carpentry_II, Motivation_II, Power_II, Toughness_II,
 		Capable, Cunning, Curious, Classy,
 		Overkill, Resourceful, Coordinated, Siphonology, Anticipation,
 		Resilience, Meditation, Relentlessness, Carpentry, Artisanistry,
 		Range, Agility, Bait, Trumps, Pheromones,
 		Packrat, Motivation, Power, Toughness, Looting
-	} = perks;
+	 = perks;
 
-	for (let name of ['whip', 'magn', 'taunt', 'ven'])
-		mod[name] = pow(1.003, zone * 99 * 0.03 * mod[name]);
+	var arr = ['whip', 'magn', 'taunt', 'ven'];
+	for(var i = 0; i < arr.length; i++){
+		mod[arr[i]] = Math.pow(1.003, zone * 99 * 0.03 * mod[arr[i]]);
+	}
 
 	const books = pow(1.25, zone) * pow(zone > 100 ? 1.28 : 1.2, max(zone - 59, 0));
 	const gigas = max(0, min(zone - 60, zone/2 - 25, zone/3 - 12, zone/5, zone/10 + 17, 39));
@@ -492,7 +511,7 @@ function optimize(params: any) {
 		return 10 * (base_housing * bonus + territory) * carp * mod.taunt + mod.dg * carp;
 	};
 
-	function income(ignore_prod?: boolean) {
+	function income(ignore_prod) {
 		let storage = mod.storage * Resourceful.bonus / Packrat.bonus;
 		let loot = looting() * mod.magn / ticks();
 		let prod = ignore_prod ? 0 : moti() * mod.prod;
@@ -500,7 +519,7 @@ function optimize(params: any) {
 		return base_income * (prod + loot * mod.loot + chronojest) * (1 - storage) * trimps();
 	}
 
-	function equip(stat: "attack" | "health" | "block") {
+	function equip(stat) {
 		let cost = equip_cost[stat] * Artisanistry.bonus;
 		let levels = 1.136;
 		let tiers = log(1 + income() / cost) / log(exponents.cost);
@@ -515,7 +534,7 @@ function optimize(params: any) {
 	// Number of buildings of a given kind that can be built with the current income.
 	// cost: base cost of the buildings
 	// exp: cost increase for each new level of the building
-	function building(cost: number, exp: number) {
+	function building(cost, exp) {
 		cost *= 4 * Resourceful.bonus;
 		return log(1 + income(true) * (exp - 1) / cost) / log(exp);
 	}
@@ -539,7 +558,7 @@ function optimize(params: any) {
 	}
 
 	// Number of Trimps sent at a time, pre-gators
-	let group_size: number[] = [];
+	let group_size = [];
 
 	for (let coord = 0; coord <= log(1 + he_left / 500e3) / log(1.3); ++coord) {
 		let ratio = 1 + 0.25 * pow(0.98, coord);
@@ -622,7 +641,8 @@ function optimize(params: any) {
 	const helium = () => base_helium * looting() + 45;
 	const overkill = () => Overkill.bonus;
 
-	const stats: {[key: string]: () => number} = { agility, helium, xp, attack, health, overkill, trimps, income };
+	//const stats: {[key: string]: () => number} = { agility, helium, xp, attack, health, overkill, trimps, income };
+        const stats = { agility, helium, xp, attack, health, overkill, trimps, income };
 
 	function score() {
 		let result = 0;
@@ -654,12 +674,12 @@ function optimize(params: any) {
 			perks[name + '_II'].gain = perks[name].gain * perks[name + '_II'].log_ratio() / perks[name].log_ratio();
 	}
 
-	function solve_quadratic_equation(a: number, b: number, c: number): number {
+	function solve_quadratic_equation(a, b, c) {
 		let delta = b * b - 4 * a * c;
 		return (-b + sqrt(delta)) / (2 * a);
 	}
 
-	function spend_he(perk: Perk, budget: number) {
+	function spend_he(perk, budget) {
 		perk.gain /= perk.log_ratio();
 
 		if (perk.cost_increment) {
@@ -719,15 +739,24 @@ function optimize(params: any) {
 			"You don’t have a respec available.";
 
 	// Main loop
-	let sorted_perks: Perk[] = Object.keys(perks).map(name => perks[name]).filter(perk => perk.levellable(he_left));
-
-	for (let x = 0.999; x > 1e-12; x *= x) {
+	//let sorted_perks = Object.keys(perks).map(name => perks[name]).filter(perk => perk.levellable(he_left));
+        let sorted_perks = Object.keys(perks).map(name => perks[name]).filter(perk => perk.levellable(he_left));
+        
+        /*
+         *      var keysSorted = Object.keys(obj).sort(function(a, b) {
+                    return obj[b] - obj[a];
+                });
+         */
+        
+	for (let x = 0.999; x > 0.000000000001; x *= x) {
 		let he_target = he_left * x;
 		recompute_marginal_efficiencies();
 		sorted_perks.sort((a, b) => b.gain / b.cost - a.gain / a.cost);
 
 		while (he_left > he_target && sorted_perks.length) {
-			let best = sorted_perks.shift()!;
+			//let best = sorted_perks.shift()!;
+			//if (!best.levellable(he_left))
+                        let best = sorted_perks.shift();
 			if (!best.levellable(he_left))
 				continue;
 

@@ -1,6 +1,7 @@
 //MODULES["upgrades"] = {};
 var upgradeList = ['Miners', 'Scientists', 'Coordination', 'Speedminer', 'Speedlumber', 'Speedfarming', 'Speedscience', 'Speedexplorer', 'Megaminer', 'Megalumber', 'Megafarming', 'Megascience', 'Efficiency', 'TrainTacular', 'Trainers', 'Explorers', 'Blockmaster', 'Battle', 'Bloodlust', 'Bounty', 'Egg', 'Anger', 'Formations', 'Dominance', 'Barrier', 'UberHut', 'UberHouse', 'UberMansion', 'UberHotel', 'UberResort', 'Trapstorm', 'Gigastation', 'Shieldblock', 'Potency', 'Magmamancers'];
 var buyCoords = true;
+var lastAmalSpamCell = -1;
 
 //Buys all available non-equip upgrades listed in var upgradeList
 function buyUpgrades(coordsOnly) {
@@ -32,30 +33,24 @@ function buyUpgrades(coordsOnly) {
             var currentSendAfter = game.resources.trimps.getCurrentSend()*coordinationMult;
             var popArmyRatioAfter = game.resources.trimps.realMax()/currentSendAfter;
             if (popArmyRatioAfter <= 1001 && game.jobs.Amalgamator.owned > 0){
-                debug("Skipping coordination to preserve Amalgamator!");
+                var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
+                if(lastAmalSpamCell != cellNum){
+                    lastAmalSpamCell = cellNum;
+                    debug("Skipping coordination to preserve Amalgamator!", "other");
+                }
                 buyCoords = false;
             }
         }
         
         var dontBuyStartZ = getPageSetting('NoCoordBuyStartZ');
-        if(dontBuyStartZ == game.global.world + 1)
+        if(dontBuyStartZ === game.global.world + 1)
             buyCoords = true;
         else if (dontBuyStartZ > 0 && game.global.world > dontBuyStartZ && getPageSetting('TillWeHaveAmalg') > 0) { //if dontBuyStartZ is set and we've passed it
             if (game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg'))
                 buyCoords = false;
         }
-        if (game.global.challengeActive == "Trapper") //no amalgamators in trapper
+        if (game.global.challengeActive === "Trapper") //no amalgamators in trapper
             buyCoords = true;
-    }
-    
-    if(coordsOnly){
-        /*if(getPageSetting('BuyUpgradesNew') == 2 || !canAffordCoordinationTrimps() || !buyCoords)
-            return;
-        var gameUpgrade = game.upgrades['Coordination'];
-        var available = (gameUpgrade.allowed > gameUpgrade.done && canAffordTwoLevel(gameUpgrade));
-        
-        
-        return;*/
     }
     
     for (var upgrade in upgradeList) {

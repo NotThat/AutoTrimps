@@ -789,3 +789,4 @@ var AutoPerks = {
 };
 
 AutoPerky.init();
+//var AutoPerky = new AutoPerks();

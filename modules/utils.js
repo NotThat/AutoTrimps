@@ -193,7 +193,8 @@ function timeEstimator(cellNum){
 //Global debug message
 function debug(messageStr, type, lootIcon) {
     var output = true;
-    var noclock = false;
+    //var noclock = false;
+    var noclock = true;
     switch (type) {
         case null:
             break;
@@ -242,8 +243,10 @@ function debug(messageStr, type, lootIcon) {
         if (enableDebug){
             if(noclock)
                 console.log(messageStr);
+                //setTimeout (console.log.bind (console, messageStr));
             else
                 console.log(timeStamp() + ' ' + messageStr);
+                //setTimeout (console.log.bind (console, timeStamp() + ' ' + messageStr));
         }
         if(typeof pendingLogs !== 'undefined')
             message3(messageStr, "AutoTrimps", lootIcon, type);

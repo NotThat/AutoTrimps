@@ -115,10 +115,10 @@ function calcDmg(){
     
     remainingCells = 99 - game.global.lastClearedCell;
     
-    threshhold = poisonMult * windMult * remainingCells * 0.01;
+    threshold = poisonMult * windMult * remainingCells * 0.01;
     
     DHratio = (ourBaseDamage*0.25 / enemyHealth);
-    enoughDamage = DHratio > threshhold;
+    enoughDamage = DHratio > threshold;
     nextZoneDHratio = DHratio / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2);
     
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
@@ -166,8 +166,7 @@ function autoMap() {
     AutoMapsCoordOverride = false;
     calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
     
-    if(!(getPageSetting('AutoMaps') > 0))
-        return;
+    if(getPageSetting('AutoMaps') === 0 || game.global.challengeActive == "Mapology") return;
 
     //exit and do nothing if we are prior to zone 6 (maps haven't been unlocked):
     if (!game.global.mapsUnlocked || !(ourBaseDamage > 0)) { //if we have no damage, why bother running anything? (this fixes weird bugs)
@@ -243,7 +242,8 @@ function autoMap() {
     //spire specific settings
     var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 8);
     var stackSpireGetMinDamage = stackSpire && stackSpireOneTime && (game.global.lastClearedCell + 1 === 0) && (checkForGoodCell(0));
-    preSpireFarming = (isActiveSpireAT()) && ((spireTime = (Date.now() - game.global.zoneStarted) / 1000 / 60) < getPageSetting('MinutestoFarmBeforeSpire') || getPageSetting('MinutestoFarmBeforeSpire') < 0) && getPageSetting('MinutestoFarmBeforeSpire') !== 0;
+    spireTime = (getGameTime() - game.global.zoneStarted) / 1000 / 60;
+    preSpireFarming = isActiveSpireAT() && getPageSetting('MinutestoFarmBeforeSpire') !== 0 && (spireTime < getPageSetting('MinutestoFarmBeforeSpire') || getPageSetting('MinutestoFarmBeforeSpire') < 0);
     spireMapBonusFarming = getPageSetting('MaxStacksForSpire') && isActiveSpireAT() && game.global.mapBonus < 10;
     if (preSpireFarming || spireMapBonusFarming || stackSpireGetMinDamage)
         shouldDoMaps = true;
@@ -309,7 +309,7 @@ function autoMap() {
         }
     }
     
-    //Organize a list of the sorted map's levels and their index in the mapOwnedarray
+    /*//Organize a list of the sorted map's levels and their index in the mapOwnedarray
     var keysSorted = Object.keys(obj).sort(function(a, b) {
         return obj[b] - obj[a];
     });
@@ -319,7 +319,7 @@ function autoMap() {
     if (keysSorted[0])
         highestMap = keysSorted[0];
     else
-        selectedMap = "create";
+        selectedMap = "create";*/
 
     //Look through all the maps we have and figure out, find and Run Uniques if we need to
     var runUniques = (getPageSetting('AutoMaps') == 1);
@@ -447,6 +447,7 @@ function autoMap() {
     //#1 in a map, figure out repeat button
     if (game.global.mapsActive) {
         if(currMap.location == "Void"){
+            AutoMapsCoordOverride = true;
             if(doVoids && !game.global.repeatMap)
                 repeatClicked(); //enable repeat
             if(!doVoids && game.global.repeatMap)
@@ -472,10 +473,10 @@ function autoMap() {
             if(specials > 0) //we still need prestige from our current map
                 repeatChoice = 2;
             
-            if((DHratio / ourBaseDamage * ourBaseDamagePlusOne) > threshhold)
+            if((DHratio / ourBaseDamage * ourBaseDamagePlusOne) > threshold)
                 repeatChoice = 2; //psuedo 'repeat off' if we dont need more damage
             //DHratio = (ourBaseDamage*0.25 / enemyHealth);
-            //enoughDamage = DHratio > threshhold;
+            //enoughDamage = DHratio > threshold;
             
             if(preSpireFarming)
                 repeatChoice = 0;
@@ -542,9 +543,9 @@ function autoMap() {
                     fightManual();                      //--fight
                     mapsClicked(true);                  //--exit map
 
-                    var start = Date.now();
+                    var start = getGameTime();
                     while(game.global.breedBack > 0){
-                        var current = Date.now();
+                        var current = getGameTime();
                         if(current-start > 1000){
                             debug("error: took too long to breed back army. exiting.");
                             break;
@@ -619,7 +620,7 @@ function updateAutoMapsStatus(get, msg, final) {
     else if (doVoids) status = 'VMs Left: ' + game.global.totalVoidMaps + "<br>";
     else if (skippedPrestige) status += '<br><b style="font-size:.8em;color:pink;margin-top:0.2vw">Prestige Skipped</b><br>'; // Show skipping prestiges
 
-    status = status + "Ratio = " + formattedRatio;
+    //status = status + "Ratio = " + formattedRatio;
 
     //hider he/hr% status
     var getPercent = (game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned))) * 100;
@@ -636,10 +637,13 @@ function updateAutoMapsStatus(get, msg, final) {
         var elemA = document.getElementById('autoMapStatus');
         if(status != elemA.innerHTML)
             elemA.innerHTML = status;
-        var b = 'Threshhold = ' + threshhold.toFixed(3) + '<br>' + hiderStatus;
-        var elemB = document.getElementById('hiderStatus');
-        if(b != elemB.innerHTML)
-            elemB.innerHTML = b;
+        var b1 = "Ratio: " + formattedRatio;
+        var b2 = hiderStatus;
+        //var b3 = 'threshold: ' + threshold.toFixed(3);
+        var elemB1 = document.getElementById('hiderStatus1');
+        if(b1 !== elemB1.textContent) elemB1.textContent = b1;
+        var elemB2 = document.getElementById('hiderStatus2');
+        if(b2 !== elemB2.textContent) elemB2.textContent = b2;
     }
 }
 
@@ -666,7 +670,7 @@ function PrestigeRaid() {
     //at the zone where we BW, we want the most gear from normal maps that is possible.
     if (BWRaidNowLogic())
         PRaidMax = 10;
-    else if (StartZone === -1 || game.global.world < StartZone || PRaidMax <= 0 || getPageSetting('AutoMaps') == 0){
+    else if (StartZone === -1 || game.global.world < StartZone || PRaidMax <= 0){
         if(!isActiveSpireAT() || !getPageSetting('PRaidSpire'))
             return true; 
     }
@@ -1390,7 +1394,7 @@ function addSpecialsAT(mapLevel, isBionic){
             count += (allowedPres - tmp);
     }
     
-    if(isBionic && (game.global.bionicOwned - Math.floor((350-125) / 15)) <= 1)
+    if(isBionic && (game.global.bionicOwned - Math.floor((mapLevel-125) / 15)) <= 1)
         count++;
     
     return count;

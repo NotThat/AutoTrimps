@@ -10,7 +10,7 @@ var worldArray = [];
 var dailyMult = 1;
 var Goal = 0.005;
 var pctTotal;
-var OmniThreshhold;
+var OmniThreshold;
 var m;
 var hr;
 var highDamageHeirloom = true;
@@ -190,7 +190,7 @@ function autoStance() {
         }
     }
     
-    if (game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
+    if (!game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
         goDefaultStance(); //D if we have it, X otherwise
         getDamageCaller(game.global.gridArray[0].maxHealth*1000000, false);
         allowBuyingCoords = true;
@@ -237,7 +237,7 @@ function autoStance() {
         return; //beyond this point, only spire is a stacked spire4
     }
 
-    updateOmniThreshhold();
+    updateOmniThreshold();
     
     allowBuyingCoords = !getPageSetting('DelayCoordsForWind'); //dont buy coords unless we explicitly permit it. automaps() can also allow it if player runs a map for ratio.
 
@@ -380,7 +380,7 @@ function autoStance() {
                 for(var i = 98; i>80; i--){
                     worldArray[i].geoRelativeCellWorth = getRetainModifier("Wind") * (worldArray[i+1].baseWorth + worldArray[i+1].geoRelativeCellWorth);
                     worldArray[i].PBWorth = pbMult * (worldArray[i+1].baseWorth + worldArray[i+1].geoRelativeCellWorth);
-                    worldArray[i].finalWorth = (worldArray[i].baseWorth + worldArray[i].geoRelativeCellWorth + worldArray[i].PBWorth) * game.empowerments.Wind.getModifier() * dailyMult / OmniThreshhold; //this is in Omnipotrimps units
+                    worldArray[i].finalWorth = (worldArray[i].baseWorth + worldArray[i].geoRelativeCellWorth + worldArray[i].PBWorth) * game.empowerments.Wind.getModifier() * dailyMult / OmniThreshold; //this is in Omnipotrimps units
                 }
             }
         }
@@ -411,8 +411,8 @@ function autoStance() {
         cmpActual += worldArray[cellNum].geoRelativeCellWorth;
     
     if(worldArray[cellNum].corrupted == "corruptDodge" && !stackSpire) {cmp *= 0.7; cmpActual *= 0.7;} //dodge cells are worth less
-    cmp       *= game.empowerments.Wind.getModifier() * dailyMult / OmniThreshhold; //cmp is in OmniThreshhold units
-    cmpActual *= game.empowerments.Wind.getModifier() * dailyMult / OmniThreshhold;
+    cmp       *= game.empowerments.Wind.getModifier() * dailyMult / OmniThreshold; //cmp is in OmniThreshold units
+    cmpActual *= game.empowerments.Wind.getModifier() * dailyMult / OmniThreshold;
     
     calculateZoneWorth(cellNum);
     
@@ -681,7 +681,7 @@ function setEmptyStats(){
         stanceStats.timeDead = 0;
     }
     
-    if (game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp")
+    if (!game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp")
         return; //dont redraw every zone in liquification zones since redrawing graph makes mouseover tooltips flicker
     
     if(getPageSetting('ForceUpdateGraph') && document.getElementById('graphParent') && document.getElementById('graphParent').style.display === "block")
@@ -866,7 +866,7 @@ function buildWorldArray(){
     worldArray = []; //create a world array that's safe to write to
     currentBadGuyNum = -1;
     
-    if (game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
+    if (!game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
         var atk = calcEnemyAttack(game.global.gridArray[0].mutation, game.global.gridArray[0].corrupted, 1, game.global.gridArray[0].name, 0, 1);
         worldArray[0] = {health: game.global.gridArray[0].maxHealth, maxHealth: game.global.gridArray[0].maxHealth, attack: atk};
         return;
@@ -983,11 +983,11 @@ function buildWorldArray(){
 
     worldArray[99].geoRelativeCellWorth = (game.global.world % 5 === 0 ? 0 : 1); //approximation of stack transfer worth into next zone    
     worldArray[99].PBWorth = 0; //PB doesnt get carried over to next zone
-    worldArray[99].finalWorth = (worldArray[99].baseWorth + worldArray[99].geoRelativeCellWorth) * game.empowerments.Wind.getModifier() * dailyMult / OmniThreshhold; //this is in Omnipotrimps units
+    worldArray[99].finalWorth = (worldArray[99].baseWorth + worldArray[99].geoRelativeCellWorth) * game.empowerments.Wind.getModifier() * dailyMult / OmniThreshold; //this is in Omnipotrimps units
     for(var i = 98; i >= 0; i--){
         worldArray[i].geoRelativeCellWorth = getRetainModifier("Wind") * (worldArray[i+1].baseWorth + worldArray[i+1].geoRelativeCellWorth);
         worldArray[i].PBWorth = pbMult * (worldArray[i+1].baseWorth + worldArray[i+1].geoRelativeCellWorth);
-        worldArray[i].finalWorth = (worldArray[i].baseWorth + worldArray[i].geoRelativeCellWorth + worldArray[i].PBWorth) * game.empowerments.Wind.getModifier() * dailyMult / OmniThreshhold; //this is in Omnipotrimps units
+        worldArray[i].finalWorth = (worldArray[i].baseWorth + worldArray[i].geoRelativeCellWorth + worldArray[i].PBWorth) * game.empowerments.Wind.getModifier() * dailyMult / OmniThreshold; //this is in Omnipotrimps units
     }
 
     stanceStats = {cmp: [], stacks: [], wastedStacksAtEnd: [], wastedStacksAtStart: [], shieldUsedAtCellDeath: [], trimpicides: [], wantLessDamage: [], wantMoreDamage: [], timeDead: 0}; //keep track of how well we're doing
@@ -995,7 +995,7 @@ function buildWorldArray(){
     calculateZoneWorth(0);
     
     if(!isNaN(m) && !game.global.runningChallengeSquared)
-        debug("Zone " + game.global.world + " Omni/atk Goal: "+OmniThreshhold.toFixed(2)+" ("+ m.toExponential(2)+ ") zone worth: " + zoneWorth.toFixed(2));
+        debug("Zone " + game.global.world + " Omni/atk Goal: "+OmniThreshold.toFixed(2)+" ("+ m.toExponential(2)+ ") zone worth: " + zoneWorth.toFixed(2));
     else
         debug("Zone " + game.global.world);
     
@@ -1076,10 +1076,10 @@ function calcOmniHelium(){ //rewardResource()
     m = a*b*c*d*e*f*g*h*i*j*k*l*heliumy; //Omnipotrimp helium
     hr = m * 60 * 60 * 1/(Math.pow(0.95, 20) - 0.1); //if we kill Omni every attack how much he/hr we'll have
 
-    updateOmniThreshhold();
+    updateOmniThreshold();
 }
 
-function updateOmniThreshhold() {
+function updateOmniThreshold() {
     pctTotal = (100*hr/game.global.totalHeliumEarned); //which is this much he/hr% out of our total helium
     
     if (countDailyWeight() === 0) //no daily
@@ -1089,7 +1089,7 @@ function updateOmniThreshhold() {
     
     Goal = getPageSetting('WindStackingPctHe');
     if(Goal == -1) Goal = 0.5;
-    OmniThreshhold = Goal/pctTotal; //this is how many Omnis' worth of helium we need to get on each attack in order to meet our he%/hr quota
+    OmniThreshold = Goal/pctTotal; //this is how many Omnis' worth of helium we need to get on each attack in order to meet our he%/hr quota
 }
 
 function calculateZoneWorth(fromCellNum){

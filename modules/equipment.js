@@ -454,7 +454,7 @@ function getDamage(dmg, lowerDamage, noCrit){
             return;
     }
     
-    if (!game.global.spireActive && game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
+    if (!game.global.spireActive && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
         if(dmgToCheck*8 >= dmg) buyWeaponsMode = 0;
         else buyWeaponsMode = 3;
         //autoLevelEquipment(lowerDamage, true, true);

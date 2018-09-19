@@ -276,7 +276,7 @@ function buyJobs() {
     //Magmamancers code:
     if (game.jobs.Magmamancer.locked) return;
     //game.jobs.Magmamancer.getBonusPercent(true);
-    var timeOnZone = Math.floor((Date.now() - game.global.zoneStarted) / 60000);
+    var timeOnZone = Math.floor((getGameTime() - game.global.zoneStarted) / 60000);
     // Add 5 minutes for zone-time for magmamancer mastery
     if (game.talents.magmamancer.purchased)
         timeOnZone += 5;

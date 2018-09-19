@@ -17,7 +17,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 ////////////////////////////////////////
 
 var local = false;
-//local = true;
+local = true;
 var ver = "18.7";
 var verDate = "11.9.18";
 
@@ -49,8 +49,10 @@ function startAT() {
     for (var script in ATmoduleListComplete){
         var found = false;
         for (var i = 0; i < document.scripts.length; i++){
-            if(document.scripts[i].src.indexOf(ATmoduleListComplete[script]) > -1)
+            if(document.scripts[i].src.indexOf(ATmoduleListComplete[script]) >= 0){ //found
                 found = true;
+                break;
+            }
         }
         if(!found){
             setTimeout(startAT, 100);
@@ -61,8 +63,8 @@ function startAT() {
     //one last time for compiler to recognize all loaded vars
     if(!allLoaded){
         allLoaded = true;
-        setTimeout(startAT, 1000);
-        return;
+        //setTimeout(startAT, 1000);
+        //return;
     }
     
     //code to run on script launch:
@@ -150,7 +152,8 @@ function initializeAutoTrimps() {
     ATscriptLoad('','Graphs');        //populate Graphs
     //Load modules:
     //ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'scryer', 'magmite', 'other', 'import-export', 'client-server', 'perks', /* 'perky', */ 'fight-info', 'performance', 'ATcalc'];
-    ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'scryer', 'magmite', 'other', 'import-export', 'perks', /* 'perky', */ 'fight-info', 'performance', 'ATcalc'];
+    //ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'scryer', 'magmite', 'other', 'import-export', 'perks', /* 'perky', */ 'fight-info', 'performance', 'ATcalc'];
+    ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'scryer', 'magmite', 'other', 'import-export', 'perks', /*'perky',*/ 'fight-info', 'performance', 'ATcalc'];
 
     for (var m in ATmoduleList) {
         ATscriptLoad(modulepath, ATmoduleList[m]);
@@ -240,7 +243,7 @@ var windMult = 1;
 var poisonMultFixed=0.05;
 var poisonMult = 1;
 var enemyHealth=1;
-var threshhold=1;
+var threshold=1;
 var DHratio = 0;
 var formattedRatio = "";
 var nextZoneDHratio = 0;
@@ -307,9 +310,9 @@ function ATLoop(makeUp) {
     statusMsg = ASMode;
     
     if(game.options.menu.showFullBreed.enabled != 1) toggleSetting("showFullBreed");    //more detail
-    hiddenBreedTimer = ((game.jobs.Amalgamator.owned > 0) ? Math.floor((Date.now() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000));
+    hiddenBreedTimer = ((game.jobs.Amalgamator.owned > 0) ? Math.floor((getGameTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000));
     if(hiddenBreedTimer != hiddenBreedTimerLast && typeof addbreedTimerInsideText !== 'undefined'){
-        addbreedTimerInsideText.innerHTML = hiddenBreedTimer + 's'; //add breed time for next army;
+        addbreedTimerInsideText.textContent = hiddenBreedTimer + 's'; //add breed time for next army;
         hiddenBreedTimerLast = hiddenBreedTimer;
     }
     addToolTipToArmyCount(); //Add hidden tooltip for army count (SettingsGUI.js @ end)
@@ -354,7 +357,6 @@ function ATLoop(makeUp) {
         AutoMapsCoordOverride = false;
         maxCoords = -1;
         perked = false;
-
     }
     setScienceNeeded();  //determine how much science is needed
     

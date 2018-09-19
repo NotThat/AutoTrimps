@@ -353,7 +353,8 @@ function getTotalDarkEssenceCount() {
 
 function pushData() {
     //debug('Starting Zone ' + game.global.world, "graphs");
-    var getPercent = (game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned)))*100;
+    var dailyMultGraph = (countDailyWeight() === 0 ? 1 : 1 + getDailyHeliumValue(countDailyWeight()) / 100);
+    var getPercent = (dailyMultGraph * game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned)))*100;
     var lifetime = (game.resources.helium.owned / (game.global.totalHeliumEarned-game.resources.helium.owned))*100;
     
     //var resultForGraph = Math.log10(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend());
@@ -361,7 +362,7 @@ function pushData() {
     allSaveData.push({
         totalPortals: game.global.totalPortals,
         heliumOwned: game.resources.helium.owned,
-        currentTime: Date.now(),
+        currentTime: getGameTime(),
         portalTime: game.global.portalTime,
         world: game.global.world,
         challenge: game.global.challengeActive,
@@ -394,7 +395,7 @@ function pushData() {
 var graphAnal = [];
 function trackHourlyGraphAnalytics() {
     graphAnal.push({
-        currentTime: Date.now(),
+        currentTime: getGameTime(),
         totalPortals: game.global.totalPortals,
         heliumOwned: game.resources.helium.owned,
         highzone: game.global.highestLevelCleared,
@@ -467,14 +468,14 @@ function gatherInfo() {
     //Overkill cell tracking:
     if (game.options.menu.overkillColor.enabled == 0) toggleSetting('overkillColor');   //make sure the setting is on.
     //Detecting the liquification through liquimp - Crude attempt at this, need to store/track more data.
-    if (game.options.menu.liquification.enabled && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp")
+    if (!game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp")
         GraphsVars.OVKcellsInWorld = 100;
         //if (game.stats.zonesLiquified.value > oldzonesLiquified)    //may come in handy; goes up by 1 each zone you liqui-kill.
     else
         //track how many overkill world cells we have beaten in the current level. (game.stats.cellsOverkilled.value for the entire run)
         GraphsVars.OVKcellsInWorld = document.getElementById("grid").getElementsByClassName("cellColorOverkill").length;
     //track time in each zone for better graphs
-    GraphsVars.ZoneStartTime = Date.now() - game.global.zoneStarted;
+    GraphsVars.ZoneStartTime = getGameTime() - game.global.zoneStarted;
     //track MapBonus
     GraphsVars.MapBonus = game.global.mapBonus;
 }
@@ -783,16 +784,17 @@ function setGraphData(graph) {
             var arr1 = [];
             var arr2 = [];
             
-            for(var i = 0; i <stanceStats.cmp.length; i++){
-                if(!worldArray[i])
-                    names.push(i);
-                else if(worldArray[i].corrupted === undefined)
-                    names.push(i + "empty");
-                else
-                    names.push(i + worldArray[i].corrupted);
-                arr1.push([names[i], stanceStats.cmp[i]]);
-                arr2.push([names[i], stanceStats.stacks[i]]);
-            }
+            if(typeof cmp !== 'undefined')
+                for(var i = 0; i <stanceStats.cmp.length; i++){
+                    if(!worldArray[i])
+                        names.push(i);
+                    else if(worldArray[i].corrupted === undefined)
+                        names.push(i + "empty");
+                    else
+                        names.push(i + worldArray[i].corrupted);
+                    arr1.push([names[i], stanceStats.cmp[i]]);
+                    arr2.push([names[i], stanceStats.stacks[i]]);
+                }
             
             graphData = [];
             graphData[0] = {name: 'He/hr Efficiency', data: arr1};
