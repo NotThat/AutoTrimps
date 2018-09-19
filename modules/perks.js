@@ -16,7 +16,7 @@ presetObj("--------------", 1,    1,  1,    1,   1);
 
 var preset_Custom = JSON.parse(localStorage.getItem('AutoPerksCustomRatios'));
 var secondLine    = JSON.parse(localStorage.getItem('AutoPerksSecondLine'));
-if(Array.isArray(preset_Custom) || typeof preset_Custom === 'undefined'){
+if(Array.isArray(preset_Custom) || preset_Custom == null){
     preset_Custom = presetObj("Custom", 1, 1, 1, 1, 1);
     safeSetItems('AutoPerksCustomRatios', JSON.stringify(preset_Custom) );
 }
