@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 local = true;
-var ver = "19";
+var ver = "19.1";
 var verDate = "19.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -63,8 +63,8 @@ function startAT() {
     //one last time for compiler to recognize all loaded vars
     if(!allLoaded){
         allLoaded = true;
-        //setTimeout(startAT, 1000);
-        //return;
+        setTimeout(startAT, 100);
+        return;
     }
     
     //code to run on script launch:
