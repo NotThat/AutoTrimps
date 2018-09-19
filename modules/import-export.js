@@ -241,19 +241,6 @@ function ImportExportTooltip(what, event) {
         }
         tooltipText = "Autotrimps - Loaded the MODULE .JS File(s): " + modnames;
         costText = "<div class='maxCenter'><div id='confirmTooltipBtn' class='btn btn-info' onclick='cancelTooltip();'>OK</div></div>";
-    } else if (what == "ATModuleUnload") {
-        var mods = document.getElementById('ATModuleListDropdown');
-        var modnames = "";
-        for (script in mods.selectedOptions) {
-            var $item = mods.selectedOptions[script];
-            if ($item.value != null) {
-                ATscriptUnload($item.value);
-                //console.log($item.value);
-                modnames += $item.value + " ";
-            }            
-        }
-        tooltipText = "Autotrimps - UnLoaded the MODULE .JS File(s): " + modnames;
-        costText = "<div class='maxCenter'><div id='confirmTooltipBtn' class='btn btn-info' onclick='cancelTooltip();'>OK</div></div>";
     } else if (what == "ResetModuleVars") {
         resetModuleVars();
         tooltipText = "Autotrimps MODULE variable settings have been successfully reset to its defaults!";

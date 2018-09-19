@@ -534,16 +534,7 @@ function initializeAllSettings() {
     //createSetting('ResetModuleVars', 'Reset Custom Variables', 'Reset(Delete) your custom MODULES variables, and return the script to normal. ', 'infoclick', 'ResetModuleVars', null, 'Import Export');
 
     //createSetting('PlayerLevel', 'PlayerLevel', 'PlayerLevel: Indicate around what level you are. noob, low, medium, high, spire, magma, expert, z450+, z500+, endgame and so on. Might be used to control which settings are visible in the future. ', 'dropdown', "Medium", ["Noob","Low","Medium","High","Spire","Magma","Expert","z450+","z500+","EndGame"], 'Display');
-    /*
-    createSetting('ATModuleListDropdown', 'Modules', 'AT Module List Dropdown: Lists all the individual modules (.js files) that have been auto-loaded. It might be possible to unload these or something in the future.', 'dropdown', ATmoduleList[0], ATmoduleList, 'Import Export');
-    document.getElementById('ATModuleListDropdown').multiple = true;    //allow 4 multiple selections
-    document.getElementById('ATModuleListDropdown').size = 4;
-    document.getElementById('ATModuleListDropdown').height = '5vw';
-    document.getElementById('ATModuleListDropdownLabel').style.verticalAlign = 'top';
-    document.getElementById('ATModuleListDropdownLabel').parentNode.style.width = null; //make the next stuff fit on 1 line.
-    createSetting('ATModuleUnload', 'Unload Module', 'UnLoads a running module file this session', 'infoclick', 'ATModuleUnload', null, 'Import Export');
-    createSetting('ATModuleLoad', 'ReLoad Module', 'Load/Reloads a module file (.js) and runs it.', 'infoclick', 'ATModuleLoad', null, 'Import Export');
-    */
+
 }
 initializeAllSettings(); //EXECUTE
 

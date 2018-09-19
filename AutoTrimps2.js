@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "19.8";
+var ver = "19.9";
 var verDate = "19.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -50,26 +50,7 @@ function startAT() {
         setTimeout(startAT, 100);
         return;
     }
-    /*for (var script in ATmoduleListComplete){
-        var found = false;
-        for (var i = 0; i < document.scripts.length; i++){
-            if(document.scripts[i].src.indexOf(ATmoduleListComplete[script]) >= 0){ //found
-                found = true;
-                break;
-            }
-        }
-        if(!found || typeof addToolTipToArmyCount === 'undefined'){
-            setTimeout(startAT, 100);
-            return;
-        }
-    }*/
-    
-    //one last time for compiler to recognize all loaded vars
-    //if(!allLoaded){
-    //    allLoaded = true;
-        //setTimeout(startAT, 1000);
-        //return;
-    //}
+    debug('AutoTrimps loaded!');
     
     //code to run on script launch:
     if (!local) printChangelog();
@@ -143,13 +124,6 @@ function ATscriptLoad(pathname, modulename) {
     //script.setAttribute('crossorigin',"anonymous");
     document.head.appendChild(script);
 }
-//Scripts can be unloaded like this: ATscriptUnload('scryer');
-function ATscriptUnload(id) {
-    var $link = document.getElementById(id + '_MODULE');
-    if (!$link) return;
-    document.head.removeChild($link);
-    debug("Removing " + id + "_MODULE","other");
-}
 ATscriptLoad(modulepath, 'utils');    //Load stuff needed to load other stuff:
 
 //This starts up after game is loaded
@@ -158,14 +132,12 @@ function initializeAutoTrimps() {
     ATscriptLoad('','SettingsGUI');   //populate Settings GUI
     ATscriptLoad('','Graphs');        //populate Graphs
     //Load modules:
-    //ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'scryer', 'magmite', 'other', 'import-export', 'client-server', 'perks', /* 'perky', */ 'fight-info', 'performance', 'ATcalc'];
-    //ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'scryer', 'magmite', 'other', 'import-export', 'perks', /* 'perky', */ 'fight-info', 'performance', 'ATcalc'];
     ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'scryer', 'magmite', 'other', 'import-export', 'perks', /*'perky',*/ 'fight-info', 'performance', 'ATcalc'];
-
-    for (var m in ATmoduleList) {
+    for (var m in ATmoduleList) 
         ATscriptLoad(modulepath, ATmoduleList[m]);
-    }
-    debug('AutoTrimps v' + ATversion + ' ' + ver + ' Loaded!', '*spinner3');
+    
+    //debug('AutoTrimps v' + ATversion + ' ' + ver + ' Loaded!', '*spinner3');
+    debug('AutoTrimps v' + ATversion + ' ' + ver);
 }
 
 var changelogList = [];

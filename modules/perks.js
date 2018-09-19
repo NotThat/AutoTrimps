@@ -888,7 +888,7 @@ function calcPopBreed(){
                 AutoPerks.veniBonus *
                 0.1 *           //broken planet
                 (1 + 0.1*pheroPerk.level);
-    debug("breed = " + AutoPerks.breed);
+    //debug("breed = " + AutoPerks.breed);
     //var geneticists = Math.log(AutoPerks.breed / 45) / -log(0.98);
     var geneticists = AutoPerks.breed / finalArmySize;
     
