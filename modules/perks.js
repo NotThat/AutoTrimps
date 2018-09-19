@@ -878,16 +878,21 @@ function calcPopBreed(){
                          Math.pow(1.009, AutoPerks.maxZone-AutoPerks.amalZone); //complete to maxZone
     AutoPerks.breed = 
                 0.0085 *        //base
-                0.1 *           //broken planet
-                finalPopSize/2 * 
+                finalPopSize/2 *
                 Math.pow(1.1, Math.floor(AutoPerks.maxZone / 5)) * //potency
                 AutoPerks.veniBonus *
+                0.1 *           //broken planet
                 (1 + 0.1*pheroPerk.level);
+    debug("breed = " + AutoPerks.breed);
     //var geneticists = Math.log(AutoPerks.breed / 45) / -log(0.98);
     var geneticists = AutoPerks.breed / finalArmySize;
     
     return geneticists; //TODO
     //return 1;
+}
+
+function calcBreed(popSize, zone, veniBonus, pheroLevel){
+    
 }
 
 function benefitDGCalc(){
