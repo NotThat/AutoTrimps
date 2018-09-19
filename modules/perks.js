@@ -22,7 +22,6 @@ if(Array.isArray(preset_Custom) || typeof preset_Custom === 'undefined'){
 }
 else presetList.push(preset_Custom);
 
-
 //Custom Creation for all perk customRatio boxes in Trimps Perk Window
 AutoPerks.createInput = function(perkname,div) {
     var perk1input = document.createElement("Input");

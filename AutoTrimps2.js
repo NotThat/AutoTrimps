@@ -17,8 +17,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 ////////////////////////////////////////
 
 var local = false;
-//local = true;
-var ver = "19.5";
+local = true;
+var ver = "19.6";
 var verDate = "19.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -46,7 +46,11 @@ function startAT() {
     }
     
     //wait until all the scripts are loaded into page
-    for (var script in ATmoduleListComplete){
+    if(loadedScriptAmount !== expectedScriptAmount){
+        setTimeout(startAT, 100);
+        return;
+    }
+    /*for (var script in ATmoduleListComplete){
         var found = false;
         for (var i = 0; i < document.scripts.length; i++){
             if(document.scripts[i].src.indexOf(ATmoduleListComplete[script]) >= 0){ //found
@@ -58,14 +62,14 @@ function startAT() {
             setTimeout(startAT, 100);
             return;
         }
-    }
+    }*/
     
     //one last time for compiler to recognize all loaded vars
-    if(!allLoaded){
-        allLoaded = true;
+    //if(!allLoaded){
+    //    allLoaded = true;
         //setTimeout(startAT, 1000);
         //return;
-    }
+    //}
     
     //code to run on script launch:
     if (!local) printChangelog();
@@ -125,13 +129,16 @@ if (atscript !== null) {
 // AKA do certain things when matched on a certain url.
 //if (atscript.src.includes('localhost')) {;};
 
-//Script can be loaded like this: ATscriptLoad(modulepath, 'utils.js');
+var loadedScriptAmount = 0;
+var expectedScriptAmount = 0;
 function ATscriptLoad(pathname, modulename) {
     if (modulename == null) debug("Wrong Syntax. Script could not be loaded. Try ATscriptLoad(modulepath, 'example.js'); ");
     var script = document.createElement('script');
     if (pathname == null) pathname = '';
     script.src = basepath + pathname + modulename + '.js';
     script.id = modulename + '_MODULE';
+    script.onload = function(){loadedScriptAmount++;}
+    expectedScriptAmount++;
     //script.setAttribute('crossorigin',"use-credentials");
     //script.setAttribute('crossorigin',"anonymous");
     document.head.appendChild(script);
