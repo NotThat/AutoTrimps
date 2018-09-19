@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "19.3";
+var ver = "19.4";
 var verDate = "19.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script')
@@ -54,7 +54,7 @@ function startAT() {
                 break;
             }
         }
-        if(!found){
+        if(!found || typeof addToolTipToArmyCount === 'undefined'){
             setTimeout(startAT, 100);
             return;
         }
@@ -63,8 +63,8 @@ function startAT() {
     //one last time for compiler to recognize all loaded vars
     if(!allLoaded){
         allLoaded = true;
-        setTimeout(startAT, 1000);
-        return;
+        //setTimeout(startAT, 1000);
+        //return;
     }
     
     //code to run on script launch:
