@@ -16,14 +16,12 @@ presetObj("--------------", 1,    1,  1,    1,   1);
 
 var preset_Custom = JSON.parse(localStorage.getItem('AutoPerksCustomRatios'));
 var secondLine    = JSON.parse(localStorage.getItem('AutoPerksSecondLine'));
-if(Array.isArray(preset_Custom)){
+if(Array.isArray(preset_Custom) || typeof preset_Custom === 'undefined'){
     preset_Custom = presetObj("Custom", 1, 1, 1, 1, 1);
     safeSetItems('AutoPerksCustomRatios', JSON.stringify(preset_Custom) );
 }
-else {
-    preset_Custom.header = "Custom";
-    presetList.push(preset_Custom);
-}
+else presetList.push(preset_Custom);
+
 
 //Custom Creation for all perk customRatio boxes in Trimps Perk Window
 AutoPerks.createInput = function(perkname,div) {
