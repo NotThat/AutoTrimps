@@ -63,7 +63,7 @@ function startAT() {
     //one last time for compiler to recognize all loaded vars
     if(!allLoaded){
         allLoaded = true;
-        setTimeout(startAT, 100);
+        setTimeout(startAT, 1000);
         return;
     }
     
