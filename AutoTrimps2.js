@@ -18,13 +18,12 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "19.9";
+var ver = "19.10";
 var verDate = "19.9.18";
 
-var atscript = document.getElementById('AutoTrimps-script')
-    , basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/')
-  , modulepath = 'modules/'
-  ;  
+var atscript = document.getElementById('AutoTrimps-script'), 
+        basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
+        modulepath = 'modules/';  
     
 var initialized = false;
 function startAT() {
@@ -45,7 +44,6 @@ function startAT() {
         setTimeout(startAT, 100);
         return;
     }
-    debug('AutoTrimps loaded!');
     
     //code to run on script launch:
     if (!local) printChangelog();
@@ -94,6 +92,7 @@ function startAT() {
             return result;
         };
     })();
+    debug('AutoTrimps loaded!');
 }
 
 //This should redirect the script to wherever its being mirrored from.
@@ -113,7 +112,7 @@ function ATscriptLoad(pathname, modulename) {
     if (pathname == null) pathname = '';
     script.src = basepath + pathname + modulename + '.js';
     script.id = modulename + '_MODULE';
-    script.onload = function(){loadedScriptAmount++;}
+    script.onload = function(){loadedScriptAmount++;};
     expectedScriptAmount++;
     //script.setAttribute('crossorigin',"use-credentials");
     //script.setAttribute('crossorigin',"anonymous");
@@ -158,7 +157,7 @@ function printChangelog() {
         var $item = changelogList[i];
         var result = assembleChangelog($item.date,$item.version,$item.description,$item.isNew);
         body+=result;
-    };
+    }
     var footer =
         '<b>Ongoing Development</b> - <u>Report any bugs/problems please</u>!\
         <br>Talk with the dev: <b>meowchan_#0720</b> @ <a target="#" href="https://discord.gg/0VbWe0dxB9kIfV2C">AutoTrimps Discord Channel</a>'

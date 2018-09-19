@@ -904,7 +904,7 @@ function setGraphData(graph) {
         case 'Helium - Total':
             graphData = allPurposeGraph('heliumOwned',true,null,
                     function specialCalc(e1,e2) {
-                        return Math.floor(e1.heliumOwned);
+                        return prettify(Math.floor(e1.heliumOwned));
                     });
             title = 'Helium (Lifetime Total)';
             xTitle = 'Zone';

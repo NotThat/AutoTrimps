@@ -309,7 +309,7 @@ function autoMap() {
         }
     }
     
-    /*//Organize a list of the sorted map's levels and their index in the mapOwnedarray
+    //Organize a list of the sorted map's levels and their index in the mapOwnedarray
     var keysSorted = Object.keys(obj).sort(function(a, b) {
         return obj[b] - obj[a];
     });
@@ -319,7 +319,7 @@ function autoMap() {
     if (keysSorted[0])
         highestMap = keysSorted[0];
     else
-        selectedMap = "create";*/
+        selectedMap = "create";
 
     //Look through all the maps we have and figure out, find and Run Uniques if we need to
     var runUniques = (getPageSetting('AutoMaps') == 1);
