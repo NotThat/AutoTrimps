@@ -181,10 +181,18 @@ AutoPerks.updateFromBoxes = function() {
             $perkRatioBoxes[i].value = presetObj[perkname];
     }
     
-    $perkRatioBoxes[5].value = secondLine[0] || 560;
-    $perkRatioBoxes[6].value = secondLine[1] || 6;
-    $perkRatioBoxes[7].value = secondLine[2] || 420;
-    $perkRatioBoxes[8].value = secondLine[3] || 105;
+    if(secondLine == null){
+        $perkRatioBoxes[5].value = 560;
+        $perkRatioBoxes[6].value = 6;
+        $perkRatioBoxes[7].value = 420;
+        $perkRatioBoxes[8].value = 105;        
+    }
+    else{
+        $perkRatioBoxes[5].value = secondLine[0];
+        $perkRatioBoxes[6].value = secondLine[1];
+        $perkRatioBoxes[7].value = secondLine[2];
+        $perkRatioBoxes[8].value = secondLine[3];
+    }
     
     AutoPerks.updatePerkRatios(); //updates perk ratios from boxes into the data structures
  
