@@ -27,8 +27,6 @@ var atscript = document.getElementById('AutoTrimps-script')
   ;  
     
 var initialized = false;
-var allLoaded = false;
-var ATmoduleListComplete = [];
 function startAT() {
     //first we wait for the game to load
     if((typeof game === 'undefined' || typeof loadPageVariables === 'undefined' || typeof game.options === 'undefined' || typeof game.options.menu === 'undefined' || typeof pendingLogs === 'undefined' || document.getElementById('logBtnGroup') === null)){ //game hasnt initialized yet
@@ -39,9 +37,6 @@ function startAT() {
     if(!initialized){
         pendingLogs.AutoTrimps = []; //adds AT messages slot. needed before we can call debug()
         initializeAutoTrimps(); //loads modules asynchronously
-        ATmoduleListComplete = ATmoduleList;
-        ATmoduleListComplete.push('SettingsGUI');
-        ATmoduleListComplete.push('Graphs');
         initialized = true;
     }
     

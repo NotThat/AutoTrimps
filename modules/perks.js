@@ -398,8 +398,8 @@ AutoPerks.spendHelium = function(helium) {
     for(var i in perks) {
         if(perks[i].isLocked || perks[i].isFixed || typeof perks[i].parent !== 'undefined') //skip unowned, fixed, and T2 perks.
             continue;
-        if(perks[i].name == "Carpentry")
-            debug("here");
+        //if(perks[i].name == "Carpentry")
+            //debug("here");
         var inc = perks[i].getBenefit();
         var price = perks[i].getPrice();
         perks[i].efficiency = inc/price;
