@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "19.11";
+var ver = "20";
 var verDate = "19.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 

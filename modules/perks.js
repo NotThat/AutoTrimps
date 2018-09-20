@@ -280,7 +280,7 @@ AutoPerks.getHelium = function() {
 //green "Allocate Perks" button:
 AutoPerks.clickAllocate = function() {
     AutoPerks.totalHelium = AutoPerks.getHelium(); //differs whether we're in the portal screen or mid run respec
-    AutoPerks.incomeMult  = 1;
+    AutoPerks.gearLevels  = 1;
     AutoPerks.breedMult   = 1;
     AutoPerks.veniBonus   = 1;
     for(var i = 1; i <= AutoPerks.maxZone * 3; i++)
@@ -421,6 +421,8 @@ AutoPerks.spendHelium = function(helium) {
     for (iterateQueue() ; !effQueue.isEmpty() ; iterateQueue() ) {
         if(mostEff.level < mostEff.max) { // check if the perk has reached its maximum value
             if (helium <= price) continue;
+            if(mostEff.name === "Artisanistry")
+            debug("here");
             helium -= price;
             mostEff.buyLevel();
             mostEff.spent += price;            
@@ -782,9 +784,9 @@ function benefitAttackCalc(incomeFlag){
     //AutoPerks.benefitHolderObj.Helium
     var income;
     if(incomeFlag) income = calcIncome();
-    else income = AutoPerks.incomeMult;
-    
-    this.benefit = (1 + 0.05*power1Perk.level) * (1 + 0.01*power2Perk.level) * income;
+    else income = AutoPerks.gearLevels;
+    var amalBonus = game.talents.amalg.purchased ? Math.pow(1.5, AutoPerks.currAmalgamators) : (1 + 0.5*AutoPerks.currAmalgamators);
+    this.benefit = (1 + 0.05*power1Perk.level) * (1 + 0.01*power2Perk.level) * income * amalBonus;
     
     if(isNaN(this.benefit)) debug("error - Attack NaN benefit");
     
@@ -800,11 +802,11 @@ function benefitHealthCalc(incomeFlag, popBreedFlag){
     
     var income, popBreed;
     if(incomeFlag) income = calcIncome();
-    else income = AutoPerks.incomeMult;
+    else income = AutoPerks.gearLevels;
     if(popBreedFlag) popBreed = calcPopBreed(); //TODO
     else popBreed = AutoPerks.breedMult;
     
-    this.benefit = (1 + 0.05*toughness1Perk.level) * (1 + 0.01*toughness2Perk.level)*Math.pow(1.1, resilPerk.level) * income * popBreed;
+    this.benefit = (1 + 0.05*toughness1Perk.level) * (1 + 0.01*toughness2Perk.level)*Math.pow(1.1, resilPerk.level) * income * popBreed * Math.pow(40, AutoPerks.currAmalgamators);
     
     if(isNaN(this.benefit)) debug("error - Health NaN benefit");
     
@@ -838,33 +840,31 @@ function calcIncome(){
     var looting1 = AutoPerks.perksByName.Looting;
     var looting2 = AutoPerks.perksByName.Looting_II;
 
-    var lootedToGatheredRatio = 1/20000000; //TODO: calculate based on base zone drop
     //TODO: this is in resources, still need to convert to gear levels
-    var totalResources = (1 + 0.05*motivation1Perk.level/lootedToGatheredRatio*popMultiplier()) * 
-                         (1 + 0.01*motivation2Perk.level* popMultiplier()/lootedToGatheredRatio) + //benefit from miners
-                         (1 + 0.05*looting1.level) * (1 + 0.0025*looting2.level) ;                 //benefit from looting
-    
+    var miningMults =   0.5 * //base
+                        Math.pow(1.25, 60) * //basic books
+                        Math.pow(1.6, AutoPerks.maxZone-60) * //advanced books
+                        2 * //bounty
+                        AutoPerks.veniBonus *//same bonus as whipimp
+                        AutoPerks.basePopAtAmalZ *
+                        Math.pow(1.009, AutoPerks.maxZone-AutoPerks.amalZone); //complete to final zone
+    var gatheredResources = 1e36*((1 + 0.05*motivation1Perk.level) * (1 + 0.01*motivation2Perk.level))*miningMults; //benefit from miners
+    var lootedToGatheredRatio = 1/20000000; //TODO: calculate based on base zone drop
+    var lootedResources = lootedToGatheredRatio*(1 + 0.05*looting1.level) * (1 + 0.0025*looting2.level); //benefit from looting
+    var totalResources = gatheredResources + lootedResources;
     //TODO: we can calculate prestige/gearcost/how much 1 level of every gear costs once per button click.
-    var prestiges = (Math.floor(AutoPerks.maxZone/10)*2+3); //roundup to next xx5 zone for prestige
+    var prestiges = Math.floor(AutoPerks.maxZone/10)*2+3; //roundup to next xx5 zone for prestige
     var baseCost = (2+3+4+7+9+15) * Math.pow(0.95, artisanPerk.level);
     var prestigeMod = (prestiges - 3) * 0.85 + 2;
     var gearCost = baseCost * Math.pow(1.069, prestigeMod * game.global.prestige.cost + 1); //hopefully this is the cost of all gear at max prestige level 1
     //now lets see how many levels we can afford
-    var maxLoops = 500;
-    var remainingMetal = totalResources;
-    var level = 1;
-    while(maxLoops--){
-        remainingMetal -= gearCost;
-        level++;
-        gearCost = 1.2*gearCost;
-        if(remainingMetal <= 0) break;
-    }
-    if(maxLoops === 0) debug("maxLoops 0");
-    AutoPerks.incomeMult = level;
-    //AutoPerks.incomeMult = totalResources;
-    //return AutoPerks.incomeMult; //TODO
-    //return level;
-    return 1;
+    var level = Math.log(totalResources/gearCost) - Math.log(1.2) - 4;
+    if(level < 1) level = 1;
+
+    AutoPerks.gearLevels = level;
+    return AutoPerks.gearLevels;
+    //AutoPerks.gearLevels = 1;
+    //return 1;
 }
 
 function calcPopBreed(){
@@ -889,7 +889,7 @@ function calcPopBreed(){
     var geneticists = Math.floor(Math.log(desiredAmalMult) / Math.log(0.98));
     var genHealthBonus = Math.pow(1.01, geneticists);
     //debug(geneticists+" " + genHealthBonus.toFixed(0));
-    AutoPerks.breedMult = genHealthBonus * Math.pow(40, AutoPerks.currAmalgamators);
+    AutoPerks.breedMult = genHealthBonus;
     return AutoPerks.breedMult;
 }
 
@@ -1275,8 +1275,12 @@ function minMaxMi(print){
         //var msg1 = "Final - Carp1: " + AutoPerks.perksByName.Carpentry.level + " Carp2: " + AutoPerks.perksByName.Carpentry_II.level.toExponential(2) + " Coordinated: " + AutoPerks.perksByName.Coordinated.level;
         //var msg2 = "Amalgamators: "+AutoPerks.currAmalgamators + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " pop/army Goal " + AutoPerks.finalAmalRatio.toFixed(2) + " Mi collected: " + AutoPerks.totalMi;
         var msg2 = "Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + " DG Growth/Run " + (AutoPerks.DGGrowthRun*100).toFixed(2) + "% ("+AutoPerks.totalMi + " Mi)";
+        var msg3 = "";
+        for(var i = 0; i < AutoPerks.benefitHolder.length; i++)
+            msg3 += AutoPerks.benefitHolder[i].benefit.toExponential(2) + " ";
+        var msg4 = "Gear levels: " + AutoPerks.gearLevels;
         var $text = document.getElementById("textAreaAllocate");
-        $text.innerHTML += msg2;
+        $text.innerHTML += msg2 + '<br>' + msg3 + '<br>' + msg4;
         
         //debug(msg1);
         debug(msg2);
