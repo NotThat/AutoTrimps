@@ -1274,13 +1274,21 @@ function minMaxMi(print){
     if(print){
         //var msg1 = "Final - Carp1: " + AutoPerks.perksByName.Carpentry.level + " Carp2: " + AutoPerks.perksByName.Carpentry_II.level.toExponential(2) + " Coordinated: " + AutoPerks.perksByName.Coordinated.level;
         //var msg2 = "Amalgamators: "+AutoPerks.currAmalgamators + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " pop/army Goal " + AutoPerks.finalAmalRatio.toFixed(2) + " Mi collected: " + AutoPerks.totalMi;
-        var msg2 = "Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + " DG Growth/Run " + (AutoPerks.DGGrowthRun*100).toFixed(2) + "% ("+AutoPerks.totalMi + " Mi)";
+        var fluffyXP = Fluffy.currentExp[1]; //xp in current evolution only
+        var currEvo = game.global.fluffyPrestige;
+        for (var i = 0; i < currEvo-2; i++){
+            fluffyXP += Math.floor(Fluffy.getFirstLevel() * ((Math.pow(Fluffy.growth-i, 10) - 1) / (Fluffy.growth - i - 1))); //xp for previous evolutions
+        }
+        var fluffyGrowth = (AutoPerks.benefitHolderObj.Fluffy.benefit*100 / fluffyXP).toFixed(4) + "%";
+        var heliumGrowth = AutoPerks.totalHelium;
+        //var msg5 = "Fluffy Growth / Run: " + fluffyGrowth;
+        var msg2 = "Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + " Fluffy Growth / Run: " + fluffyGrowth + " DG Growth/Run " + (AutoPerks.DGGrowthRun*100).toFixed(2) + "% ("+AutoPerks.totalMi + " Mi)";
         var msg3 = "";
         for(var i = 0; i < AutoPerks.benefitHolder.length; i++)
             msg3 += AutoPerks.benefitHolder[i].benefit.toExponential(2) + " ";
         var msg4 = "Gear levels: " + AutoPerks.gearLevels;
         var $text = document.getElementById("textAreaAllocate");
-        //$text.innerHTML += msg2 + '<br>' + msg3 + '<br>' + msg4;
+        //$text.innerHTML += msg2 + '<br>' + msg3 + '<br>' + msg4 + '<br>' + msg5;
         $text.innerHTML += msg2;
         
         //debug(msg1);
