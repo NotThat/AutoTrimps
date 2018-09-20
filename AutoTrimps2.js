@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "19.10";
+var ver = "19.11";
 var verDate = "19.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -290,7 +290,7 @@ function ATLoop(makeUp) {
     }
     addToolTipToArmyCount(); //Add hidden tooltip for army count (SettingsGUI.js @ end)
     if (mainCleanup() // Z1 new world
-            || portalWindowOpen // in the portal screen (for manual portallers)
+            //|| portalWindowOpen // if we want this functionality, we can hookin to the activate portal btn. i just dont know that we do.
             || (!heirloomsShown && heirloomFlag) // closed heirlooms screen
             || (heirloomCache != game.global.heirloomsExtra.length)) { // inventory size changed (a drop appeared)
             // also pre-portal: portal.js:111
