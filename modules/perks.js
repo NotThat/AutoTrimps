@@ -1280,7 +1280,8 @@ function minMaxMi(print){
             msg3 += AutoPerks.benefitHolder[i].benefit.toExponential(2) + " ";
         var msg4 = "Gear levels: " + AutoPerks.gearLevels;
         var $text = document.getElementById("textAreaAllocate");
-        $text.innerHTML += msg2 + '<br>' + msg3 + '<br>' + msg4;
+        //$text.innerHTML += msg2 + '<br>' + msg3 + '<br>' + msg4;
+        $text.innerHTML += msg2;
         
         //debug(msg1);
         debug(msg2);
