@@ -827,6 +827,10 @@ function benefitFluffyCalc(){
     
     this.benefit = sumBenefit;
     
+	if(this.benefitBak === this.benefit){
+		debug("error fluff");
+	}
+
     if(isNaN(this.benefit)) {
         debug("error - Fluffy NaN benefit");
         return 0;
@@ -899,7 +903,7 @@ function benefitDGCalc(){
     this.benefitBak = this.benefit; //first we backup the old value (we do this even if it doesnt change, because perk will call takeBack() shortly
 
     //when we change DG perks, we potentially change the amount of Mi we get and DG growth. if Mi changed we need to recalculate AutoPerks.benefitDG
-    var miBefore = AutoPerks.totalMi;
+    //var miBefore = AutoPerks.totalMi;
     var miPerRun = minMaxMi(); //calculates maximum Mi using carp1/carp2/coordinated to maintain amalgamator goal
     //if(miBefore !== miPerRun)
         this.benefit = MiToDGGrowth(miPerRun); //mi changed, update benefit
@@ -1278,8 +1282,15 @@ function minMaxMi(print, maxFuel){
         //var msg2 = "Amalgamators: "+AutoPerks.currAmalgamators + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " pop/army Goal " + AutoPerks.finalAmalRatio.toFixed(2) + " Mi collected: " + AutoPerks.totalMi;
         var fluffyXP = Fluffy.currentExp[1]; //xp in current evolution only
         var currEvo = game.global.fluffyPrestige;
-        for (var i = 0; i < currEvo-2; i++){
-            fluffyXP += Math.floor(Fluffy.getFirstLevel() * ((Math.pow(Fluffy.growth-i, 10) - 1) / (Fluffy.growth - i - 1))); //xp for previous evolutions
+		var prestigeEvoZero = 1000;
+		var xpCount = 0;
+		for(var i = 0; i < 10; i++){
+			xpCount += prestigeEvoZero;
+			prestigeEvoZero *= 4;
+		}
+        for (var i = 0; i < currEvo; i++){
+            fluffyXP += xpCount
+            xpCount *= 5;
         }
         var fluffyGrowth = (AutoPerks.benefitHolderObj.Fluffy.benefit*100 / fluffyXP).toFixed(4) + "%";
         var heliumGrowth = AutoPerks.totalHelium;
