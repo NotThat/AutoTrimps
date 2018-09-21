@@ -77,12 +77,11 @@ AutoPerks.initializeGUI = function() {
     //apGUI.$spacer.innerHTML = " ";
     //text area
     apGUI.$textArea = document.createElement("DIV");
-    apGUI.$textArea.setAttribute('style', 'display: inline-block; text-align: left; width: 100%; background-color: #ffffff; font-size: 15px'); //black on white background
+    apGUI.$textArea.setAttribute('style', 'display: inline-block; text-align: left; width: 100%; background-color: #ffffff; font-size: 15px; color: #000000'); //black on white background
     //apGUI.$textArea.setAttribute('style', 'display: inline-block; text-align: left; width: 100%; color: white !important; font-size: 15px'); //white on purple
     //white !important
     //apGUI.$textArea.innerHTML = "                          ";
     apGUI.$textArea.id ='textAreaAllocate';
-    var oldstyle = 'text-align: center; width: 8vw; font-size: 0.8vw; font-weight: lighter; ';
     //Create ratioPreset dropdown
     apGUI.$ratioPresetLabel = document.createElement("Label");
     apGUI.$ratioPresetLabel.id = 'Ratio Preset Label';
@@ -91,7 +90,7 @@ AutoPerks.initializeGUI = function() {
     apGUI.$ratioPreset = document.createElement("select");
     apGUI.$ratioPreset.id = 'ratioPreset';
     apGUI.$ratioPreset.setAttribute('onchange', 'AutoPerks.updateFromBoxes()');
-    oldstyle = 'text-align: center; width: 8vw; font-size: 0.8vw; font-weight: lighter; ';
+    var oldstyle = 'text-align: center; width: 8vw; font-size: 0.8vw; font-weight: lighter; ';
     if(game.options.menu.darkTheme.enabled != 2) apGUI.$ratioPreset.setAttribute("style", oldstyle + " color: black;");
     else apGUI.$ratioPreset.setAttribute('style', oldstyle);
     //Populate ratio preset dropdown list from HTML above:
@@ -279,6 +278,13 @@ AutoPerks.getHelium = function() {
 
 //green "Allocate Perks" button:
 AutoPerks.clickAllocate = function() {
+    if(!game.global.canRespecPerks){
+        var $text = document.getElementById("textAreaAllocate");
+        var msg = "A respec is needed to Auto Allocate. Try again after portal.";
+        debug(msg);
+        $text.innerHTML = msg;
+        return;
+    }
     AutoPerks.totalHelium = AutoPerks.getHelium(); //differs whether we're in the portal screen or mid run respec
     AutoPerks.gearLevels  = 1;
     AutoPerks.breedMult   = 1;
@@ -522,7 +528,6 @@ AutoPerks.spendHelium = function(helium) {
     minMaxMi(true); //recalculate mi efficiency, and also printout amalgamator/fuel info
 };
 
-//Assigns perk points without respeccing if nothing is needed to be negative.
 AutoPerks.applyCalculations = function(testValidOnly){
     game.global.lockTooltip = true;
     //AutoPerks.perksByName.Looting_II.level--; //sometime the game wont let us buy the level right away, but will let us buy it -1, then 1 more. weird.
@@ -756,7 +761,10 @@ function benefitHeliumCalc(){
     
     this.benefit = (1 + 0.05*looting1.level) * (1 + 0.0025*looting2.level);
     
-    if(isNaN(this.benefit)) debug("error - Helium NaN benefit");
+    if(isNaN(this.benefit)) {
+        debug("error - Helium NaN benefit");
+        return 0;
+    }
     
     return this.getValue();
 }
@@ -772,7 +780,10 @@ function benefitAttackCalc(incomeFlag){
     var amalBonus = game.talents.amalg.purchased ? Math.pow(1.5, AutoPerks.currAmalgamators) : (1 + 0.5*AutoPerks.currAmalgamators);
     this.benefit = (1 + 0.05*power1Perk.level) * (1 + 0.01*power2Perk.level) * income * amalBonus;
     
-    if(isNaN(this.benefit)) debug("error - Attack NaN benefit");
+    if(isNaN(this.benefit)) {
+        debug("error - Attack NaN benefit");
+        return 0;
+    }
     
     return this.getValue();
 }
@@ -794,7 +805,10 @@ function benefitHealthCalc(incomeFlag, popBreedFlag){
     
     this.benefit = (1 + 0.05*toughness1Perk.level) * (1 + 0.01*toughness2Perk.level)*Math.pow(1.1, resilPerk.level) * income * popBreed * Math.pow(40, AutoPerks.currAmalgamators);
     
-    if(isNaN(this.benefit)) debug("error - Health NaN benefit");
+    if(isNaN(this.benefit)) {
+        debug("error - Health NaN benefit");
+        return 0;
+    }
     
     return this.getValue();
 }
@@ -813,7 +827,10 @@ function benefitFluffyCalc(){
     
     this.benefit = sumBenefit;
     
-    if(isNaN(this.benefit)) debug("error - Fluffy NaN benefit");
+    if(isNaN(this.benefit)) {
+        debug("error - Fluffy NaN benefit");
+        return 0;
+    }
     
     return this.getValue();
 }
@@ -887,7 +904,10 @@ function benefitDGCalc(){
     //if(miBefore !== miPerRun)
         this.benefit = MiToDGGrowth(miPerRun); //mi changed, update benefit
     
-    if(isNaN(this.benefit)) debug("error - DG NaN benefit");
+    if(isNaN(this.benefit)) {
+        debug("error - DG NaN benefit");
+        return 0;
+    }
     
     return this.getValue();
 }

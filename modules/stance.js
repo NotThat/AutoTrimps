@@ -285,15 +285,23 @@ function autoStance() {
             trimpicides++;
         }
         getDamageCaller(10*requiredDmgToOK, false, true);
+        var remainingDrops = countRemainingEssenceDrops(); //how many cells with De remaining
         if(getPageSetting('AutoStance') == 2){ //DE mode
-            goDefaultStance(4);
+            if(remainingDrops > 0)
+                goDefaultStance(4);
+            else
+                goDefaultStance(2);
         }
         else{
             if((getPageSetting('AutoStance') == 3))  //push mode
                 goDefaultStance(2); //D if we have it, X otherwise
             else{ //hybrid mode
-            if(poisonZone())
-                goDefaultStance(4);
+            if(poisonZone()){
+                if(remainingDrops > 0)
+                    goDefaultStance(4);
+                else
+                    goDefaultStance(2);
+            }
             else
                 goDefaultStance(2);
             }
