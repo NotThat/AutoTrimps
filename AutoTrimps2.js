@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "23";
-var verDate = "21.9.18";
+var ver = "24";
+var verDate = "22.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -92,6 +92,23 @@ function startAT() {
             return result;
         };
     })();
+    
+    //hook up into activateClicked() (confirm portal/respec button) to save autoperks calculated settings
+    activateClicked = (function(makeUp, now) {
+        var cached_function = activateClicked;
+        return function(makeUp, now) {
+            if(AutoPerks.userSaveATSettings){ //save relevant AT settings
+                setPageSetting('TillWeHaveAmalg',   AutoPerks.amalGoal); //amal goal
+                setPageSetting('NoCoordBuyStartZ',  (AutoPerks.amalZone - AutoPerks.coordsBehind)); //start no coord buy
+                setPageSetting('FuelFromZ',         AutoPerks.fuelStartZone); //fuel start zone
+                setPageSetting('FuelToZ',           AutoPerks.fuelEndZone); //fuel end zone
+                setPageSetting('FuelUntilAmal',     false); //fuel until amalgamator
+            }
+            var result = cached_function.apply(this, arguments);
+            return result;
+        };
+    })();
+    
     debug('AutoTrimps loaded!');
 }
 
@@ -126,7 +143,7 @@ function initializeAutoTrimps() {
     ATscriptLoad('','SettingsGUI');   //populate Settings GUI
     ATscriptLoad('','Graphs');        //populate Graphs
     //Load modules:
-    ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'scryer', 'magmite', 'other', 'import-export', 'perks', /*'perky',*/ 'fight-info', 'performance', 'ATcalc'];
+    ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'magmite', 'other', 'import-export', 'perks', 'fight-info', 'performance', 'ATcalc'];
     for (var m in ATmoduleList) 
         ATscriptLoad(modulepath, ATmoduleList[m]);
     

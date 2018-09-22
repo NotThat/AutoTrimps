@@ -23,12 +23,15 @@ if(Array.isArray(preset_Custom) || preset_Custom == null){
 else presetList.push(preset_Custom);
 
 //Custom Creation for all perk customRatio boxes in Trimps Perk Window
-AutoPerks.createInput = function(perkname,div) {
+AutoPerks.createInput = function(perkname,div, isCheckBox) {
     var perk1input = document.createElement("Input");
-    perk1input.id = perkname + 'Ratio';
+    if(isCheckBox) perk1input.setAttribute("type", "checkbox");
+    perk1input.id = perkname + (isCheckBox ? '' : 'Ratio');
     perk1input.perkname = perkname;
-    //var oldstyle = 'text-align: center; width: calc(100vw/36); font-size: 1.0vw; ';
-    var oldstyle = 'text-align: center; width: calc(100vw/25); font-size: 1.0vw; ';
+    //if(isCheckBox)
+    //    var oldstyle = 'text-align: center; width: calc(100vw/36); font-size: 1.0vw; ';
+    //else
+        var oldstyle = 'text-align: center; width: calc(100vw/25); font-size: 1.0vw; ';
     if(game.options.menu.darkTheme.enabled != 2) perk1input.setAttribute("style", oldstyle + " color: black;");
     else perk1input.setAttribute('style', oldstyle);
     perk1input.setAttribute('class', 'perkRatios');
@@ -40,6 +43,7 @@ AutoPerks.createInput = function(perkname,div) {
     //add to the div.
     div.appendChild(perk1input);
     div.appendChild(perk1label);
+    return perk1input;
 };
 
 AutoPerks.GUI = {};
@@ -71,16 +75,28 @@ AutoPerks.initializeGUI = function() {
     var listratiosLine2 = ["Portal Zone","amalGoal","amalZone","coordsBehind"];
     for (i in listratiosLine2)
         var input = AutoPerks.createInput(listratiosLine2[i],apGUI.$ratiosLine2);
-
-    //1 empty row
-    //apGUI.$spacer = document.createElement("DIV");
-    //apGUI.$spacer.innerHTML = " ";
-    //text area
+    
+    //check boxes line
+    apGUI.$checkBoxesLine3 = document.createElement("DIV");
+    apGUI.$checkBoxesLine3.setAttribute('style', 'display: inline-block; text-align: left; width: 100%');
+    var checkBoxMaxFuel = AutoPerks.createInput("MaxFuel", apGUI.$checkBoxesLine3, true);
+    checkBoxMaxFuel.setAttribute("onmouseover", 'tooltip("Max Fuel", "customText", event, "Force use max fuel, even after Amalgamator goal has been reached.")');
+    var checkBoxRespecAfterAmal = AutoPerks.createInput("RespecAfterAmal", apGUI.$checkBoxesLine3, true);
+    checkBoxRespecAfterAmal.setAttribute("onmouseover", 'tooltip("Respec After Reaching Amalgamator Goal", "customText", event, "After reaching Amalgamator goal, will respec to maintain amalgamators by Portal Zone.")');
+    var checkBoxMaintainMode = AutoPerks.createInput("MaintainMode", apGUI.$checkBoxesLine3, true);
+    checkBoxMaintainMode.setAttribute("onmouseover", 'tooltip("Maintain Amalgamator only", "customText", event, "Check this box if you in the middle of a run and already have Amalgamator Goal and wish to respec to minimum Carp1 / 2 / Coordinated to maintain it by Portal Zone.")');
+    var checkBoxSaveSettings = AutoPerks.createInput("SaveATSettings", apGUI.$checkBoxesLine3, true);
+    checkBoxSaveSettings.setAttribute("onmouseover", 'tooltip("Save Run Settings to AT", "customText", event, "Will save Fuel Start / Fuel End / Disables Fuel until Amalgamator / Start no Buy Coords / Amalgamator Goal to AT settings. Only occurs when the confirm button is pressed.")');
+    var checkBoxArr = [checkBoxMaxFuel, checkBoxRespecAfterAmal, checkBoxMaintainMode, checkBoxSaveSettings];
+    for (i in checkBoxArr){
+        checkBoxArr[i].setAttribute("onmouseout", 'tooltip("hide")');
+    }
+    checkBoxArr[1].disabled = true;
+    checkBoxArr[2].disabled = true;
+    
+    //create text allocate area
     apGUI.$textArea = document.createElement("DIV");
-    apGUI.$textArea.setAttribute('style', 'display: inline-block; text-align: left; width: 100%; background-color: #ffffff; font-size: 15px; color: #000000'); //black on white background
-    //apGUI.$textArea.setAttribute('style', 'display: inline-block; text-align: left; width: 100%; color: white !important; font-size: 15px'); //white on purple
-    //white !important
-    //apGUI.$textArea.innerHTML = "                          ";
+    apGUI.$textArea.setAttribute('style', 'display: inline-block; text-align: left; width: 100%; background-color: #ffffff; font-size: 15px; color: #000000'); //black on white background                       ";
     apGUI.$textArea.id ='textAreaAllocate';
     //Create ratioPreset dropdown
     apGUI.$ratioPresetLabel = document.createElement("Label");
@@ -105,7 +121,7 @@ AutoPerks.initializeGUI = function() {
     apGUI.$ratiosLine1.appendChild(apGUI.$ratioPresetLabel);
     apGUI.$ratiosLine1.appendChild(apGUI.$ratioPreset);
     apGUI.$customRatios.appendChild(apGUI.$ratiosLine2);
-    //apGUI.$customRatios.appendChild(apGUI.$spacer);
+    apGUI.$customRatios.appendChild(apGUI.$checkBoxesLine3);
     apGUI.$customRatios.appendChild(apGUI.$textArea);
 
     //Add it all to the perk/portal screen
@@ -144,8 +160,8 @@ AutoPerks.switchAndSaveCustomRatio = function(perkname, value) {
     preset_Custom[perkname] = parseFloat(value);
     
     AutoPerks.updatePerkRatios(); //updates perk ratios from boxes into the data structures
-    
-    secondLine = [AutoPerks.maxZone, AutoPerks.amalGoal, AutoPerks.amalZone, AutoPerks.coordsBehind];
+        
+    saveSecondLine();
     
     safeSetItems('AutoperkSelectedRatioPresetID', $rp.selectedIndex);
     safeSetItems('AutoperkSelectedRatioPresetName', $rp.selectedOptions[0].id);
@@ -170,18 +186,16 @@ AutoPerks.updateFromBoxes = function() {
             $perkRatioBoxes[i].value = presetObj[perkname];
     }
     
-    if(secondLine == null){
-        $perkRatioBoxes[5].value = 560;
-        $perkRatioBoxes[6].value = 6;
-        $perkRatioBoxes[7].value = 420;
-        $perkRatioBoxes[8].value = 105;        
-    }
-    else{
-        $perkRatioBoxes[5].value = secondLine[0];
-        $perkRatioBoxes[6].value = secondLine[1];
-        $perkRatioBoxes[7].value = secondLine[2];
-        $perkRatioBoxes[8].value = secondLine[3];
-    }
+    $perkRatioBoxes[5].value = secondLine[0] ? secondLine[0] : 560;
+    $perkRatioBoxes[6].value = secondLine[1] ? secondLine[1] : 6;
+    $perkRatioBoxes[7].value = secondLine[2] ? secondLine[2] : 420;
+    $perkRatioBoxes[8].value = secondLine[3] ? secondLine[3] : 105;
+    
+    //check boxes
+    $perkRatioBoxes[9].checked  = typeof secondLine[4] !== 'undefined' ? secondLine[4] : false;
+    $perkRatioBoxes[10].checked = typeof secondLine[5] !== 'undefined' ? secondLine[5] : false;
+    $perkRatioBoxes[11].checked = typeof secondLine[6] !== 'undefined' ? secondLine[6] : false;
+    $perkRatioBoxes[12].checked = typeof secondLine[7] !== 'undefined' ? secondLine[7] : false;
     
     AutoPerks.updatePerkRatios(); //updates perk ratios from boxes into the data structures
  
@@ -203,6 +217,11 @@ AutoPerks.updatePerkRatios = function() {
     AutoPerks.amalGoal      = parseFloat($perkRatioBoxes[6].value);
     AutoPerks.amalZone      = parseFloat($perkRatioBoxes[7].value);
     AutoPerks.coordsBehind  = parseFloat($perkRatioBoxes[8].value);
+    
+    AutoPerks.userMaxFuel           = $perkRatioBoxes[9].checked;
+    AutoPerks.userRespecAfterAmal   = $perkRatioBoxes[10].checked;
+    AutoPerks.userMaintainMode      = $perkRatioBoxes[11].checked;
+    AutoPerks.userSaveATSettings    = $perkRatioBoxes[12].checked;
 };
 
 AutoPerks.resetPerks = function(){
@@ -845,13 +864,14 @@ function calcIncome(){
     var motivation2Perk = AutoPerks.perksByName.Motivation_II;
     var looting1        = AutoPerks.perksByName.Looting;
     var looting2        = AutoPerks.perksByName.Looting_II;
+    var basePopToUse    = AutoPerks.userMaxFuel ? AutoPerks.maxFuelBasePopAtMaxZ : AutoPerks.basePopAtMaxZ;
     
     var miningMults =   0.5 *                               //base
                         Math.pow(1.25, 60) *                //basic books
                         Math.pow(1.6, AutoPerks.maxZone-60) * //advanced books
                         2 *                                 //bounty
                         AutoPerks.compoundingImp *          //same bonus as whipimp
-                        AutoPerks.basePopAtMaxZ;
+                        basePopToUse;
                         
     var staffMult = 15;
     var gatheredResources = 1e36*((1 + 0.05*motivation1Perk.level) * (1 + 0.01*motivation2Perk.level))*miningMults*staffMult; //benefit from miners
@@ -879,9 +899,10 @@ function calcPopBreed(){
     //this accounts for coordination (army size), carp1/2 (pop size), and breeding
     var coordPerk = AutoPerks.perksByName.Coordinated;
     var pheroPerk = AutoPerks.perksByName.Pheromones;
-    var finalArmySize =  calcCoords(AutoPerks.maxZone+99, coordPerk.level) * Math.pow(1000, AutoPerks.currAmalgamators);
-    var finalPopSize  =  popMultiplier() * //carp1/2
-                         AutoPerks.basePopAtMaxZ;
+    var finalArmySize = calcCoords(AutoPerks.maxZone+99, coordPerk.level) * Math.pow(1000, AutoPerks.currAmalgamators);
+    var basePopToUse  = AutoPerks.userMaxFuel ? AutoPerks.maxFuelBasePopAtMaxZ : AutoPerks.basePopAtMaxZ;
+    var finalPopSize  = popMultiplier() * //carp1/2
+                        basePopToUse;
     AutoPerks.breed =   0.0085        //base
                         * finalPopSize/2
                         * Math.pow(1.1, Math.floor(AutoPerks.maxZone / 5)) //potency
@@ -1051,15 +1072,16 @@ function calcBasePopArr(){
     AutoPerks.amalZoneCalculated = AutoPerks.amalZone;
     AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230; //max possible fuel
     AutoPerks.basePopArr = [];
-    for (AutoPerks.fuelMaxZones = 0; AutoPerks.fuelMaxZones <= AutoPerks.amalZone - 230; AutoPerks.fuelMaxZones+= AutoPerks.FuelZoneCutoff){
+    for (AutoPerks.fuelMaxZones = 0; AutoPerks.fuelMaxZones <= AutoPerks.amalZone - 230; AutoPerks.fuelMaxZones += AutoPerks.FuelZoneCutoff){
         AutoPerks.basePopArr[Math.floor(AutoPerks.fuelMaxZones / AutoPerks.FuelZoneCutoff)] = calcBasePop();
     }
-    AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230; //max possible fuel
+    AutoPerks.maxFuelBasePopAtMaxZ = calcBasePop(true); //basepop if we fuel from 230 to maxZ
+    AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230; //set max possible fuel until amalZ
     return AutoPerks.basePopArr;
 }
 
 //base pop only depends on DG stats and fuel zones.
-function calcBasePop(){
+function calcBasePop(useMaxFuel){
     findStartEndFuel();
     //fuel and tauntimps
     var eff = game.generatorUpgrades["Efficiency"].upgrades;
@@ -1074,11 +1096,21 @@ function calcBasePop(){
     AutoPerks.totalFuelGathered = 0;
     
     var popTick = Math.floor(Math.sqrt(fuelCapacity)* 500000000 * (1 + 0.1*eff) * OCEff);
-    
-    for (var i = AutoPerks.fuelStartZone; i <  AutoPerks.amalZone; i++){
+    if(useMaxFuel){
+        var start   = 230;
+        var endFuel = AutoPerks.maxZone;
+        var endZone = AutoPerks.maxZone;
+    }
+    else{
+        var start   = AutoPerks.fuelStartZone;
+        var endFuel = AutoPerks.fuelEndZone;
+        var endZone = AutoPerks.amalZone;
+        
+    }
+    for (var i = start; i < endZone; i++){
         pop *= 1.009; //tauntimp average increase
         
-        if(i <  AutoPerks.fuelEndZone){
+        if(i < endFuel){
             var fuelFromMagmaCell = Math.min(0.2 + (i-230) * 0.01, supMax);
             var fuelFromZone = magmaCells * fuelFromMagmaCell;
             currFuel += fuelFromZone;
@@ -1121,6 +1153,10 @@ function findStartEndFuel(){
     AutoPerks.totalMi = (game.talents.magmaFlow.purchased ? 18 : 16) * (AutoPerks.maxZone - 230 - AutoPerks.fuelMaxZones);
 }
 
+function saveSecondLine(){
+    secondLine = [AutoPerks.maxZone, AutoPerks.amalGoal, AutoPerks.amalZone, AutoPerks.coordsBehind, AutoPerks.userMaxFuel, AutoPerks.userRespecAfterAmal, AutoPerks.userMaintainMode, AutoPerks.userSaveATSettings];
+}
+
 //get ready / initialize
 AutoPerks.initializeAmalg = function() {
     AutoPerks.MAXPCT = 85;      //maximum helium we're willing to spend in carp1/2/coordinated
@@ -1132,7 +1168,7 @@ AutoPerks.initializeAmalg = function() {
     if(AutoPerks.amalGoal < 0) AutoPerks.amalGoal = 0;
     if(AutoPerks.maxZone < AutoPerks.amalZone) AutoPerks.maxZone = AutoPerks.amalZone;
     if(AutoPerks.coordsBehind < 0) AutoPerks.coordsBehind = 0;
-    secondLine = [AutoPerks.maxZone, AutoPerks.amalGoal, AutoPerks.amalZone, AutoPerks.coordsBehind];//update the boxes
+    saveSecondLine();
     AutoPerks.updateFromBoxes();                                                                     //update the boxes
     
     //amal calc
@@ -1251,13 +1287,16 @@ AutoPerks.initializeAmalg = function() {
     coordperk.spent = coordinatedcost;
 };
 
-function minMaxMi(print, maxFuel){
+function minMaxMi(print){
     //for a given carp1/2/coordinated/amalgamator, figure out min fuel zones in jumps of 10
     AutoPerks.popMult = popMultiplier(); //pop calc, uses carp1/2
     AutoPerks.finalArmySize = calcCoords(AutoPerks.coordsUsed); //uses coordinated
-    AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230;
-    //var maxFuel = true;
-    if(!maxFuel){
+    if(AutoPerks.userMaxFuel)
+        AutoPerks.fuelMaxZones = AutoPerks.maxZone - 230;
+    else
+        AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230;
+    
+    if(AutoPerks.benefitHolderObj.DG.weightUser > 0 && !AutoPerks.userMaxFuel){ //if DG weight is 0, always use max fuel
         var maxLoops = 500;
         while(maxLoops--){
             if(AutoPerks.fuelMaxZones <= 10) break;
@@ -1275,7 +1314,7 @@ function minMaxMi(print, maxFuel){
     AutoPerks.basePopAtMaxZ  = AutoPerks.basePopAtAmalZ * Math.pow(1.009, AutoPerks.maxZone-AutoPerks.amalZone);
     
     findStartEndFuel(); //updates start zone, end zone and Mi
-    
+    if(AutoPerks.userMaxFuel) AutoPerks.totalMi = 0;
     if(print){
         //printSomeStatsForGraph(); //for csv format
         //var msg1 = "Final - Carp1: " + AutoPerks.perksByName.Carpentry.level + " Carp2: " + AutoPerks.perksByName.Carpentry_II.level.toExponential(2) + " Coordinated: " + AutoPerks.perksByName.Coordinated.level;
@@ -1289,12 +1328,13 @@ function minMaxMi(print, maxFuel){
 			prestigeEvoZero *= 4;
 		}
         for (var i = 0; i < currEvo; i++){
-            fluffyXP += xpCount
+            fluffyXP += xpCount;
             xpCount *= 5;
         }
         var fluffyGrowth = (AutoPerks.benefitHolderObj.Fluffy.benefit*100 / fluffyXP).toFixed(4) + "%";
         var heliumGrowth = AutoPerks.totalHelium;
         //var msg5 = "Fluffy Growth / Run: " + fluffyGrowth;
+        if(AutoPerks.userMaxFuel) AutoPerks.fuelEndZone = AutoPerks.maxZone;
         var msg2 = "Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + " Fluffy Growth / Run: " + fluffyGrowth + " DG Growth/Run " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)";
         var msg3 = "";
         for(var i = 0; i < AutoPerks.benefitHolder.length; i++)
@@ -1339,6 +1379,8 @@ function printBenefitsPerks(){
 
 //we care about DG growth, not straight Mi numbers, so convert the two based off how fast we can expect our DG to grow.
 function MiToDGGrowth(MiPerRun){
+    if(MiPerRun === 0) return AutoPerks.DGGrowthRun = 0;
+    
     //get levels
     var effCurr         = game.generatorUpgrades["Efficiency"].upgrades;
     var effPlusOne      = game.generatorUpgrades["Efficiency"].upgrades + 1;
