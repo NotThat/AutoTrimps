@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "24";
-var verDate = "22.9.18";
+var ver = "25";
+var verDate = "23.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -104,6 +104,22 @@ function startAT() {
                 setPageSetting('FuelToZ',           AutoPerks.fuelEndZone); //fuel end zone
                 setPageSetting('FuelUntilAmal',     false); //fuel until amalgamator
             }
+            
+            if(game.jobs["Miner"].owned > 0){ //fire all miners
+                var wasPaused = false;
+                if (game.options.menu.pauseGame.enabled){ //cant fire while paused
+                    wasPaused = true;
+                    toggleSetting('pauseGame');
+                }
+                var old = preBuy2();
+                game.global.firing = true;
+                game.global.buyAmt = game.jobs["Miner"].owned;
+                buyJob("Miner", true, true);
+                postBuy2(old);
+                if(wasPaused) 
+                    toggleSetting('pauseGame');
+            }
+            
             var result = cached_function.apply(this, arguments);
             return result;
         };
@@ -155,7 +171,7 @@ var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
 //changelogList.push({date: verDate, version: ver, description: "", isNew: true});
 //changelogList.push({date: "28/06/2018", version: "v0.2", description: "Backup your game before using this or any AT fork for the first time (and often)! Please Trimps responsibly!", isNew: true});
-changelogList.push({date: "19.9.2018", version: "", description: "New AutoAllocate - work in progress", isNew: true});
+changelogList.push({date: "23.9.2018", version: "", description: "New AutoAllocate - maintain mode. will respec to preserve current amalgamator until max zone.", isNew: true});
 //changelogList.push({date: "", version: "", description: "Combat setting: Helium mode / Dark Essence Mode / Push Mode.", isNew: true});
 //changelogList.push({date: "", version: "", description: "AT Control GA - Automatic breed timers (smart enough for bleed/bogged dailies) and optional spire breed timer.", isNew: true});
 //changelogList.push({date: "", version: "", description: "Trimpicide on Empower Dailies (toggle-able).", isNew: true});
@@ -177,7 +193,7 @@ function printChangelog() {
     }
     var footer =
         '<b>Ongoing Development</b> - <u>Report any bugs/problems please</u>!\
-        <br>Talk with the dev: <b>meowchan_#0720</b> @ <a target="#" href="https://discord.gg/0VbWe0dxB9kIfV2C">AutoTrimps Discord Channel</a>'
+        <br>Talk with the dev: <b>Meowchan_#0720</b> @ <a target="#" href="https://discord.gg/0VbWe0dxB9kIfV2C">AutoTrimps Discord Channel</a>'
     ,   action = 'cancelTooltip()'
     ,   title = "AutoTrimps - Meowchan's Fork<br>" + "v" + ver + " " + verDate
     ,   acceptBtnText = "Thank you for playing AutoTrimps!"

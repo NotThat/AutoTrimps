@@ -594,6 +594,7 @@ function setGraphData(graph) {
             var currentZone = -1;
             graphData = [];
             var nowhehr=0;var lasthehr=0;
+            var dailyMultGraph = (countDailyWeight() === 0 ? 1 : 1 + getDailyHeliumValue(countDailyWeight()) / 100); //daily mult
             for (var i in allSaveData) {
                 if (allSaveData[i].totalPortals != currentPortal) {
                     graphData.push({
@@ -614,7 +615,7 @@ function setGraphData(graph) {
                     nowhehr = 0; lasthehr = 0;
                 }
                 if(currentZone < allSaveData[i].world && currentZone != -1) {
-                    nowhehr = Math.floor((allSaveData[i].heliumOwned - allSaveData[i-1].heliumOwned) / ((allSaveData[i].currentTime - allSaveData[i-1].currentTime) / 3600000));
+                    nowhehr = Math.floor((allSaveData[i].heliumOwned - allSaveData[i-1].heliumOwned)*dailyMultGraph / ((allSaveData[i].currentTime - allSaveData[i-1].currentTime) / 3600000));
                     graphData[graphData.length - 1].data.push(nowhehr);
                 }
                 currentZone = allSaveData[i].world;

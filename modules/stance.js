@@ -329,8 +329,7 @@ function autoStance() {
             var currDHratio = DHratio;
             
             var wantDmg = 8*baseDamageHigh*maxDHratio/currDHratio; //unfortunately we can not hit exact damages because of the game bug
-            if(local)
-                debug("wanted now: " + maxDHratio.toExponential(2) + " goal 1st wind: " + limit.toFixed(0));
+            //if(local) debug("wanted now: " + maxDHratio.toExponential(2) + " goal 1st wind: " + limit.toFixed(0));
             
             if(DHratio > maxDHratio)
                 allowBuyingCoords = false;
