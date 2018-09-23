@@ -91,7 +91,7 @@ AutoPerks.initializeGUI = function() {
     for (i in checkBoxArr){
         checkBoxArr[i].setAttribute("onmouseout", 'tooltip("hide")');
     }
-    //checkBoxArr[1].disabled = true;
+    checkBoxArr[1].disabled = true;
     //checkBoxArr[2].disabled = true;
     
     //create text allocate area
