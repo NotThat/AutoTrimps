@@ -841,8 +841,12 @@ function benefitFluffyCalc(){
     var startZone = 301 - 2*classyPerk.level;
     
     var sumBenefit = 0;
-    for(var zone = startZone; zone <= maxZone; zone++)
-        sumBenefit += (50 + (curiousPerk.level * 30)) * (Math.pow(1.015,zone - startZone)) * (1 + (cunningPerk.level * 0.25));
+    for(var zone = startZone; zone <= maxZone; zone++){
+        var zoneReward = (50 + (curiousPerk.level * 30)) * (Math.pow(1.015,zone - startZone)) * (1 + (cunningPerk.level * 0.25));
+        sumBenefit += zoneReward;
+        if(zone % 100 === 0 && zone >= 400) 
+            sumBenefit += 2*zoneReward; //spire 3+ c50 rewards 2x zone reward
+    }
     
     this.benefit = sumBenefit;
     
