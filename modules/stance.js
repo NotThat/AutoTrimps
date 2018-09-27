@@ -148,20 +148,11 @@ function autoStance() {
         lastCell = cellNum;
     }
     
-    if (getPageSetting('AutoStance') > 1 || game.global.world == getPageSetting('VoidMaps') || BWRaidNowLogic() || PRaidingActive || !getPageSetting('DelayWeaponsForWind'))
-        buyWeaponsMode = 3; //buy everything
-    else
-        buyWeaponsMode = 0; //buy nothing
+    if(trimpicide && !getTargetAntiStack(minAnticipationStacks, false))
+        return;
     
-    if(trimpicide)
-        if (!getTargetAntiStack(minAnticipationStacks, false))
-            return;
-    
-    
-    //equipMainShield(); //TODO: maybe we want to not do this
     wantGoodShield = true;
     calcBaseDamageinB();
-    //updateAllBattleNumbers(true);
             
     handleGA(); //controlls GA (when settings allow) and activates GA #3
     
@@ -192,7 +183,7 @@ function autoStance() {
     
     if (!game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
         goDefaultStance(); //D if we have it, X otherwise
-        getDamageCaller(game.global.gridArray[0].maxHealth*1000000, false);
+        getDamageCaller(game.global.gridArray[0].maxHealth*10000, false);
         allowBuyingCoords = true;
         if (game.global.soldierHealth <= 0)
             fightManualAT();
@@ -510,7 +501,7 @@ function autoStance() {
             allowBuyingCoords = true;
             getDamageCaller(1.5*requiredDmgToOK, false, true);
         }
-        else if(cmp >= 1 && !stackSpire){//we are rushing a cell that's worth farming, because next cells are worth even more. therefore we want just enough damage to kill current cell (assuming no crit).
+        else if(cmp >= 1 && !stackSpire){//we are rushing a cell that's worth farming. we want just enough damage to kill current cell (assuming no crit).
             chosenFormation = 2;
             
             if(enemyHealth < baseDamageHighNoCrit*2)
@@ -520,7 +511,6 @@ function autoStance() {
                 if(enemyHealth < baseDamageLowNoCrit*8){ //we will hold onto low shield, so recalc values
                     wantGoodShield = false;
                     chosenFormation = 2;
-                    //updateAllBattleNumbers(true);
                     //debug("enemyHealth " + enemyHealth.toExponential(2) + " baseDamageNoCrit " + baseDamageNoCrit.toExponential(2));
                     ourAvgDmgS = baseDamageLow;
                     ourAvgDmgD = ourAvgDmgS * 8;

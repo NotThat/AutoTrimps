@@ -1,8 +1,5 @@
-MODULES["equipment"] = {};
-//These can be changed (in the console) if you know what you're doing:
-MODULES["equipment"].capDivisor = 10; //Your Equipment cap divided by this will give you the lower cap for liquified and overkilled zones
-var verbose = false;
-var buyWeaponsMode; //0: dont buy anything, only prestige once if it lowers damage. 1: prestige till -1 and level 2: 2: buy levels only, prestige if level > 81 or another weapon is higher prestige 3: get all 4: get max levels at current prestiges only
+//MODULES["equipment"] = {};
+var buyWeaponsMode; //0: dont buy levels, only prestige once if it lowers damage. 2: buy levels, prestige if leveling costs more than 1% of total resources, or another weapon is higher prestige 3: get all 4: buy levels only
 
 var equipmentList = { 
     'Dagger': {
@@ -158,10 +155,7 @@ function evaluateEquipmentEfficiency(equipName) {
                     Wall = false;
             }
             else if (buyWeaponsMode == 2 || buyWeaponsMode == 4) Wall = false; //prestiging equipment isnt allowed, so allow buying levels
-            
-            //buyWeaponsMode; //1: prestige till -1 and level 2: buy levels only 3: get all
 
-            if (verbose) debug("equipname " + equipName + " " + game.upgrades[equipmentList[equipName].Upgrade].done + "/" + game.equipment[equipName].level + " wall " + Wall + " buyWeaponsMode " + buyWeaponsMode);
             var done = game.upgrades[equipmentList[equipName].Upgrade].done;
             var allowed = game.upgrades[equipmentList[equipName].Upgrade].allowed;
             if(getPageSetting('AutoStance')==1 && getPageSetting('DelayWeaponsForWind') && buyWeaponsMode === 1 && done === allowed - 1) //1: prestige till 1 before max prestige and level 2: prestige only 3: buy everything
@@ -224,7 +218,7 @@ function evaluateEquipmentEfficiency(equipName) {
 
 var resourcesNeeded;
 var Best;
-function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
+function autoLevelEquipment(buyDamage, colorStyle) {
     var boughtSomething = false;
     resourcesNeeded = {"food": 0, "wood": 0, "metal": 0, "science": 0, "gems": 0};  //list of amount of resources needed for stuff we want to afford
     Best = {};
@@ -298,50 +292,39 @@ function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
                     if(equipmentList[equipName].Stat == 'attack' && getPageSetting('AutoStance')==1 && getPageSetting('DelayWeaponsForWind')){
                         if(buyWeaponsMode === 0){ 
                             allow = false;
-                            if(lowerDamage && game.equipment[equipName].level >= 9) //only buy prestige if it lowers our damage
+                            if(game.equipment[equipName].level >= 9) //only buy prestige if it lowers our damage
                                 allow = true;
                         }
-                        else if(buyWeaponsMode === 1){ //dont buy the last prestige
-                            var done = game.upgrades[equipmentList[equipName].Upgrade].done;
-                            var allowed = game.upgrades[equipmentList[equipName].Upgrade].allowed;
-                            if (done === allowed - 1)
-                                allow = false;
-                        }
-                        else if(buyWeaponsMode === 2){ //dont prestige, unless other weapon is higher prestige
-                            if(game.upgrades[equipmentList[equipName].Upgrade].done >= highestPrestigeOwned){
-                                allow = false;
+                        else if(buyWeaponsMode === 2){ //prestige if costs more than 1% of total metal
+                            allow = false;
+                            if(equipCost(gameResource, equip)*100 > game.resources.metal.owned){ //keep buying levels until they cost 1% of total metal
+                                allow = true;
+                                buyWeaponsMode = 4;
                             }
-                            //if (game.equipment[equipName].level > 81 && !(game.global.world == 400 && game.global.challengeActive == "Daily")) //spire3 special case on dailies, grab every level we can afford so hopefully we prestige+1 after and farm low 400s more easier
-                            if (game.global.gridArray[0].name == "Liquimp" && game.equipment[equipName].level > 9) //fast on liquidated
-                                allow = true;
-                            else if (game.global.world == 300 && game.equipment[equipName].level > 40)
-                                allow = true;
-                            else if (game.global.world == 400 && getPageSetting('Spire3Time') < 6 && game.equipment[equipName].level > 40)
-                                allow = true;
                         }
                         else if(buyWeaponsMode === 3){
-                            //if (game.upgrades[upgrade].done === highestPrestigeOwned){
-                                if(equipCost(gameResource, equip)*100 < game.resources.metal.owned && !fastMode) //keep buying levels until they cost 0.1% of total metal
-                                    allow = false;
-                            //}
+                            allow = true;
+                            buyWeaponsMode = 4;
                         }
                         else if(buyWeaponsMode == 4)
                             allow = false;
-                        if(game.upgrades[equipmentList[equipName].Upgrade].done > highestPrestigeOwned)
-                            highestPrestigeOwned = game.upgrades[equipmentList[equipName].Upgrade].done;
+                        
+                        if(buyWeaponsMode !== 0 && game.upgrades[equipmentList[equipName].Upgrade].done < highestPrestigeOwned)
+                            allow = true; 
                     }
        
                     var upgrade = equipmentList[equipName].Upgrade;
-                    if (upgrade != "Gymystic" && allow)
-                        debug('Upgrading ' + upgrade + " - Prestige " + game.equipment[equipName].prestige, "equips", '*upload');
                     if(allow){ //we want to prioritize buying levels over buying prestiges. only buy prestige if next weapon level isnt trivially affordeed
                         preBuy();
-                        debug('Upgrading ' + upgrade + " # " + game.upgrades[upgrade].allowed + " buyWeaponsMode " + buyWeaponsMode, "equips", '*upload');
                         buyUpgrade(upgrade, true, true);
                         postBuy();
                         evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName); //update equipment eval
+                        if(buyDamage)
+                            debug('Upgrading ' + " #" + game.equipment[equipName].prestige + " " + upgrade + " buyWeaponsMode " + buyWeaponsMode, "equips", '*upload');
                         boughtSomething = true;
                     }
+                    if(equipmentList[equipName].Stat == 'attack' && game.upgrades[equipmentList[equipName].Upgrade].done > highestPrestigeOwned)
+                        highestPrestigeOwned = game.upgrades[equipmentList[equipName].Upgrade].done;
                 }
                 else {
                     if(colorStyle) $equipName.style.color = 'orange';
@@ -369,8 +352,6 @@ function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
                 if(colorStyle) $eqName.style.color = Best[stat].Wall ? 'orange' : 'red';
                 if(colorStyle) $eqName.style.border = '2px solid red';
             }
-            if(equipName != 'Gym')
-                if (verbose) debug("leveling Z" + game.global.world + " " + equipName + "("+game.upgrades[equipmentList[equipName].Upgrade].done + "/" + game.equipment[equipName].level+") buyWeaponsMode " + buyWeaponsMode); 
             //If we're considering an attack item, we want to buy weapons if we don't have enough damage, or if we don't need health (so we default to buying some damage)
             if (buyDamage && BuyWeaponLevels && DaThing.Stat == 'attack'){ 
                 if (DaThing.Equip && canAffordBuilding(equipName, null, null, true)) {
@@ -379,6 +360,20 @@ function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
                         allow = false;
                     }
                     if(allow){
+                        //buy multiple weapon levels at once
+                        var howMany = calculateMaxAfford(game.equipment[equipName], false, true, false, false, 0.01); //1% of available resources
+                        if(howMany === 0)
+                            howMany = calculateMaxAfford(game.equipment[equipName], false, true, false, false, 0.1); //10% of available resources
+                        if(howMany === 0)
+                            howMany = calculateMaxAfford(game.equipment[equipName], false, true, false, false, 1); //100% of available resources
+                        if(howMany === 0){
+                            if(buyWeaponsMode === 3) //if we prestiged is allowed and we cant buy a single level of what we want, we can't get any more damage.
+                                return false;
+                            buyWeaponsMode = 3; //cant afford to buy 1 level of the equipment, so allow prestiging and restart.
+                            return autoLevelEquipment(buyDamage, colorStyle);
+                        }
+                        game.global.buyAmt = howMany;
+                        //debug('Buying ' + game.global.buyAmt + " levels " + game.equipment[equipName].prestige + "-" + game.equipment[equipName].level + " " + equipName + " buyWeaponsMode " + buyWeaponsMode, "equips", '*upload');
                         buyEquipment(equipName, null, true);
                         evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName);
                         boughtSomething = true;
@@ -388,8 +383,9 @@ function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
             //If we're considering a health item, buy it if we don't have enough health, otherwise we default to buying damage
             if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health' || DaThing.Stat == 'block') && game.global.soldierHealth < wantedHP && game.global.soldierHealth > 1) {
                 if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(equipName, null, null, true)) {
+                    var howMany = calculateMaxAfford(game.equipment[equipName], false, true, false, false, 0.01); //1% of available resources
+                    game.global.buyAmt = Math.min(25, howMany);
                     buyEquipment(equipName, null, true);
-                    //debug("bought " + equipName, "equips");
                     evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName);
                     boughtSomething = true; 
                 }
@@ -397,6 +393,8 @@ function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
             //Always LVL 25:
             if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health') && game.equipment[equipName].level < 25){
                 if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(equipName, null, null, true)) {
+                    var howMany = calculateMaxAfford(game.equipment[equipName], false, true, false, false, 0.01); //1% of available resources
+                    game.global.buyAmt = Math.min(24, howMany);
                     buyEquipment(equipName, null, true);
                     evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName);
                     boughtSomething = true;
@@ -411,20 +409,21 @@ function autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle) {
     return boughtSomething;
 }
 
-function getDamageLoop(dmg, lowerDamage, noCrit, maxLoop){
+function getDamageLoop(dmg, noCrit){
     var dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
     var dmgLast = 0;
+    var maxLoop = 500;
     var boughtHP = false;
     
     while ((boughtHP || dmgLast != dmgToCheck) && maxLoop-- > 0){
         //if(game.global.soldierHealth < wantedHP && game.global.soldierHealth > 1)
-            boughtHP = autoLevelEquipment(lowerDamage, false, true); //buy health only
+            boughtHP = autoLevelEquipment(false); //buy health only
         
-        //if (dmgToCheck*8 >= dmg) //have enough damage
-        //    return true;
+        if (dmgToCheck*8 >= dmg && buyWeaponsMode !== 0) //have enough damage and we arent trying to lower damage
+            return true;
         
         dmgLast = dmgToCheck;
-        autoLevelEquipment(lowerDamage, true, true); //buy damage only autoLevelEquipment(lowerDamage, buyDamage, fastMode, colorStyle)
+        autoLevelEquipment(true); //buy damage only autoLevelEquipment(buyDamage, colorStyle)
         dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
     }
     if (dmgToCheck*8 >= dmg) //have enough damage
@@ -435,8 +434,7 @@ function getDamageLoop(dmg, lowerDamage, noCrit, maxLoop){
 
 function getDamage(dmg, lowerDamage, noCrit){
     var dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
-    var maxLoop = 500;
-            
+    
     if (baseDamageHigh < 0 || game.global.soldierCurrentAttack < 0) {
         debug("error: getDamage: damage " + game.global.soldierCurrentAttack + " " + baseDamageHigh);
         if (baseDamageHigh < 0 || game.global.soldierCurrentAttack < 0)
@@ -448,26 +446,22 @@ function getDamage(dmg, lowerDamage, noCrit){
             debug("error: baseDamageHigh is zero. Buying damage.");
     }
     
-    if(game.global.runningChallengeSquared){
-        buyWeaponsMode = 3;
-        if(getDamageLoop(dmg, lowerDamage, noCrit, maxLoop))
-            return;
-    }
+    if(lowerDamage)
+        buyWeaponsMode = 0;
+    else
+        buyWeaponsMode = 4;
     
-    if (!game.global.spireActive && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
-        if(dmgToCheck*8 >= dmg) buyWeaponsMode = 0;
-        else buyWeaponsMode = 3;
-        //autoLevelEquipment(lowerDamage, true, true);
-        getDamageLoop(dmg, lowerDamage, noCrit, maxLoop);
-        return;
-    }
+    if(game.global.runningChallengeSquared)
+        buyWeaponsMode = 3;    
     
-    buyWeaponsMode = 0;
-    if(getDamageLoop(dmg, lowerDamage, noCrit, maxLoop))
+    //if (dmgToCheck*8 < dmg && !game.global.spireActive && !game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp")
+    //    buyWeaponsMode = 3;
+    
+    if(getDamageLoop(dmg, noCrit))
         return;
     
     buyWeaponsMode = 2; //allow buying equipment levels but not prestige
-    if(getDamageLoop(dmg, lowerDamage, noCrit, maxLoop))
+    if(getDamageLoop(dmg, noCrit))
         return;
     
     if(game.upgrades.Coordination.done < game.upgrades.Coordination.allowed){
@@ -483,7 +477,7 @@ function getDamage(dmg, lowerDamage, noCrit){
     }
     
     buyWeaponsMode = 3; //allow buying equipment levels and prestiges
-    if(getDamageLoop(dmg, lowerDamage, noCrit, maxLoop))
+    if(getDamageLoop(dmg, noCrit))
         return;
 }
 

@@ -785,8 +785,8 @@ function setGraphData(graph) {
             var arr1 = [];
             var arr2 = [];
             
-            if(typeof cmp !== 'undefined')
-                for(var i = 0; i <stanceStats.cmp.length; i++){
+            if(typeof stanceStats.cmp !== 'undefined')
+                for(var i = 0; i < stanceStats.cmp.length; i++){
                     if(!worldArray[i])
                         names.push(i);
                     else if(worldArray[i].corrupted === undefined)
