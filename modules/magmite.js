@@ -148,7 +148,7 @@ function autoGenerator() {
         return;
     
     var dailyFlag = game.global.challengeActive == "Daily" && getPageSetting('AutoGenDC');
-    var c2Flag = game.global.runningChallengeSquared && getPageSetting('AutoGenC2') && game.global.challengeActive != "Trapper";
+    var c2Flag = game.global.runningChallengeSquared && getPageSetting('AutoGenC2');
     if(c2Flag || dailyFlag){
         if(game.global.generatorMode != FUEL)
             changeGeneratorState(FUEL);

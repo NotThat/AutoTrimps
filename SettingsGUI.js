@@ -444,7 +444,7 @@ function initializeAllSettings() {
     
     createSetting('FuelUntilAmal', 'Fuel until Amalgamator', 'Continue using Fuel until Fuel End Zone AND Amalgamator Amount are reached.', 'boolean', false, null, 'Magma');
     createSetting('AutoGenDC', 'Daily: Fuel', 'Always fuel in Dailies', 'boolean', true, null, 'Magma');
-    createSetting('AutoGenC2', 'C2: Fuel', 'Always fuel in C2 (except Trapper)', 'boolean', true, null, 'Magma');
+    createSetting('AutoGenC2', 'C2: Fuel', 'Always fuel in C2', 'boolean', true, null, 'Magma');
     
     //createSetting('AutoGen2Override', ['Override Final Only', 'Strong Override'], 'Overrides apply to the final mode (always use early mode), or also to early mode (will stop microtick etc). Normal will not change anything.', 'multitoggle', 1, null, 'Magma');
     createSetting('AutoMagmiteSpender2', ['Spend Magmite OFF', 'Spend Magmite (Portal)', 'Spend Magmite Always'], 'Auto Spends any unspent Magmite immediately before portaling. (Or Always, if toggled). Part 1 buys any permanent one-and-done upgrades in order from most expensive to least. Part 2 then analyzes Efficiency vs Capacity for cost/benefit, and buys Efficiency if its BETTER than Capacity. If not, if the PRICE of Capacity is less than the price of Supply, it buys Capacity. If not, it buys Supply. And then it repeats itself until you run out of Magmite and cant buy anymore. For Magma z230+ purposes.', 'multitoggle', 1, null, 'Magma');

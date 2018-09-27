@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "27";
+var ver = "28";
 var verDate = "26.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -105,7 +105,7 @@ function startAT() {
                 setPageSetting('FuelUntilAmal',     false); //fuel until amalgamator
             }
             
-            if(game.jobs["Miner"].owned > 0){ //fire all miners
+            if(!portalWindowOpen && game.jobs["Miner"].owned > 0){ //respeccing mid-run - fire all miners
                 var wasPaused = false;
                 if (game.options.menu.pauseGame.enabled){ //cant fire while paused
                     wasPaused = true;
@@ -119,6 +119,9 @@ function startAT() {
                 if(wasPaused) 
                     toggleSetting('pauseGame');
             }
+            
+            if(portalWindowOpen && getPageSetting('AutoHeirlooms')) //portalling, run autoheirloom
+                autoHeirlooms();
             
             var result = cached_function.apply(this, arguments);
             return result;
