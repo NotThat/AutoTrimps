@@ -249,6 +249,19 @@ function autoStance() {
     
     if(game.global.mapsActive)
         return;
+    
+    if(game.global.world >= getPageSetting('NoCoordBuyStartZ') && game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg')){ //we're expecting an amalg, so check if we can get it by trimpiciding
+        var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();
+        var spiresBeaten = Math.floor((game.global.spireRows-10) / 10);
+        var needed = 1e10 / Math.pow(10, spiresBeaten);
+        if(popArmyRatio > needed){
+            debug("Trimpiciding to pick up amalgamator #" + (game.jobs.Amalgamator.owned+1), "trimpicide");
+            mapsClicked(true);
+            if(game.global.preMapsActive)
+                mapsClicked(true);
+            return;
+        }
+    }
         
     if(enemyHealth == -1) //new zone, game didnt generate first enemy yet, so use our own
         enemyHealth = worldArray[cellNum].maxHealth;

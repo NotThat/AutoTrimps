@@ -6,7 +6,7 @@ var lastAmalSpamCell = -1;
 //Buys all available non-equip upgrades listed in var upgradeList
 function buyUpgrades(coordsOnly) {
     if (getPageSetting('BuyUpgradesNew') != 2){ //skip this calculation if AT isnt allowed to buy coords
-        var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();    
+        var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();
         buyCoords = true;
         
         if((getPageSetting('AutoStance')==1) && getPageSetting('DelayCoordsForWind')){

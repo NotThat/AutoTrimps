@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "29";
-var verDate = "27.9.18";
+var ver = "30";
+var verDate = "29.9.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -173,8 +173,10 @@ function initializeAutoTrimps() {
 var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
 //changelogList.push({date: verDate, version: ver, description: "", isNew: true});
-//changelogList.push({date: "28/06/2018", version: "v0.2", description: "Backup your game before using this or any AT fork for the first time (and often)! Please Trimps responsibly!", isNew: true});
-changelogList.push({date: "23.9.2018", version: "", description: "New AutoAllocate - maintain mode. will respec to preserve current amalgamator until max zone.", isNew: true});
+changelogList.push({date: "29.09.2018", version: "", description: "AutoAllocate reworked - check your weights. Helium/Attack/Health describes your in-run stats, the more the better. You can see the effect of using different Amalgamator count. Row #3 Growth describes the increase of stats per run out of total ever." , isNew: true});
+changelogList.push({date: "29.09.2018", version: "", description: "Will Trimpicide to pick up an Amalgamator when in Start no Coord Buy range.", isNew: true});
+//changelogList.push({date: "29.09.2018", version: "", description: "Backup your game before using this or any AT fork for the first time (and often)! Please Trimps responsibly!", isNew: true});
+changelogList.push({date: "23.9.2018", version: "", description: "New AutoAllocate - maintain mode. will respec to preserve current amalgamator until max zone."});
 //changelogList.push({date: "", version: "", description: "Combat setting: Helium mode / Dark Essence Mode / Push Mode.", isNew: true});
 //changelogList.push({date: "", version: "", description: "AT Control GA - Automatic breed timers (smart enough for bleed/bogged dailies) and optional spire breed timer.", isNew: true});
 //changelogList.push({date: "", version: "", description: "Trimpicide on Empower Dailies (toggle-able).", isNew: true});
