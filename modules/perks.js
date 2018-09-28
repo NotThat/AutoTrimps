@@ -186,16 +186,16 @@ AutoPerks.updateFromBoxes = function() {
             $perkRatioBoxes[i].value = presetObj[perkname];
     }
     
-    $perkRatioBoxes[5].value = typeof secondLine[0] !== 'undefined' ? secondLine[0] : 560;
-    $perkRatioBoxes[6].value = typeof secondLine[1] !== 'undefined' ? secondLine[1] : 6;
-    $perkRatioBoxes[7].value = typeof secondLine[2] !== 'undefined' ? secondLine[2] : 420;
-    $perkRatioBoxes[8].value = typeof secondLine[3] !== 'undefined' ? secondLine[3] : 105;
+    $perkRatioBoxes[5].value = (secondLine != null && typeof secondLine[0] !== 'undefined') ? secondLine[0] : 560;
+    $perkRatioBoxes[6].value = (secondLine != null && typeof secondLine[1] !== 'undefined') ? secondLine[1] : 6;
+    $perkRatioBoxes[7].value = (secondLine != null && typeof secondLine[2] !== 'undefined') ? secondLine[2] : 420;
+    $perkRatioBoxes[8].value = (secondLine != null && typeof secondLine[3] !== 'undefined') ? secondLine[3] : 105;
     
     //check boxes
-    $perkRatioBoxes[9].checked  = typeof secondLine[4] !== 'undefined' ? secondLine[4] : false;
-    $perkRatioBoxes[10].checked = typeof secondLine[5] !== 'undefined' ? secondLine[5] : false;
-    $perkRatioBoxes[11].checked = typeof secondLine[6] !== 'undefined' ? secondLine[6] : false;
-    $perkRatioBoxes[12].checked = typeof secondLine[7] !== 'undefined' ? secondLine[7] : false;
+    $perkRatioBoxes[9].checked  = (secondLine != null && typeof secondLine[4] !== 'undefined') ? secondLine[4] : false;
+    $perkRatioBoxes[10].checked = (secondLine != null && typeof secondLine[5] !== 'undefined') ? secondLine[5] : false;
+    $perkRatioBoxes[11].checked = (secondLine != null && typeof secondLine[6] !== 'undefined') ? secondLine[6] : false;
+    $perkRatioBoxes[12].checked = (secondLine != null && typeof secondLine[7] !== 'undefined') ? secondLine[7] : false;
     
     AutoPerks.updatePerkRatios(); //updates perk ratios from boxes into the data structures
  
