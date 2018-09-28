@@ -142,7 +142,7 @@ AutoPerks.initializeRatioPreset = function() {
     var $perkRatioBoxes = document.getElementsByClassName("perkRatios");
     for(var i = 0; i < $perkRatioBoxes.length; i++) {
         perkname = $perkRatioBoxes[i].perkname;
-        if(chosenPreset.hasOwnProperty(perkname))
+        if(typeof chosenPreset !== 'undefined' && chosenPreset.hasOwnProperty(perkname))
             $perkRatioBoxes[i].value = chosenPreset.perkname;
         else
             $perkRatioBoxes[i].value = "";
