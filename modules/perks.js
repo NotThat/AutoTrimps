@@ -321,8 +321,8 @@ AutoPerks.clickAllocate = function() {
     else if(game.global.challengeActive == "Daily")//get current run challenge/daily
         AutoPerks.dailyObj = game.global.dailyChallenge;
 
+    AutoPerks.DailyHousingMult = 1;
     if(AutoPerks.dailyObj != null){
-        AutoPerks.DailyHousingMult = 1;
         if(AutoPerks.dailyObj.hasOwnProperty("large"))
             AutoPerks.DailyHousingMult = (100 - AutoPerks.dailyObj.large.strength) / 100;
     }
