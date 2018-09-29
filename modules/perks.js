@@ -310,16 +310,25 @@ AutoPerks.clickAllocate = function() {
     AutoPerks.gearLevels  = 0;
     AutoPerks.compoundingImp = Math.pow(1.003, AutoPerks.maxZone * 3 - 1);
     
-    /* most of these will be user adjustable. These weights are baseline, and each gets multiplied by their relevant benefits and multiplied again by userWeight
-     * benefitStat captures how much of a stat we have, and what the change will be from increasing a perk.
+    /* benefitStat captures how much of a stat we have, and what the change will be from increasing a perk.
      * increasing a weight by a factor of 2 means we are willing to spend twice as much helium for the same increase.
-     * calculateBenefit(): each perk has its own calculateBenefit function. it calculates the relevant increases of stat(s) associated with a weight type(s)
-     * looting for example, increases our helium, but also slightly increases our attack. 
-     * so looting.calculateBenefit() multiplies a large increase in helium * weightHelium + a small increase in attack * weightAttack
      * finally, perk.efficiency equals perk.calculateBenefit() / perk.cost
      */
     
+    AutoPerks.dailyObj = null;
+    if(portalWindowOpen) //we are respecting to enter a new portal
+        AutoPerks.dailyObj = getDailyChallenge(readingDaily, true, false);
+    else if(game.global.challengeActive == "Daily")//get current run challenge/daily
+        AutoPerks.dailyObj = game.global.dailyChallenge;
+
+    if(AutoPerks.dailyObj != null){
+        AutoPerks.DailyHousingMult = 1;
+        if(AutoPerks.dailyObj.hasOwnProperty("large"))
+            AutoPerks.DailyHousingMult = (100 - AutoPerks.dailyObj.large.strength) / 100;
+    }
     
+    
+    //AutoPerks.grabDaily();       //get the run challenge/daily, if any
     AutoPerks.resetPerks();      // set all perks to level 0
     AutoPerks.resetBenefits();   // benefit and benefitBak = 1;
     AutoPerks.initializeAmalg(); // calculates amalgamator related variables. also pumps carp1/2/coord. doing this every allocate instead of 
@@ -342,13 +351,6 @@ AutoPerks.clickAllocate = function() {
         perks[i].spent = perks[i].getTotalPrice(perks[i].level);
         preSpentHe += perks[i].spent;
     }
-    
-    /*for(i = 0; i < 160; i++){
-        var price = AutoPerks.perksByName.Artisanistry.getPrice();
-        AutoPerks.perksByName.Artisanistry.buyLevel();
-        AutoPerks.perksByName.Artisanistry.spent += price;
-    }*/
-    
 
     if (preSpentHe)
         debug("AutoPerks: Your existing fixed-perks reserve Helium: " + prettify(preSpentHe), "perks");
@@ -1306,7 +1308,7 @@ function calcBasePop(useMaxFuel){
         }
     }
     
-    return Math.floor(pop);
+    return Math.floor(pop * AutoPerks.DailyHousingMult);
 }
 
 //base pop at maxZ, used for respec
