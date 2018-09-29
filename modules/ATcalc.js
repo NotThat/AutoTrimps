@@ -223,6 +223,63 @@ function calcDmgManual(printout){
     return baseDamageHigh;
 }
 
+function calcEndDamageAA(base, zone){
+    var coords = zone + 99;
+    var soldiers = calcCoords(coords, 0);
+    base *= soldiers;
+    
+    var achievements = 1 + (game.global.achievementBonus / 100);
+    base *= achievements;
+    
+    var anti = ((45 * game.portal.Anticipation.level * game.portal.Anticipation.modifier) + 1);
+    base *= anti;    
+    
+    var form = 4;
+    base *= form;   
+    
+    if (game.global.roboTrimpLevel > 0){
+        var robo = ((0.2 * game.global.roboTrimpLevel) + 1);
+        base *= robo;
+    }
+    
+    var shield = highATK;
+    base *= shield;
+    
+    if (game.talents.stillRowing2.purchased){
+        var rowing = (10*Math.floor((zone-100)/100) * 0.06 + 1);
+        base *= rowing;
+    }
+    if (game.talents.healthStrength.purchased){
+        var healthy = zone > 300 ? 2 + Math.floor((zone - 301)/15) : 0;
+        var str = (0.15 * healthy + 1);
+        base *= str;
+    }
+    
+    var magMult = Math.pow(0.8, zone-230+1);
+    base *= magMult;
+        
+    if (game.global.totalSquaredReward > 0){
+        var sqr = ((game.global.totalSquaredReward / 100) + 1);
+        base *= sqr;
+    }
+    if (Fluffy.isActive()){
+        var fluff = lastFluffDmg;
+        base *= fluff;
+    }
+    
+    var min = 1;
+    var max = 1.2;
+    
+    var avgRange = (max + min) / 2;
+    
+    var critMultHigh = calcCritModifier(highCritChance, highCritDamage);
+    base *= critMultHigh;
+    
+    base *= avgRange;
+    
+    return base;
+}
+
 
 
 function calcEnemyAttack(mutation, corrupted, atkScale, name, level, oblitMult){
@@ -385,4 +442,26 @@ function checkForGoodCell(cellNum){
 
 function isScryhardActive(){
     return isScryerBonusActive() && game.talents.scry.purchased && !game.global.mapsActive && (getCurrentWorldCell().mutation == "Corruption" || getCurrentWorldCell().mutation == "Healthy");
+}
+
+function getEnemyHealthAT(level, name, ignoreImpStat, zone) {
+    var world = (zone) ? zone : game.global.world;
+    var amt = 0;
+    amt += 130 * Math.sqrt(world) * Math.pow(3.265, world / 2);
+    amt -= 110;
+    if (world == 1 || world == 2 && level < 10){
+        amt *= 0.6;
+        amt = (amt * 0.25) + ((amt * 0.72) * (level / 100));
+    }
+    else if (world < 60)
+        amt = (amt * 0.4) + ((amt * 0.4) * (level / 110));
+    else{
+        amt = (amt * 0.5) + ((amt * 0.8) * (level / 100));
+        amt *= Math.pow(1.1, world - 59);
+    }
+    if (world < 60) amt *= 0.75;
+    if (world > 5 && game.global.mapsActive) amt *= 1.1;
+    if (!ignoreImpStat)
+        amt *= game.badGuys[name].health;
+    return Math.floor(amt);
 }

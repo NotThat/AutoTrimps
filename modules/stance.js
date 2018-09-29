@@ -936,7 +936,7 @@ function buildWorldArray(){
         }
         
         //enemy.attack = calcEnemyAttack(enemy.mutation, enemy.corrupted, mutationMultAtk, enemy.name, i, oblitMult);
-        enemy.maxHealth =  game.global.getEnemyHealth(i, enemy.name, true) * mutationMult * dailyHPMult; //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
+        enemy.maxHealth =  getEnemyHealthAT(i, enemy.name, true, game.global.world) * mutationMult * dailyHPMult; //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
         if(game.global.spireActive)                      enemy.maxHealth = getSpireStats(i+1, enemy.name, "health");
         if(game.global.challengeActive == "Obliterated") enemy.maxHealth *= oblitMult;
         //if (enemy.corrupted == "corruptTough")         enemy.maxHealth *= 5;   //the player has no access to corruption type before reaching them, and neither do we
@@ -949,7 +949,7 @@ function buildWorldArray(){
     }
     //last cell special case
     worldArray[99].baseWorth = 1;
-    worldArray[99].maxHealth = game.global.getEnemyHealth(99, "Omnipotrimp", false) * mutationMultCorrupted * dailyHPMult; //ignore imp stat = false
+    worldArray[99].maxHealth = getEnemyHealthAT(99, "Omnipotrimp", false, game.global.world) * mutationMultCorrupted * dailyHPMult; //ignore imp stat = false
     if(game.global.spireActive)
         worldArray[99].maxHealth = getSpireStats(i+1, worldArray[99].name, "health") * dailyHPMult;
     worldArray[99].health = worldArray[99].maxHealth;

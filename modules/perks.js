@@ -318,11 +318,15 @@ AutoPerks.clickAllocate = function() {
      * so looting.calculateBenefit() multiplies a large increase in helium * weightHelium + a small increase in attack * weightAttack
      * finally, perk.efficiency equals perk.calculateBenefit() / perk.cost
      */
-
+    
+    
     AutoPerks.resetPerks();      // set all perks to level 0
     AutoPerks.resetBenefits();   // benefit and benefitBak = 1;
     AutoPerks.initializeAmalg(); // calculates amalgamator related variables. also pumps carp1/2/coord. doing this every allocate instead of 
                                  // on firstRun() because DG stats and helium mightve changed
+    //calculates attack / health of non tough cell 50 corrupted enemy at AutoPerks.maxZone
+    AutoPerks.enemyHealth = getEnemyHealthAT(50, 'Snimp', true, AutoPerks.maxZone) * mutations.Corruption.statScale(10); //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
+    AutoPerks.enemyDamage = calcEnemyAttack("Corruption", "corruptDbl", mutations.Corruption.statScale(3), 'Snimp', 50, 1);
 
     var helium = AutoPerks.totalHelium;
 
@@ -830,11 +834,8 @@ function benefitAttackCalc(incomeFlag){
     var power1Perk = AutoPerks.perksByName.Power;
     var power2Perk = AutoPerks.perksByName.Power_II;
     
-    var income;
-    //if(incomeFlag) 
-        income = calcIncome();
-    //else 
-    //    income = AutoPerks.gearLevels;
+    calcIncome(); //updates AutoPerks.equipmentAttack
+    var income = AutoPerks.equipmentAttack;
     var amalBonus = game.talents.amalg.purchased ? Math.pow(1.5, AutoPerks.currAmalgamators) : (1 + 0.5*AutoPerks.currAmalgamators);
     this.benefit = (1 + 0.05*power1Perk.level) * (1 + 0.01*power2Perk.level) * income * amalBonus;
     
@@ -851,10 +852,10 @@ function benefitHealthCalc(incomeFlag, popBreedFlag){
     var toughness1Perk = AutoPerks.perksByName.Toughness;
     var toughness2Perk = AutoPerks.perksByName.Toughness_II;
     
-    var income, popBreed;
-    //if(incomeFlag)
-        income = calcIncome();
-    //else income = AutoPerks.gearLevels;
+    calcIncome(); //updates AutoPerks.equipmentHealth
+    var income = AutoPerks.equipmentHealth;    
+    
+    var popBreed;
     //if(popBreedFlag)    
         popBreed = calcPopBreed(); //TODO
     //else popBreed = AutoPerks.breedMult;
@@ -979,8 +980,9 @@ function calcIncome(){
         }
         AutoPerks.gearLevels = Math.log(AutoPerks.totalResources/AutoPerks.gearCost) / Math.log(1.2) / Math.pow(100000, prestigesDropped); //the main thing i want from this is lower prestige -> smaller fraction of a level. i expect users to be able to afford at least 1 level of last prestige.
     }
-
-    return AutoPerks.gearLevels;
+    
+    AutoPerks.equipmentAttack = Math.round(40 * Math.pow(1.19, ((AutoPerks.prestiges - 1) * 13) + 1)) * AutoPerks.gearLevels; //40 is prestige 0 level 0 total attack values
+    AutoPerks.equipmentHealth = Math.round(152 * Math.pow(1.19, ((AutoPerks.prestiges - 1) * 14) + 1)) * AutoPerks.gearLevels; //40 is prestige 0 level 0 total attack values
 }
 
 function calcLootedResources(){
@@ -1424,10 +1426,17 @@ function minMaxMi(print){
         }
         var fluffyGrowth = (AutoPerks.benefitHolderObj.Fluffy.benefit*100 / fluffyXP).toFixed(3) + "%";
         var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
-        var atkMod = AutoPerks.benefitHolderObj.Attack.benefit.toExponential(2);
-        var healthMod = AutoPerks.benefitHolderObj.Health.benefit.toExponential(2);
+        var atkMod = (calcEndDamageAA(AutoPerks.benefitHolderObj.Attack.benefit, AutoPerks.maxZone) / AutoPerks.enemyHealth).toFixed(2); //this includes gear, amalgamators, power1 and power2
+        var healthMod = AutoPerks.benefitHolderObj.Health.benefit.toExponential(2); //this includes gear, amalgamators, toughness1/2, resil, and anything breeding related
         if(AutoPerks.userMaxFuel) AutoPerks.fuelEndZone = AutoPerks.maxZone;
-        var msg2 = "Helium: " + heliumMod + " Attack: " + atkMod + " Health: " + healthMod + " Gear: " + AutoPerks.gearLevels.toFixed(2) + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%";
+        //AutoPerks.enemyHealth
+        //AutoPerks.enemyDamage
+        //calculate our final attack at maxZone
+        
+        
+
+        
+        var msg2 = "Helium: " + heliumMod + " Attack/Enemy Health at maxZone: " + atkMod + " Health: " + healthMod + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%";
         var msg3 = "Fluffy Growth: " + fluffyGrowth + " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)";
         var $text = document.getElementById("textAreaAllocate");
         $text.innerHTML += msg2 + '<br>' + msg3;
