@@ -460,7 +460,7 @@ function getEnemyHealthAT(level, name, ignoreImpStat, zone) {
         amt *= Math.pow(1.1, world - 59);
     }
     if (world < 60) amt *= 0.75;
-    if (world > 5 && game.global.mapsActive) amt *= 1.1;
+    //if (world > 5 && game.global.mapsActive) amt *= 1.1;
     if (!ignoreImpStat)
         amt *= game.badGuys[name].health;
     return Math.floor(amt);

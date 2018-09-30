@@ -279,9 +279,9 @@ function autoStance() {
         var timeEstimate = timeEstimator(cellNum); //rough estimate of how long it will take to finish zone
         var timeFlag = timeEstimate > 50 || DHratio < easyRatioThreshold;
         if(timeFlag && hiddenBreedTimer > maxAnti && game.global.antiStacks < maxAnti-1){
-            debug("Trimpiciding to get max stacks", "trimpicide");
             wantedAnticipation = maxAnti;
             if (!game.global.preMapsActive && !game.global.mapsActive && game.global.soldierHealth > 0){
+                debug("Trimpiciding to get max stacks", "trimpicide");
                 mapsClicked(true);
                 if(game.global.preMapsActive)
                     mapsClicked(true);

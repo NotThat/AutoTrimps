@@ -4,8 +4,6 @@ MODULES["maps"] = {};
 var remainingCells = 100;
 
 MODULES["maps"].preferGardens = !getPageSetting('PreferMetal'); //prefer run Garden maps instead of ^^ if we have Decay done
-MODULES["maps"].wantHealthMapBonus = 10; //cap how many maps are run during Want More Health mode
-MODULES["maps"].SpireFarm199Maps = true; //this will farm spire on 199 maps instead of 200 maps when Map Reducer is bought
 //- init as default value (10). user can set if they want.
 
 //Initialize Global Vars
@@ -159,19 +157,24 @@ function calcDmg(){
 }
 
 function autoMap() {
-    //if (game.global.gridArray.length === 0) //world not ready yet
-    //    return;
-    
     wantGoodShield = true;
     AutoMapsCoordOverride = false;
     calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
     
-    if(getPageSetting('AutoMaps') === 0 || game.global.challengeActive == "Mapology") return;
-
+    if(getPageSetting('AutoMaps') === 0) return;
+    
     //exit and do nothing if we are prior to zone 6 (maps haven't been unlocked):
     if (!game.global.mapsUnlocked || !(ourBaseDamage > 0)) { //if we have no damage, why bother running anything? (this fixes weird bugs)
         enoughDamage = true;
         return;
+    }
+    
+    if(  ((cycleZone() === 0 || cycleZone() === 4) && game.global.lastClearedCell + 1 < 82) //last poison zone mapping (praid, bw raid) tends to take a while, so get books before going into it
+        || game.global.challengeActive == "Mapology") //TODO: mapology
+    {
+        if(game.global.preMapsActive)
+            mapsClicked(true);
+        return; 
     }
     
     //check if we want to trimpicide for stacks
@@ -421,7 +424,7 @@ function autoMap() {
         }
         else if (preSpireFarming) { //if preSpireFarming x minutes is true, switch over from wood maps to metal maps.
             statusMsg = "Spire Farm: ";
-            var spiremaplvl = (game.talents.mapLoot.purchased && MODULES["maps"].SpireFarm199Maps) ? game.global.world - 1 : game.global.world;
+            var spiremaplvl = game.talents.mapLoot.purchased ? game.global.world - 1 : game.global.world;
             if (game.global.mapsActive) {
                 if(currMap.level === spiremaplvl)
                     selectedMap = currMap;

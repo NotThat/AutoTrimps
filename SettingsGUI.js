@@ -39,7 +39,7 @@ function automationMenuInit() {
     newContainer.setAttribute("style", "display: block; font-size: 1.1vw; text-align: center; background-color: rgba(0,0,0,0.3);");
     
     //status
-    newContainer.setAttribute("onmouseover", 'tooltip(\"Current Status\", \"customText\", event, \" You\'ve found a secret! Visit the Trimps Discord to reclaim it.")');
+    newContainer.setAttribute("onmouseover", 'tooltip(\"Current Status\", \"customText\", event, \" Whats\'s happening.")');
     newContainer.setAttribute("onmouseout", 'tooltip("hide")');
     abutton = document.createElement("SPAN");
     abutton.id = 'autoMapStatus';
