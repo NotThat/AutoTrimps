@@ -276,7 +276,7 @@ function autoStance() {
     
     if (getPageSetting('AutoStance') > 1){ //2 - DE mode 3 - push mode
         //consider trimpicide for max stacks
-        var timeEstimate = timeEstimator(cellNum); //rough estimate of how long it will take to finish zone
+        var timeEstimate = timeEstimator(true, cellNum); //rough estimate of how long it will take to finish zone
         var timeFlag = timeEstimate > 50 || DHratio < easyRatioThreshold;
         if(timeFlag && hiddenBreedTimer > maxAnti && game.global.antiStacks < maxAnti-1){
             wantedAnticipation = maxAnti;
@@ -344,7 +344,7 @@ function autoStance() {
         }
         
         //consider trimpicide for max stacks
-        var timeEstimate = timeEstimator(cellNum); //rough estimate of how long it will take to finish zone
+        var timeEstimate = timeEstimator(true, cellNum); //rough estimate of how long it will take to finish zone
         var timeFlag = timeEstimate > 50 || DHratio*2 < easyRatioThreshold;
         if(timeFlag && hiddenBreedTimer > maxAnti && game.global.antiStacks < maxAnti-1){
             debug("Trimpiciding to get max stacks", "trimpicide");
@@ -497,7 +497,7 @@ function autoStance() {
                     break;
                 }
             }
-            var timeEstimate = timeEstimator(cellNum); //rough estimate of how long it will take to finish zone
+            var timeEstimate = timeEstimator(true, cellNum); //rough estimate of how long it will take to finish zone
             var careAboutArmyReadyFlag = (game.global.world % 5 === 0 || nextZoneDHratio <= poisonMult * windMult);
             var timeFlag = timeEstimate > 50 || DHratio/2 > easyRatioThreshold || !careAboutArmyReadyFlag;
             if(!goodCellFlag && timeFlag && zoneWorth >= 0.1){
@@ -939,10 +939,10 @@ function buildWorldArray(){
         enemy.maxHealth =  getEnemyHealthAT(i, enemy.name, true, game.global.world) * mutationMult * dailyHPMult; //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
         if(game.global.spireActive)                      enemy.maxHealth = getSpireStats(i+1, enemy.name, "health");
         if(game.global.challengeActive == "Obliterated") enemy.maxHealth *= oblitMult;
-        //if (enemy.corrupted == "corruptTough")         enemy.maxHealth *= 5;   //the player has no access to corruption type before reaching them, and neither do we
-        //else if (enemy.corrupted == "healthyTough")    enemy.maxHealth *= 7.5; //the player has no access to corruption type before reaching them, and neither do we
-        if(enemy.mutation == "Corruption")               enemy.maxHealth *= 5;   //so we take the worst possible case.
-        else if(enemy.mutation == "Healthy")             enemy.maxHealth *= 7.5;
+        if (enemy.corrupted == "corruptTough")         enemy.maxHealth *= 5;   //the player has no access to corruption type before reaching them, and neither do we
+        else if (enemy.corrupted == "healthyTough")    enemy.maxHealth *= 7.5; //the player has no access to corruption type before reaching them, and neither do we
+        //if(enemy.mutation == "Corruption")               enemy.maxHealth *= 5;   //so we take the worst possible case.
+        //else if(enemy.mutation == "Healthy")             enemy.maxHealth *= 7.5;
         enemy.health = enemy.maxHealth;
 
         worldArray.push(enemy);

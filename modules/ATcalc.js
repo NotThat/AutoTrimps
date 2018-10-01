@@ -223,6 +223,8 @@ function calcDmgManual(printout){
     return baseDamageHigh;
 }
 
+//base includes gear, amalgamators, power1 and power2
+//TODO: golden battle, sharp trimps, daily bonuses, 
 function calcEndDamageAA(base, zone){
     var coords = zone + 99;
     var soldiers = calcCoords(coords, 0);
@@ -254,6 +256,14 @@ function calcEndDamageAA(base, zone){
         var str = (0.15 * healthy + 1);
         base *= str;
     }
+    
+    if(AutoPerks.dailyObj != null){
+        if (game.talents.daily.purchased)
+            base *= 1.5;
+    }
+    
+    base *= AutoPerks.sharpBonusMult;
+    base *= AutoPerks.battleGUMult;
     
     var magMult = Math.pow(0.8, zone-230+1);
     base *= magMult;
@@ -464,4 +474,90 @@ function getEnemyHealthAT(level, name, ignoreImpStat, zone) {
     if (!ignoreImpStat)
         amt *= game.badGuys[name].health;
     return Math.floor(amt);
+}
+
+function timeEstimator(currZoneFlag, fromCell, zoneHealth, isPoison){
+    var totalHP = 0;
+    var ret = 0;
+    var dmgToUse = (currZoneFlag ? baseDamageHigh*8 : calcEndDamageAA(AutoPerks.benefitHolderObj.Attack.benefit, AutoPerks.maxZone))*4;
+    if(currZoneFlag)
+        for (var i = fromCell; i<100; i++)
+            totalHP += worldArray[i].maxHealth;
+    else{
+        totalHP = zoneHealth;
+    }
+
+    ret = totalHP / dmgToUse;
+    if(ret > 300){ //if longer than 5 minutes, get max map bonus
+        totalHP *= 1.1; //rough estimate of running 10 -3 FA maps
+        dmgToUse *= 3;
+        ret = totalHP / dmgToUse;
+    }
+    
+    if(ret > 300){ //magmanmancer bonus kicks in
+        var damageDone = 300 * dmgToUse;
+        var magmamancerStacks = 0;
+        var magmaDmgMult = 1;
+        var time = -300;
+        do{
+            if(magmamancerStacks > 12) break;
+            magmaDmgMult = getBonusPercentAT(false, magmamancerStacks++);
+            damageDone += dmgToUse * magmaDmgMult;
+            time += 600;
+        } while(damageDone < totalHP);
+        if(damageDone < totalHP) time += (totalHP - damageDone) / (dmgToUse * magmaDmgMult);
+        return time;
+    }
+    
+    return Math.max(7,ret);
+}
+
+function getBonusPercentAT(justStacks, forceTime, count){
+    var boostMult = 0.9999;
+    var boostMax = 3;
+    var expInc = 1.2;
+    var timeOnZone;
+    var howMany = typeof count === 'undefined' ? 31500 : count;
+    if (typeof forceTime === 'undefined'){
+        var timeOnZone = getGameTime() - game.global.zoneStarted;
+        if (game.talents.magmamancer.purchased) timeOnZone += 300000;
+        timeOnZone = Math.floor(timeOnZone / 600000);
+
+        if (timeOnZone > 12) timeOnZone = 12;
+        else if (timeOnZone <= 0) return 1;
+    }
+    else timeOnZone = forceTime;
+    if (justStacks) return timeOnZone;
+    //return 1 + ((((1 - Math.pow(boostMult, this.owned)) * boostMax)) * (Math.pow(expInc, timeOnZone) - 1));
+    return 1 + ((((1 - Math.pow(boostMult, howMany)) * boostMax)) * (Math.pow(expInc, timeOnZone) - 1));
+}
+
+
+
+function approxZoneHP(zoneNum){
+    var zone = typeof zoneNum === 'undefined' ? game.global.world : zoneNum;
+    var healthy = zone > 300 ? 2 + Math.floor((zone - 300)/15): 0;
+    var corrupt = 99 - healthy; //assumes full zone corruption which happens in zone 430ish?
+    
+    //corruptDbl,corruptCrit,corruptBleed,corruptStrong,corruptTough,corruptDodge,healthyDbl,healthyCrit,healthyBleed, healthyStrong, healthyTough, none
+    var corruptMult = (3 + 5 + 1.3) / 6; //1.3 for dodge, 5 for tough
+    var healthyMult = (4 + 7.5) / 5; //7.5 for tough
+    
+    var amt = 1;
+    if(typeof AutoPerks.DailyHousingMult !== 'undefined') amt *= AutoPerks.DailyHousingMult;
+    amt *= getEnemyHealthAT(50, 'Snimp', true, zone)*(healthy*healthyMult*corruptHealthyStatScaleAT(14, zone) + (corrupt*corruptMult + 6)*corruptHealthyStatScaleAT(10, zone)); //omni has 6 times regular corrupted enemy of equal cell health
+    return amt;
+}
+
+function corruptHealthyStatScaleAT(base, zone){
+    var scales = Math.floor((zone - 150) / 6);
+    base *= Math.pow(1.05, scales);
+    return base;
+}
+
+function sumCurrZoneHP(){
+    var sum = 0;
+    for (var i = 0; i < 100; i++)
+        sum += worldArray[i].maxHealth;
+    return sum;
 }

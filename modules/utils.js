@@ -178,18 +178,6 @@ function setPageSetting(setting, value) {
     }
 }
 
-//note we have good shield equipped when this is called
-function timeEstimator(cellNum){
-    var totalHP = 0;
-    var mult = 1;
-    for (var i = cellNum; i<100; i++){
-        totalHP += worldArray[i].maxHealth;
-    }
-    var ret = totalHP / (baseDamageHigh*8*4*mult);
-    //debug("timeEstimator is " + ret);
-    return ret;
-}
-
 //Global debug message
 function debug(messageStr, type, lootIcon) {
     var output = true;

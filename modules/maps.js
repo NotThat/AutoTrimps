@@ -1324,10 +1324,11 @@ function poisonZone(){
 }
 
 
-function cycleZone(){ //poizon - wind - ice
-    if(game.global.world < 236)
+function cycleZone(zoneNum){ //poizon - wind - ice
+    var zone = typeof zoneNum === 'undefined' ? game.global.world : zoneNum;
+    if(zone < 236)
         return -1;
-    return (game.global.world - 236) % 15;
+    return (zone - 236) % 15;
 }
 
 function getRemainingSpecials(maxZone){

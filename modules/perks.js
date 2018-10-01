@@ -295,10 +295,23 @@ AutoPerks.getHelium = function() {
     return respecMax;
 };
 
-function corruptionStatScaleAT(base, zone){
-    var scales = Math.floor((zone - 150) / 6);
-    base *= Math.pow(1.05, scales);
-    return base;
+AutoPerks.updateDailyMods = function(){
+    AutoPerks.dailyObj = null;
+    if(portalWindowOpen) //we are respecting to enter a new portal
+        AutoPerks.dailyObj = getDailyChallenge(readingDaily, true, false);
+    else if(game.global.challengeActive == "Daily")//get current run challenge/daily
+        AutoPerks.dailyObj = game.global.dailyChallenge;
+    
+    
+    AutoPerks.DailyHousingMult = 1;
+    AutoPerks.DailyBadHealthMult = 1;
+    //AutoPerks.
+    if(AutoPerks.dailyObj != null){
+        if(AutoPerks.dailyObj.hasOwnProperty("large"))
+            AutoPerks.DailyHousingMult = (100 - AutoPerks.dailyObj.large.strength) / 100;
+        if(AutoPerks.dailyObj.hasOwnProperty("badHealth"))
+            AutoPerks.DailyHousingMult = (100 + 20*AutoPerks.dailyObj.badHealth.strength) / 100;
+    }
 }
 
 //green "Allocate Perks" button:
@@ -315,33 +328,26 @@ AutoPerks.clickAllocate = function() {
     AutoPerks.breedMult   = 1;
     AutoPerks.gearLevels  = 0;
     AutoPerks.compoundingImp = Math.pow(1.003, AutoPerks.maxZone * 3 - 1);
+    AutoPerks.windMod = 1 + 13 * game.empowerments.Wind.getModifier() * 10; //13 minimum stacks
+    
+    AutoPerks.sharpBonusMult = 1; //TODO: checkbox this
+    AutoPerks.battleGUMult = 1; //TODO: checkbox this
+    //AutoPerks.sharpBonusMult = 1.5; //TODO: checkbox this
+    //AutoPerks.battleGUMult = 19.89; //TODO: checkbox this
     
     /* benefitStat captures how much of a stat we have, and what the change will be from increasing a perk.
      * increasing a weight by a factor of 2 means we are willing to spend twice as much helium for the same increase.
      * finally, perk.efficiency equals perk.calculateBenefit() / perk.cost
      */
     
-    AutoPerks.dailyObj = null;
-    if(portalWindowOpen) //we are respecting to enter a new portal
-        AutoPerks.dailyObj = getDailyChallenge(readingDaily, true, false);
-    else if(game.global.challengeActive == "Daily")//get current run challenge/daily
-        AutoPerks.dailyObj = game.global.dailyChallenge;
-
-    AutoPerks.DailyHousingMult = 1;
-    if(AutoPerks.dailyObj != null){
-        if(AutoPerks.dailyObj.hasOwnProperty("large"))
-            AutoPerks.DailyHousingMult = (100 - AutoPerks.dailyObj.large.strength) / 100;
-    }
-    
-    
-    //AutoPerks.grabDaily();       //get the run challenge/daily, if any
+    AutoPerks.updateDailyMods(); // current (or selected) challenge modifiers
     AutoPerks.resetPerks();      // set all perks to level 0
     AutoPerks.resetBenefits();   // benefit and benefitBak = 1;
     AutoPerks.initializeAmalg(); // calculates amalgamator related variables. also pumps carp1/2/coord. doing this every allocate instead of 
                                  // on firstRun() because DG stats and helium mightve changed
     //calculates attack / health of non tough cell 50 corrupted enemy at AutoPerks.maxZone
-    AutoPerks.enemyHealth = getEnemyHealthAT(50, 'Snimp', true, AutoPerks.maxZone) * corruptionStatScaleAT(10, AutoPerks.maxZone); //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
-    AutoPerks.enemyDamage = calcEnemyAttack("Corruption", "corruptDbl", corruptionStatScaleAT(3, AutoPerks.maxZone), 'Snimp', 50, 1);
+    AutoPerks.zoneHealth = approxZoneHP(AutoPerks.maxZone); //this is health approx of the entire zone
+    AutoPerks.enemyDamage = calcEnemyAttack("Corruption", "corruptDbl", corruptHealthyStatScaleAT(3, AutoPerks.maxZone), 'Snimp', 50, 1);
 
     var helium = AutoPerks.totalHelium;
 
@@ -920,7 +926,6 @@ function calcIncome(){
     var staffBonusMining= 1 + game.heirlooms.Staff.MinerSpeed.currentBonus / 100;
     var staffBonusDrop  = 1 + game.heirlooms.Staff.metalDrop.currentBonus / 100;
     //var windMod = 1 + game.empowerments.Wind.getCombatModifier() * 10;
-    var windMod = 1 + 14 * game.empowerments.Wind.getModifier() * 10; //14 minimum stacks
     
     AutoPerks.gatheredResources =   0.5 *                   //base
                         AutoPerks.basePopToUse *
@@ -931,7 +936,7 @@ function calcIncome(){
                         AutoPerks.compoundingImp *          //same bonus as whipimp
                         (1 + 0.05*motivation1Perk.level) * 
                         (1 + 0.01*motivation2Perk.level) *
-                        windMod *
+                        AutoPerks.windMod *
                         staffBonusMining *
                         2;                                 //sharing food
                         
@@ -944,10 +949,9 @@ function calcIncome(){
     AutoPerks.lootedResources = calcLootedResources();
     
     AutoPerks.totalResources = (AutoPerks.cacheResources + AutoPerks.gatheredResources + tBonus * staffBonusDrop * AutoPerks.lootedResources); //out of these 3, AutoPerks.cacheResources is the predominent one (from LMC maps)
-    //debug("cache " + AutoPerks.cacheResources.toExponential(2) + " gathered " + AutoPerks.gatheredResources.toExponential(2) + " looted " + AutoPerks.lootedResources.toExponential(2));
     
     var baseCost = 1315 * Math.pow(0.95, artisanPerk.level); //total all gear level 1 basecost
-    AutoPerks.prestiges = Math.floor((AutoPerks.maxZone-1)/10 + 2) * 2; //roundup to next xx5 zone for prestige
+    AutoPerks.prestiges = Math.floor(AutoPerks.maxZone/10) * 2 + 2 + (AutoPerks.maxZone % 10 >= 5 && cycleZone(AutoPerks.maxZone) !== 9 ? 2 : 0); //roundup to next xx5 zone for prestige, unless its last wind zone
     
     var prestigeMod = (AutoPerks.prestiges - 3) * 0.85 + 2;
     AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1); //this is the cost of all gear at max prestige level 1
@@ -982,7 +986,6 @@ function calcLootedResources(){
     var looting1        = AutoPerks.perksByName.Looting;
     var looting2        = AutoPerks.perksByName.Looting_II;
     var spireBonus = 1 + 10 * Math.floor((AutoPerks.maxZone - 100) / 100) * (game.talents.stillRowing.purchased ? 0.03 : 0.02);
-    var windMod = 1 + 14 * game.empowerments.Wind.getModifier() * 10; //14 minimum stacks
     AutoPerks.lootedResources = AutoPerks.baseZoneLoot *
                                 AutoPerks.basePopToUse *
                                 popMultiplier() *
@@ -990,7 +993,7 @@ function calcLootedResources(){
                                 (1 + 0.0025*looting2.level) * 
                                 AutoPerks.compoundingImp * 
                                 spireBonus * 
-                                windMod;
+                                AutoPerks.windMod;
     return AutoPerks.lootedResources;
 }
 
@@ -999,16 +1002,19 @@ function calcCacheReward(){
     var looting2        = AutoPerks.perksByName.Looting_II;
     
     var amt = AutoPerks.basePopToUse * popMultiplier() / 2 * getJobModifierAT() * 20; //game.jobs["Miner"].modifier;
-    
+    amt *= AutoPerks.windMod;
     amt = calcHeirloomBonus("Staff", "MinerSpeed", amt);
 
     if (game.talents.turkimp4.purchased)
         amt *= 2;
     
-    amt += getPlayerModifierAT() * 20;
+    amt += getPlayerModifierAT() * 20; //tiny effect
     
     if (Fluffy.isRewardActive("lucky"))
         amt *= 1.25;
+    
+    //if (game.portal.Meditation.level > 0) amt *= (1 + (game.portal.Meditation.getBonusPercent() * 0.01));
+    //if (game.jobs.Magmamancer.owned > 0 && what == "metal") amt *= game.jobs.Magmamancer.getBonusPercent();
     
     //whats left of scaleToCurrentMap()
     amt *= 0.64; //low level map -2 levels penalty
@@ -1404,17 +1410,17 @@ function minMaxMi(print){
         }
         var fluffyGrowth = (AutoPerks.benefitHolderObj.Fluffy.benefit*100 / fluffyXP).toFixed(3) + "%";
         var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
-        var atkMod = (calcEndDamageAA(AutoPerks.benefitHolderObj.Attack.benefit, AutoPerks.maxZone) / AutoPerks.enemyHealth); //this includes gear, amalgamators, power1 and power2
+        var lastZoneLength = timeEstimator(false, 0, approxZoneHP(AutoPerks.maxZone), false);
         var healthMod = AutoPerks.benefitHolderObj.Health.benefit.toExponential(2); //this includes gear, amalgamators, toughness1/2, resil, and anything breeding related
         if(AutoPerks.userMaxFuel) AutoPerks.fuelEndZone = AutoPerks.maxZone;
-        //AutoPerks.enemyHealth
-        //AutoPerks.enemyDamage
-        //calculate our final attack at maxZone
         
         
 
-        
-        var msg2 = "Helium: " + heliumMod + " Attack/Enemy Health at maxZone: " + prettify(atkMod) + " Health: " + healthMod + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%";
+        var timeText = "";
+        if(lastZoneLength < 60) timeText = Math.floor(lastZoneLength) + "s";
+        else if (lastZoneLength < 3600) timeText = Math.floor(lastZoneLength/60) + "m" + Math.floor(lastZoneLength % 60) + "s";
+        else timeText = Math.floor(lastZoneLength / 3600) + "h" + Math.floor(lastZoneLength % 60) + "m";
+        var msg2 = "Helium: " + heliumMod + " zone " + AutoPerks.maxZone + " will take approx " + timeText + ". Health: " + healthMod + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%";
         var msg3 = "Fluffy Growth: " + fluffyGrowth + " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)";
         var $text = document.getElementById("textAreaAllocate");
         $text.innerHTML += msg2 + '<br>' + msg3;
@@ -1647,6 +1653,7 @@ AutoPerks.initializeAmalg = function() {
 };
 
 AutoPerks.firstRun = function(){
+    AutoPerks.updateDailyMods(); // current (or selected) challenge modifiers
     AutoPerks.initializePerks();        //create data structures
     AutoPerks.initializeGUI();          //create UI elements
     AutoPerks.initializeRatioPreset();  //loads last selected preset.

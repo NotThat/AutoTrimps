@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "33";
+var ver = "34";
 var verDate = "1.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -50,12 +50,15 @@ function startAT() {
     
     highCritChance = getPlayerCritChance();
     highCritDamage = getPlayerCritDamageMult();
-    highATK        = 1;
-    highPB         = 0;
+    highATK        = calcHeirloomBonus("Shield", "trimpAttack", 1);
+    highPB         = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
     lowCritChance  = getPlayerCritChance();
     lowCritDamage  = getPlayerCritDamageMult();
     lowATK         = 1;
     lowPB          = 0;
+    
+    everyLoopStuff();
+    calcBaseDamageinB();
     
     //HTML For adding a 5th tab to the message window
     var ATbutton = document.createElement("button");
@@ -296,6 +299,15 @@ function pauseRemovalLoop(){
    }
 }
 
+function everyLoopStuff(){
+    maxAnti = (game.talents.patience.purchased ? 45 : 30);
+    if(game.global.mapsActive) currMap = getCurrentMapObject();
+    if (Fluffy.isActive() && lastFluffXp != Fluffy.currentExp[1]){
+        lastFluffXp = Fluffy.currentExp[1];
+        lastFluffDmg = Fluffy.getDamageModifier();
+    }
+}
+
 ////////////////////////////////////////
 //Main LOGIC Loop///////////////////////
 ////////////////////////////////////////
@@ -371,12 +383,7 @@ function ATLoop(makeUp) {
     }
     setScienceNeeded();  //determine how much science is needed
     
-    maxAnti = (game.talents.patience.purchased ? 45 : 30);
-    if(game.global.mapsActive) currMap = getCurrentMapObject();
-    if (Fluffy.isActive() && lastFluffXp != Fluffy.currentExp[1]){
-        lastFluffXp = Fluffy.currentExp[1];
-        lastFluffDmg = Fluffy.getDamageModifier();
-    }
+    everyLoopStuff();
 
     //EXECUTE CORE LOGIC
     if (getPageSetting('ExitSpireCell') >0 || getPageSetting('ExitSpireCellDailyC2') >0) exitSpireCell(); //"Exit Spire After Cell" (other.js)
