@@ -476,15 +476,15 @@ function getEnemyHealthAT(level, name, ignoreImpStat, zone) {
     return Math.floor(amt);
 }
 
-function timeEstimator(currZoneFlag, fromCell, zoneHealth, isPoison){
+function timeEstimator(currZoneFlag, fromCell, zone, isPoison, toText){
     var totalHP = 0;
     var ret = 0;
-    var dmgToUse = (currZoneFlag ? baseDamageHigh*8 : calcEndDamageAA(AutoPerks.benefitHolderObj.Attack.benefit, AutoPerks.maxZone))*4;
+    var dmgToUse = (currZoneFlag ? baseDamageHigh*8 : calcEndDamageAA(AutoPerks.benefitHolderObj.Attack.benefit, zone))*4;
     if(currZoneFlag)
         for (var i = fromCell; i<100; i++)
             totalHP += worldArray[i].maxHealth;
     else{
-        totalHP = zoneHealth;
+        totalHP = approxZoneHP(zone);
     }
 
     ret = totalHP / dmgToUse;
@@ -506,10 +506,19 @@ function timeEstimator(currZoneFlag, fromCell, zoneHealth, isPoison){
             time += 600;
         } while(damageDone < totalHP);
         if(damageDone < totalHP) time += (totalHP - damageDone) / (dmgToUse * magmaDmgMult);
-        return time;
+        ret = time;
     }
+    ret = Math.max(7, ret);
     
-    return Math.max(7,ret);
+    if(toText){
+        var timeText = "";
+        if(ret < 60) timeText = Math.floor(ret) + "s";
+        else if (ret < 3600) timeText = Math.floor(ret/60) + "m" + Math.floor(ret % 60) + "s";
+        else timeText = Math.floor(ret / 3600) + "h" + Math.floor(ret % 60) + "m";
+        return timeText;
+    }
+    else
+        return ret;
 }
 
 function getBonusPercentAT(justStacks, forceTime, count){

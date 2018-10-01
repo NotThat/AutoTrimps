@@ -492,7 +492,10 @@ function getDamageCaller(dmg, lowerDamage, noCrit){
     for (var equipName in equipmentList) //update equipment evaluations
         evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName);
     
-    getDamage(dmg, lowerDamage, noCrit);
+    if (getPageSetting('AutoStance') > 1) //2 - DE mode 3 - push mode
+        getDamage(Number.MAX_VALUE, lowerDamage, noCrit); //buy max damage
+    else
+        getDamage(dmg, lowerDamage, noCrit);
     
     if (game.global.world === 400 && game.global.challengeActive === "Daily" && getPageSetting('Spire3Time') > 1){
         var backup = buyWeaponsMode;

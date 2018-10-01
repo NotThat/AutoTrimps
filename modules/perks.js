@@ -1410,16 +1410,13 @@ function minMaxMi(print){
         }
         var fluffyGrowth = (AutoPerks.benefitHolderObj.Fluffy.benefit*100 / fluffyXP).toFixed(3) + "%";
         var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
-        var lastZoneLength = timeEstimator(false, 0, approxZoneHP(AutoPerks.maxZone), false);
+        var timeText = timeEstimator(false, 0, AutoPerks.maxZone, false, true);
         var healthMod = AutoPerks.benefitHolderObj.Health.benefit.toExponential(2); //this includes gear, amalgamators, toughness1/2, resil, and anything breeding related
         if(AutoPerks.userMaxFuel) AutoPerks.fuelEndZone = AutoPerks.maxZone;
         
         
 
-        var timeText = "";
-        if(lastZoneLength < 60) timeText = Math.floor(lastZoneLength) + "s";
-        else if (lastZoneLength < 3600) timeText = Math.floor(lastZoneLength/60) + "m" + Math.floor(lastZoneLength % 60) + "s";
-        else timeText = Math.floor(lastZoneLength / 3600) + "h" + Math.floor(lastZoneLength % 60) + "m";
+        
         var msg2 = "Helium: " + heliumMod + " zone " + AutoPerks.maxZone + " will take approx " + timeText + ". Health: " + healthMod + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%";
         var msg3 = "Fluffy Growth: " + fluffyGrowth + " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)";
         var $text = document.getElementById("textAreaAllocate");
