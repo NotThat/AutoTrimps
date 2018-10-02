@@ -465,8 +465,9 @@ function initializeAllSettings() {
     
 
 //Golden Upgrade
-    createSetting('AutoGoldenUpgrades', 'Auto', 'Off - Does nothing. All other choices get overruled by Max Void.<br>Helium - Helium in fillers/dailies, Battle in C^2<br>Battle - Always battle.<br>Match Perks - will sometime get a battle GU when the inferred Helium/Attack ratio from active perks drops below the value of a Battle GU compared to an extra Helium one. You can turn on Golden Upgrade Spam under Display to see the numbers in action.', 'dropdown', 'Helium', ["Off", "Helium", "Battke", "Match Perks"], 'Golden');
-    createSetting('MaxVoid',            'Max Void',            'Always get 60% Void. <b>THIS INCLUDES C^2</b>.','dropdown', 'Yes', ["Yes", "No"], 'Golden');
+    createSetting('AutoGoldenUpgrades', 'Auto', 'Off - Does nothing. All other choices will max Void if the relevant button is pressed, and buy battle in C2.<br>Match Perks - will sometime get a battle GU when the inferred Helium/Attack ratio from active perks drops below the value of a Battle GU compared to an extra Helium one. You can turn on Golden Upgrade Spam under Display to see the numbers in action.', 'dropdown', 'Helium', ["Off", "Helium", "Battle", "Match Perks"], 'Golden');
+    createSetting('MaxVoid',        'Max Void', 'Always get 60% Void Not in C2.' ,'boolean', true, null, 'Golden');
+    createSetting('MaxVoidC2',   'Max Void C2', 'Always get 60% Void In C2.'     ,'boolean', true, null, 'Golden');
 
 // Nature settings:
     createSetting('AutoNatureTokens', 'Spend Nature Tokens', '<b>MASTER BUTTON</b> Automatically spend or convert nature tokens.', 'boolean', false, null, 'Nature');

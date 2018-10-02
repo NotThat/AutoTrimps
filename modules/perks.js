@@ -1,5 +1,6 @@
 //Create blank AutoPerks object
 var AutoPerks = {};
+var effQueue;
 AutoPerks.Squared = "ChallengeSquared";
 var presetList = [];
 function presetObj(header, Helium, Attack, Health, Fluffy, DG) {
@@ -459,7 +460,6 @@ AutoPerks.spendHelium = function(helium) {
     
     
     calcZeroState(); //calculates efficiency of benefits, and sums benefitBak for every perk
-    //var effQueue = new PriorityQueue(function(a,b) { return a.efficiency > b.efficiency; } ); // Queue that keeps most efficient purchase at the top
     for(var i = 0; i < AutoPerks.workPerks.length; i++){ //next we calculate the efficiency of leveling each perk
         var inc = AutoPerks.workPerks[i].getBenefit();
         var price = AutoPerks.workPerks[i].getPrice();
@@ -467,27 +467,18 @@ AutoPerks.spendHelium = function(helium) {
         if(AutoPerks.workPerks[i].efficiency < 0)
             throw "Error: Perk ratios must be positive values.";
         
-        //effQueue.add(AutoPerks.workPerks[i]);
     }
 
     var mostEff, price, inc;
     var packPrice,packLevel;
     var loopCounter=0;
-    var highestEfficiency = 0;
-    var highestEffPrice = 0;
-    var highestEffLocation = 0;
-    
-    
     
     //iterate and find highest efficiency perk
     function iterateArr(){
-        highestEfficiency = 0;
-        highestEffPrice = 0;
-        highestEffLocation = 0;
         calcZeroState();
-        
-        //var effQueue = new PriorityQueue(function(a,b) { return a.efficiency > b.efficiency; } ); // Queue that keeps most efficient purchase at the top
-        
+
+        effQueue = new PriorityQueue(function(a,b) { return a.efficiency > b.efficiency; } ); // Queue that keeps most efficient purchase at the top
+
         for(var i = 0; i < AutoPerks.workPerks.length; i++){
             if(AutoPerks.workPerks[i].level >= AutoPerks.workPerks[i].max){
                 AutoPerks.workPerks.splice(i, 1); //remove from array
@@ -509,24 +500,18 @@ AutoPerks.spendHelium = function(helium) {
             if(AutoPerks.workPerks[i].efficiency < 0)
                 throw "Error: Perk ratios must be positive values.";
 
-            //effQueue.add(AutoPerks.workPerks[i]);
-            if(highestEfficiency < AutoPerks.workPerks[i].efficiency){
-                highestEfficiency = AutoPerks.workPerks[i].efficiency;
-                highestEffPrice = price;
-                highestEffLocation = i;
-            }
+            effQueue.add(AutoPerks.workPerks[i]);
         }
         if(AutoPerks.workPerks.length === 0) //all done
             return false;
-        
-        //mostEff = effQueue.poll();
-        //price = mostEff.getPrice();
-        mostEff = AutoPerks.workPerks[highestEffLocation];
-        price = highestEffPrice;
-        loopCounter++;
+
+        mostEff = effQueue.poll();
+        price = mostEff.getPrice();
         return true;
     }
+    
     while(iterateArr()){
+        loopCounter++;
         helium -= price;
         mostEff.buyLevel();
         mostEff.spent += price;            
@@ -571,7 +556,7 @@ AutoPerks.spendHelium = function(helium) {
     //Repeat the process for spending round 2.
     var pct = 0.01; //when a T2 perk is most efficient, buy as many as we can afford with helium * pct of our total helium (min 1 level)
     while (iterateArr()){
-        if(typeof mostEff.parent !== 'undefined'){ 
+        if(typeof mostEff.parent !== 'undefined'){
             var extraLevels = mostEff.getBulkAmountT2(helium * pct); //returns how many additional levels of this perk we can afford with helium. minimum 0;
             var newCost = mostEff.getTotalPrice(mostEff.level + extraLevels);
             var oldCost = mostEff.spent;
