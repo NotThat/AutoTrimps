@@ -24,7 +24,7 @@
            console.log(x.poll());
          } // will print 0 1 3 4 5
  */
-'use strict';
+//'use strict';
 
 var defaultcomparator = function(a, b) {
     return a < b;

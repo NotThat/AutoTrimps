@@ -18,16 +18,14 @@ function autoRoboTrimp() {
 function autoGoldenUpgradesAT() {
     var setting = getPageSetting('AutoGoldenUpgrades');
     if(setting == 'Off') return;
-    var goldStrat = getPageSetting('goldStrat');
     
     while(getAvailableGoldenUpgrades() > 0){
         var what = "";
-        if(goldStrat == "Yes" && game.goldenUpgrades.Void.nextAmt() != 0.12 && buyGoldenUpgrade("Void")) continue;
+        if(getPageSetting('MaxVoid') == "Yes" && game.goldenUpgrades.Void.nextAmt() != 0.12 && buyGoldenUpgrade("Void")) continue;
         
         if(game.global.runningChallengeSquared || setting === "Battle") what = "Battle";
         else if (setting === "Helium") what = "Helium";
         else{ //'Match Perks' mode: aim to buy Helium/Battle at a ratio that matches our perk setup
-            what = "Helium";
             var helCurrBonus = game.goldenUpgrades.Helium.currentBonus;
             var batCurrBonus = game.goldenUpgrades.Battle.currentBonus;
             var helNextBonus = game.goldenUpgrades.Helium.nextAmt();
@@ -37,7 +35,7 @@ function autoGoldenUpgradesAT() {
             var batRelativeIncrease = (1 + batCurrBonus + batNextBonus)/(1 + batCurrBonus); //relative damage increase from upgrading battle GU
             
             var looting = game.portal["Looting"].level;
-            var power   = game.portal["Power"].level
+            var power   = game.portal["Power"].level;
             
             var helBenefit = ((1 + 0.05*(looting+1)) * (1 + 0.0025*(looting+1))) / ((1 + 0.05*looting) * (1 + 0.0025*looting)); //relative helium increase from 1 more looting1 level
             var atkBenefit = ((1 + 0.05*(power+1)) * (1 + 0.01*(power+1))) / ((1 + 0.05*power) * (1 + 0.01*power)); //relative damage increase from 1 more power1 level
@@ -52,6 +50,7 @@ function autoGoldenUpgradesAT() {
                 debug("Match Perks GU: Buying Battle GU", "GU");
                 what = "Battle";
             }
+            else what = "Helium";
         }
         
         if(!buyGoldenUpgrade(what)){

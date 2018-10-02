@@ -466,7 +466,7 @@ function initializeAllSettings() {
 
 //Golden Upgrade
     createSetting('AutoGoldenUpgrades', 'Auto', 'Off - Does nothing. All other choices get overruled by Max Void.<br>Helium - Helium in fillers/dailies, Battle in C^2<br>Battle - Always battle.<br>Match Perks - will sometime get a battle GU when the inferred Helium/Attack ratio from active perks drops below the value of a Battle GU compared to an extra Helium one. You can turn on Golden Upgrade Spam under Display to see the numbers in action.', 'dropdown', 'Helium', ["Off", "Helium", "Battke", "Match Perks"], 'Golden');
-    createSetting('goldStrat',          'Max Void',            'Always get 60% Void. <b>THIS INCLUDES C^2</b>.','dropdown', 'Yes', ["Yes", "No"], 'Golden');
+    createSetting('MaxVoid',            'Max Void',            'Always get 60% Void. <b>THIS INCLUDES C^2</b>.','dropdown', 'Yes', ["Yes", "No"], 'Golden');
 
 // Nature settings:
     createSetting('AutoNatureTokens', 'Spend Nature Tokens', '<b>MASTER BUTTON</b> Automatically spend or convert nature tokens.', 'boolean', false, null, 'Nature');
@@ -918,7 +918,6 @@ function updateCustomButtons() {
     document.getElementById('AutoWind').value = autoTrimpSettings.AutoWind.selected;
     document.getElementById('AutoIce').value = autoTrimpSettings.AutoIce.selected;
     //DerSkagg Mod: Golden Upgrade Settings. (Toggles relevant ones on/off)
-    //document.getElementById('goldStrat').value = autoTrimpSettings.goldStrat.selected;
 
     //document.getElementById('Prestige').value = autoTrimpSettings.Prestige.selected; //dont update this, dynamic prestige takes it over and is handled elsewhere.
 
