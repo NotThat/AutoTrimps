@@ -459,7 +459,7 @@ AutoPerks.spendHelium = function(helium) {
     
     
     calcZeroState(); //calculates efficiency of benefits, and sums benefitBak for every perk
-    var effQueue = new PriorityQueue(function(a,b) { return a.efficiency > b.efficiency; } ); // Queue that keeps most efficient purchase at the top
+    //var effQueue = new PriorityQueue(function(a,b) { return a.efficiency > b.efficiency; } ); // Queue that keeps most efficient purchase at the top
     for(var i = 0; i < AutoPerks.workPerks.length; i++){ //next we calculate the efficiency of leveling each perk
         var inc = AutoPerks.workPerks[i].getBenefit();
         var price = AutoPerks.workPerks[i].getPrice();
@@ -486,7 +486,7 @@ AutoPerks.spendHelium = function(helium) {
         highestEffLocation = 0;
         calcZeroState();
         
-        var effQueue = new PriorityQueue(function(a,b) { return a.efficiency > b.efficiency; } ); // Queue that keeps most efficient purchase at the top
+        //var effQueue = new PriorityQueue(function(a,b) { return a.efficiency > b.efficiency; } ); // Queue that keeps most efficient purchase at the top
         
         for(var i = 0; i < AutoPerks.workPerks.length; i++){
             if(AutoPerks.workPerks[i].level >= AutoPerks.workPerks[i].max){
@@ -505,32 +505,24 @@ AutoPerks.spendHelium = function(helium) {
                 continue;
             }
             inc = AutoPerks.workPerks[i].getBenefit();
-            //var lastEfficiency = AutoPerks.workPerks[i].efficiency;
             AutoPerks.workPerks[i].efficiency = inc/price;
             if(AutoPerks.workPerks[i].efficiency < 0)
                 throw "Error: Perk ratios must be positive values.";
 
-            effQueue.add(AutoPerks.workPerks[i]);
-            /*if(highestEfficiency < AutoPerks.workPerks[i].efficiency){
+            //effQueue.add(AutoPerks.workPerks[i]);
+            if(highestEfficiency < AutoPerks.workPerks[i].efficiency){
                 highestEfficiency = AutoPerks.workPerks[i].efficiency;
                 highestEffPrice = price;
                 highestEffLocation = i;
-            }*/
+            }
         }
         if(AutoPerks.workPerks.length === 0) //all done
             return false;
         
-        //quickSort(AutoPerks.workPerks, 0, AutoPerks.workPerks.length-1);
-        
-        mostEff = effQueue.poll();
-        /*var maxLoops = 500;
-        do {
-            mostEff = effQueue.poll(); 
-        } while(mostEff.efficiency !== AutoPerks.perksByName[mostEff.name].efficiency && maxLoops--);*/
-        
-        //mostEff = AutoPerks.workPerks[AutoPerks.workPerks.length-1];
-        price = mostEff.getPrice();
-        //price = highestEffPrice;
+        //mostEff = effQueue.poll();
+        //price = mostEff.getPrice();
+        mostEff = AutoPerks.workPerks[highestEffLocation];
+        price = highestEffPrice;
         loopCounter++;
         return true;
     }
@@ -577,7 +569,7 @@ AutoPerks.spendHelium = function(helium) {
     loopCounter = 0;
     var loopT2 = 0;
     //Repeat the process for spending round 2.
-    var pct = 0.001; //when a T2 perk is most efficient, buy as many as we can afford with helium * pct of our total helium (min 1 level)
+    var pct = 0.01; //when a T2 perk is most efficient, buy as many as we can afford with helium * pct of our total helium (min 1 level)
     while (iterateArr()){
         if(typeof mostEff.parent !== 'undefined'){ 
             var extraLevels = mostEff.getBulkAmountT2(helium * pct); //returns how many additional levels of this perk we can afford with helium. minimum 0;
@@ -1810,38 +1802,4 @@ class PriorityQueue {
       node = maxChild;
     }
   }
-}
-
-function quickSort(arr, left, right){
-   var len = arr.length, pivot, partitionIndex;
-
-  if(left < right){
-    pivot = right;
-    partitionIndex = partition(arr, pivot, left, right);
-    
-   //sort left and right
-   quickSort(arr, left, partitionIndex - 1);
-   quickSort(arr, partitionIndex + 1, right);
-  }
-  return arr;
-}
-
-function partition(arr, pivot, left, right){
-   var pivotValue = arr[pivot].efficiency,
-       partitionIndex = left;
-
-   for(var i = left; i < right; i++){
-    if(arr[i].efficiency < pivotValue){
-      QSswap(arr, i, partitionIndex);
-      partitionIndex++;
-    }
-  }
-  QSswap(arr, right, partitionIndex);
-  return partitionIndex;
-}
-
-function QSswap(arr, i, j){
-   var temp = arr[i];
-   arr[i] = arr[j];
-   arr[j] = temp;
 }

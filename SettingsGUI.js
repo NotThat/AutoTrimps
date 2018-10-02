@@ -499,7 +499,7 @@ function initializeAllSettings() {
     createSetting('SpamMaps', 'Maps Spam', 'Maps Spam = Buy,Pick,Run Maps,Recycle,CantAfford', 'boolean', true, null, 'Display');
     createSetting('SpamHeirlooms', 'Heirlooms Spam', 'Heirlooms Spam = cant carry any more heirlooms', 'boolean', true, null, 'Display');
     createSetting('SpamTrimpicide', 'Trimpicide Spam', 'Trimpicide Spam = Where Trimps go to die', 'boolean', true, null, 'Display');
-    createSetting('SpamOther', 'Amal Spam', 'Skipping cooordination to preserve Amalgamator! spam', 'boolean', true, null, 'Display');
+    createSetting('SpamAmal', 'Amal Spam', 'Skipping cooordination to preserve Amalgamator! spam', 'boolean', true, null, 'Display');
     createSetting('SpamBuilding', 'Building Spam', 'Building Spam = all buildings, even storage', 'boolean', false, null, 'Display');
     createSetting('SpamJobs', 'Job Spam', 'Job Spam = All jobs, in scientific notation', 'boolean', false, null, 'Display');
     //Line2
@@ -902,7 +902,7 @@ function updateCustomButtons() {
       ,"BuyShieldblock",
       "DynamicSiphonology","PreferMetal","RunBionicBeforeSpire","CorruptionCalc","VoidCheck","TrimpleZ",
       "SupplyWall","BuyOneTimeOC","MagmiteExplain",
-      "SpamGeneral","SpamUpgrades","SpamEquipment","SpamMaps","SpamOther","SpamBuilding","SpamJobs","SpamGraphs","SpamMagmite","SpamPerks",
+      "SpamGeneral","SpamUpgrades","SpamEquipment","SpamMaps","SpamAmal","SpamBuilding","SpamJobs","SpamGraphs","SpamMagmite","SpamPerks",
     ];
     if (game.worldUnlocks.easterEgg)
         turnonofflist.push("AutoEggs");

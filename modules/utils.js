@@ -212,7 +212,7 @@ function debug(messageStr, type, lootIcon) {
             output = getPageSetting('SpamTrimpicide');
             break;
         case "other":
-            output = getPageSetting('SpamOther');
+            output = getPageSetting('SpamAmal');
             break;
         case "buildings":
             output = getPageSetting('SpamBuilding');

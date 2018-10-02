@@ -523,7 +523,7 @@ function timeEstimator(currZoneFlag, fromCell, zone, isPoison, toText){
         else if (ret < 3600)  timeText = Math.floor(ret/60) + "m" + Math.floor(ret % 60) + "s";
         else if (ret < 86400) timeText = Math.floor(ret / 3600) + "h" + Math.floor((ret % 3600)/60) + "m";
         else timeText = Math.floor(ret / 86400) + "d" + Math.floor((ret % 86400)/3600) + "h";
-        return timeText + " " + Math.floor(ret);
+        return timeText;// + " " + Math.floor(ret);
     }
     else
         return ret;
