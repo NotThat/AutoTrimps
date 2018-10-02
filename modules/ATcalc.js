@@ -257,10 +257,8 @@ function calcEndDamageAA(base, zone){
         base *= str;
     }
     
-    if(AutoPerks.dailyObj != null){
-        if (game.talents.daily.purchased)
-            base *= 1.5;
-    }
+    if(AutoPerks.dailyObj != null && AutoPerks.dailyObj != AutoPerks.Squared && game.talents.daily.purchased) //legs for days
+        base *= 1.5;
     
     base *= AutoPerks.sharpBonusMult;
     base *= AutoPerks.battleGUMult;
@@ -478,7 +476,7 @@ function getEnemyHealthAT(level, name, ignoreImpStat, zone) {
 
 function timeEstimator(currZoneFlag, fromCell, zone, isPoison, toText){
     var totalHP = 0;
-    var ret = 0;
+    var time = 0;
     var dmgToUse = (currZoneFlag ? baseDamageHigh*8 : calcEndDamageAA(AutoPerks.benefitHolderObj.Attack.benefit, zone))*4;
     if(currZoneFlag)
         for (var i = fromCell; i<100; i++)
@@ -486,36 +484,46 @@ function timeEstimator(currZoneFlag, fromCell, zone, isPoison, toText){
     else{
         totalHP = approxZoneHP(zone);
     }
-
-    ret = totalHP / dmgToUse;
-    if(ret > 300){ //if longer than 5 minutes, get max map bonus
-        totalHP *= 1.1; //rough estimate of running 10 -3 FA maps
+    
+    var damageDone = 0;
+    if(totalHP / dmgToUse > 200){ //if longer than 200s, get max map bonus
+        time = 200;
+        damageDone += 200 * dmgToUse; //rough estimate of running 10 -3 FA maps 40s maps, 90s zone 270s prezone
         dmgToUse *= 3;
-        ret = totalHP / dmgToUse;
+        time + (totalHP - damageDone) / dmgToUse;
+    }
+    else {
+        time = totalHP / dmgToUse;
+        damageDone = totalHP;
     }
     
-    if(ret > 300){ //magmanmancer bonus kicks in
-        var damageDone = 300 * dmgToUse;
+    if((time + (totalHP - damageDone) / dmgToUse) > 300){ //magmanmancer bonus kicks in
+        damageDone -= 300 * dmgToUse;
         var magmamancerStacks = 0;
         var magmaDmgMult = 1;
         var time = -300;
         do{
             if(magmamancerStacks > 12) break;
             magmaDmgMult = getBonusPercentAT(false, magmamancerStacks++);
-            damageDone += dmgToUse * magmaDmgMult;
+            damageDone += 600 * dmgToUse * magmaDmgMult;
             time += 600;
         } while(damageDone < totalHP);
         if(damageDone < totalHP) time += (totalHP - damageDone) / (dmgToUse * magmaDmgMult);
-        ret = time;
+        else{
+            damageDone -= 600 * dmgToUse * magmaDmgMult;
+            time += (totalHP - damageDone) / (dmgToUse * magmaDmgMult);
+        }
+        
     }
-    ret = Math.max(7, ret);
+    var ret = Math.max(7, time);
     
     if(toText){
         var timeText = "";
         if(ret < 60) timeText = Math.floor(ret) + "s";
-        else if (ret < 3600) timeText = Math.floor(ret/60) + "m" + Math.floor(ret % 60) + "s";
-        else timeText = Math.floor(ret / 3600) + "h" + Math.floor(ret % 60) + "m";
-        return timeText;
+        else if (ret < 3600)  timeText = Math.floor(ret/60) + "m" + Math.floor(ret % 60) + "s";
+        else if (ret < 86400) timeText = Math.floor(ret / 3600) + "h" + Math.floor((ret % 3600)/60) + "m";
+        else timeText = Math.floor(ret / 86400) + "d" + Math.floor((ret % 86400)/3600) + "h";
+        return timeText + " " + Math.floor(ret);
     }
     else
         return ret;
@@ -554,7 +562,8 @@ function approxZoneHP(zoneNum){
     
     var amt = 1;
     if(typeof AutoPerks.DailyHousingMult !== 'undefined') amt *= AutoPerks.DailyHousingMult;
-    amt *= getEnemyHealthAT(50, 'Snimp', true, zone)*(healthy*healthyMult*corruptHealthyStatScaleAT(14, zone) + (corrupt*corruptMult + 6)*corruptHealthyStatScaleAT(10, zone)); //omni has 6 times regular corrupted enemy of equal cell health
+    amt *= getEnemyHealthAT(50, 'Snimp', true, zone)       *(healthy*healthyMult*corruptHealthyStatScaleAT(14, zone) + (corrupt*corruptMult)*corruptHealthyStatScaleAT(10, zone))
+         + getEnemyHealthAT(99, "Omnipotrimp", false, zone)*corruptHealthyStatScaleAT(10, zone);
     return amt;
 }
 
@@ -569,4 +578,18 @@ function sumCurrZoneHP(){
     for (var i = 0; i < 100; i++)
         sum += worldArray[i].maxHealth;
     return sum;
+}
+
+function getMaxBattleGU(zoneNum){
+    var zone = typeof zoneNum === 'undefined' ? game.global.world : zoneNum;
+    var howManyGU = countExtraAchievementGoldens(); //starting GUs
+    var freq = getGoldenFrequency(getAchievementStrengthLevel());
+    var str = 3;
+    var totalPct = 0;
+    howManyGU += Math.floor(zone / freq);
+    for(var i = 0; i < howManyGU; i++){
+        totalPct += str;
+        str += 3;
+    }
+    return 1 + totalPct/100;
 }

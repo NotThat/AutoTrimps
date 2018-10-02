@@ -433,20 +433,13 @@ function initializeAllSettings() {
 
 // Dimensional Generator settings:
     createSetting('UseAutoGen', ['Auto Generator OFF', 'Auto Generator ON'], '<b>MASTER BUTTON</b> Dynamically switch generator modes. Required for the following mode management configurations to work. The Dimensional Generator is a building unlocked in The Magma, from z230.', 'multitoggle', 0, null, 'Magma');
-    //createSetting('AutoGen2', ['Default', 'Microtick', 'Max Cap', 'Overclock'], 'Before Z is reached, Microtick and Max Cap will switch between [Hybrid / Gain Fuel] to get EXACTLY one / FULL stacks of Capacity (not Storage) before using [Gain Mi]. Default will respect whatever you set it to and won\'t fiddle with it unless challenge overriding is on. Overclock will Gain Fuel until Z.', 'multitoggle', 2, null, 'Magma');
-    //createSetting('AutoGen2End', 'End Early Mode Z', 'On and after Z, be done with the mode we start with and switch to the final mode. -1 to disable.', 'value', 300, null, 'Magma');
-    //createSetting('AutoGen2SupplyEnd', 'End at Supply', 'On and after the zone for gathering the most magma by Supply, end Early Mode. Works alongside AutoGen2End and will end when either condition is met.', 'boolean', false, null, 'Magma');
-    //createSetting('AutoGen3', ['Gain Mi', 'Gain Fuel', 'Hybrid'], 'Mode to use after Z / SupplyEnd.', 'multitoggle', 1, null, 'Magma');
     createSetting('FuelFromZ', 'Fuel Start Zone', 'Start fueling from this zone.', 'value', 230, null, 'Magma');
     createSetting('FuelToZ', 'Fuel End Zone', 'Fuel until this zone (including).', 'value', 999, null, 'Magma');
-    //createSetting('AutoGenDC', ['Daily: Normal', 'Daily: Fuel', 'Daily: Hybrid'], 'Use a special mode in dailies to make the most out of it. Overrides AutoGen3 unless Strong Override is on.', 'multitoggle', 1, null, 'Magma');
-    //createSetting('AutoGenC2', ['c2: Normal', 'c2: Fuel', 'c2: Hybrid'], 'Use a special mode when running challenge2s to make the most out of it. Overrides AutoGen3 unless Strong Override is on.', 'multitoggle', 1, null, 'Magma');
     
     createSetting('FuelUntilAmal', 'Fuel until Amalgamator', 'Continue using Fuel until Fuel End Zone AND Amalgamator Amount are reached.', 'boolean', false, null, 'Magma');
-    createSetting('AutoGenDC', 'Daily: Fuel', 'Always fuel in Dailies', 'boolean', true, null, 'Magma');
-    createSetting('AutoGenC2', 'C2: Fuel', 'Always fuel in C2', 'boolean', true, null, 'Magma');
+    //createSetting('AutoGenDC', 'Daily: Fuel', 'Always fuel in Dailies', 'boolean', true, null, 'Magma');
+    //createSetting('AutoGenC2', 'C2: Fuel', 'Always fuel in C2', 'boolean', true, null, 'Magma');
     
-    //createSetting('AutoGen2Override', ['Override Final Only', 'Strong Override'], 'Overrides apply to the final mode (always use early mode), or also to early mode (will stop microtick etc). Normal will not change anything.', 'multitoggle', 1, null, 'Magma');
     createSetting('AutoMagmiteSpender2', ['Spend Magmite OFF', 'Spend Magmite (Portal)', 'Spend Magmite Always'], 'Auto Spends any unspent Magmite immediately before portaling. (Or Always, if toggled). Part 1 buys any permanent one-and-done upgrades in order from most expensive to least. Part 2 then analyzes Efficiency vs Capacity for cost/benefit, and buys Efficiency if its BETTER than Capacity. If not, if the PRICE of Capacity is less than the price of Supply, it buys Capacity. If not, it buys Supply. And then it repeats itself until you run out of Magmite and cant buy anymore. For Magma z230+ purposes.', 'multitoggle', 1, null, 'Magma');
     createSetting('SupplyWall', 'Throttle Supply (or Capacity)', 'Positive number NOT 1 e.g. 2.5: Consider Supply when its cost * 2.5 is < Capacity, instead of immediately when < Cap. Effectively throttles supply for when you don\'t need too many.<br><br>Negative number (-1 is ok) e.g. -2.5: Consider Supply if it costs < Capacity * 2.5, buy more supplys! Effectively throttling capacity instead.<br><br><b>Set to 1: DISABLE SUPPLY only spend magmite on Efficiency, Capacity and Overclocker. (For some end game players, supply is worth probably figuratively nothing.)<br>Set to 0: IGNORE SETTING and use old behaviour (will still try to buy overclocker)</b>', 'valueNegative', 2, null, 'Magma');
     createSetting('BuyOneTimeOC', ['Buy OneTime Only (No OC)', 'Maybe Buy OneTime & OC', 'Maybe Buy OneTime (No OC)', 'Buy OneTime & OC Only'], 'Buy OneTime Only (No OC) = ONLY BUYS ONE TIME UPGRADES, NOTHING ELSE. <br>Maybe Buy OneTime & OC = Normal spending, will consider Overclocker and One Time Upgrades<br>Maybe Buy OneTime (No OC) = Normal Spending, but will NOT Buy Overclocker (Will still buy the first level if you don\'t have it).<br>Buy OneTime & OC Only = Will Force spend magmite on these two only, ignoring Efficiency, Capacity and Supply. <br> Recommend Default (Maybe Buy OneTime & OC)', 'multitoggle', 1, null, 'Magma');
@@ -471,15 +464,9 @@ function initializeAllSettings() {
     createSetting('HeirloomHighPushShield', 'Keep High & Push', 'Will hold onto any Plagued shield capable of becoming either a 5/5 shield or a push shield. For example crit chance + crit damage + attack and 2 empty mods.', 'boolean', true, null, 'Heirlooms');
     
 
-//Golden Upgrade Strategies:
-
-    createSetting('AutoGoldenUpgrades', 'AutoGoldenUpgrades', 'IMPORTANT SETTING. Automatically Buy the specified Golden Upgrades as they become available. Faster than vanilla. <b>NOTE:</b> Void setting unlocks more settings: goldStrat, goldAlternating, goldZone and goldNoBattle. <b>New:</b> Void also has a \\"Max then Helium\\" setting so you can get the perfect 60% Voids then Helium. More buttons will become visible when you make selections.', 'dropdown', 'Void', ["Off", "Helium", "Battle", "Void"], 'Golden');
-    createSetting('goldStrat', 'Strategy', 'VOID ONLY: After max Void golden upgrades, alternate between buying helium and battle upgrades. Or Choose a Zone to switch over completely at (zones lower than X will buy only battle, and zones higher than X only helium). Battle can be disabled completely with the goldNoBattle button. <b>MAX THEN HELIUM </b> setting so you can get the perfect 60% Voids then Helium', 'dropdown', 'Max then Helium', ["Off", "Alternating", "Zone", "Max then Helium"], 'Golden');
-    createSetting('goldAlternating', 'GU VOID: Alternating', 'Buy a helium upgrade after X-1 battle upgrades have been purchased', 'value', '2', null, 'Golden');
-    createSetting('goldZone', 'GU VOID: Zone', 'Buy a helium upgrade until zone X, then buy battle upgrades.', 'value', '200', null, 'Golden');
-    createSetting('goldNoBattle', 'GU VOID: No Battle', 'Green = Do <b>NOT</b> buy Battle Upgrades <br> Red = Buy Battle Upgrades.', 'boolean', true, null, 'Golden');
-
-
+//Golden Upgrade
+    createSetting('AutoGoldenUpgrades', 'Auto', 'Off - Does nothing. All other choices get overruled by Max Void.<br>Helium - Helium in fillers/dailies, Battle in C^2<br>Battle - Always battle.<br>Match Perks - will sometime get a battle GU when the inferred Helium/Attack ratio from active perks drops below the value of a Battle GU compared to an extra Helium one. You can turn on Golden Upgrade Spam under Display to see the numbers in action.', 'dropdown', 'Helium', ["Off", "Helium", "Battke", "Match Perks"], 'Golden');
+    createSetting('goldStrat',          'Max Void',            'Always get 60% Void%. <b>THIS INCLUDES C^2</b>.','dropdown', 'Yes', ["Yes", "No"], 'Golden');
 
 // Nature settings:
     createSetting('AutoNatureTokens', 'Spend Nature Tokens', '<b>MASTER BUTTON</b> Automatically spend or convert nature tokens.', 'boolean', false, null, 'Nature');
@@ -518,6 +505,7 @@ function initializeAllSettings() {
     //Line2
     //createSetting('SpamGraphs', 'Starting Zone Spam', 'Disables \'Starting new Zone ###\' , RoboTrimp MagnetoShreik, and any future Graph Spam that comes from graph logs.', 'boolean', true, null, 'Display');
     createSetting('SpamMagmite', 'Magmite/Magma Spam', 'Everything in Magmite Module and Buy Magmamancers', 'boolean', true, null, 'Display');
+    createSetting('SpamGU', 'Golden Upgrade Spam', 'Helium / Attack Perk Ratio spam.', 'boolean', true, null, 'Display');
     createSetting('SpamPerks', 'AutoPerks Spam', 'Everything in related to AutoPerks', 'boolean', true, null, 'Display');
 
 
@@ -539,6 +527,7 @@ function initializeAllSettings() {
 initializeAllSettings(); //EXECUTE
 
 //Universal function that creates sets up the Settings database, structures and associated graphic elements
+
 function createSetting(id, name, description, type, defaultValue, list, container) {
     var btnParent = document.createElement("DIV");
     // btnParent.setAttribute('class', 'optionContainer');
@@ -595,8 +584,11 @@ function createSetting(id, name, description, type, defaultValue, list, containe
         //make sure the saved selected dropdown option actually exists
         if(autoTrimpSettings[id].list.indexOf(autoTrimpSettings[id].selected) == -1)
             autoTrimpSettings[id].selected = defaultValue;
-        if(autoTrimpSettings[id].list.indexOf(autoTrimpSettings[id].selected) == -1)
-            debug("error: autoTrimpSettings["+id+"] value " +autoTrimpSettings[id].selected+ " unrecognized");
+        if(autoTrimpSettings[id].list.indexOf(autoTrimpSettings[id].selected) == -1){
+            debug("autoTrimpSettings["+id+"] value " +autoTrimpSettings[id].selected+ " unrecognized");
+            debug("defaulting to first choice, " + autoTrimpSettings[id].list[0] + "!");
+            autoTrimpSettings[id].selected = autoTrimpSettings[id].list[0];
+        }
         var btn = document.createElement("select");
         btn.id = id;
         if (game.options.menu.darkTheme.enabled == 2) btn.setAttribute("style", "color: #C8C8C8; font-size: 1.0vw;");
@@ -926,22 +918,8 @@ function updateCustomButtons() {
     document.getElementById('AutoWind').value = autoTrimpSettings.AutoWind.selected;
     document.getElementById('AutoIce').value = autoTrimpSettings.AutoIce.selected;
     //DerSkagg Mod: Golden Upgrade Settings. (Toggles relevant ones on/off)
-    if (autoTrimpSettings.AutoGoldenUpgrades.selected == "Void") {
-        turnOn("goldStrat");
-        document.getElementById('goldStrat').value = autoTrimpSettings.goldStrat.selected;
-        if (autoTrimpSettings.goldStrat.selected == "Alternating") {
-            document.getElementById('goldAlternating').value = autoTrimpSettings.goldAlternating.selected;
-            turnOn("goldAlternating")
-        } else
-            turnOff("goldAlternating");
-        (autoTrimpSettings.goldStrat.selected == "Zone") ? turnOn("goldZone") : turnOff("goldZone");
-        (autoTrimpSettings.goldStrat.selected != "Off") ? turnOn("goldNoBattle") : turnOn("goldNoBattle");
-    } else {
-        turnOff("goldStrat");
-        turnOff("goldAlternating");
-        turnOff("goldZone");
-        turnOff("goldNoBattle");
-    }
+    //document.getElementById('goldStrat').value = autoTrimpSettings.goldStrat.selected;
+
     //document.getElementById('Prestige').value = autoTrimpSettings.Prestige.selected; //dont update this, dynamic prestige takes it over and is handled elsewhere.
 
     // handle metal preference

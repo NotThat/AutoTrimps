@@ -7,65 +7,58 @@ var cost = (updateMapCost(true));
 
 
 function autoRoboTrimp() {
-    //exit if the cooldown is active, or we havent unlocked robotrimp.
     if (game.global.roboTrimpCooldown > 0 || !game.global.roboTrimpLevel) return;
     var robotrimpzone = parseInt(getPageSetting('AutoRoboTrimp'));
-    //exit if we have the setting set to 0
     if (robotrimpzone == 0) return;
     //activate the button when we are above the cutoff zone, and we are out of cooldown (and the button is inactive)
-    if (game.global.world >= robotrimpzone && !game.global.useShriek && (game.global.world - robotrimpzone) % 5 == 0){
+    if (game.global.world >= robotrimpzone && !game.global.useShriek && (game.global.world - robotrimpzone) % 5 === 0)
         magnetoShriek();
-        //if (MODULES["other"].enableRoboTrimpSpam)
-        //    debug("Activated Robotrimp MagnetoShriek Ability @ z" + game.global.world, "graphs", '*podcast');
-    }
 }
 
-//Version 3.6 Golden Upgrades
-    //setting param : get the numerical value of the selected index of the dropdown box
-function autoGoldenUpgradesAT(setting) {
-    var num = getAvailableGoldenUpgrades();
-    if (num == 0) return;       //if we have nothing to buy, exit.
-    //Challenge^2 cant Get/Buy Helium, so adapt - do Derskagg mod.
-    var challSQ = game.global.runningChallengeSquared;
-    //Default: True = Always get 60% void by skipping the 12% upgrade then buying 14%/16%
+function autoGoldenUpgradesAT() {
+    var setting = getPageSetting('AutoGoldenUpgrades');
+    if(setting == 'Off') return;
     var goldStrat = getPageSetting('goldStrat');
-    //Try to achieve 60% Void    
-    if (setting == "Void" && (goldStrat == "Max then Helium" || goldStrat == "Zone")) {
-      var nextVoidAmt = game.goldenUpgrades.Void.nextAmt().toFixed(2);
-      if (nextVoidAmt == 0.12)   //skip the 6th void upgrade
-        setting = "Helium";
-      if (challSQ)  //always buy battle during max then helium mode.
-        setting = "Battle";
+    
+    while(getAvailableGoldenUpgrades() > 0){
+        var what = "";
+        if(goldStrat == "Yes" && game.goldenUpgrades.Void.nextAmt() != 0.12 && buyGoldenUpgrade("Void")) continue;
+        
+        if(game.global.runningChallengeSquared || setting === "Battle") what = "Battle";
+        else if (setting === "Helium") what = "Helium";
+        else{ //'Match Perks' mode: aim to buy Helium/Battle at a ratio that matches our perk setup
+            what = "Helium";
+            var helCurrBonus = game.goldenUpgrades.Helium.currentBonus;
+            var batCurrBonus = game.goldenUpgrades.Battle.currentBonus;
+            var helNextBonus = game.goldenUpgrades.Helium.nextAmt();
+            var batNextBonus = game.goldenUpgrades.Battle.nextAmt();
+            
+            var helRelativeIncrease = (1 + helCurrBonus + helNextBonus)/(1 + helCurrBonus); //relative helium increase from upgrading helium GU
+            var batRelativeIncrease = (1 + batCurrBonus + batNextBonus)/(1 + batCurrBonus); //relative damage increase from upgrading battle GU
+            
+            var looting = game.portal["Looting"].level;
+            var power   = game.portal["Power"].level
+            
+            var helBenefit = ((1 + 0.05*(looting+1)) * (1 + 0.0025*(looting+1))) / ((1 + 0.05*looting) * (1 + 0.0025*looting)); //relative helium increase from 1 more looting1 level
+            var atkBenefit = ((1 + 0.05*(power+1)) * (1 + 0.01*(power+1))) / ((1 + 0.05*power) * (1 + 0.01*power)); //relative damage increase from 1 more power1 level
+            var helCost    = Math.ceil(looting/2 + 1 * Math.pow(1.3, looting)); //looting1 cost
+            var atkCost    = Math.ceil(power/2 + 1 * Math.pow(1.3, power)); //power1 cost
+            var helEff = helBenefit / helCost; //looting efficiency
+            var atkEff = atkBenefit / atkCost; //power efficiency
+            var helAtkRatio = atkEff / helEff; //how many times we like helium better than attack
+            var helAtkGURatio = (batRelativeIncrease-1) / (helRelativeIncrease-1); //how many times more attack we get from battle than helium from helium
+            debug("Auto GU: Helium / Attack Perk Ratio: " + helAtkRatio.toFixed(2) + " GU Ratio: " + helAtkGURatio.toFixed(2), "GU");
+            if(helAtkGURatio > helAtkRatio){
+                debug("Match Perks GU: Buying Battle GU", "GU");
+                what = "Battle";
+            }
+        }
+        
+        if(!buyGoldenUpgrade(what)){
+            throw "error buying Golden upgrade: " + what;
+            return;
+        }
     }
-    //buy one upgrade per loop.
-    var success = buyGoldenUpgrade(setting);
-
-    var doDerskaggChallSQ = false;
-    if (setting == ("Helium" || "Void") && challSQ)
-        {doDerskaggChallSQ = true; setting = (challSQ) ? "Battle" : "Helium"}
-    // DZUGAVILI MOD - SMART VOID GUs
-    // Assumption: buyGoldenUpgrades is not an asynchronous operation and resolves completely in function execution.
-    // Assumption: "Locking" game option is not set or does not prevent buying Golden Void
-    var noBat = getPageSetting('goldNoBattle');  //true = no battle = buy helium
-  //In 'Alternating' mode : instead of alternating between buying Helium and Battle, with this on it will only buy Helium.
-    if (!success && setting == "Void" || doDerskaggChallSQ) {
-        num = getAvailableGoldenUpgrades(); //recheck availables.
-        if (num == 0) return;
-        // DerSkagg Mod - Instead of Voids, For every Helium upgrade buy X-1 battle upgrades to maintain speed runs
-        if (goldStrat == "Alternating") {
-            var goldAlternating = getPageSetting('goldAlternating');
-            setting = (game.global.goldenUpgrades%goldAlternating == 0 || noBat) ? "Helium" : "Battle";
-        } else if (goldStrat == "Zone") {
-            var goldZone = getPageSetting('goldZone');
-            setting = (game.global.world <= goldZone || noBat) ? "Helium" : "Battle";
-        } else if (goldStrat == "Max then Helium") {
-            setting = (challSQ) ? "Battle" : "Helium";
-        } else
-            setting = (challSQ) ? "Battle" : "Helium";
-        buyGoldenUpgrade(setting);
-    }
-    // END OF DerSkagg & DZUGAVILI MOD
-//} catch(err) { debug("Error in autoGoldenUpgrades: " + err.message, "general"); }
 }
 
 //auto spend nature tokens

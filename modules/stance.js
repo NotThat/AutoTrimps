@@ -1091,15 +1091,17 @@ function calcOmniHelium(){ //rewardResource()
 
 function updateOmniThreshold() {
     pctTotal = (100*hr/game.global.totalHeliumEarned); //which is this much he/hr% out of our total helium
-    
+    updateDailyMult();
+    Goal = getPageSetting('WindStackingPctHe');
+    if(Goal == -1) Goal = 0.5;
+    OmniThreshold = Goal/pctTotal; //this is how many Omnis' worth of helium we need to get on each attack in order to meet our he%/hr quota
+}
+
+function updateDailyMult(){
     if (countDailyWeight() === 0) //no daily
         dailyMult = 1;
     else
         dailyMult = 1 + getDailyHeliumValue(countDailyWeight()) / 100;
-    
-    Goal = getPageSetting('WindStackingPctHe');
-    if(Goal == -1) Goal = 0.5;
-    OmniThreshold = Goal/pctTotal; //this is how many Omnis' worth of helium we need to get on each attack in order to meet our he%/hr quota
 }
 
 function calculateZoneWorth(fromCellNum){

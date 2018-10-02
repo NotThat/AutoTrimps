@@ -169,7 +169,7 @@ function autoMap() {
         return;
     }
     
-    if(  ((cycleZone() === 0 || cycleZone() === 4) && game.global.lastClearedCell + 1 < 82) //last poison zone mapping (praid, bw raid) tends to take a while, so get books before going into it
+    if(  ((cycleZone() === 4 || cycleZone() === 19) && game.global.lastClearedCell + 1 < 82 && !game.global.spireActive) //last poison zone mapping (praid, bw raid) tends to take a while, so get books before going into it
         || game.global.challengeActive == "Mapology") //TODO: mapology
     {
         if(game.global.preMapsActive)
@@ -819,7 +819,7 @@ function findNextBionic() {
 }
 
 function BWRaidNowLogic(){
-    if (game.global.world < getPageSetting('BWraidingmin') || cycleZone() !== 4) return false;
+    if (game.global.world < getPageSetting('BWraidingmin') || (cycleZone() !== 4 && cycleZone() !== 19)) return false;
     if (getPageSetting('BWraidDailyCOnly') && !(game.global.runningChallengeSquared || game.global.challengeActive)) return false;
     return true;
 }
@@ -1319,16 +1319,16 @@ function windZone(value){
         return (game.global.world-241) % 15 <= 4 && game.global.world > 240;
 }
 
-function poisonZone(){
-    return ((game.global.world-236) % 15 <= 4);
+function poisonZone(zoneNum){
+    var zone = typeof zoneNum === 'undefined' ? game.global.world : zoneNum;
+    return ((zone-236) % 15 <= 4);
 }
-
 
 function cycleZone(zoneNum){ //poizon - wind - ice
     var zone = typeof zoneNum === 'undefined' ? game.global.world : zoneNum;
     if(zone < 236)
         return -1;
-    return (zone - 236) % 15;
+    return (zone - 236) % 30;
 }
 
 function getRemainingSpecials(maxZone){

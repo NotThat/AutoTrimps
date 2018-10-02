@@ -69,6 +69,8 @@ function buyUpgrades(coordsOnly) {
         if (upgrade == 'Coordination'){
             if(buyCoords)
                 buyUpgrade(upgrade, true, true);
+            else
+                continue;
         }
         else
             buyUpgrade(upgrade, true, true);

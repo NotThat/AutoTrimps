@@ -543,6 +543,7 @@ function equipMainShield(){
     highATK             = calcHeirloomBonus("Shield", "trimpAttack", 1);
     highPB              = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
     highDamageHeirloom  = true;
+    updateAllBattleNumbers(true);
     return true;
 }
 equipMainShield();
@@ -573,6 +574,7 @@ function equipLowDmgShield(){
     lowATK              = calcHeirloomBonus("Shield", "trimpAttack", 1);
     lowPB               = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
     highDamageHeirloom  = false;
+    updateAllBattleNumbers(true);
     return true;
 }
 

@@ -223,6 +223,9 @@ function debug(messageStr, type, lootIcon) {
         case "magmite":
             output = getPageSetting('SpamMagmite');
             break;
+        case "GU":
+            output = getPageSetting('SpamGU')
+            break;
         case "perks":
             output = getPageSetting('SpamPerks');
             break;      
