@@ -84,9 +84,11 @@ function autoHeirlooms() {
         if(!getPageSetting('HeirloomEvalNew')) valueLoomsOld(); //uses old heirloom valuing method
         else valueLoomsNew(); //only care about plagued heirlooms, and only 5/5 staves/shields and 2/5 shields.
         
-        //protect all heirlooms in our carried slots
-        for(var index=0; index < game.global.heirloomsCarried.length; index++) 
-            game.global.heirloomsCarried[index].protected = true;
+        if(getPageSetting('HeirloomEvalNew')){
+            //protect all heirlooms in our carried slots
+            for(var index=0; index < game.global.heirloomsCarried.length; index++) 
+                game.global.heirloomsCarried[index].protected = true;
+        }
     }
     /*else if(heirloomsShown && game.global.selectedHeirloom.length > 0){
         heirloomUpgradeHighlighting();
