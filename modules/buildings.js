@@ -41,7 +41,9 @@ function safeBuyBuilding(building) {
     game.global.firing = false;
     //buy max warpstations when we own <2 (ie: after a new giga)
     //thereafter, buy only 1 warpstation
+    
     if (building == 'Warpstation') {
+        
         if (game.buildings.Warpstation.owned < 2) {
             game.global.buyAmt = 'Max';
             game.global.maxSplit = 1;
@@ -102,6 +104,7 @@ function buyFoodEfficientHousing() {
 function buyGemEfficientHousing() {
     var gemHousing = ["Hotel", "Resort", "Gateway", "Collector", "Warpstation"];
     var unlockedHousing = [];
+
     for (var house in gemHousing) {
         if (game.buildings[gemHousing[house]].locked === 0 && (house == 4 || getPageSetting("Max"+gemHousing[house]) > 0)) {
             unlockedHousing.push(gemHousing[house]);
@@ -180,6 +183,7 @@ function buyGemEfficientHousing() {
             break;
         }
     }
+
     //if we found something make it green and buy it
     if (bestBuilding) {
         safeBuyBuilding(bestBuilding);

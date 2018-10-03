@@ -62,7 +62,7 @@ function worthOfHeirlooms(){
 //Crit Chance/Crit Damage, Miner Efficiency/Metal Drop, Gem Drop/Dragimp Efficiency, Farmer/Lumberjack Efficiency. 
 //For the purposes of carrying, rarity trumps all of the stat evaluations. Empty mod slots are valued at the average value of the best missing mod.
 //NEW:
-function autoHeirlooms() {
+function autoHeirlooms(){
     if(!heirloomsShown){
         //start by dropping ALL carried heirlooms
         var originalLength = game.global.heirloomsCarried.length;

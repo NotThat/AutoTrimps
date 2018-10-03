@@ -98,13 +98,10 @@ function calcBaseDamageinB() {
     calcDmgManual(); //this returns our damage, also factoring in the new damage from prestige/levels/coordinations that the game will only calculate on the next cell.
 
     baseBlock = game.global.soldierCurrentBlock;
-    baseHealth = game.global.soldierHealthMax;
 
     if (game.global.soldierHealth <= 0) return; //dont calculate stances when dead, cause the "current" numbers are not updated when dead. not sure how relevant this is
     if (game.global.formation == 3) baseBlock /= 4; //B stance
     else if (game.global.formation != "0") baseBlock *= 2;
-    if (game.global.formation == 1) baseHealth /= 4; //H stance 
-    else if (game.global.formation != "0") baseHealth *= 2;
 }
 
 function autoStance() {

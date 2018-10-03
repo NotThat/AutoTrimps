@@ -2,7 +2,6 @@ MODULES["other"] = {};
 MODULES["other"].enableRoboTrimpSpam = true;  //set this to false to stop Spam of "Activated Robotrimp MagnetoShriek Ability"
 var bwraided = false;
 var failbwraid = false;
-var perked = false;
 var cost = (updateMapCost(true));
 
 
@@ -197,7 +196,7 @@ function dropsAtZone(itemName, nextLevel){
                 slotModifier=5.3;
                 break;
             case "Harmbalest": 
-                slotModifier=5.4; 
+                slotModifier=5.4;
                 break;
             case "GambesOP": 
                 slotModifier=5.5;
@@ -211,38 +210,31 @@ function dropsAtZone(itemName, nextLevel){
 
 //AutoAllocate Looting II
 function lootdump() {
-    if (game.global.world == 1 && !perked && getPageSetting('AutoAllocatePerks')==2) {
-        viewPortalUpgrades();
-        var currLevel = parseFloat(game.portal.Looting_II.level);
-        var totalSpent = parseFloat(game.portal.Looting_II.heliumSpent);
-        var totalUnspent = parseFloat(game.global.heliumLeftover); //this is for mid-run allocation
-        //var totalUnspent = game.resources.helium.owned + game.global.heliumLeftover; //this is for portal allocation
+    viewPortalUpgrades();
+    var currLevel = parseFloat(game.portal.Looting_II.level);
+    var totalSpent = parseFloat(game.portal.Looting_II.heliumSpent);
+    var totalUnspent = parseFloat(game.global.heliumLeftover); //this is for mid-run allocation
 
-        var amt = Math.floor(1/100*(Math.sqrt(2)*Math.sqrt(totalSpent+totalUnspent+451250)-950)) - currLevel;
-        //debug("game.portal.Looting_II.level " + currLevel + " game.portal.Looting_II.heliumSpent " + totalSpent + " game.global.heliumLeftover " + totalUnspent);
-        //debug("amt = " + amt);
-        
-        if(amt <= 0){
-            perked = true;
-            cancelPortal();
-	    //debug("Done buying Looting II");
-            return;
-        }
-        game.global.lastCustomAmt = amt;
-        
-        numTab(5, true);
-        if (getPortalUpgradePrice("Looting_II")+game.resources.helium.totalSpentTemp <= game.resources.helium.respecMax) {
-            buyPortalUpgrade('Looting_II');
-            activateClicked();
-            cancelPortal();
-            debug('Bought ' + amt.toExponential(2) + ' Looting II');
-        }
-        else{
-	    perked = true;
-	    cancelPortal();
-	    debug("Done buying Looting II");
-        }
+    var amt = Math.floor(1/100*(Math.sqrt(2)*Math.sqrt(totalSpent+totalUnspent+451250)-950)) - currLevel;
+
+    if(amt <= 0){
+        cancelPortal();
+        return;
     }
+    game.global.lastCustomAmt = amt;
+
+    numTab(5, true);
+    if (getPortalUpgradePrice("Looting_II")+game.resources.helium.totalSpentTemp <= game.resources.helium.respecMax) {
+        buyPortalUpgrade('Looting_II');
+        activateClicked();
+        cancelPortal();
+        debug('Bought ' + amt.toExponential(2) + ' Looting II');
+    }
+    else{
+        cancelPortal();
+        debug("Done buying Looting II");
+    }
+    
 }
 
 function fightManualAT(){

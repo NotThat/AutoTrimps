@@ -215,7 +215,7 @@ function autoMap() {
     
     preSpireFarming = false;
     spireMapBonusFarming = false;
-    needPrestige = (lastPrestigeZone() < lastDropZone()) || (lastPrestigeZone() == lastDropZone() && prestigeState != 2);
+    needPrestige = (lastPrestigeZone() < lastDropZone()) || (lastPrestigeZone() == lastDropZone() && prestigeState != 2 && game.global.world !== expectedPortalZone);
     
     if (!needPrestige && getPageSetting('PRaidingZoneStart') >0){
         if(!PrestigeRaid()){ //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
@@ -685,7 +685,7 @@ function PrestigeRaid() {
         return true; 
     if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 2) //have all
         return true; 
-    if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 1 && game.global.world % 100 != 0 && !BWRaidNowLogic()) //only missing last armor (we want the armor in spire and when BWRaiding)
+    if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 1 && game.global.world % 100 != 0 && !BWRaidNowLogic() && (maxDesiredLevel >= expectedPortalZone || bsZone >= maxDesiredLevel)) //when to skip last gambes
         return true; 
     
     if (game.global.mapsActive){ //if we are in a map

@@ -32,26 +32,11 @@ addBreedingBoxTimers();
 //Add GUI popup for hovering over the army group size and translate that to breeding time
 function addToolTipToArmyCount() {
     var $armycount = document.getElementById('trimpsFighting');
-    if ($armycount.className != "tooltipadded") {
-        $armycount.setAttribute("onmouseover", 'tooltip(\"Army Count\", \"customText\", event, \"To Fight now would add: \" + prettify(getArmyTime()) + \" seconds to the breed timer.\")');
-        $armycount.setAttribute("onmouseout", 'tooltip("hide")');
-        $armycount.setAttribute("class", 'tooltipadded');
-    }
+    $armycount.setAttribute("onmouseover", 'tooltip(\"Army Count\", \"customText\", event, \"To Fight now would add: \" + prettify(getArmyTime()) + \" seconds to the breed timer.\")');
+    $armycount.setAttribute("onmouseout", 'tooltip("hide")');
+    $armycount.setAttribute("class", 'tooltipadded');
 }
-/*
-function testBreedManager() {
-    var oldPotency = testPotencyMod();
-    safeFireJob('Farmer', 1);
-    canAffordJob('Geneticist', false, 1);
-    safeBuyJob('Geneticist', 1);
-    var newPotency = testPotencyMod();
-    var potencyGap = newPotency - oldPotency;
-    var targetBreed = getPageSetting('GeneticistTimer');
-    var estimateBreedTime = getBreedTime(null,1);
-    var genDif = Math.ceil(Math.log10(targetBreed / compareTime) / Math.log10(1.02));
-    var realTime = game.global.realBreedTime;
-}
-*/
+addToolTipToArmyCount();
 
 //Controls "Auto Breed Timer" and "Geneticist Timer" - adjust geneticists to reach desired breed timer
 function autoBreedTimer() {

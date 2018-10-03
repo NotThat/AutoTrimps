@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "37.6";
+var ver = "37.7";
 var verDate = "3.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -57,8 +57,15 @@ function startAT() {
     lowATK         = 1;
     lowPB          = 0;
     
-    everyLoopStuff();
+    if (Fluffy.isActive()) lastFluffDmg = Fluffy.getDamageModifier(); //expensive, so calculate once per zone
+    
+    maxAnti = (game.talents.patience.purchased ? 45 : 30);
+    if(game.global.mapsActive) currMap = getCurrentMapObject();
+    
+    equipLowDmgShield();
+    equipMainShield();
     calcBaseDamageinB();
+    
     
     //HTML For adding a 5th tab to the message window
     var ATbutton = document.createElement("button");
@@ -165,7 +172,7 @@ function initializeAutoTrimps() {
     ATscriptLoad('','SettingsGUI');   //populate Settings GUI
     ATscriptLoad('','Graphs');        //populate Graphs
     //Load modules:
-    ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'fight', 'magmite', 'other', 'import-export', 'perks', 'fight-info', 'performance', 'ATcalc'];
+    ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'magmite', 'other', 'import-export', 'perks', 'fight-info', 'performance', 'ATcalc'];
     for (var m in ATmoduleList) 
         ATscriptLoad(modulepath, ATmoduleList[m]);
     
@@ -234,12 +241,8 @@ var breedFire = false;
 var hiddenBreedTimer;
 var hiddenBreedTimerLast;
 
-var shouldFarm = false;
 var enoughDamage = true;
-var enoughHealth = true;
-
 var baseBlock = 0;
-var baseHealth = 0;
 
 var preBuyAmt;
 var preBuyFiring;
@@ -247,7 +250,6 @@ var preBuyTooltip;
 var preBuymaxSplit;
 
 var currentworld = 0;
-var lastrunworld = 0;
 var aWholeNewWorld = false;
 var needGymystic = true;    //used in setScienceNeeded, buildings.js, equipment.js
 var heirloomFlag = false;
@@ -267,8 +269,8 @@ var wantedAnticipation = maxAnti;
 var highestPrestigeOwned = 0;
 var allowBuyingCoords = true;
 var lastCell = -1;
+var bsZone;
 
-var checkedShields = false; //check shield stats on script start
 var highCritChance;
 var highCritDamage;
 var highATK;
@@ -282,12 +284,12 @@ var highShieldName = "HighDmgShield";
 var wantGoodShield = true; //we want to only swap shield maximum once per loop
 var goodBadShieldRatio = 1;
 
-var lastFluffXp = -1;
 var lastFluffDmg = 1;
 
 var currMap;
 var statusMsg = "";
 var ASMode;
+var expectedPortalZone = 0;
 
 var ATmakeUp = false;
 
@@ -300,25 +302,12 @@ function pauseRemovalLoop(){
    }
 }
 
-function everyLoopStuff(){
-    maxAnti = (game.talents.patience.purchased ? 45 : 30);
-    if(game.global.mapsActive) currMap = getCurrentMapObject();
-    if (Fluffy.isActive() && lastFluffXp != Fluffy.currentExp[1]){
-        lastFluffXp = Fluffy.currentExp[1];
-        lastFluffDmg = Fluffy.getDamageModifier();
-    }
-}
-
 ////////////////////////////////////////
 //Main LOGIC Loop///////////////////////
 ////////////////////////////////////////
 ////////////////////////////////////////
 //makeUp = true when game is in catchup mode, so we can skip some unnecessary visuals
 function ATLoop(makeUp) {
-    
-    //console.log(requestCounter + " " + (requestCounter-requestCounterLast));
-    //requestCounterLast = requestCounter;
-    
     if (ATrunning == false) return;
     if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled || game.global.viewingUpgrades) {
         if(getPageSetting('PauseScript'))
@@ -327,40 +316,32 @@ function ATLoop(makeUp) {
     }
     ATrunning = true;
     ATmakeUp = makeUp;
-    var AS = getPageSetting('AutoStance');
-    if(AS < 2)       ASMode = "Advancing";
-    else if(AS == 2) ASMode = "DE";
-    else             ASMode = "Push";
-    statusMsg = ASMode;
     
-    if(game.options.menu.showFullBreed.enabled != 1) toggleSetting("showFullBreed");    //more detail
-    hiddenBreedTimer = ((game.jobs.Amalgamator.owned > 0) ? Math.floor((getGameTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000));
+    hiddenBreedTimer = game.jobs.Amalgamator.owned > 0 ? Math.floor((getGameTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000);
     if(hiddenBreedTimer != hiddenBreedTimerLast && typeof addbreedTimerInsideText !== 'undefined'){
-        addbreedTimerInsideText.textContent = hiddenBreedTimer + 's'; //add breed time for next army;
+        if (!makeUp) addbreedTimerInsideText.textContent = hiddenBreedTimer + 's'; //add breed time for next army;
         hiddenBreedTimerLast = hiddenBreedTimer;
     }
-    addToolTipToArmyCount(); //Add hidden tooltip for army count (SettingsGUI.js @ end)
-    if (mainCleanup() // Z1 new world
-            //|| portalWindowOpen // if we want this functionality, we can hookin to the activate portal btn. i just dont know that we do.
-            || (!heirloomsShown && heirloomFlag) // closed heirlooms screen
-            || (heirloomCache != game.global.heirloomsExtra.length)) { // inventory size changed (a drop appeared)
-            // also pre-portal: portal.js:111
-        if (getPageSetting('AutoHeirlooms')) autoHeirlooms(); //"Auto Heirlooms" (heirlooms.js)
-        //if (getPageSetting('AutoUpgradeHeirlooms') && !heirloomsShown) autoNull();  //"Auto Upgrade Heirlooms" (heirlooms.js)
+    
+    var lastrunworld = currentworld;
+    currentworld = game.global.world;
+    aWholeNewWorld = lastrunworld != game.global.world;
+ 
+    if ((game.global.world == 1 && aWholeNewWorld) || (!heirloomsShown && heirloomFlag) || (heirloomCache != game.global.heirloomsExtra.length)){ 
+        if (getPageSetting('AutoHeirlooms')) autoHeirlooms();
 
         heirloomCache = game.global.heirloomsExtra.length;
         highestPrestigeOwned = 0;
     }
     heirloomFlag = heirloomsShown;
     
-    if(!checkedShields){
-        equipLowDmgShield();
-        equipMainShield();
-        checkedShields = true;
-    }
-    
     //Stuff to do Every new Zone
     if (aWholeNewWorld) {
+        
+        //Stuff to do Every new Portal
+        if(game.global.world == 1) 
+            zonePostpone = 0;
+        
         // Auto-close dialogues.
         switch (document.getElementById('tipTitle').innerHTML) {
             case 'The Improbability':   // Breaking the Planet
@@ -369,35 +350,40 @@ function ATLoop(makeUp) {
             case 'The Magma':           // Magma
                 cancelTooltip();
         }
-        if (getPageSetting('AutoEggs'))
-            easterEggClicked();
-        setTitle(); // Set the browser title
+        if (getPageSetting('AutoEggs')) easterEggClicked();
+        setTitle(); //Set the browser title
         buildWorldArray();
         setEmptyStats(); //also clears graph data
+        if (getPageSetting('AutoAllocatePerks')==2) lootdump();
         
         lastCell = -1;
-        lastFluffXp = -1;
-        lastFluffDmg = 1;
+        if (Fluffy.isActive()) lastFluffDmg = Fluffy.getDamageModifier(); //expensive, so calculate once per zone
+        
         AutoMapsCoordOverride = false;
         maxCoords = -1;
-        perked = false;
     }
     setScienceNeeded();  //determine how much science is needed
     
-    everyLoopStuff();
-
-    //EXECUTE CORE LOGIC
-    if (getPageSetting('ExitSpireCell') >0 || getPageSetting('ExitSpireCellDailyC2') >0) exitSpireCell(); //"Exit Spire After Cell" (other.js)
-    //if (getPageSetting('loomprotect') == true) protectloom(); //"Exit Spire After Cell" (other.js)
-
-    if (getPageSetting('AutoAllocatePerks')==2) lootdump(); //Loot Dumping (other.js)
-    if (getPageSetting('BuyUpgradesNew') != 0) buyUpgrades();                                //"Buy Upgrades"       (upgrades.js)         
+    maxAnti = (game.talents.patience.purchased ? 45 : 30);
+    if(game.global.mapsActive) currMap = getCurrentMapObject();
+    expectedPortalZone = autoTrimpSettings.AutoPortal.selected !== "Custom" ? 0 : getPageSetting('CustomAutoPortal') + (game.global.challengeActive == "Daily" ? getPageSetting('AutoFinishDailyNew') : 0);
+    bsZone = (0.5*game.talents.blacksmith.purchased + 0.25*game.talents.blacksmith2.purchased + 0.15*game.talents.blacksmith3.purchased)*(game.global.highestLevelCleared + 1);
     
-    autoGoldenUpgradesAT();                                                              //"Golden Upgrades"     (other.js)
-    if (getPageSetting('BuyBuildingsNew')===0);                                            //"Buy Neither"              (Buildings.js)
-      else if (getPageSetting('BuyBuildingsNew')==1) { buyBuildings(); buyStorage(); }      //"Buy Buildings & Storage"  (")
-      else if (getPageSetting('BuyBuildingsNew')==2) buyBuildings();                      //"Buy Buildings"            (")
-      else if (getPageSetting('BuyBuildingsNew')==3) buyStorage();                        //"Buy Storage"              (")
+    var AS = getPageSetting('AutoStance');
+    if(AS < 2)       statusMsg = "Advancing";
+    else if(AS == 2) statusMsg = "DE";
+    else             statusMsg = "Push";
+    
+    if (getPageSetting('ExitSpireCell') >0 || getPageSetting('ExitSpireCellDailyC2') >0) exitSpireCell(); //"Exit Spire After Cell" (other.js)
+    
+    if (getPageSetting('BuyUpgradesNew') != 0) buyUpgrades();                      
+    
+    autoGoldenUpgradesAT();                                                        
+    
+    if (getPageSetting('BuyBuildingsNew')==1)    { buyBuildings(); buyStorage(); } 
+    else if (getPageSetting('BuyBuildingsNew')==2) buyBuildings();                 
+    else if (getPageSetting('BuyBuildingsNew')==3) buyStorage();  
+    
     if (getPageSetting('BuyJobsNew')>0) buyJobs();                                              
     if (getPageSetting('ManualGather2')) manualLabor();  //"Auto Gather/Build"       (gather.js)
      
@@ -412,20 +398,16 @@ function ATLoop(makeUp) {
     
     if (getPageSetting('AutoStance')>0) autoStance();    //autostance() is in charge of world combat
     equipSelectedShield(wantGoodShield);
-    //if (getPageSetting('UseScryerStance'))  useScryerStance();  //"Use Scryer Stance"   (scryer.js)
     
     if (getPageSetting('UseAutoGen')) autoGenerator();          //"Auto Generator ON" (magmite.js)
-    //ATselectAutoFight();  //  pick the right version of Fight/AutoFight/BetterAutoFight/BAF2 (fight.js)       //<--------- remove the settings
     var forcePrecZ = (getPageSetting('ForcePresZ')<0) || (game.global.world<getPageSetting('ForcePresZ'));                                                      //dagger push etc
     if (getPageSetting('DynamicPrestige2')>0 && forcePrecZ) prestigeChanging2(); //"Dynamic Prestige" (dynprestige.js)                                          //dagger push etc
     else autoTrimpSettings.Prestige.selected = document.getElementById('Prestige').value; //just make sure the UI setting and the internal setting are aligned. //dagger push etc
     if (getPageSetting('AutoMagmiteSpender2')==2 && !magmiteSpenderChanged)  autoMagmiteSpender();   //Auto Magmite Spender (magmite.js)
     if (getPageSetting('AutoNatureTokens')) autoNatureTokens();     //Nature     (other.js)
-    //
-    //Runs any user provided scripts, see line 254 below
+    
+    //Runs any user provided scripts
     if (userscriptOn) userscripts();
-    //
-    //rinse, repeat, done
     
     return;
 }
@@ -441,25 +423,6 @@ function guiLoop() {
         MODULES["fightinfo"].Update();
     if(typeof MODULES !== 'undefined' && typeof MODULES["performance"] !== 'undefined' && MODULES["performance"].isAFK)
         MODULES["performance"].UpdateAFKOverlay();
-}
-
-//reset stuff that may not have gotten cleaned up on portal
-function mainCleanup() {
-    lastrunworld = currentworld;
-    currentworld = game.global.world;
-    aWholeNewWorld = lastrunworld != currentworld;
- 
-    //run once per portal:
-    if (currentworld == 1 && aWholeNewWorld) {
-        lastHeliumZone = 0;
-        zonePostpone = 0;
-        amalgamatorsCounter = 0;
-        firstTime = true;
-        //for the dummies like me who always forget to turn automaps back on after portaling
-        if(getPageSetting('AutoMaps')==1 && !game.upgrades.Battle.done && getPageSetting('AutoMaps') == 0)
-            settingChanged("AutoMaps");
-        return true; // Do other things
-    }
 }
 
 // Userscript loader. write your own!

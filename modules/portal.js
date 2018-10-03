@@ -6,7 +6,6 @@ MODULES["portal"].bufferExceedFactor = 5;  //amount for: allows portaling midzon
 /////////////////////////////////////////////////////
 //Portal Related Code)///////////////////////////////
 /////////////////////////////////////////////////////
-//var lastHeliumZone = 0; //zone where the He/hr portal conditions were first met
 var zonePostpone = 0;   //additional postponement of the zone above.
 
 //Decide When to Portal
@@ -43,7 +42,6 @@ function autoPortal() {
                 //Postpone Portal (and Actually Portal) code:
                 if (OKtoPortal && zonePostpone == 0) {
                     zonePostpone+=1;
-                    //lastHeliumZone = game.global.world;
                     debug("My HeliumHr was: " + myHeliumHr + " & the Best HeliumHr was: " + bestHeHr + " at zone: " +  bestHeHrZone, "portal");
                     cancelTooltip();
                     tooltip('confirm', null, 'update', '<b>Auto Portaling NOW!</b><p>Hit Delay Portal to WAIT 1 more zone.', 'zonePostpone+=1', '<b>NOTICE: Auto-Portaling in 10 seconds....</b>','Delay Portal');
@@ -104,7 +102,7 @@ function doPortal(challenge) {
     if(!game.global.portalActive) return;
     if (getPageSetting('AutoMagmiteSpender2')==1) autoMagmiteSpender();
     // From ATLoop                                        //"AutoHeirlooms OFF"        (Heirlooms.js)
-    if (getPageSetting('AutoHeirlooms')) autoHeirlooms();                   //"AH2"                      (")
+//    if (getPageSetting('AutoHeirlooms')) autoHeirlooms();                   //"AH2"                      (")
     if (getPageSetting('AutoUpgradeHeirlooms') && !heirloomsShown) autoNull();  //"Auto Upgrade Heirlooms" (heirlooms.js)
     //Go into portal screen
     portalClicked();
@@ -142,7 +140,7 @@ function doPortal(challenge) {
     //Actually Portal.
     activateClicked(); //click button
     activatePortal(); //confirm
-    lastHeliumZone = 0; zonePostpone = 0;
+    zonePostpone = 0;
 }
 
 // Finish Challenge2 (UNI mod)

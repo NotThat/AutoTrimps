@@ -73,7 +73,6 @@ The ATLoop() consists of the following subroutine functions, all of which are en
 -     autoRoboTrimp();        //"AutoRoboTrimp" (genBTC settings area)
 -     autoLevelEquipment();   //"Buy Armor", "Buy Armor Upgrades", "Buy Weapons","Buy Weapons Upgrades"
 -     autoStance();           //"Auto Stance"
--     betterAutoFight();      //"Better Auto Fight"
 -     prestigeChanging2();    //"Dynamic Prestige" (genBTC settings area)
 -     userscripts();          //Runs any user provided scripts - by copying and pasting a function named userscripts() into the Chrome Dev console. (F12)
 
