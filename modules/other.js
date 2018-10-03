@@ -18,12 +18,13 @@ function autoGoldenUpgradesAT(){
     var setting = getPageSetting('AutoGoldenUpgrades');
     if(setting === 'Off') return;
     
+    var initialLock = game.options.menu.lockOnUnlock.enabled;
+    game.options.menu.lockOnUnlock.enabled = 0;
     while(getAvailableGoldenUpgrades() > 0){
-        if(!game.global.runningChallengeSquared && getPageSetting('MaxVoid')   && game.goldenUpgrades.Void.nextAmt() != 0.12 && buyGoldenUpgrade("Void")) continue;
-        if(game.global.runningChallengeSquared  && getPageSetting('MaxVoidC2') && game.goldenUpgrades.Void.nextAmt() != 0.12 && buyGoldenUpgrade("Void")) continue;
-        
         var what = "";
-        if(game.global.runningChallengeSquared || setting === "Battle") what = "Battle";
+        if(!game.global.runningChallengeSquared && getPageSetting('MaxVoid')   && game.goldenUpgrades.Void.nextAmt() != 0.12 && buyGoldenUpgrade("Void")) continue;
+        else if(game.global.runningChallengeSquared  && getPageSetting('MaxVoidC2') && game.goldenUpgrades.Void.nextAmt() != 0.12 && buyGoldenUpgrade("Void")) continue;
+        else if(game.global.runningChallengeSquared || setting === "Battle") what = "Battle";
         else if (setting === "Helium") what = "Helium";
         else{ //'Match Perks' mode: aim to buy Helium/Battle at a ratio that matches our perk setup
             var helCurrMult  = game.goldenUpgrades.Helium.currentBonus + 1;
@@ -53,17 +54,18 @@ function autoGoldenUpgradesAT(){
         }
         
         try{
-            if(!(what === "Helium" || what === "Battle"))
+            if(!(what === "Helium" || what === "Battle" || what === "Void"))
                 throw "buying Golden upgrade: " + what + " unknown GU type";
             
             if(!buyGoldenUpgrade(what))
-                throw "buying Golden upgrade: " + what;
+                throw "General Golden Upgrade error - " + what;
         }
         catch(err){
             debug("Golden Upgrade Critical Error! Failed to buy " + what + " upgrade. z " + game.global.world + " getAvailableGoldenUpgrades() = " + getAvailableGoldenUpgrades());
-            return false;
+            break;
         }
     }
+    game.options.menu.lockOnUnlock.enabled = initialLock;
 }
 
 //auto spend nature tokens

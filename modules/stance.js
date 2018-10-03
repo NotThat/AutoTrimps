@@ -294,7 +294,7 @@ function autoStance() {
                 goDefaultStance(2);
         }
         else{
-            if((getPageSetting('AutoStance') == 3))  //push mode
+            if(getPageSetting('AutoStance') == 3)  //push mode
                 goDefaultStance(2); //D if we have it, X otherwise
             else{ //hybrid mode
             if(poisonZone()){

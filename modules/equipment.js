@@ -494,7 +494,7 @@ function getDamageCaller(dmg, lowerDamage, noCrit){
     for (var equipName in equipmentList) //update equipment evaluations
         evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName);
     
-    if (getPageSetting('AutoStance') > 1) //2 - DE mode 3 - push mode
+    if (getPageSetting('AutoStance') > 1 || game.global.runningChallengeSquared) //2 - DE mode 3 - push mode
         holdingBack = getDamage(Number.MAX_VALUE, lowerDamage, noCrit); //buy max damage
     else
         holdingBack = getDamage(dmg, lowerDamage, noCrit);
