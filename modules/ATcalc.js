@@ -227,7 +227,7 @@ function calcDmgManual(printout){
 //TODO: golden battle, sharp trimps, daily bonuses, 
 function calcEndDamageAA(base, zone){
     var coords = zone + 99;
-    var soldiers = calcCoords(coords, 0);
+    var soldiers = calcCoords(0, coords);
     base *= soldiers;
     
     var achievements = 1 + (game.global.achievementBonus / 100);

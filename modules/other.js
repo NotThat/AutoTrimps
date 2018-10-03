@@ -15,9 +15,9 @@ function autoRoboTrimp() {
         magnetoShriek();
 }
 
-function autoGoldenUpgradesAT() {
+function autoGoldenUpgradesAT(){
     var setting = getPageSetting('AutoGoldenUpgrades');
-    if(setting == 'Off') return;
+    if(setting === 'Off') return;
     
     while(getAvailableGoldenUpgrades() > 0){
         if(!game.global.runningChallengeSquared && getPageSetting('MaxVoid')   && game.goldenUpgrades.Void.nextAmt() != 0.12 && buyGoldenUpgrade("Void")) continue;
@@ -38,12 +38,12 @@ function autoGoldenUpgradesAT() {
             var looting = game.portal["Looting"].level;
             var power   = game.portal["Power"].level;
             
-            var helBenefit = ((1 + 0.05*(looting+1)) * (1 + 0.0025*(looting+1))) / ((1 + 0.05*looting) * (1 + 0.0025*looting)); //relative helium increase from 1 more looting1 level
-            var atkBenefit = ((1 + 0.05*(power+1)) * (1 + 0.01*(power+1))) / ((1 + 0.05*power) * (1 + 0.01*power)); //relative damage increase from 1 more power1 level
-            var helCost    = Math.ceil(looting/2 + 1 * Math.pow(1.3, looting)); //looting1 cost
-            var atkCost    = Math.ceil(power/2 + 1 * Math.pow(1.3, power)); //power1 cost
-            var helEff = helBenefit / helCost; //looting efficiency
-            var atkEff = atkBenefit / atkCost; //power efficiency
+            var helBenefit  = ((1 + 0.05*(looting+1)) * (1 + 0.0025*(looting+1))) / ((1 + 0.05*looting) * (1 + 0.0025*looting)); //relative helium increase from 1 more looting1 level
+            var atkBenefit  = ((1 + 0.05*(power+1)) * (1 + 0.01*(power+1))) / ((1 + 0.05*power) * (1 + 0.01*power)); //relative damage increase from 1 more power1 level
+            var helCost     = Math.ceil(looting/2 + 1 * Math.pow(1.3, looting)); //looting1 cost
+            var atkCost     = Math.ceil(power/2 + 1 * Math.pow(1.3, power)); //power1 cost
+            var helEff      = helBenefit / helCost; //looting efficiency
+            var atkEff      = atkBenefit / atkCost; //power efficiency
             var helAtkRatio = atkEff / helEff; //how many times we like helium better than attack
             var helAtkGURatio = (batRelativeIncrease-1) / (helRelativeIncrease-1); //how many times more attack we get from battle than helium from helium
             debug("Auto GU: Helium / Attack Perk Ratio: " + helAtkRatio.toFixed(2) + " GU Ratio: " + helAtkGURatio.toFixed(2), "GU");
@@ -54,10 +54,8 @@ function autoGoldenUpgradesAT() {
             else what = "Helium";
         }
         
-        if(!buyGoldenUpgrade(what)){
+        if(!buyGoldenUpgrade(what))
             throw "error buying Golden upgrade: " + what;
-            return;
-        }
     }
 }
 
