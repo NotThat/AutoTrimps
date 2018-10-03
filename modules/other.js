@@ -52,8 +52,17 @@ function autoGoldenUpgradesAT(){
             else what = "Helium";
         }
         
-        if(!buyGoldenUpgrade(what))
-            throw "error buying Golden upgrade: " + what;
+        try{
+            if(!(what === "Helium" || what === "Battle"))
+                throw "buying Golden upgrade: " + what + " unknown GU type";
+            
+            if(!buyGoldenUpgrade(what))
+                throw "buying Golden upgrade: " + what;
+        }
+        catch(err){
+            debug("Golden Upgrade Critical Error! Failed to buy " + what + " upgrade. z " + game.global.world + " getAvailableGoldenUpgrades() = " + getAvailableGoldenUpgrades());
+            return false;
+        }
     }
 }
 

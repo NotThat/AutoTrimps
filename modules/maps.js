@@ -666,7 +666,7 @@ function praidAutoStart(){
     var HPMultTill5 = Math.pow(2, zonesToEndOf5);
     var DHRatioIn5 = DHratio / HPMultTill5;
     var score = DHRatioIn5 * praidAutoStartHelper();
-    debug(score.toFixed(0) + " " + DHRatioIn5.toFixed(0) + " " + praidAutoStartHelper());
+    //debug(score.toFixed(0) + " " + DHRatioIn5.toFixed(0) + " " + praidAutoStartHelper());
     if(score < 100 && calculateMaxAfford(game.equipment["Dagger"], false, true, false, false, 1) < 2)
         return game.global.world;
     else 
