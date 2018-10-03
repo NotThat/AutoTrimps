@@ -463,7 +463,7 @@ AutoPerks.spendHelium = function(helium) {
         var price = AutoPerks.workPerks[i].getPrice();
         AutoPerks.workPerks[i].efficiency = inc/price;
         if(AutoPerks.workPerks[i].efficiency < 0)
-            throw "Perk ratios must be positive values.";
+            throw "Setup: " + AutoPerks.workPerks[i].name + " " + AutoPerks.workPerks[i].level + " efficiency is negative " + prettify(AutoPerks.workPerks[i].efficiency);
         
     }
 
@@ -496,7 +496,7 @@ AutoPerks.spendHelium = function(helium) {
             inc = AutoPerks.workPerks[i].getBenefit();
             AutoPerks.workPerks[i].efficiency = inc/price;
             if(AutoPerks.workPerks[i].efficiency < 0)
-                throw "Perk ratios must be positive values.";
+                throw AutoPerks.workPerks[i].name + " " + AutoPerks.workPerks[i].level + " efficiency is negative " + prettify(AutoPerks.workPerks[i].efficiency);
 
             effQueue.add(AutoPerks.workPerks[i]);
         }
@@ -536,7 +536,7 @@ AutoPerks.spendHelium = function(helium) {
     }
     debug("AutoPerks2: Pass One Complete. Loops ran: " + loopCounter, "perks");
     
-    printBenefitsPerks(true);
+    //printBenefitsPerks(true);
     var calcHe = AutoPerks.applyCalculations(true);
     if(calcHe < 0) throw "loop1 error: negative helium remaining " + prettify(calcHe) + " expected: " + prettify(helium);
     if(calcHe !== helium) //this can (and will) happen due to large number rounding errors. thought about using bigInt, but since the game doesnt there's no point.
@@ -788,8 +788,17 @@ function calcBenefits(){ //calculate the benefits of raising a perk by 1
     this.level++;
     var sum = 0;
     this.benefits.forEach((benefit) => {
-        if(benefit.getZeroStateValue() !== 0)
-            sum += benefit.weightBase * (benefit.calc(false, this.incomeFlag, this.popBreedFlag)/benefit.getZeroStateValue() - 1) * benefit.weightUser;
+        if(benefit.getZeroStateValue() !== 0){
+            var last = benefit.calc(false, this.incomeFlag, this.popBreedFlag);
+            if(last < 0)
+                throw "negative benefit " + benefit + " flags " + this.incomeFlag + " " + this.popBreedFlag + " " + benefit.calc(false, this.incomeFlag, this.popBreedFlag);
+            var delta = benefit.weightBase * (last/benefit.getZeroStateValue() - 1) * benefit.weightUser;
+            if(delta < 0){
+            	benefit.calc(false, this.incomeFlag, this.popBreedFlag);
+                throw "calcBenefits " + this.name + " negative delta " + prettify(delta);
+            }
+            sum += delta;
+        }
     });
     this.level--;
     return sum;
@@ -998,13 +1007,13 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
     
     //AutoPerks.resourcesNeededXXX = AutoPerks.gearCost * Math.pow(1.2, 123);
     //AutoPerks.resourcesMissingRatio = AutoPerks.resourcesNeededXXX / AutoPerks.totalResources;
-    if(AutoPerks.totalResources >= AutoPerks.gearCost)
+    if(AutoPerks.totalResources >= AutoPerks.gearCost*20)
         AutoPerks.gearLevels = Math.log(AutoPerks.totalResources/AutoPerks.gearCost) / Math.log(1.2);
     else{ //cant even afford a single level
         //since we cant afford a single level, lets go down in prestiges until we can.
         var prestigesDropped = 0;
         var maxLoops = 500;
-        while(AutoPerks.totalResources < AutoPerks.gearCost && maxLoops-- > 0){
+        while(AutoPerks.totalResources < AutoPerks.gearCost*20 && maxLoops-- > 0){
             prestigesDropped++;
             AutoPerks.prestiges--;
             prestigeMod = (AutoPerks.prestiges - 3) * 0.85 + 2;
@@ -1013,7 +1022,7 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
         if(maxLoops === 0)
             throw "Error: calcIncome() maxLoops is 0.";
 
-        AutoPerks.gearLevels = Math.log(AutoPerks.totalResources/AutoPerks.gearCost) / Math.log(1.2) / Math.pow(100000, prestigesDropped); //the main thing i want from this is lower prestige -> smaller fraction of a level. i expect users to be able to afford at least 1 level of last prestige.
+        AutoPerks.gearLevels = Math.log(AutoPerks.totalResources/AutoPerks.gearCost) / Math.log(1.2);
     }
     
     var atk    = Math.round(40 * Math.pow(1.19, ((AutoPerks.prestiges - 1) * 13) + 1)) * AutoPerks.gearLevels; //40 is prestige 0 level 0 total attack values
@@ -1692,7 +1701,7 @@ AutoPerks.initializeAmalg = function(noAmalg) {
             else if(AutoPerks.dailyObj !== null) runMode = "Daily Mode (max fuel), x" + (AutoPerks.DailyWeight).toFixed(2) + ": ";
             
             var msg = runMode + "Amalgamator #"+AutoPerks.currAmalgamators+(AutoPerks.userMaintainMode ? " maintained. " : " found. ");//+pct.toFixed(2)+"% of total helium used.";
-            debug(msg, "perks");
+            //debug(msg, "perks");
             finalMsg = msg + '<br>';
             if(AutoPerks.currAmalgamators == AutoPerks.amalGoal)
                 break;

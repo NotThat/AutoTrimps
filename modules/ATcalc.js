@@ -515,7 +515,9 @@ function timeEstimator(currZoneFlag, fromCell, zone, isPoison, toText){
         }
         
     }
-    var ret = Math.max(7, time);
+    var OC = 1 + Fluffy.isRewardActive("overkiller") + (game.talents.overkill.purchased ? 1 : 0);
+    var minTime = Math.ceil(100 / 4 / OC);
+    var ret = Math.max(minTime, time);
     
     if(toText){
         var timeText = "";
