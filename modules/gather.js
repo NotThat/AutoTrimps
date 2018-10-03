@@ -32,7 +32,6 @@ function manualLabor2() {
     var breedingTrimps = game.resources.trimps.owned - game.resources.trimps.employed;
     var lowOnTraps = game.buildings.Trap.owned < 100;
     var notFullPop = game.resources.trimps.owned < game.resources.trimps.realMax();
-    var trapTrimpsOK = getPageSetting('TrapTrimps');
     var targetBreed = getPageSetting('GeneticistTimer');
     var trapperTrapUntilFull = game.global.challengeActive == "Trapper" && notFullPop;
     var watchJumpstartTraps  = game.global.challengeActive == "Watch"  && notFullPop;
@@ -52,20 +51,6 @@ function manualLabor2() {
         }
     }
 
-    //Traps and Trimps:
-    if(trapTrimpsOK && (breedingTrimps < 5 || trapperTrapUntilFull || watchJumpstartTraps) && game.buildings.Trap.owned == 0 && canAffordBuilding('Trap')) {
-        //safeBuyBuilding returns false if item is already in queue
-        if(!safeBuyBuilding('Trap'))
-            setGather('buildings');
-        return;
-    }
-    else if (trapTrimpsOK && (breedingTrimps < 5 || trapperTrapUntilFull || watchJumpstartTraps) && game.buildings.Trap.owned > 0) {
-        setGather('trimps');
-        if (trapperTrapUntilFull && (game.global.buildingsQueue.length == 0 || game.buildings.Trap.owned == 1) && !game.global.trapBuildAllowed  && canAffordBuilding('Trap'))
-            safeBuyBuilding('Trap'); //get ahead on trap building since it is always needed for Trapper
-        return;
-    }
-
     //Buildings:
     var manualBuildSpeedAdvantage = getPlayerModifier() / game.global.autoCraftModifier;
         //pre-requisites for all: have something in the build queue, and playerCraftmod does actually speed it up.
@@ -73,13 +58,10 @@ function manualLabor2() {
     //if we have 2 or more buildings in queue, and playerCraftmod is high enough (>3x autoCraftmod) to speed it up.
     ((game.global.buildingsQueue.length >= 2 && manualBuildSpeedAdvantage > 3) ||
     //Prioritize Storage buildings when they hit the front of the queue (in case they are the only object in the queue).
-    (game.global.buildingsQueue[0] == 'Barn.1' || game.global.buildingsQueue[0] == 'Shed.1' || game.global.buildingsQueue[0] == 'Forge.1') ||
-    //manualBuild traps if we have TrapTrimps on, AutoTraps on, and we own less than (100) traps.
-    (trapTrimpsOK && game.global.trapBuildAllowed && game.global.trapBuildToggled && lowOnTraps))) {
+    (game.global.buildingsQueue[0] == 'Barn.1' || game.global.buildingsQueue[0] == 'Shed.1' || game.global.buildingsQueue[0] == 'Forge.1'))){
         setGather('buildings');//buildBuildings = true;
         return;
     }
-
     //Sciencey:
     //if we have some upgrades sitting around which we don't have enough science for, gather science
     if (document.getElementById('scienceCollectBtn').style.display != 'none' && document.getElementById('science').style.visibility != 'hidden') {

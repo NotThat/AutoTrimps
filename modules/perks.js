@@ -1433,7 +1433,7 @@ function minMaxMi(print){
             AutoPerks.fuelMaxZones -= AutoPerks.FuelZoneCutoff;
             AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[Math.floor(AutoPerks.fuelMaxZones / AutoPerks.FuelZoneCutoff)]; //must be called before every getAmalFinal
             AutoPerks.finalAmalRatio = getAmalFinal(AutoPerks.basePopAtAmalZ);
-            if(AutoPerks.finalAmalRatio < 1){ //below threshold, undo last
+            if(AutoPerks.finalAmalRatio < 1.05){ //below threshold, undo last
                 AutoPerks.fuelMaxZones += AutoPerks.FuelZoneCutoff;
                 AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[Math.floor(AutoPerks.fuelMaxZones / AutoPerks.FuelZoneCutoff)]; //must be called before every getAmalFinal
                 AutoPerks.finalAmalRatio = getAmalFinal(AutoPerks.basePopAtAmalZ);

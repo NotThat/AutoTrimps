@@ -412,7 +412,7 @@ function autoLevelEquipment(buyDamage, colorStyle) {
 function getDamageLoop(dmg, noCrit){
     var dmgToCheck = dmgToCompare(wantGoodShield, noCrit);
     var dmgLast = 0;
-    var maxLoop = 500;
+    var maxLoop = 50;
     var boughtHP = false;
     
     while ((boughtHP || dmgLast != dmgToCheck) && maxLoop-- > 0){
