@@ -268,8 +268,8 @@ AutoPerks.calculateTIIprice = function(perk, finalLevel) {
 //Fluffy is special
 AutoPerks.calculateFluffyTotalPrice = function(perk, level){
     var price = 0;
-    for (var i = 1; i <= level; i++)
-        price += perk.baseCost * Math.pow(10, i-1);
+    for (var i = 0; i < level; i++)
+        price += perk.baseCost * Math.pow(10, i);
     return price;
 };
 
@@ -312,9 +312,7 @@ AutoPerks.updateDailyMods = function(){
         AutoPerks.dailyObj = AutoPerks.Squared;
     
     
-    
-    
-    
+
     AutoPerks.battleGUMult = 1;
     AutoPerks.DailyHousingMult = 1;
     AutoPerks.DailyBadHealthMult = 1;
@@ -392,17 +390,17 @@ AutoPerks.clickAllocate = function() {
         var remainingHelium = helium - preSpentHe;
        //Check for NaN - if one of these is NaN, bugs.
         if (Number.isNaN(remainingHelium))
-            throw "AutoPerks: Major Error: Reading your Helium amount. " + remainingHelium;
+            throw "error reading your Helium amount. " + remainingHelium;
 
         // determine how to spend helium
         var result = AutoPerks.spendHelium(remainingHelium);
         if (result == false) {
-            throw "AutoPerks: Major Error: Make sure all ratios are set properly.";
+            throw "error: Make sure all ratios are set properly.";
         }
 
         var missing = -AutoPerks.applyCalculations(true);
         if(missing >= 0){ //theres some issues with large helium number inaccuracies. if missing is 0, remove 1 level just in case
-            if(missing > 0) debug("missing " + missing + " helium. attempting to correct");
+            if(missing > 0) debug("missing " + prettify(missing) + " helium. attempting to correct");
             //try removing 1 from T2 perk
             var lowest = Number.MAX_VALUE;
             var perk;
@@ -423,28 +421,28 @@ AutoPerks.clickAllocate = function() {
                 perk.level--;
             }
         }
-
-        if(AutoPerks.applyCalculations(true) < 0){
-            throw "error! setup not affordable. Aborting.";
-            return;
-        }
+        
+        var ret = AutoPerks.applyCalculations(true);
+        if(ret < 0)
+            throw "setup not affordable, missing " + prettify(-ret) + " helium.";
 
         AutoPerks.applyCalculations(); //re-arrange perk points
+        debug("AutoPerks: Auto-Allocate Finished.","perks");
     }
     catch(err){
-        debug("AutoPerks error: " + err);
+        debug("AutoPerks Critical Error: " + err);
+        var $text = document.getElementById("textAreaAllocate");
+        $text.innerHTML += 'Error: ' + err + '<br>' + '<a href="https://discord.gg/79hDRT" target="_blank">Report it on the Trimps Discord</a>';
     }
-    
-    debug("AutoPerks: Auto-Allocate Finished.","perks");
 };
 
 AutoPerks.spendHelium = function(helium) {
     debug("Calculating how to spend " + prettify(helium) + " Helium...","perks");
     if(helium < 0) 
-        throw "AutoPerks: Major Error - Not enough helium to buy fixed perks.";
+        throw "Not enough helium to buy fixed perks.";
     
     if (Number.isNaN(helium)) 
-        throw "AutoPerks: Major Error - Helium is Not a Number!";
+        throw "Helium is Not a Number!";
 
     AutoPerks.workPerks = AutoPerks.perkHolder.slice(); //create a copy of perkHolder which holds all perks we are currently leveling
     
@@ -465,7 +463,7 @@ AutoPerks.spendHelium = function(helium) {
         var price = AutoPerks.workPerks[i].getPrice();
         AutoPerks.workPerks[i].efficiency = inc/price;
         if(AutoPerks.workPerks[i].efficiency < 0)
-            throw "Error: Perk ratios must be positive values.";
+            throw "Perk ratios must be positive values.";
         
     }
 
@@ -498,7 +496,7 @@ AutoPerks.spendHelium = function(helium) {
             inc = AutoPerks.workPerks[i].getBenefit();
             AutoPerks.workPerks[i].efficiency = inc/price;
             if(AutoPerks.workPerks[i].efficiency < 0)
-                throw "Error: Perk ratios must be positive values.";
+                throw "Perk ratios must be positive values.";
 
             effQueue.add(AutoPerks.workPerks[i]);
         }
@@ -538,7 +536,9 @@ AutoPerks.spendHelium = function(helium) {
     }
     debug("AutoPerks2: Pass One Complete. Loops ran: " + loopCounter, "perks");
     
+    printBenefitsPerks(true);
     var calcHe = AutoPerks.applyCalculations(true);
+    if(calcHe < 0) throw "loop1 error: negative helium remaining " + prettify(calcHe) + " expected: " + prettify(helium);
     if(calcHe !== helium) //this can (and will) happen due to large number rounding errors. thought about using bigInt, but since the game doesnt there's no point.
         helium = calcHe;
     
@@ -547,8 +547,6 @@ AutoPerks.spendHelium = function(helium) {
         if(!AutoPerks.additivePerks[i].isLocked)
             AutoPerks.workPerks.push(AutoPerks.additivePerks[i]);
     }
-    
-    //printBenefitsPerks(true);
 
     debug("Spending remainder " + prettify(helium), "perks");
     loopCounter = 0;
@@ -562,7 +560,7 @@ AutoPerks.spendHelium = function(helium) {
             var oldCost = mostEff.spent;
             var packPrice = newCost-oldCost;
             if(packPrice > helium)
-                throw "error, can't afford " + (extraLevels - mostEff.level);
+                throw "can't afford " + (extraLevels - mostEff.level);
 
             helium-= packPrice;
             mostEff.buyLevel(extraLevels);
@@ -591,16 +589,17 @@ AutoPerks.applyCalculations = function(testValidOnly){
     if(!game.global.viewingUpgrades && !portalWindowOpen) //we need some sort of screen open to do this.. right?
         viewPortalUpgrades(); //open 'view perks'
     
-    //Pushes the respec button, then the Clear All button, then assigns perk points based on what was calculated.
-    // *Apply calculations with respec
-    if (game.global.canRespecPerks && !portalWindowOpen)
-        respecPerksAT(); //without drawing
-    if(!game.global.respecActive){
-        game.global.lockTooltip = false;
-        return;
+    if(!testValidOnly){ //only actually clear perks in the final go
+        //Pushes the respec button, then the Clear All button
+        if (game.global.canRespecPerks && !portalWindowOpen)
+            respecPerksAT(); //without drawing
+        if(!game.global.respecActive){
+            game.global.lockTooltip = false;
+            return;
+        }
+        clearPerksAT(); //without drawing
     }
     
-    clearPerksAT(); //without drawing
     var ret = useQuickImportAT(testValidOnly); //uses adapted code from export/import
     
     game.global.lockTooltip = false;
@@ -789,7 +788,8 @@ function calcBenefits(){ //calculate the benefits of raising a perk by 1
     this.level++;
     var sum = 0;
     this.benefits.forEach((benefit) => {
-        sum += benefit.weightBase * (benefit.calc(false, this.incomeFlag, this.popBreedFlag)/benefit.getZeroStateValue() - 1) * benefit.weightUser;
+        if(benefit.getZeroStateValue() !== 0)
+            sum += benefit.weightBase * (benefit.calc(false, this.incomeFlag, this.popBreedFlag)/benefit.getZeroStateValue() - 1) * benefit.weightUser;
     });
     this.level--;
     return sum;
@@ -800,6 +800,10 @@ function getBenefitValue(){
 }
 
 function benefitSave(value){
+    /*if(value === 0) {
+        debug(this);
+        throw "benefitSave value 0";
+    }*/
     this.benefitBak = value;
 }
 
@@ -1175,14 +1179,15 @@ AutoPerks.initializePerks = function () {
     var trumps          = {name: "Trumps",          baseCost: 3};
     var packrat         = {name: "Packrat",         baseCost: 3};
     var overkill        = {name: "Overkill",        baseCost: 1e6, max: 30};   
+    var capable         = {name: "Capable",         baseCost: 1e8}; //capable has a unique getTotalPrice function, added later down the function
     
-    AutoPerks.fixedPerks = [siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, overkill];
+    AutoPerks.fixedPerks = [siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, overkill, capable];
     for (var i in AutoPerks.fixedPerks){
         AutoPerks.fixedPerks[i].getPrice        = compoundingPriceFunc;
         AutoPerks.fixedPerks[i].getTotalPrice   = compoundingTotalPriceFunc;
         AutoPerks.fixedPerks[i].isFixed           = true;
     }
-    var capable = {name: "Capable", baseCost: 1e8, getTotalPrice: calculateFluffyTotalPrice, isFixed: true}; //capable has a unique getTotalPrice function
+    
     
     //perks affect 1 or more benefit (stats)
     /* 
@@ -1267,6 +1272,7 @@ AutoPerks.initializePerks = function () {
         AutoPerks.additivePerks[i].getPrice        = linearPriceFunc;
         AutoPerks.additivePerks[i].getTotalPrice   = linearTotalPriceFunc;
     }
+    capable.getTotalPrice = calculateFluffyTotalPrice; //capable has a unique getTotalPrice function
 };
 
 carp2LevelFunc = function(){
@@ -1492,13 +1498,24 @@ function printSomeStatsForGraph(){
 }
 
 //printout
-function printBenefitsPerks(levels){
-    for(var i = 0; i < AutoPerks.benefitHolder.length; i++)
-        debug(AutoPerks.benefitHolder[i].getValue());
+function printBenefitsPerks(levels, shush){
+    if(!shush){
+        debug("benefits:");
+        for(var i = 0; i < AutoPerks.benefitHolder.length; i++)
+            debug(AutoPerks.benefitHolder[i].getValue());
+        debug("Perks:");
+    }
+    var sumSpent = 0;
+    var sumTotalPrices = 0;
     for(var i = 0; i < AutoPerks.perkHolder.length; i++){
         if(AutoPerks.perkHolder[i].isFixed) continue;
-        debug(AutoPerks.perkHolder[i].name + (typeof levels === 'undefined' ? " " : " " + AutoPerks.perkHolder[i].level + " ") + AutoPerks.perkHolder[i].getBenefit());
+        sumSpent += AutoPerks.perkHolder[i].spent;
+        sumTotalPrices += AutoPerks.perkHolder[i].getTotalPrice();
+        //if(!shush) debug(AutoPerks.perkHolder[i].name + " - " + AutoPerks.perkHolder[i].level + " - " + prettify(AutoPerks.perkHolder[i].getBenefit()));
+        if(!shush) debug(AutoPerks.perkHolder[i].name + " - " + AutoPerks.perkHolder[i].level + " - " + prettify(AutoPerks.perkHolder[i].getTotalPrice()));
     }
+    debug("sumSpent " + prettify(sumSpent) + " sumtotalprices " + prettify(sumTotalPrices));
+    
 }
 
 //we care about DG growth, not straight Mi numbers, so convert the two based off how fast we can expect our DG to grow.
