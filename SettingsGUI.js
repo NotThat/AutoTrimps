@@ -364,12 +364,8 @@ function initializeAllSettings() {
     //Line3
     createSetting('VoidMaps', 'Void Maps', 'The zone at which you want all your void maps to be cleared. During dailies it will add VMs Daily Modifier unless VMs Daily Modifier is set to 999, in which case it will add Portal Daily Modifier instead. 0 to disable.', 'value', '0', null, "Maps");
     createSetting('RunNewVoidsUntilNew', 'New Voids Mod', 'This allows you to run new Void Maps obtained after Void Maps zone for a certain number of zones. For example set this to 10 to run new void maps for 10 more zones. 0 to disable, -1 to run VMs past VM zone always.', 'value', '0', null, 'Maps'); //Should replace the two below
-    //createSetting('VoidsPerZone', 'Voids per Zone', 'Run a max of this many Voids per zone, if you have a lot of Voids saved up. Then moves onto the next zone and does more voids.', 'value', '-1', null, 'Maps');
-    //<b>-1 Autograbs your Portal Daily Modifier<br>0 Disables this setting<br>Positive Numbers add to your normal void zone on a daily</b><br> Possible number input?
-    //createSetting('DailyVoidMod', 'Daily Void Zone Mod', 'If this is on, your daily autoportal mod (Core) will also apply to Void maps on dailies. For example, if you have void maps and autoportal set to 200 on normal runs, and your daily mod is 15, you will do voids and portal 15 zones later on a daily.', 'boolean', true, null, 'Maps');
-    //createSetting('VoidCheck', 'Void Difficulty Check', 'How many hits to be able to take from a void map boss in X stance before we attempt the map. Higher values will get you stronger (by farming maps for health) before attempting. Disabling this with 0 or -1 translates into a default of surviving 2 hits. I recommend somewhere between 2 and 12 (default is now 6).', 'value', '6', null, 'Maps');
-    //createSetting('TrimpleZ', 'Trimple Z', 'I don\'t really think doing this automatically is a good idea. You might want to farm for a bit before this, but I\'m not sure if it\'s meaningful at all to make a \'farm X minutes before trimple\' parameter to go along with it. Set it to the zone you want and it will run Trimple of Doom for Ancient Treasure AFTER farming and getting map stacks. If it is a negative number, this will be disabled after a successful run so you can set it differently next time.', 'valueNegative', 0, null, 'Maps'); //in reality this needs another setting to make it farm for a set number of minutes without spending anything. And I cba cause its a meh setting anyway. Advancing 2 zones more than doubles your income. Only useful for spire I, and IMO you may aswell actually play the game manually at SOME point.
-    
+
+    createSetting('PRaidSetting', 'Auto PRaid', 'With this on AT will decide automatically when to Prestige Raid based on zone, damage and zone type.', 'boolean', true, null, 'Maps');
     createSetting('PRaidingZoneStart', 'Map Raiding Start', 'Starting this zone, begin raiding higher maps for prestige. -1 for never.', 'value', -1, null, 'Maps');
     createSetting('PAggression', ['PRaid: Light', 'PRaid: Aggressive'], 'How aggressively should AT chase after prestige. Aggressive costs more fragments. If you have a plagued staff with fragment drop then you probably want aggressive mode.', 'multitoggle', 1, null, 'Maps');
     createSetting('PRaidingMaxZones', 'Max Extra Zones', 'Caps maximum extra Zones AT should ever buy chasing prestige. If BW Raid is enabled then will always attempt to prestige raid the highest possible before beginning BW raiding.', 'value', 10, null, 'Maps');
@@ -882,6 +878,7 @@ function updateCustomButtons() {
     
 
     getPageSetting('GASetting') ? turnOff("GASettingManual"): turnOn("GASettingManual");
+    getPageSetting('PRaidSetting') ? turnOff("PRaidingZoneStart") : turnOn("PRaidingZoneStart");
     
     //getPageSetting('AutoAllocatePerks')==1 ? turnOn("fastallocate") : turnOff("fastallocate");
     

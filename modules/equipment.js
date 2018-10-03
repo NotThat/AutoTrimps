@@ -438,7 +438,7 @@ function getDamage(dmg, lowerDamage, noCrit){
     if (baseDamageHigh < 0 || game.global.soldierCurrentAttack < 0) {
         debug("error: getDamage: damage " + game.global.soldierCurrentAttack + " " + baseDamageHigh);
         if (baseDamageHigh < 0 || game.global.soldierCurrentAttack < 0)
-            return;
+            return false;
     }
     else if(baseDamageHigh === 0){
         calcBaseDamageinB();
@@ -458,11 +458,11 @@ function getDamage(dmg, lowerDamage, noCrit){
     //    buyWeaponsMode = 3;
     
     if(getDamageLoop(dmg, noCrit))
-        return;
+        return true;
     
     buyWeaponsMode = 2; //allow buying equipment levels but not prestige
     if(getDamageLoop(dmg, noCrit))
-        return;
+        return true;
     
     if(game.upgrades.Coordination.done < game.upgrades.Coordination.allowed){
         if (game.global.mapsActive) AutoMapsCoordOverride = true;
@@ -478,7 +478,9 @@ function getDamage(dmg, lowerDamage, noCrit){
     
     buyWeaponsMode = 3; //allow buying equipment levels and prestiges
     if(getDamageLoop(dmg, noCrit))
-        return;
+        return true;
+    
+    return false;
 }
 
 var evalObjAT = {};
@@ -493,9 +495,9 @@ function getDamageCaller(dmg, lowerDamage, noCrit){
         evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName);
     
     if (getPageSetting('AutoStance') > 1) //2 - DE mode 3 - push mode
-        getDamage(Number.MAX_VALUE, lowerDamage, noCrit); //buy max damage
+        holdingBack = getDamage(Number.MAX_VALUE, lowerDamage, noCrit); //buy max damage
     else
-        getDamage(dmg, lowerDamage, noCrit);
+        holdingBack = getDamage(dmg, lowerDamage, noCrit);
     
     if (game.global.world === 400 && game.global.challengeActive === "Daily" && getPageSetting('Spire3Time') > 1){
         var backup = buyWeaponsMode;

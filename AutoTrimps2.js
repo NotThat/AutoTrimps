@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "37.7";
+var ver = "37.8";
 var verDate = "3.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -183,6 +183,7 @@ function initializeAutoTrimps() {
 var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
 //changelogList.push({date: verDate, version: ver, description: "", isNew: true});
+changelogList.push({date: "3.10.2018", version: "", description: "Auto Prestige Raid added." , isNew: true});
 changelogList.push({date: "2.10.2018", version: "", description: "Reworked Golden Upgrade settings, check the tab. New setting: Match Perks" , isNew: true});
 changelogList.push({date: "29.09.2018", version: "", description: "AutoAllocate reworked - check your weights. Helium/Attack/Health describes your in-run stats, the more the better. You can see the effect of using different Amalgamator count. Row #3 Growth describes the increase of stats per run out of total ever." , isNew: true});
 changelogList.push({date: "29.09.2018", version: "", description: "Will Trimpicide to pick up an Amalgamator when in Start no Coord Buy range.", isNew: true});
@@ -270,6 +271,7 @@ var highestPrestigeOwned = 0;
 var allowBuyingCoords = true;
 var lastCell = -1;
 var bsZone;
+var holdingBack = false;
 
 var highCritChance;
 var highCritDamage;

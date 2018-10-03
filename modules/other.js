@@ -26,25 +26,24 @@ function autoGoldenUpgradesAT(){
         if(game.global.runningChallengeSquared || setting === "Battle") what = "Battle";
         else if (setting === "Helium") what = "Helium";
         else{ //'Match Perks' mode: aim to buy Helium/Battle at a ratio that matches our perk setup
-            var helCurrBonus = game.goldenUpgrades.Helium.currentBonus;
-            var batCurrBonus = game.goldenUpgrades.Battle.currentBonus;
-            var helNextBonus = game.goldenUpgrades.Helium.nextAmt();
-            var batNextBonus = game.goldenUpgrades.Battle.nextAmt();
+            var helCurrMult  = game.goldenUpgrades.Helium.currentBonus + 1;
+            var batCurrMult  = game.goldenUpgrades.Battle.currentBonus + 1;
+            //var helNextBonus = game.goldenUpgrades.Helium.nextAmt();
+            //var batNextBonus = game.goldenUpgrades.Battle.nextAmt();
             
-            var helRelativeIncrease = (1 + helCurrBonus + helNextBonus)/(1 + helCurrBonus); //relative helium increase from upgrading helium GU
-            var batRelativeIncrease = (1 + batCurrBonus + batNextBonus)/(1 + batCurrBonus); //relative damage increase from upgrading battle GU
+            var helAtkGURatio = helCurrMult / batCurrMult;
             
             var looting = game.portal["Looting"].level;
             var power   = game.portal["Power"].level;
             
-            var helBenefit  = ((1 + 0.05*(looting+1)) * (1 + 0.0025*(looting+1))) / ((1 + 0.05*looting) * (1 + 0.0025*looting)); //relative helium increase from 1 more looting1 level
-            var atkBenefit  = ((1 + 0.05*(power+1)) * (1 + 0.01*(power+1))) / ((1 + 0.05*power) * (1 + 0.01*power)); //relative damage increase from 1 more power1 level
+            var helBenefit  = ((1 + 0.05*(looting+1)) * (1 + 0.0025*(looting+1))) / ((1 + 0.05*looting) * (1 + 0.0025*looting)) - 1; //relative helium increase from 1 more looting1 level
+            var atkBenefit  = ((1 + 0.05*(power+1)) * (1 + 0.01*(power+1))) / ((1 + 0.05*power) * (1 + 0.01*power)) - 1; //relative damage increase from 1 more power1 level
             var helCost     = Math.ceil(looting/2 + 1 * Math.pow(1.3, looting)); //looting1 cost
             var atkCost     = Math.ceil(power/2 + 1 * Math.pow(1.3, power)); //power1 cost
             var helEff      = helBenefit / helCost; //looting efficiency
             var atkEff      = atkBenefit / atkCost; //power efficiency
             var helAtkRatio = atkEff / helEff; //how many times we like helium better than attack
-            var helAtkGURatio = (batRelativeIncrease-1) / (helRelativeIncrease-1); //how many times more attack we get from battle than helium from helium
+            
             debug("Auto GU: Helium / Attack Perk Ratio: " + helAtkRatio.toFixed(2) + " GU Ratio: " + helAtkGURatio.toFixed(2), "GU");
             if(helAtkGURatio > helAtkRatio){
                 debug("Match Perks GU: Buying Battle GU", "GU");

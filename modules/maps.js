@@ -214,10 +214,10 @@ function autoMap() {
         AutoMapsCoordOverride = true;
     
     preSpireFarming = false;
-    spireMapBonusFarming = false;
+    spireMapBonusFarming = false; 
     needPrestige = (lastPrestigeZone() < lastDropZone()) || (lastPrestigeZone() == lastDropZone() && prestigeState != 2 && game.global.world !== expectedPortalZone);
     
-    if (!needPrestige && getPageSetting('PRaidingZoneStart') >0){
+    if (!needPrestige && (getPageSetting('PRaidingZoneStart') > 0 || getPageSetting('PRaidSetting'))){
         if(!PrestigeRaid()){ //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
             PRaidingActive = true;
             return; 
@@ -650,13 +650,35 @@ function updateAutoMapsStatus(get, msg, final) {
     }
 }
 
+function praidAutoStartHelper(){
+    var cycle = cycleZone();
+    if(cycle < 5)        return 0.007;    //xx6-xx0 poison
+    else if (cycle < 10) return 0.6;      //xx1-xx5 wind
+    else if (cycle < 15) return 0.5;    //xx6-xx0 ice
+    else if (cycle < 20) return 0.007;   //xx1-xx5 poison
+    else if (cycle < 25) return 5;      //xx6-xx0 wind
+    else                 return 1;      //xx1-xx5 ice
+}
+
+function praidAutoStart(){
+    var zonesToEndOf5 = game.global.world % 5 === 0 ? 0 : 5 - game.global.world % 5;
+    var HPMultTill5 = Math.pow(2, zonesToEndOf5);
+    var DHRatioIn5 = DHratio / HPMultTill5;
+    var score = DHRatioIn5 * praidAutoStartHelper();
+    //debug(score.toFixed(0) + " " + DHRatioIn5.toFixed(0) + " " + praidAutoStartHelper());
+    if(score < 100 && calculateMaxAfford(game.equipment["Dagger"], false, true, false, false, 1) < 2)
+        return game.global.world;
+    else 
+        return 999;
+}
+
 //returns true when done
 function PrestigeRaid() {
     if(game.global.highestLevelCleared < 210){
         //debug("Prestige Raiding is unlocked until HZE 210.", "maps");
         return true;
     }
-    var StartZone = getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid. -1 to ignore
+    var StartZone = getPageSetting('PRaidSetting') ? praidAutoStart() : getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
     presRaiding = true; //for message passing to UI
@@ -685,7 +707,7 @@ function PrestigeRaid() {
         return true; 
     if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 2) //have all
         return true; 
-    if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 1 && game.global.world % 100 != 0 && !BWRaidNowLogic() && (maxDesiredLevel >= expectedPortalZone || bsZone >= maxDesiredLevel)) //when to skip last gambes
+    if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 1 && game.global.world % 100 !== 0 && !BWRaidNowLogic() && (maxDesiredLevel >= expectedPortalZone || bsZone >= maxDesiredLevel)) //when to skip last gambes
         return true; 
     
     if (game.global.mapsActive){ //if we are in a map
