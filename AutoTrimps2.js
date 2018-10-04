@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "38.2";
+var ver = "39";
 var verDate = "4.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -33,7 +33,7 @@ function startAT() {
         return;
     }
     
-    if(!initialized){
+    if(!initialized){ //perform once
         pendingLogs.AutoTrimps = []; //adds AT messages slot. needed before we can call debug()
         initializeAutoTrimps(); //loads modules asynchronously
         initialized = true;
@@ -172,7 +172,7 @@ function initializeAutoTrimps() {
     ATscriptLoad('','SettingsGUI');   //populate Settings GUI
     ATscriptLoad('','Graphs');        //populate Graphs
     //Load modules:
-    ATmoduleList = ['query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'magmite', 'other', 'import-export', 'perks', 'fight-info', 'performance', 'ATcalc'];
+    ATmoduleList = ['chat', 'query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'magmite', 'other', 'import-export', 'perks', 'fight-info', 'performance', 'ATcalc'];
     for (var m in ATmoduleList) 
         ATscriptLoad(modulepath, ATmoduleList[m]);
     
@@ -183,6 +183,7 @@ function initializeAutoTrimps() {
 var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
 //changelogList.push({date: verDate, version: ver, description: "", isNew: true});
+changelogList.push({date: "4.10.2018", version: "", description: "Chat ?!?" , isNew: true});
 changelogList.push({date: "3.10.2018", version: "", description: "Auto Prestige Raid added." , isNew: true});
 changelogList.push({date: "2.10.2018", version: "", description: "Reworked Golden Upgrade settings, check the tab. New setting: Match Perks" , isNew: true});
 changelogList.push({date: "29.09.2018", version: "", description: "AutoAllocate reworked - check your weights. Helium/Attack/Health describes your in-run stats, the more the better. You can see the effect of using different Amalgamator count. Row #3 Growth describes the increase of stats per run out of total ever." , isNew: true});
@@ -297,12 +298,24 @@ var expectedPortalZone = 0;
 var ATmakeUp = false;
 
 function pauseRemovalLoop(){
-   if(!getPageSetting('PauseMsgsVisible')){
+    var wrapper = document.getElementById("wrapper");
+    var chatFrame = document.getElementById("chatFrame");
+    var iFrame = chatFrame.children[0];
+    var settingsRow = document.getElementById("settingsRow");
+    //this is ugly but best i found so far. problem is the settingsRow when it opens and closes
+    iFrame.style.height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
+    
+    
+    //multiple screen changing buttons set wrapper display to block. chat functionality changes it to flex, so reset to flex every loop
+    if(wrapper.style.display === "block")
+        wrapper.style.display = "flex";
+    
+    if(!getPageSetting('PauseMsgsVisible')){
         var pauseMsgs = document.getElementsByClassName('pauseMsg');
         var log = document.getElementById('log');
         for (var x = 0; x < pauseMsgs.length; x++)
            log.removeChild(pauseMsgs[x]);
-   }
+    }
 }
 
 ////////////////////////////////////////
@@ -311,6 +324,7 @@ function pauseRemovalLoop(){
 ////////////////////////////////////////
 //makeUp = true when game is in catchup mode, so we can skip some unnecessary visuals
 function ATLoop(makeUp) {
+    
     if (ATrunning == false) return;
     if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled || game.global.viewingUpgrades) {
         if(getPageSetting('PauseScript'))
@@ -366,6 +380,8 @@ function ATLoop(makeUp) {
         
         AutoMapsCoordOverride = false;
         maxCoords = -1;
+        
+        if(game.options.menu.ctrlGigas.enabled === 1) game.options.menu.ctrlGigas.enabled = 0; //stops tooltip from showing when buying gigas (hopefully)
     }
     setScienceNeeded();  //determine how much science is needed
     

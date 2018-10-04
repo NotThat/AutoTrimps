@@ -809,7 +809,7 @@ function switchOnGA(){
     var maxTries = 10;
     while(currentStep != 3 && maxTries > 0){ //get to the last active GA mode
         maxTries--;
-        cancelTooltip(); //in case its on
+        //cancelTooltip(); //in case its on
         //toggleGeneticistassist(true);
         toggleGeneticistassist();
         currentStep = steps.indexOf(game.global.GeneticistassistSetting);

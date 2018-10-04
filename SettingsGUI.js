@@ -17,7 +17,10 @@ function automationMenuInit() {
     newItem.setAttribute("onclick", "autoToggle()");
     var settingbarRow = document.getElementById("settingsTable").firstElementChild.firstElementChild;
     settingbarRow.insertBefore(newItem, settingbarRow.childNodes[10]);
+    
 
+    
+    
     //create automaps button (in the world sidebar)
     var newContainer = document.createElement("DIV");
     //newContainer.setAttribute("class", "battleSideBtnContainer");
@@ -785,8 +788,8 @@ function autoSetValue(id,negative) {
 }
 
 //toggles the display of the settings menu. 1
-function autoToggle(what) {
-    if (what) {
+function autoToggle(what){
+    if (what){
         var $what = document.getElementById(what);
         if ($what.style.display === 'block') {
             $what.style.display = 'none';
@@ -795,7 +798,8 @@ function autoToggle(what) {
             $what.style.display = 'block';
             document.getElementById(what + 'BTN').style.border = '4px solid green';
         }
-    } else {
+    }
+    else{
         if (game.options.displayed)
             toggleSettingsMenu();
         var $item = document.getElementById('graphParent');

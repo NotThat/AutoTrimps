@@ -8,8 +8,8 @@ MODULES["buildings"].storageLowlvlCutoff2 = 0.5; //when to buy more storage from
 var housingList = ['Hut', 'House', 'Mansion', 'Hotel', 'Resort', 'Gateway', 'Collector', 'Warpstation'];
 
 //An error-resilient function that will actually purchase buildings and return a success status
-function safeBuyBuilding(building) {
-    if (isBuildingInQueue(building))
+function safeBuyBuilding(building){
+    if(isBuildingInQueue(building))
         return false;
     //check if building is locked, or else it can buy 'phantom' buildings and is not exactly safe.
     if (game.buildings[building].locked)
@@ -17,23 +17,23 @@ function safeBuyBuilding(building) {
     var oldBuy = preBuy2();
     //build 2 at a time if we have the mastery for it.
     //Note: Bypasses any "Max" caps by 1 if they are odd numbers and we can afford the 2nd one.
-    if (game.talents.doubleBuild.purchased) {
+    if(game.talents.doubleBuild.purchased) {
         game.global.buyAmt = 2;
         if(game.talents.deciBuild.purchased){
             game.global.buyAmt = 10;
             if (!canAffordBuilding(building))
                 game.global.buyAmt = 2;
         }
-        if (!canAffordBuilding(building)) {
+        if(!canAffordBuilding(building)) {
             game.global.buyAmt = 1;
-            if (!canAffordBuilding(building)) {
+            if(!canAffordBuilding(building)){
                 postBuy2(oldBuy);
                 return false;
             }
         }
-    } else {
+    }else {
         game.global.buyAmt = 1;
-        if (!canAffordBuilding(building)) {
+        if(!canAffordBuilding(building)){
             postBuy2(oldBuy);
             return false;
         }
@@ -42,14 +42,13 @@ function safeBuyBuilding(building) {
     //buy max warpstations when we own <2 (ie: after a new giga)
     //thereafter, buy only 1 warpstation
     
-    if (building == 'Warpstation') {
-        
+    if (building == 'Warpstation'){
         if (game.buildings.Warpstation.owned < 2) {
             game.global.buyAmt = 'Max';
             game.global.maxSplit = 1;
-        } else {
+        }else
             game.global.buyAmt = 1;
-        }
+        
         buyBuilding(building, true, true);
         debug('Building ' + game.global.buyAmt + ' ' + building + 's', "buildings", '*rocket');
         postBuy2(oldBuy);

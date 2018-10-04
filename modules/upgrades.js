@@ -53,6 +53,7 @@ function buyUpgrades(coordsOnly) {
             buyCoords = true;
     }
     
+    //game.global.lockTooltip = true; //stop annoying warpstation tooltip when buying gigastations
     for (var upgrade in upgradeList) {
         upgrade = upgradeList[upgrade];
         var gameUpgrade = game.upgrades[upgrade];
@@ -76,4 +77,5 @@ function buyUpgrades(coordsOnly) {
             buyUpgrade(upgrade, true, true);
         debug('Upgraded ' + upgrade, "upgrades", "*upload2");
     }
+    //game.global.lockTooltip = false;
 }

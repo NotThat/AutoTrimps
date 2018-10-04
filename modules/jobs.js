@@ -93,7 +93,8 @@ function buyJobs() {
     }
 
     //FRESH GAME LOWLEVEL NOHELIUM CODE.
-    if (game.global.world == 1 && game.global.totalHeliumEarned <= 5000 && game.resources.trimps.owned < trimpsRealMax * 0.9) return buyJobsEarlyGame();
+    if (game.global.world == 1 && game.global.totalHeliumEarned <= 5000 && game.resources.trimps.owned < trimpsRealMax * 0.9) 
+        return buyJobsEarlyGame();
     
     if (game.jobs.Farmer.owned == 0 && game.jobs.Lumberjack.locked && getFreeWorkers())
         safeBuyJob('Farmer', 1);
