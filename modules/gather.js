@@ -31,7 +31,7 @@ function manualLabor2() {
     //vars
     var breedingTrimps = game.resources.trimps.owned - game.resources.trimps.employed;
     var lowOnTraps = game.buildings.Trap.owned < 100;
-    var notFullPop = game.resources.trimps.owned < game.resources.trimps.realMax();
+    var notFullPop = game.resources.trimps.owned < trimpsRealMax;
     var targetBreed = getPageSetting('GeneticistTimer');
     var trapperTrapUntilFull = game.global.challengeActive == "Trapper" && notFullPop;
     var watchJumpstartTraps  = game.global.challengeActive == "Watch"  && notFullPop;

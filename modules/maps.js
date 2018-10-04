@@ -394,7 +394,7 @@ function autoMap() {
     if (game.global.soldierHealth > 1000){//if we have an army currently fighting
         if(!doVoids){ //and we dont need to voids
             if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
-                if (game.resources.trimps.owned < game.resources.trimps.realMax()){ //and we dont have another army ready, then we may as well stay in the world until another army is ready. may not be true for some dailies
+                if (game.resources.trimps.owned < trimpsRealMax){ //and we dont have another army ready, then we may as well stay in the world until another army is ready. may not be true for some dailies
                     if (getEmpowerment() == "Poison"){
                         if(game.global.world % 10 != 5 && game.global.world % 10 != 0) //in poison zones xx0 and xx5, we are willing to sit and wait in the map screen to be sure not to miss our last poison zone
                             return;
@@ -736,7 +736,7 @@ function PrestigeRaid() {
     //this code prevents PrestigeRaid() from killing our army and going into map screen under certain conditions:    
     if (game.global.soldierHealth > 1000){//if we have an army currently fighting
         if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
-            if (game.resources.trimps.owned < game.resources.trimps.realMax()){ //and we dont have another army ready, then we may as well stay in the world until another army is ready. may not be true for some dailies
+            if (game.resources.trimps.owned < trimpsRealMax){ //and we dont have another army ready, then we may as well stay in the world until another army is ready. may not be true for some dailies
                 if (getEmpowerment() == "Poison"){
                     if(game.global.world % 10 != 5 && game.global.world % 10 != 0){ //in poison zones xx0 and xx5, we are willing to sit and wait in the map screen to be sure not to miss our last poison zone
                         if(!doVoids)

@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "38.1";
+var ver = "38.2";
 var verDate = "4.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -272,6 +272,7 @@ var allowBuyingCoords = true;
 var lastCell = -1;
 var bsZone;
 var holdingBack = false;
+var trimpsRealMax = game.resources.trimps.realMax();
 
 var highCritChance;
 var highCritDamage;
@@ -318,6 +319,8 @@ function ATLoop(makeUp) {
     }
     ATrunning = true;
     ATmakeUp = makeUp;
+    
+    trimpsRealMax = game.resources.trimps.realMax();
     
     hiddenBreedTimer = game.jobs.Amalgamator.owned > 0 ? Math.floor((getGameTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000);
     if(hiddenBreedTimer != hiddenBreedTimerLast && typeof addbreedTimerInsideText !== 'undefined'){
@@ -386,7 +389,7 @@ function ATLoop(makeUp) {
     else if (getPageSetting('BuyBuildingsNew')==2) buyBuildings();                 
     else if (getPageSetting('BuyBuildingsNew')==3) buyStorage();  
     
-    if (getPageSetting('BuyJobsNew')>0) buyJobs();                                              
+    if (getPageSetting('BuyJobsNew')) buyJobs();                                              
     if (getPageSetting('ManualGather2')) manualLabor();  //"Auto Gather/Build"       (gather.js)
      
     autoMap(); //automaps() is in charge of maps combat

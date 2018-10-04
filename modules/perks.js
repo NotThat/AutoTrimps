@@ -1353,7 +1353,7 @@ function calcBasePopMaintain(){
     
     var currCarp1Bonus = Math.pow(1.1, game.portal["Carpentry"].level);
     var currCarp2Bonus = 1 + 0.0025 * game.portal["Carpentry_II"].level;
-    var basePop = game.resources.trimps.realMax() / currCarp1Bonus / currCarp2Bonus;
+    var basePop = trimpsRealMax / currCarp1Bonus / currCarp2Bonus;
     var currFuel = game.global.magmaFuel;
     
     var popTick = Math.floor(Math.sqrt(fuelCapacity)* 500000000 * (1 + 0.1*eff) * OCEff);

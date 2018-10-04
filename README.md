@@ -58,7 +58,6 @@ AutoTrimps2.js is the main file that loads the modules, and then runs its ATLoop
 
 The ATLoop() consists of the following subroutine functions, all of which are enable-able/disable-able by their buttons.:
 -     exitSpireCell();        //"Exit Spire After Cell" (other.js)
--     workerRatios();         //"Auto Worker Ratios"
 -     buyUpgrades();          //"Buy Upgrades"
 -     autoGoldenUpgrades();   //"AutoGoldenUpgrades" (genBTC settings area)
 -     buyStorage();           //"Buy Storage"

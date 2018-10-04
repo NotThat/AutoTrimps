@@ -169,7 +169,7 @@ function buyGemEfficientHousing() {
                     var coordReplace = (game.portal.Coordinated.level) ? (25 * Math.pow(game.portal.Coordinated.modifier, game.portal.Coordinated.level)).toFixed(3) : 25;
                     if (!canAffordCoordinationTrimps()){
                         var nextCount = (game.portal.Coordinated.level) ? game.portal.Coordinated.currentSend : game.resources.trimps.maxSoldiers;
-                        var amtToGo = ((nextCount * 3) - game.resources.trimps.realMax());
+                        var amtToGo = ((nextCount * 3) - trimpsRealMax);
                         //calc amount of trimps that warpstation increases by
                         var increase = toTip.increase.by;
                         if (game.portal.Carpentry.level && toTip.increase.what == "trimps.max") increase *= Math.pow(1.1, game.portal.Carpentry.level);

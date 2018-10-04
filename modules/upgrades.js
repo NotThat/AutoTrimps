@@ -6,7 +6,7 @@ var lastAmalSpamCell = -1;
 //Buys all available non-equip upgrades listed in var upgradeList
 function buyUpgrades(coordsOnly) {
     if (getPageSetting('BuyUpgradesNew') != 2){ //skip this calculation if AT isnt allowed to buy coords
-        var popArmyRatio = game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend();
+        var popArmyRatio = trimpsRealMax/game.resources.trimps.getCurrentSend();
         buyCoords = true;
         
         if((getPageSetting('AutoStance')==1) && getPageSetting('DelayCoordsForWind')){
@@ -31,7 +31,7 @@ function buyUpgrades(coordsOnly) {
         if(popArmyRatio < 1350){ //we're dangerously close to losing amalgamator
             var coordinationMult = 1+0.25*Math.pow(0.98, game.portal.Coordinated.level);
             var currentSendAfter = game.resources.trimps.getCurrentSend()*coordinationMult;
-            var popArmyRatioAfter = game.resources.trimps.realMax()/currentSendAfter;
+            var popArmyRatioAfter = trimpsRealMax/currentSendAfter;
             if (popArmyRatioAfter <= 1001 && game.jobs.Amalgamator.owned > 0){
                 var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
                 if(lastAmalSpamCell != cellNum){

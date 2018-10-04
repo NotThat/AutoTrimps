@@ -357,7 +357,7 @@ function pushData() {
     var getPercent = (dailyMultGraph * game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned)))*100;
     var lifetime = (game.resources.helium.owned / (game.global.totalHeliumEarned-game.resources.helium.owned))*100;
     
-    //var resultForGraph = Math.log10(game.resources.trimps.realMax()/game.resources.trimps.getCurrentSend());
+    //var resultForGraph = Math.log10(trimpsRealMax/game.resources.trimps.getCurrentSend());
 
     allSaveData.push({
         totalPortals: game.global.totalPortals,
@@ -371,7 +371,7 @@ function pushData() {
         nullifium: recycleAllExtraHeirlooms(true),
         gigas: game.upgrades.Gigastation.done,
         gigasleft: game.upgrades.Gigastation.allowed - game.upgrades.Gigastation.done,
-        trimps: game.resources.trimps.realMax(),
+        trimps: trimpsRealMax,
         coord: game.upgrades.Coordination.done,
         lastwarp: game.global.lastWarp,
         essence: getTotalDarkEssenceCount(),
