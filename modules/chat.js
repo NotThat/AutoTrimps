@@ -14,21 +14,13 @@ function initializeChat(){
     
     var chatFrame = document.createElement("div");
     
-    //chatFrame.innerHTML = '<iframe src="https://titanembeds.com/embed/230899632777986048" style="resize: horizontal;position: relative;width: 431px; background-color: rgb(84, 110, 122); border: 8px; padding-right: 8px;" frameborder="0"></iframe>'
-    chatFrame.innerHTML = '<iframe src="https://discord.gg/BFfAtD" style="resize: horizontal;position: relative;width: 431px; background-color: rgb(84, 110, 122); border: 8px; padding-right: 8px;" frameborder="0"></iframe>'
+    chatFrame.innerHTML = '<iframe src="https://titanembeds.com/embed/230899632777986048" style="resize: horizontal;position: relative;width: 431px; background-color: rgb(84, 110, 122); border: 8px; padding-right: 8px;" frameborder="0"></iframe>'
     chatFrame.setAttribute("id", "chatFrame");
     chatFrame.setAttribute("style", "display: block;float: left;background-color: rgb(255, 255, 255);color: rgb(255, 255, 255);");
     //chatFrame.setAttribute("style", "display: block;float: left;background-color: rgb(255, 255, 255);color: rgb(255, 255, 255);pointer-events: none;");
     
-    
-    
-    
     var settingsRow = document.getElementById("settingsRow");
     settingsRow.setAttribute("style", "/* position: relative; */left: 0px;right: 0px;");
-    
-    //var settingsTable = document.getElementById("settingsTable").children[0].children[0].children;
-    //for (var i = 0; i < settingsTable.length ; i++)
-    //    settingsTable[i].style.padding = '0px'; 
     
     var wrapper = document.getElementById("wrapper");
     wrapper.setAttribute("style", "background: url('css/bg2_vert.png') center center repeat-y;opacity: 1.05207;/* position: relative; *//* overflow: auto; */display: flex;");
@@ -38,6 +30,7 @@ function initializeChat(){
     wrapper.appendChild(innerWrapper);
     
     //collapseChat(); //start minimized
+    chatFrame.style.display = 'none';
 }
 initializeChat();
 
