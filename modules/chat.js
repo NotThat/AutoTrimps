@@ -13,8 +13,9 @@ function initializeChat(){
     settingbarRow.insertBefore(newItem, settingbarRow.childNodes[10]);
     
     var chatFrame = document.createElement("div");
-    //chatFrame.innerHTML = '<iframe src="https://titanembeds.com/embed/230899632777986048" style="resize: horizontal;position: relative;width: 431px;height: 90%; background-color: rgb(255, 255, 255);" frameborder="0"></iframe>'
-    chatFrame.innerHTML = '<iframe src="https://titanembeds.com/embed/230899632777986048" style="resize: horizontal;position: relative;width: 431px; background-color: rgb(84, 110, 122); border: 8px; padding-right: 8px;" frameborder="0"></iframe>'
+    
+    //chatFrame.innerHTML = '<iframe src="https://titanembeds.com/embed/230899632777986048" style="resize: horizontal;position: relative;width: 431px; background-color: rgb(84, 110, 122); border: 8px; padding-right: 8px;" frameborder="0"></iframe>'
+    chatFrame.innerHTML = '<iframe src="https://discord.gg/BFfAtD" style="resize: horizontal;position: relative;width: 431px; background-color: rgb(84, 110, 122); border: 8px; padding-right: 8px;" frameborder="0"></iframe>'
     chatFrame.setAttribute("id", "chatFrame");
     chatFrame.setAttribute("style", "display: block;float: left;background-color: rgb(255, 255, 255);color: rgb(255, 255, 255);");
     //chatFrame.setAttribute("style", "display: block;float: left;background-color: rgb(255, 255, 255);color: rgb(255, 255, 255);pointer-events: none;");
@@ -36,7 +37,7 @@ function initializeChat(){
     wrapper.appendChild(chatFrame);
     wrapper.appendChild(innerWrapper);
     
-    collapseChat(); //start minimized
+    //collapseChat(); //start minimized
 }
 initializeChat();
 

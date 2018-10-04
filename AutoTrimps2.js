@@ -18,13 +18,27 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "39";
+var ver = "39.1";
 var verDate = "4.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
         modulepath = 'modules/';  
-    
+
+//include jquery
+var head = document.getElementsByTagName('head')[0];
+var queuescript = document.createElement('script');
+queuescript.type = 'text/javascript';
+queuescript.src = 'https://code.jquery.com/jquery-1.12.4.js';
+head.appendChild(queuescript);
+
+var head = document.getElementsByTagName('head')[0];
+var queuescript = document.createElement('script');
+queuescript.type = 'text/javascript';
+queuescript.src = 'https://code.jquery.com/ui/1.12.1/jquery-ui.js';
+head.appendChild(queuescript);
+
+
 var initialized = false;
 function startAT() {
     //first we wait for the game to load
