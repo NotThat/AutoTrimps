@@ -222,21 +222,13 @@ function autoMap() {
             PRaidingActive = true;
             return; 
         }
-        else{
-            statusMsg = ASMode;
-        }
     }
     
     PRaidingActive = false;
     
-    if (!needPrestige && BWRaidNowLogic()){
-        if(!BWraiding()){ //BW Raiding
-            return; 
-        }
-        else{
-            statusMsg = ASMode;
-        }
-    }
+    //BW Raiding
+    if (!needPrestige && BWRaidNowLogic() && !BWraiding())
+        return; 
     
     //BEGIN AUTOMAPS DECISIONS:
     shouldDoMaps = !enoughDamage && game.global.mapBonus < 10;

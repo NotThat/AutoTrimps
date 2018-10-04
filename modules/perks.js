@@ -822,7 +822,7 @@ function benefitHeliumCalc(){
     this.benefit = (1 + 0.05*looting1.level) * (1 + 0.0025*looting2.level) * AutoPerks.DailyWeight;
     
     if(isNaN(this.benefit))
-        throw "error - Helium NaN benefit";
+        throw "Helium NaN benefit";
     
     return this.getValue();
 }
@@ -851,7 +851,7 @@ function benefitAttackCalc(commit, incomeFlag){
     this.benefit = (1 + 0.05*power1Perk.level) * (1 + 0.01*power2Perk.level) * income * amalBonus;
     
     if(isNaN(this.benefit))
-        throw "error - Attack NaN benefit";
+        throw "Attack NaN benefit";
 
     
     return this.getValue();
@@ -895,7 +895,7 @@ function benefitHealthCalc(commit, incomeFlag, popBreedFlag){
     this.benefit = (1 + 0.05*toughness1Perk.level) * (1 + 0.01*toughness2Perk.level)*Math.pow(1.1, resilPerk.level) * income * popBreed * Math.pow(40, amalToUse) * (1 + 0.001*ResourcefulFudgeFactor);
     
     if(isNaN(this.benefit))
-        throw "error - Health NaN benefit";
+        throw "Health NaN benefit";
 
     
     return this.getValue();
@@ -920,7 +920,7 @@ function benefitFluffyCalc(){
     this.benefit = sumBenefit * cunningCuriousMult * flufffocus * staffBonusXP * AutoPerks.DailyWeight;
 
     if(isNaN(this.benefit))
-        throw "error - Fluffy NaN benefit";
+        throw "Fluffy NaN benefit";
 
     
     return this.getValue();
@@ -936,7 +936,7 @@ function benefitDGCalc(){
         this.benefit = MiToDGGrowth(miPerRun); //mi changed, update benefit
     
     if(isNaN(this.benefit))
-        throw "error - DG NaN benefit";
+        throw "DG NaN benefit";
 
     
     return this.getValue();
@@ -1172,7 +1172,8 @@ AutoPerks.initializePerks = function () {
     for (var i in AutoPerks.fixedPerks){
         AutoPerks.fixedPerks[i].getPrice        = compoundingPriceFunc;
         AutoPerks.fixedPerks[i].getTotalPrice   = compoundingTotalPriceFunc;
-        AutoPerks.fixedPerks[i].isFixed           = true;
+        AutoPerks.fixedPerks[i].isFixed         = true;
+        AutoPerks.fixedPerks[i].isLocked        = typeof game.portal[AutoPerks.fixedPerks[i].name].locked === 'undefined' ? false : game.portal[AutoPerks.fixedPerks[i].name].locked;
     }
     
     

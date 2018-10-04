@@ -1,7 +1,5 @@
 var chatIsOpen = false;
-var chatWindowWidth = '500px';
-
-
+//var chatWindowWidth = '500px';
 
 function initializeChat(){
     //create the chat button (bottom toolbar)
@@ -17,7 +15,6 @@ function initializeChat(){
     chatFrame.innerHTML = '<iframe src="https://titanembeds.com/embed/230899632777986048" style="resize: horizontal;position: relative;width: 431px; background-color: rgb(84, 110, 122); border: 8px; padding-right: 8px;" frameborder="0"></iframe>'
     chatFrame.setAttribute("id", "chatFrame");
     chatFrame.setAttribute("style", "display: block;float: left;background-color: rgb(255, 255, 255);color: rgb(255, 255, 255);");
-    //chatFrame.setAttribute("style", "display: block;float: left;background-color: rgb(255, 255, 255);color: rgb(255, 255, 255);pointer-events: none;");
     
     var settingsRow = document.getElementById("settingsRow");
     settingsRow.setAttribute("style", "/* position: relative; */left: 0px;right: 0px;");
@@ -29,8 +26,8 @@ function initializeChat(){
     wrapper.appendChild(chatFrame);
     wrapper.appendChild(innerWrapper);
     
-    //collapseChat(); //start minimized
-    chatFrame.style.display = 'none';
+    //collapseChat();
+    chatFrame.style.display = 'none'; //start minimized
 }
 initializeChat();
 
