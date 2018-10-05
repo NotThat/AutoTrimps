@@ -18,26 +18,12 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "39.3";
+var ver = "39.4";
 var verDate = "5.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
         modulepath = 'modules/';  
-
-//include jquery
-var head = document.getElementsByTagName('head')[0];
-var queuescript = document.createElement('script');
-queuescript.type = 'text/javascript';
-queuescript.src = 'https://code.jquery.com/jquery-1.12.4.js';
-head.appendChild(queuescript);
-
-var head = document.getElementsByTagName('head')[0];
-var queuescript = document.createElement('script');
-queuescript.type = 'text/javascript';
-queuescript.src = 'https://code.jquery.com/ui/1.12.1/jquery-ui.js';
-head.appendChild(queuescript);
-
 
 var initialized = false;
 function startAT() {
@@ -79,7 +65,6 @@ function startAT() {
     equipLowDmgShield();
     equipMainShield();
     calcBaseDamageinB();
-    
     
     //HTML For adding a 5th tab to the message window
     var ATbutton = document.createElement("button");
@@ -186,7 +171,7 @@ function initializeAutoTrimps() {
     ATscriptLoad('','SettingsGUI');   //populate Settings GUI
     ATscriptLoad('','Graphs');        //populate Graphs
     //Load modules:
-    ATmoduleList = ['chat', 'query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'magmite', 'other', 'import-export', 'perks', 'fight-info', 'performance', 'ATcalc'];
+    ATmoduleList = ['chat', 'jQuery', 'jQuery-UI', 'query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'magmite', 'other', 'import-export', 'perks', 'fight-info', 'performance', 'ATcalc'];
     for (var m in ATmoduleList) 
         ATscriptLoad(modulepath, ATmoduleList[m]);
     
@@ -316,12 +301,26 @@ function pauseRemovalLoop(){
     var chatFrame = document.getElementById("chatFrame");
     var iFrame = document.getElementById("chatIFrame");
     var settingsRow = document.getElementById("settingsRow");
-    //this is ugly but best i found so far. problem is the settingsRow when it opens and closes
-    if(iFrame) iFrame.style.height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
     
+    //dont know why wrapper started shrinking on me
+    wrapper.style.width = '100vw';
     //multiple screen changing buttons set wrapper display to block. chat functionality changes it to flex, so reset to flex every loop
     if(wrapper.style.display === "block")
         wrapper.style.display = "flex";
+    
+    //this is ugly but best i found so far. problem is the settingsRow when it opens and closes
+    if(iFrame) {
+        var height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
+        iFrame.style.height = height;
+        chatFrame.style.height = height;
+    }
+    
+    //putting this here so that innerWrapper width gets set to fill screen when if screen changed not through chatFrame resize
+    $(document).ready(function() {
+        $("#innerWrapper").width($("#wrapper").width() - $("#chatIFrame").width());
+    });
+    
+    //if(chatFrame) chatFrame.style.height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
     
     if(!getPageSetting('PauseMsgsVisible')){
         var pauseMsgs = document.getElementsByClassName('pauseMsg');
