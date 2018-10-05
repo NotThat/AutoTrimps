@@ -279,7 +279,6 @@ function initializeAllSettings() {
     createSetting('AutoFinishDailyNew', 'Portal Daily Modifier', 'Modifies your normal auto portal zone in dailies. Accepts negative numbers as well, which will make you portal sooner on dailies. To disable AutoPortal during a daily, turn off the AutoPortal option or set this to <b>999</b>.', 'valueNegative', 999, null, 'Core');
     createSetting('VoidMapsDailyMod', 'VMs Daily Modifier', 'Adds this value to your normal VM map in dailies. Accepts negative values as well. <b>Disabling this will use your portal daily modifier instead.</b> Disable with 999', 'valueNegative', 999, null, 'Core');
     
-    
     createSetting('PauseScript', 'Pause AutoTrimps', 'Pause AutoTrimps Script (not including the graphs module)', 'boolean', null, null, 'Core');
     //code to locate the pause button at lower right
     var $pauseScript = document.getElementById('PauseScript');
@@ -400,7 +399,7 @@ function initializeAllSettings() {
     //Subsection1Line1
 
     createSetting('AutoStance', ['Off', 'Helium Mode', 'Dark Essence Mode', 'Push Mode', 'Hybrid'], 'Combat settings. Helium mode: will attempt to windstack any cell thats worth more than threshold. Be sure to have shield swapping enabled with this! Dark Essence Mode: Buys all damage and uses S stance. Push Mode: Buys all damage and uses D stance. Hybrid: Push in Wind/Ice, DE in Poison.', 'multitoggle', 0, null, 'Combat');
-    createSetting('WindStackingPctHe', 'He/Hr% Goal', 'For use with AutoStance. Windstacking will use this goal while handling windfarm. You should set this to about x2-3 times your filler He/Hr percent of total. In % units (type 0.5 for 0.5% He/Hr etc)', 'value', '-1', null, 'Combat');
+    createSetting('WindStackingPctHe', 'He/Hr% Threshold', 'For use with Helium Mode. Will lower damage for stacking on cells that yield higher than this threshold. Lower threshold -> more stacking. You should set this to about x2-3 times your filler He/Hr percent of total. In % units (type 0.5 for 0.5% He/Hr etc)', 'value', '-1', null, 'Combat');
     createSetting('DelayCoordsForWind', 'Stall Coords For Wind', 'With this on, AS will micromanage Coordination for windstacking. Logic is: Buy all Coords utill *Start No Coord Buy* zone, then stop until Amalgamator amount, then let AS micromanage. Will always buy all coords for active spires, Void Map zone BW Raid and Prestige Raids.', 'boolean', true, null, 'Combat');
     createSetting('DelayWeaponsForWind', 'Stall Weapons For Wind', 'With this on, AS will micromanage Weapon purchases for windstacking. Used to lower damage in the early game.', 'boolean', true, null, 'Combat');
     createSetting('GASetting', 'AT Control GA', 'AT Control GA - Allow AT to control GeneticistAssist timer. Also handles bogged dailies (Recommended). When this is off will use your manually entered Input instead.', 'boolean', true, null, 'Combat');

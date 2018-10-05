@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "39.2";
+var ver = "39.3";
 var verDate = "5.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -314,11 +314,10 @@ var ATmakeUp = false;
 function pauseRemovalLoop(){
     var wrapper = document.getElementById("wrapper");
     var chatFrame = document.getElementById("chatFrame");
-    var iFrame = chatFrame.children[0];
+    var iFrame = document.getElementById("chatIFrame");
     var settingsRow = document.getElementById("settingsRow");
     //this is ugly but best i found so far. problem is the settingsRow when it opens and closes
-    iFrame.style.height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
-    
+    if(iFrame) iFrame.style.height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
     
     //multiple screen changing buttons set wrapper display to block. chat functionality changes it to flex, so reset to flex every loop
     if(wrapper.style.display === "block")

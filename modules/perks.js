@@ -27,10 +27,8 @@ AutoPerks.createInput = function(perkname,div, isCheckBox) {
     if(isCheckBox) perk1input.setAttribute("type", "checkbox");
     perk1input.id = perkname + (isCheckBox ? '' : 'Ratio');
     perk1input.perkname = perkname;
-    //if(isCheckBox)
-    //    var oldstyle = 'text-align: center; width: calc(100vw/36); font-size: 1.0vw; ';
-    //else
-        var oldstyle = 'text-align: center; width: calc(100vw/25); font-size: 1.0vw; ';
+
+    var oldstyle = 'text-align: center; width: calc(100vw/25); font-size: 1.0vw; ';
     if(game.options.menu.darkTheme.enabled != 2) perk1input.setAttribute("style", oldstyle + " color: black;");
     else perk1input.setAttribute('style', oldstyle);
     perk1input.setAttribute('class', 'perkRatios');
@@ -196,8 +194,6 @@ AutoPerks.updateFromBoxes = function() {
     $perkRatioBoxes[11].checked = (secondLine != null && typeof secondLine[6] !== 'undefined') ? secondLine[6] : false;
     $perkRatioBoxes[12].checked = (secondLine != null && typeof secondLine[7] !== 'undefined') ? secondLine[7] : false;
     
-
-    
     AutoPerks.updatePerkRatios(); //updates perk ratios from boxes into the data structures
  
     //save the last ratio used to localstorage
@@ -208,9 +204,7 @@ AutoPerks.updateFromBoxes = function() {
 //updates the internal perk variables with values grabbed from the custom ratio input boxes that the user may have changed.
 AutoPerks.updatePerkRatios = function() {
     var $perkRatioBoxes = document.getElementsByClassName('perkRatios');
-    //for(var i = 0; i < $perkRatioBoxes.length; i++) {
     for(var i = 0; i < 5; i++) {
-        //currentPerk = AutoPerks.perksByName[$perkRatioBoxes[i].id.substring(0, $perkRatioBoxes[i].id.length - 5)]; // Remove "ratio" from the id to obtain the perk name
         var newWeight = parseFloat($perkRatioBoxes[i].value);
         AutoPerks.benefitHolder[i].weightUser = Math.max(0, newWeight);
     }
@@ -231,27 +225,28 @@ AutoPerks.resetPerks = function(){
     for (var i in AutoPerks.perkHolder){
         AutoPerks.perkHolder[i].level = 0;
         AutoPerks.perkHolder[i].spent = 0;
+        AutoPerks.perkHolder[i].efficiency = 1;
     }
 };
 
 AutoPerks.resetBenefits = function(){
     for(var i = 0; i < AutoPerks.benefitHolder.length; i++){
         AutoPerks.benefitHolder[i].benefit     = 1;
-        AutoPerks.benefitHolder[i].benefitBak  = AutoPerks.benefitHolder[i].benefit;
+        AutoPerks.benefitHolder[i].benefitBak  = 1;
     }
 };
 
 //Calculate price of buying *next* level
 AutoPerks.calculatePrice = function(perk, level) { 
-    if(perk.priceLinearScaling == 'linear') return perk.baseCost + perk.increase * level;
+    if(perk.priceLinearScaling === 'linear') return perk.baseCost + perk.increase * level;
     
     //exponential type calculation is an approximation, however it is what the game uses for price, and therefore the calculation we use
-    else if(perk.priceLinearScaling == 'exponential') return Math.ceil(level/2 + perk.baseCost * Math.pow(1.3, level));
+    else if(perk.priceLinearScaling === 'exponential') return Math.ceil(level/2 + perk.baseCost * Math.pow(1.3, level));
 };
 
 //Calculate Total Price
 AutoPerks.calculateTotalPrice = function(perk, finalLevel) {
-    if(perk.priceLinearScaling == 'linear') return AutoPerks.calculateTIIprice(perk, finalLevel);
+    if(perk.priceLinearScaling === 'linear') return AutoPerks.calculateTIIprice(perk, finalLevel);
     
     var totalPrice = 0;
     for(var i = 0; i < finalLevel; i++) {
@@ -273,22 +268,10 @@ AutoPerks.calculateFluffyTotalPrice = function(perk, level){
     return price;
 };
 
-AutoPerks.calculateBenefit = function(perk, level) {
-    if(perk.benefitType) return perk.value * perk.baseIncrease * perk.userWeight;
-    else if (perk.priceLinearScaling === "exponential") return perk.value * perk.userWeight;
-    else { //linear
-        var increase = (1 + (level + 1) * perk.baseIncrease) / ( 1 + level * perk.baseIncrease) - 1; //absolute increase. if carp2 gives 0.25% at level 1, this will be 0.125% at level 400
-        //return increase / perk.baseIncrease * perk.userWeight; //if we divide increase by perk.baseIncrease, we get the relative worth of current level compared to level 1 instead of absolute worth. in the above example this will be 0.5
-        return perk.value * increase * perk.userWeight;
-    }
-};
-
 //calcs helium like the game does
 AutoPerks.getHelium = function() {
-    //determines if we are in the portal screen or the perk screen.
+    //portal screen and the perk screen have differing helium amount to spend
     var respecMax = (game.global.viewingUpgrades) ? game.global.heliumLeftover : game.global.heliumLeftover + game.resources.helium.owned;
-    //var respecMax = (!usePortal) ? game.global.heliumLeftover : game.global.heliumLeftover + game.resources.helium.owned;
-    //iterates all the perks and gathers up their heliumSpent counts.
     for (var item in game.portal){
         if (game.portal[item].locked) continue;
         var portUpgrade = game.portal[item];
@@ -310,8 +293,6 @@ AutoPerks.updateDailyMods = function(){
         AutoPerks.dailyObj = game.global.dailyChallenge;
     else if(game.global.runningChallengeSquared)
         AutoPerks.dailyObj = AutoPerks.Squared;
-    
-    
 
     AutoPerks.battleGUMult = 1;
     AutoPerks.DailyHousingMult = 1;
@@ -327,7 +308,7 @@ AutoPerks.updateDailyMods = function(){
         if(AutoPerks.dailyObj.hasOwnProperty("badHealth"))
             AutoPerks.DailyHousingMult = (100 + 20*AutoPerks.dailyObj.badHealth.strength) / 100;
     }
-}
+};
 
 //green "Allocate Perks" button:
 AutoPerks.clickAllocate = function() {
@@ -354,7 +335,10 @@ AutoPerks.clickAllocate = function() {
          * increasing a weight by a factor of 2 means we are willing to spend twice as much helium for the same increase.
          * finally, perk.efficiency equals perk.calculateBenefit() / perk.cost
          */
-
+        
+        //AutoPerks.initializePerks(); //do this every click if its not expensive. this way we update locked perks etc.
+        
+        
         AutoPerks.updateDailyMods(); // current (or selected) challenge modifiers
         AutoPerks.resetPerks();      // set all perks to level 0
         AutoPerks.resetBenefits();   // benefit and benefitBak = 1;
@@ -369,8 +353,7 @@ AutoPerks.clickAllocate = function() {
         // Get fixed perks
         var preSpentHe = 0;
         var perks = AutoPerks.perkHolder;
-        //var fixedPerks = AutoPerks.perkHolder; //test
-        for (i in perks) {
+        for (var i in perks) {
             if(perks[i].isLocked || !perks[i].isFixed)
                 continue;
             //Maintain your existing fixed perks levels.
@@ -383,20 +366,17 @@ AutoPerks.clickAllocate = function() {
             debug("AutoPerks: Your existing fixed-perks reserve Helium: " + prettify(preSpentHe), "perks");
 
         preSpentHe = 0;
-        for (var i in AutoPerks.perkHolder){
+        for (var i in AutoPerks.perkHolder)
             preSpentHe += AutoPerks.perkHolder[i].spent;
-        }
-        //if one of these is NaN, bugs.
+        
         var remainingHelium = helium - preSpentHe;
-       //Check for NaN - if one of these is NaN, bugs.
         if (Number.isNaN(remainingHelium))
             throw "error reading your Helium amount. " + remainingHelium;
 
         // determine how to spend helium
         var result = AutoPerks.spendHelium(remainingHelium);
-        if (result == false) {
+        if (result == false)
             throw "error: Make sure all ratios are set properly.";
-        }
 
         var missing = -AutoPerks.applyCalculations(true);
         if(missing >= 0){ //theres some issues with large helium number inaccuracies. if missing is 0, remove 1 level just in case
@@ -448,7 +428,7 @@ AutoPerks.spendHelium = function(helium) {
     
     // Calculate base efficiency of all perks
     for(var i = 0; i < AutoPerks.workPerks.length; i++){
-        if(AutoPerks.workPerks[i].isLocked || AutoPerks.workPerks[i].isFixed || typeof AutoPerks.workPerks[i].parent !== 'undefined'){ //skip unowned, fixed, and T2 perks.
+        if(AutoPerks.workPerks[i].isLocked || AutoPerks.workPerks[i].isFixed || AutoPerks.workPerks[i].isT2){ //skip unowned, fixed, and T2 perks.
             AutoPerks.workPerks.splice(i, 1); //remove from array
             i--;
         }
@@ -503,7 +483,7 @@ AutoPerks.spendHelium = function(helium) {
         //when we level a T1 perk that has a T2 version, level the T2 alongside the T1 perk.
         //childLevelFunc() tells us how many levels we want in T2.
         //if we cant afford enough levels, proceed to next phase of the algorithm.
-        if(mostEff.hasChild){
+        if(mostEff.child){
             var child = mostEff.child;
             var childLevelTarget = mostEff.childLevelFunc();
             var childNewLevel = Math.max(0, childLevelTarget);
@@ -540,18 +520,18 @@ AutoPerks.spendHelium = function(helium) {
     //Repeat the process for spending round 2.
     var pct = 0.01; //when a T2 perk is most efficient, buy as many as we can afford with helium * pct of our total helium (min 1 level)
     while (mostEff = iterateArr()){
-        if(typeof mostEff.parent !== 'undefined'){
-                var extraLevels = mostEff.getBulkAmountT2(helium * pct); //returns how many additional levels of this perk we can afford with helium. minimum 0;
-                var newCost = mostEff.getTotalPrice(mostEff.level + extraLevels);
-                var oldCost = mostEff.spent;
-                var packPrice = newCost-oldCost;
-                if(packPrice > helium)
-                    throw "cant afford " + extraLevels + " " + mostEff.name;
+        if(mostEff.isT2){
+            var extraLevels = mostEff.getBulkAmountT2(helium * pct); //returns how many additional levels of this perk we can afford with helium. minimum 0;
+            var newCost = mostEff.getTotalPrice(mostEff.level + extraLevels);
+            var oldCost = mostEff.spent;
+            var packPrice = newCost-oldCost;
+            if(packPrice > helium)
+                throw "cant afford " + extraLevels + " " + mostEff.name;
 
-                helium-= packPrice;
-                mostEff.buyLevel(extraLevels);
-                mostEff.spent += packPrice;
-                loopT2++;
+            helium-= packPrice;
+            mostEff.buyLevel(extraLevels);
+            mostEff.spent += packPrice;
+            loopT2++;
         }
         else{ //T1
             price = mostEff.getPrice();
@@ -671,20 +651,20 @@ function useQuickImportAT(testValidOnly){
 
 //copied from main.js with displayPortalUpgrades and numTab commented for speed
 function respecPerksAT(){
-	if (!game.global.canRespecPerks) return;
-	//if (!game.global.viewingUpgrades) return;
-	game.global.respecActive = true;
-	//displayPortalUpgrades(true);
-	//numTab(1, true);
-	game.resources.helium.respecMax = (game.global.viewingUpgrades) ? game.global.heliumLeftover : game.global.heliumLeftover + game.resources.helium.owned;
-	document.getElementById("portalHeliumOwned").innerHTML = prettify(game.resources.helium.respecMax - game.resources.helium.totalSpentTemp);
-	document.getElementById("respecPortalBtn").style.display = "none";
-	document.getElementById("portalStory").innerHTML = "You can only respec once per run. Clicking cancel will not consume this use.";
-	document.getElementById("portalTitle").innerHTML = "Respec Perks";
-	document.getElementById("ptabRemove").style.display = "table-cell";
-	document.getElementById("clearPerksBtn").style.display = "inline-block";
-	if (selectedPreset)
-		swapClass('tab', 'tabNotSelected', document.getElementById('presetTabLoad'));
+    if (!game.global.canRespecPerks) return;
+    //if (!game.global.viewingUpgrades) return;
+    game.global.respecActive = true;
+    //displayPortalUpgrades(true);
+    //numTab(1, true);
+    game.resources.helium.respecMax = (game.global.viewingUpgrades) ? game.global.heliumLeftover : game.global.heliumLeftover + game.resources.helium.owned;
+    document.getElementById("portalHeliumOwned").innerHTML = prettify(game.resources.helium.respecMax - game.resources.helium.totalSpentTemp);
+    document.getElementById("respecPortalBtn").style.display = "none";
+    document.getElementById("portalStory").innerHTML = "You can only respec once per run. Clicking cancel will not consume this use.";
+    document.getElementById("portalTitle").innerHTML = "Respec Perks";
+    document.getElementById("ptabRemove").style.display = "table-cell";
+    document.getElementById("clearPerksBtn").style.display = "inline-block";
+    if (selectedPreset)
+        swapClass('tab', 'tabNotSelected', document.getElementById('presetTabLoad'));
 }
 
 //copied from main.js with displayPortalUpgrades commented for speed
@@ -772,8 +752,8 @@ function calcBenefits(){ //calculate the benefits of raising a perk by 1
     this.level++;
     var sum = 0;
     this.benefits.forEach((benefit) => {
-        if(benefit.getZeroStateValue() !== 0){
-            var delta = (benefit.calc(false, this.incomeFlag, this.popBreedFlag)/benefit.getZeroStateValue() - 1) * benefit.weightUser;
+        if(benefit.benefitBak !== 0){
+            var delta = (benefit.calc(false, this.incomeFlag, this.popBreedFlag)/benefit.benefitBak - 1) * benefit.weightUser;
             if(delta < 0)
                 throw "calcBenefits " + this.name + " negative delta " + prettify(delta);
 
@@ -788,18 +768,6 @@ function getBenefitValue(){
     return this.benefit;
 }
 
-function benefitSave(value){
-    /*if(value === 0) {
-        debug(this);
-        throw "benefitSave value 0";
-    }*/
-    this.benefitBak = value;
-}
-
-function benefitGetZeroStateValue(){
-    return this.benefitBak;
-}
-
 function calcZeroState(){
     minMaxMi();
     
@@ -812,7 +780,7 @@ function calcZeroState(){
     calcPopBreed(3);
     
     for (var i = 0; i < AutoPerks.benefitHolder.length; i++)
-        AutoPerks.benefitHolder[i].save(AutoPerks.benefitHolder[i].calc(false, false, false)); //with all perks' levels frozen, calculate the benefits, and store each in that benefit's benefitBak.
+        AutoPerks.benefitHolder[i].benefitBak = AutoPerks.benefitHolder[i].calc(false, false, false); //with all perks' levels frozen, calculate the benefits, and store each in that benefit's benefitBak.
 }
 
 function benefitHeliumCalc(){
@@ -852,7 +820,6 @@ function benefitAttackCalc(commit, incomeFlag){
     
     if(isNaN(this.benefit))
         throw "Attack NaN benefit";
-
     
     return this.getValue();
 }
@@ -896,7 +863,6 @@ function benefitHealthCalc(commit, incomeFlag, popBreedFlag){
     
     if(isNaN(this.benefit))
         throw "Health NaN benefit";
-
     
     return this.getValue();
 }
@@ -905,8 +871,6 @@ function benefitFluffyCalc(){
     var curiousPerk = AutoPerks.useLivePerks ? game.portal["Curious"] : AutoPerks.perksByName.Curious;
     var cunningPerk = AutoPerks.useLivePerks ? game.portal["Cunning"] : AutoPerks.perksByName.Cunning;
     var classyPerk  = AutoPerks.useLivePerks ? game.portal["Classy"] : AutoPerks.perksByName.Classy;
-    
-    //AutoPerks.useLivePerks ? game.portal[""] : 
     
     var flufffocus = (game.talents.fluffyExp.purchased ? 1 + (0.25 * game.global.fluffyPrestige) : 1);
     var staffBonusXP = 1 + game.heirlooms.Staff.FluffyExp.currentBonus / 100;
@@ -921,7 +885,6 @@ function benefitFluffyCalc(){
 
     if(isNaN(this.benefit))
         throw "Fluffy NaN benefit";
-
     
     return this.getValue();
 }
@@ -983,15 +946,14 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
     var prestigeMod = (AutoPerks.prestiges - 3) * 0.85 + 2;
     AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1); //this is the cost of all gear at max prestige level 1
     
-    //AutoPerks.resourcesNeededXXX = AutoPerks.gearCost * Math.pow(1.2, 123);
-    //AutoPerks.resourcesMissingRatio = AutoPerks.resourcesNeededXXX / AutoPerks.totalResources;
-    if(AutoPerks.totalResources >= AutoPerks.gearCost*20)
+    var minimumLevels = 20;
+    if(AutoPerks.totalResources >= AutoPerks.gearCost*minimumLevels)
         AutoPerks.gearLevels = Math.log(AutoPerks.totalResources/AutoPerks.gearCost) / Math.log(1.2);
-    else{ //cant even afford a single level
-        //since we cant afford a single level, lets go down in prestiges until we can.
+    else{
+        //since we cant afford enough levels, lets go down in prestiges until we can.
         var prestigesDropped = 0;
         var maxLoops = 500;
-        while(AutoPerks.totalResources < AutoPerks.gearCost*20 && maxLoops-- > 0){
+        while(AutoPerks.totalResources < AutoPerks.gearCost*minimumLevels && maxLoops-- > 0){
             prestigesDropped++;
             AutoPerks.prestiges--;
             prestigeMod = (AutoPerks.prestiges - 3) * 0.85 + 2;
@@ -1140,21 +1102,25 @@ function calculateMaxNurseries(resourcesAvailable){
     start *= Math.pow(0.95, resourcefulPerk.level);
     var toBuy = log10(resourcesAvailable / start * (price[1] - 1) + 1) / log10(price[1]);
     
-    if (mostAfford == -1 || mostAfford > toBuy) mostAfford = toBuy;
+    if (mostAfford === -1 || mostAfford > toBuy) mostAfford = toBuy;
     
     if (mostAfford > 1000000000) return 1000000000;
     if (mostAfford <= 0) return 1;
     return mostAfford;
 }
 
-
-
-
-
-
-
-
 AutoPerks.initializePerks = function () {
+    var bHel   = {calc: benefitHeliumCalc};
+    var bAtk   = {calc: benefitAttackCalc};
+    var bHlth  = {calc: benefitHealthCalc};
+    var bFluff = {calc: benefitFluffyCalc};
+    var bDG    = {calc: benefitDGCalc};
+    
+    AutoPerks.benefitHolderObj = {Helium:bHel, Attack:bAtk, Health:bHlth, Fluffy:bFluff, DG:bDG};
+    AutoPerks.benefitHolder    = [bHel, bAtk, bHlth, bFluff, bDG];
+    for(var i = 0; i < AutoPerks.benefitHolder.length; i++)
+        AutoPerks.benefitHolder[i].getValue = getBenefitValue;
+    
     //Fixed perks: These perks do not get changed by autoperks.
     var siphonology     = {name: "Siphonology",     baseCost: 100000};
     var anticipation    = {name: "Anticipation",    baseCost: 1000};
@@ -1165,100 +1131,69 @@ AutoPerks.initializePerks = function () {
     var bait            = {name: "Bait",            baseCost: 4};
     var trumps          = {name: "Trumps",          baseCost: 3};
     var packrat         = {name: "Packrat",         baseCost: 3};
-    var overkill        = {name: "Overkill",        baseCost: 1e6, max: 30};   
-    var capable         = {name: "Capable",         baseCost: 1e8}; //capable has a unique getTotalPrice function, added later down the function
+    var overkill        = {name: "Overkill",        baseCost: 1e6};   
+    var capable         = {name: "Capable",         baseCost: 1e8};
     
-    AutoPerks.fixedPerks = [siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, overkill, capable];
-    for (var i in AutoPerks.fixedPerks){
-        AutoPerks.fixedPerks[i].getPrice        = compoundingPriceFunc;
-        AutoPerks.fixedPerks[i].getTotalPrice   = compoundingTotalPriceFunc;
-        AutoPerks.fixedPerks[i].isFixed         = true;
-        AutoPerks.fixedPerks[i].isLocked        = typeof game.portal[AutoPerks.fixedPerks[i].name].locked === 'undefined' ? false : game.portal[AutoPerks.fixedPerks[i].name].locked;
-    }
+    //the rest of the perks
+    var cunning      = {name: "Cunning",      benefits: [bFluff],            baseCost: 1e11};
+    var curious      = {name: "Curious",      benefits: [bFluff],            baseCost: 1e14};
+    var classy       = {name: "Classy",       benefits: [bFluff],            baseCost: 1e17};
+    var pheromones   = {name: "Pheromones",   benefits: [bHlth],             baseCost: 3,       popBreedFlag:true};
+    var artisanistry = {name: "Artisanistry", benefits: [bHlth, bAtk],       baseCost: 15,      incomeFlag: true};
+    var resilience   = {name: "Resilience",   benefits: [bHlth],             baseCost: 100};
+    var coordinated  = {name: "Coordinated",  benefits: [bHlth, bAtk, bDG],  baseCost: 150000,  popBreedFlag:true};
+    var resourceful  = {name: "Resourceful",  benefits: [bHlth],             baseCost: 50000,   incomeFlag: true, popBreedFlag:true};
     
-    
-    //perks affect 1 or more benefit (stats)
-    /* 
-     * benefitStat captures how much of a stat we have, and what the change will be from increasing a perk.
-     * increasing a weight by a factor of 2 means we are willing to spend twice as much helium for the same increase.
-     * calculateBenefit(): each perk has its own calculateBenefit function. it calculates the relevant increases of stat(s) associated with a weight type(s)
-     * looting for example, increases our helium, but also slightly increases our attack. 
-     * so looting.calculateBenefit() multiplies a large increase in helium * weightHelium + a small increase in attack * weightAttack
-     * finally, perk.efficiency equals perk.calculateBenefit() / perk.cost
-     */
-    
-    //these are the main stats of the game. atk probably shouldnt be here, and health definitely shouldnt be here (they affect single run only)
-    //TODO: attack and health -> helium/fluffy/DG conversion and get rid of them as stats.
-    //
-    //Nu probably belongs here but i dont know how relevant it is to decision making. maybe it affects maxzone (via runspeed) but atm that value is user entered. 
-    //calc: updates benefit based on perks. benefit: stores it. gets backed up in benefitBak.
-    //weightUser: overall value multiplier
-    var bHel    = {calc: benefitHeliumCalc};
-    var bAtk    = {calc: benefitAttackCalc};
-    var bHlth   = {calc: benefitHealthCalc};
-    var bFluff  = {calc: benefitFluffyCalc};
-    var bDG     = {calc: benefitDGCalc}; //user must prove he can enter magma before DG is valued
-    
-    AutoPerks.benefitHolderObj = {Helium:bHel, Attack:bAtk, Health:bHlth, Fluffy:bFluff, DG:bDG};
-    AutoPerks.benefitHolder    = [bHel, bAtk, bHlth, bFluff, bDG];
-    for(var i = 0; i < AutoPerks.benefitHolder.length; i++){
-        AutoPerks.benefitHolder[i].getValue     = getBenefitValue; //benefit * weightUser
-        AutoPerks.benefitHolder[i].benefitBak   = 0; //AutoPerks.benefitHolder[i].benefit;
-        AutoPerks.benefitHolder[i].save         = benefitSave;
-        AutoPerks.benefitHolder[i].getZeroStateValue = benefitGetZeroStateValue;
-    }
-    AutoPerks.resetBenefits();
-    
-    var cunning      = {name: "Cunning",                                           benefits: [bFluff],            baseCost: 1e11};
-    var curious      = {name: "Curious",                                           benefits: [bFluff],            baseCost: 1e14};
-    var classy       = {name: "Classy",                                            benefits: [bFluff],            baseCost: 1e17};
-    var pheromones   = {name: "Pheromones",   popBreedFlag:true,                   benefits: [bHlth],             baseCost: 3};
-    var artisanistry = {name: "Artisanistry", incomeFlag: true,                    benefits: [bHlth, bAtk],       baseCost: 15};
-    var resilience   = {name: "Resilience",                                        benefits: [bHlth],             baseCost: 100};
-    var coordinated  = {name: "Coordinated",  popBreedFlag:true,                   benefits: [bHlth, bAtk, bDG],  baseCost: 150000};
-    var resourceful  = {name: "Resourceful",  incomeFlag: true, popBreedFlag:true, benefits: [bHlth],             baseCost: 50000};
-    
-    var carpentry    = {name: "Carpentry",    incomeFlag: true, popBreedFlag:true, benefits: [bHlth, bAtk, bDG],  baseCost: 25, hasChild: !game.portal["Carpentry_II"].locked, childLevelFunc: carp2LevelFunc}; 
-    var looting      = {name: "Looting",      incomeFlag: true, popBreedFlag:true, benefits: [bHlth, bAtk, bHel], baseCost: 1,  hasChild: !game.portal["Looting_II"].locked,   childLevelFunc: looting2LevelFunc};
-    var toughness    = {name: "Toughness",                                         benefits: [bHlth],             baseCost: 1,  hasChild: !game.portal["Toughness_II"].locked, childLevelFunc: toughness2LevelFunc};
-    var power        = {name: "Power",                                             benefits: [bAtk],              baseCost: 1,  hasChild: !game.portal["Power_II"].locked,     childLevelFunc: power2LevelFunc};
-    var motivation   = {name: "Motivation",   incomeFlag: true, popBreedFlag:true, benefits: [bHlth, bAtk],       baseCost: 2,  hasChild: !game.portal["Motivation_II"].locked,childLevelFunc: motivation2LevelFunc};
+    var carpentry    = {name: "Carpentry",    benefits: [bHlth, bAtk, bDG],  baseCost: 25, childLevelFunc: carp2LevelFunc,      incomeFlag: true, popBreedFlag:true};
+    var looting      = {name: "Looting",      benefits: [bHlth, bAtk, bHel], baseCost: 1,  childLevelFunc: looting2LevelFunc,   incomeFlag: true, popBreedFlag:true};
+    var toughness    = {name: "Toughness",    benefits: [bHlth],             baseCost: 1,  childLevelFunc: toughness2LevelFunc};
+    var power        = {name: "Power",        benefits: [bAtk],              baseCost: 1,  childLevelFunc: power2LevelFunc};
+    var motivation   = {name: "Motivation",   benefits: [bHlth, bAtk],       baseCost: 2,  childLevelFunc: motivation2LevelFunc,incomeFlag: true, popBreedFlag:true};
     
     //Tier2 perks
-    var carpentry_II = {name: "Carpentry_II", incomeFlag: true, popBreedFlag:true, benefits: [bHlth, bAtk, bDG],  baseCost: 100000,increase: 10000, parent: carpentry};
-    var looting_II   = {name: "Looting_II",   incomeFlag: true, popBreedFlag:true, benefits: [bHlth, bAtk, bHel], baseCost: 100000,increase: 10000, parent: looting};
-    var toughness_II = {name: "Toughness_II",                                      benefits: [bHlth],             baseCost: 20000, increase: 500,   parent: toughness};
-    var power_II     = {name: "Power_II",                                          benefits: [bAtk],              baseCost: 20000, increase: 500,   parent: power};
-    var motivation_II= {name: "Motivation_II",incomeFlag: true, popBreedFlag:true, benefits: [bHlth, bAtk],       baseCost: 50000, increase: 1000,  parent: motivation};    
-        
-    if(carpentry.hasChild)  carpentry.child  = carpentry_II;
-    if(looting.hasChild)    looting.child    = looting_II;
-    if(toughness.hasChild)  toughness.child  = toughness_II;
-    if(power.hasChild)      power.child      = power_II;
-    if(motivation.hasChild) motivation.child = motivation_II;
-    
+    var carpentry_II = {name: "Carpentry_II", benefits: [bHlth, bAtk, bDG],  baseCost: 100000, increase: 10000, incomeFlag: true, popBreedFlag:true};
+    var looting_II   = {name: "Looting_II",   benefits: [bHlth, bAtk, bHel], baseCost: 100000, increase: 10000, incomeFlag: true, popBreedFlag:true};
+    var toughness_II = {name: "Toughness_II", benefits: [bHlth],             baseCost: 20000,  increase: 500};
+    var power_II     = {name: "Power_II",     benefits: [bAtk],              baseCost: 20000,  increase: 500};
+    var motivation_II= {name: "Motivation_II",benefits: [bHlth, bAtk],       baseCost: 50000,  increase: 1000,  incomeFlag: true, popBreedFlag:true};
+           
     //gather these into an array of objects
-    AutoPerks.perkHolder = [siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, looting, toughness, power, motivation, pheromones, artisanistry, carpentry, resilience, coordinated, resourceful, overkill, capable, cunning, curious, classy, toughness_II, power_II, motivation_II, carpentry_II, looting_II];
+    AutoPerks.fixedPerks = [siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, overkill, capable];
+    AutoPerks.perkHolder = [siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, overkill, capable, looting, toughness, power, motivation, pheromones, artisanistry, carpentry, resilience, coordinated, resourceful, cunning, curious, classy, toughness_II, power_II, motivation_II, carpentry_II, looting_II];
     AutoPerks.additivePerks = [looting_II, toughness_II, power_II, motivation_II, carpentry_II];
+    AutoPerks.perksByName = {};
+    
     //initialize basics on all.
     for(var i in AutoPerks.perkHolder){
-        AutoPerks.perkHolder[i].level       = 0;
-        AutoPerks.perkHolder[i].spent       = 0;
-        AutoPerks.perkHolder[i].efficiency  = 1;
-        AutoPerks.perkHolder[i].isLocked    = typeof game.portal[AutoPerks.perkHolder[i].name].locked === 'undefined' ? false : game.portal[AutoPerks.perkHolder[i].name].locked;
-        AutoPerks.perkHolder[i].getPrice    = compoundingPriceFunc;
-        AutoPerks.perkHolder[i].getTotalPrice  = compoundingTotalPriceFunc;
-        AutoPerks.perkHolder[i].getBenefit  = calcBenefits;
-        AutoPerks.perkHolder[i].buyLevel    = buyLevel;
-        if(typeof AutoPerks.perkHolder[i].max === 'undefined') AutoPerks.perkHolder[i].max = Number.MAX_VALUE;
+        AutoPerks.perkHolder[i].getPrice      = compoundingPriceFunc;
+        AutoPerks.perkHolder[i].getTotalPrice = compoundingTotalPriceFunc;
+        AutoPerks.perkHolder[i].getBenefit    = calcBenefits;
+        AutoPerks.perkHolder[i].buyLevel      = buyLevel;
+        AutoPerks.perkHolder[i].isLocked      = game.portal[AutoPerks.perkHolder[i].name].locked;
+        AutoPerks.perkHolder[i].max           = typeof AutoPerks.perkHolder[i].max === 'undefined' ? Number.MAX_VALUE : AutoPerks.perkHolder[i].max;
         AutoPerks.perksByName[AutoPerks.perkHolder[i].name] = AutoPerks.perkHolder[i];
     }
+    
+    for (var i in AutoPerks.fixedPerks)
+        AutoPerks.fixedPerks[i].isFixed = true;
+    
     for(var i in AutoPerks.additivePerks){
         AutoPerks.additivePerks[i].getBulkAmountT2 = getBulkT2;
         AutoPerks.additivePerks[i].getPrice        = linearPriceFunc;
         AutoPerks.additivePerks[i].getTotalPrice   = linearTotalPriceFunc;
+        AutoPerks.additivePerks[i].isT2            = true;
     }
+    
+    if(!carpentry_II.isLocked)  carpentry.child  = carpentry_II;
+    if(!looting_II.isLocked)    looting.child    = looting_II;
+    if(!toughness_II.isLocked)  toughness.child  = toughness_II;
+    if(!power_II.isLocked)      power.child      = power_II;
+    if(!motivation_II.isLocked) motivation.child = motivation_II;
+    
     capable.getTotalPrice = calculateFluffyTotalPrice; //capable has a unique getTotalPrice function
+    
+    AutoPerks.resetBenefits();
+    AutoPerks.resetPerks();
 };
 
 carp2LevelFunc = function(){
@@ -1285,9 +1220,6 @@ power2LevelFunc = function(){
     var x = this.level;
     return Math.floor(0.0005*Math.pow(2,-x)*(Math.sqrt(125*Math.pow(2,2*x + 5)*Math.pow(x,2) + 8000*Math.pow(5.2,x)*x + 625*Math.pow(2,2*x + 7)*x + Math.pow(2,x + 8)*Math.pow(5,4 - x)*Math.pow(13,x) + 3515625*Math.pow(2,2*x + 10)) - 4375*Math.pow(2,x + 5)));
 };
-
-//create a 2nd array (perksByName) of the contents of perkHolder, indexed by name (easy access w/ getPerkByName)
-AutoPerks.perksByName = {};
 
 function calcBasePopArr(){
     AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230; //max possible fuel
@@ -1446,18 +1378,17 @@ function minMaxMi(print){
     findStartEndFuel(); //updates start zone, end zone and Mi
     if(AutoPerks.useMaxFuel) AutoPerks.totalMi = 0;
     if(print){
-        //printSomeStatsForGraph(); //for csv format
         //var msg1 = "Final - Carp1: " + AutoPerks.perksByName.Carpentry.level + " Carp2: " + AutoPerks.perksByName.Carpentry_II.level.toExponential(2) + " Coordinated: " + AutoPerks.perksByName.Coordinated.level;
         //var msg2 = "Amalgamators: "+AutoPerks.currAmalgamators + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " pop/army Goal " + AutoPerks.finalAmalRatio.toFixed(2) + " Mi collected: " + AutoPerks.totalMi;
         var fluffyXP = Fluffy.currentExp[1]; //xp in current evolution only
         var currEvo = game.global.fluffyPrestige;
-		var prestigeEvoZero = 1000;
-		var xpCount = 0;
-		for(var i = 0; i < 10; i++){
-			xpCount += prestigeEvoZero;
-			prestigeEvoZero *= 4;
-		}
-        for (var i = 0; i < currEvo; i++){
+            var prestigeEvoZero = 1000;
+            var xpCount = 0;
+            for(var i = 0; i < 10; i++){
+                xpCount += prestigeEvoZero;
+                prestigeEvoZero *= 4;
+            }
+        for(var i = 0; i < currEvo; i++){
             fluffyXP += xpCount;
             xpCount *= 5;
         }
@@ -1575,7 +1506,7 @@ AutoPerks.initializeAmalg = function(noAmalg) {
     AutoPerks.updateFromBoxes();                                                                     //update the boxes
     
     //army calc
-    AutoPerks.coordsUsed = AutoPerks.userMaintainMode ? AutoPerks.maxZone+99 : AutoPerks.amalZone+100-AutoPerks.coordsBehind-1;
+    AutoPerks.coordsUsed = AutoPerks.userMaintainMode ? AutoPerks.maxZone+99 : AutoPerks.amalZone+99-AutoPerks.coordsBehind;
     AutoPerks.finalArmySize = calcCoords(); //uses coordinated
     
     //step 1: find max amalgamators we can afford. calculate carp1/2/coordinated along the way
@@ -1702,7 +1633,7 @@ AutoPerks.initializeAmalg = function(noAmalg) {
 };
 
 AutoPerks.firstRun = function(){
-    AutoPerks.useLivePerks = false; //by default, use perk setup as calculated by AutoPerks. used by GU currently.
+    AutoPerks.useLivePerks = false; //by default, use perk setup as calculated by AutoPerks.
     AutoPerks.updateDailyMods(); // current (or selected) challenge modifiers
     AutoPerks.initializePerks();        //create data structures
     AutoPerks.initializeGUI();          //create UI elements
@@ -1710,7 +1641,9 @@ AutoPerks.firstRun = function(){
     AutoPerks.updateFromBoxes();        //populate UI boxes based on selected preset. also updates userWeights from box values
     
     AutoPerks.initializeAmalg(true);        //used to get pop for golden GU currently
-    AutoPerks.windMod = 1 + 13 * game.empowerments.Wind.getModifier() * 10; //13 minimum stacks
+    
+    //these are also calculated here for time estimate function
+    AutoPerks.windMod = 1 + 13 * game.empowerments.Wind.getModifier() * 10;
     AutoPerks.compoundingImp = Math.pow(1.003, AutoPerks.maxZone * 3 - 1);
 }
 
