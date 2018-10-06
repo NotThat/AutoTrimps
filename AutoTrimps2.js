@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "39.4";
+var ver = "39.5";
 var verDate = "5.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -44,6 +44,13 @@ function startAT() {
         setTimeout(startAT, 100);
         return;
     }
+    
+    //load jQuery-UI.css
+    var link1 = document.createElement('link');
+    link1.rel = "stylesheet";
+    link1.type = "text/css";
+    link1.href = basepath + modulepath + 'jQuery-UI.css';
+    document.head.appendChild(link1);
     
     //code to run on script launch:
     if (!local) printChangelog();
@@ -316,9 +323,10 @@ function pauseRemovalLoop(){
     }
     
     //putting this here so that innerWrapper width gets set to fill screen when if screen changed not through chatFrame resize
-    $(document).ready(function() {
-        $("#innerWrapper").width($("#wrapper").width() - $("#chatIFrame").width());
-    });
+    updateInnerWrapperWidth();
+    //$(document).ready(function() {
+    //    $("#innerWrapper").width($("#wrapper").width() - $("#chatIFrame").width());
+    //});
     
     //if(chatFrame) chatFrame.style.height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
     
@@ -336,7 +344,7 @@ function pauseRemovalLoop(){
 ////////////////////////////////////////
 //makeUp = true when game is in catchup mode, so we can skip some unnecessary visuals
 function ATLoop(makeUp) {
-    
+    //debug((countHeliumSpent() + game.global.heliumLeftover + game.resources.helium.owned - game.global.totalHeliumEarned).toExponential(2));
     if (ATrunning == false) return;
     if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled || game.global.viewingUpgrades) {
         if(getPageSetting('PauseScript'))
@@ -370,8 +378,10 @@ function ATLoop(makeUp) {
     if (aWholeNewWorld) {
         
         //Stuff to do Every new Portal
-        if(game.global.world == 1) 
+        if(game.global.world === 1){
+            if (getPageSetting('AutoAllocatePerks')==2) lootdump(); //TODO: this apparently causes helium inaccuracies if not running on zone 1.
             zonePostpone = 0;
+        }
         
         // Auto-close dialogues.
         switch (document.getElementById('tipTitle').innerHTML) {
@@ -385,7 +395,7 @@ function ATLoop(makeUp) {
         setTitle(); //Set the browser title
         buildWorldArray();
         setEmptyStats(); //also clears graph data
-        if (getPageSetting('AutoAllocatePerks')==2) lootdump();
+        
         
         lastCell = -1;
         if (Fluffy.isActive()) lastFluffDmg = Fluffy.getDamageModifier(); //expensive, so calculate once per zone
@@ -396,6 +406,7 @@ function ATLoop(makeUp) {
         if(game.options.menu.ctrlGigas.enabled === 1) game.options.menu.ctrlGigas.enabled = 0; //stops tooltip from showing when buying gigas (hopefully)
     }
     setScienceNeeded();  //determine how much science is needed
+    
     
     maxAnti = (game.talents.patience.purchased ? 45 : 30);
     if(game.global.mapsActive) currMap = getCurrentMapObject();

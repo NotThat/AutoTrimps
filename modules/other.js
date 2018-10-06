@@ -220,6 +220,9 @@ function dropsAtZone(itemName, nextLevel){
 
 //AutoAllocate Looting II
 function lootdump() {
+    debug("lootdump is disabled while its being validated.");
+    return;
+    if(!AutoPerks.checkValid()) throw "lootdump invalid helium amount.";
     viewPortalUpgrades();
     var currLevel = parseFloat(game.portal.Looting_II.level);
     var totalSpent = parseFloat(game.portal.Looting_II.heliumSpent);
@@ -235,7 +238,9 @@ function lootdump() {
 
     numTab(5, true);
     if (getPortalUpgradePrice("Looting_II")+game.resources.helium.totalSpentTemp <= game.resources.helium.respecMax) {
+        if(!AutoPerks.checkValid()) throw "lootdump invalid helium amount.";
         buyPortalUpgrade('Looting_II');
+        if(!AutoPerks.checkValid()) throw "lootdump invalid helium amount.";
         activateClicked();
         cancelPortal();
         debug('Bought ' + amt.toExponential(2) + ' Looting II');

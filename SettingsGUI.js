@@ -881,8 +881,6 @@ function updateCustomButtons() {
     getPageSetting('GASetting') ? turnOff("GASettingManual"): turnOn("GASettingManual");
     getPageSetting('PRaidSetting') ? turnOff("PRaidingZoneStart") : turnOn("PRaidingZoneStart");
     
-    //getPageSetting('AutoAllocatePerks')==1 ? turnOn("fastallocate") : turnOff("fastallocate");
-    
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomStaves"): turnOff("HeirloomStaves");
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomHighShield"): turnOff("HeirloomHighShield");
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomLowShield"): turnOff("HeirloomLowShield");

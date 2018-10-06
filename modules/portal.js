@@ -99,6 +99,7 @@ function autoPortal() {
 
 //Actually Portal.
 function doPortal(challenge) {
+    //return;
     if(!game.global.portalActive) return;
     if (getPageSetting('AutoMagmiteSpender2')==1) autoMagmiteSpender();
     // From ATLoop                                        //"AutoHeirlooms OFF"        (Heirlooms.js)
@@ -109,7 +110,7 @@ function doPortal(challenge) {
     //AutoPerks: do this first, because it reflashes the screen.
     if (getPageSetting('AutoAllocatePerks')==1 && (typeof MODULES["perks"] !== 'undefined' || typeof AutoPerks !== 'undefined'))
         AutoPerks.clickAllocate();
-    if (getPageSetting('AutoAllocatePerks')==2) lootdump(); 
+    //if (getPageSetting('AutoAllocatePerks')==2) lootdump(); 
     //Auto Start Daily:
     if (getPageSetting('AutoStartDaily')) {
         selectChallenge('Daily');

@@ -271,7 +271,7 @@ AutoPerks.calculateFluffyTotalPrice = function(perk, level){
 //calcs helium like the game does
 AutoPerks.getHelium = function() {
     //portal screen and the perk screen have differing helium amount to spend
-    var respecMax = (game.global.viewingUpgrades) ? game.global.heliumLeftover : game.global.heliumLeftover + game.resources.helium.owned;
+    var respecMax = game.global.heliumLeftover + (game.global.viewingUpgrades ? 0 : game.resources.helium.owned);
     for (var item in game.portal){
         if (game.portal[item].locked) continue;
         var portUpgrade = game.portal[item];
@@ -281,37 +281,15 @@ AutoPerks.getHelium = function() {
     return respecMax;
 };
 
-AutoPerks.updateDailyMods = function(){
-    AutoPerks.dailyObj = null;
-    if(portalWindowOpen){ //we are respecting to enter a new portal
-        if(game.global.selectedChallenge == "Daily")
-            AutoPerks.dailyObj = getDailyChallenge(readingDaily, true, false);
-        else if(challengeSquaredMode && game.global.selectedChallenge != "")
-            AutoPerks.dailyObj = AutoPerks.Squared;
-    }
-    else if(game.global.challengeActive == "Daily")//get current run challenge/daily
-        AutoPerks.dailyObj = game.global.dailyChallenge;
-    else if(game.global.runningChallengeSquared)
-        AutoPerks.dailyObj = AutoPerks.Squared;
-
-    AutoPerks.battleGUMult = 1;
-    AutoPerks.DailyHousingMult = 1;
-    AutoPerks.DailyBadHealthMult = 1;
-    AutoPerks.DailyWeight = 1;
-    
-    if(AutoPerks.dailyObj === AutoPerks.Squared)
-        AutoPerks.battleGUMult = getMaxBattleGU(AutoPerks.maxZone);
-    else if(AutoPerks.dailyObj != null){
-        AutoPerks.DailyWeight = 1+getDailyHeliumValue(countDailyWeight(getDailyChallenge(readingDaily, true)))/100;
-        if(AutoPerks.dailyObj.hasOwnProperty("large"))
-            AutoPerks.DailyHousingMult = (100 - AutoPerks.dailyObj.large.strength) / 100;
-        if(AutoPerks.dailyObj.hasOwnProperty("badHealth"))
-            AutoPerks.DailyHousingMult = (100 + 20*AutoPerks.dailyObj.badHealth.strength) / 100;
-    }
+AutoPerks.checkValid = function(checkTemp){
+    var ret = countHeliumSpent(checkTemp) + game.global.heliumLeftover + game.resources.helium.owned - game.global.totalHeliumEarned;
+    debug("countHeliumSpent("+checkTemp+") " + prettify(countHeliumSpent(checkTemp)) + " game.global.heliumLeftover " + prettify(game.global.heliumLeftover) + " game.resources.helium.owned " + prettify(game.resources.helium.owned) + " game.global.totalHeliumEarned " + prettify(game.global.totalHeliumEarned) + " = " + prettify(ret));
+    return ret === 0;
 };
 
 //green "Allocate Perks" button:
 AutoPerks.clickAllocate = function() {
+    
     try{
         if(!game.global.canRespecPerks){
             var $text = document.getElementById("textAreaAllocate");
@@ -336,7 +314,7 @@ AutoPerks.clickAllocate = function() {
          * finally, perk.efficiency equals perk.calculateBenefit() / perk.cost
          */
         
-        //AutoPerks.initializePerks(); //do this every click if its not expensive. this way we update locked perks etc.
+        AutoPerks.initializePerks(); //do this every click, this way we update locked perks etc.
         
         
         AutoPerks.updateDailyMods(); // current (or selected) challenge modifiers
@@ -405,8 +383,9 @@ AutoPerks.clickAllocate = function() {
         var ret = AutoPerks.applyCalculations(true);
         if(ret < 0)
             throw "setup not affordable, missing " + prettify(-ret) + " helium.";
-
+        //if(!AutoPerks.checkValid()) throw "invalid helium amount.";
         AutoPerks.applyCalculations(); //re-arrange perk points
+        //if(!AutoPerks.checkValid()) throw "invalid helium amount.";
         debug("AutoPerks: Auto-Allocate Finished.","perks");
     }
     catch(err){
@@ -414,9 +393,13 @@ AutoPerks.clickAllocate = function() {
         var $text = document.getElementById("textAreaAllocate");
         $text.innerHTML += 'Error: ' + err + '<br>' + '<a href="https://discord.gg/79hDRT" target="_blank">Report it on the Trimps Discord</a>';
     }
+    finally{
+        //numTab(1, true); //refresh all helium displays. without this at the very least Helium Left Over would show wrong until user manually adds/removes a level to something
+    }
 };
 
 AutoPerks.spendHelium = function(helium) {
+    //if(!AutoPerks.checkValid()) throw "invalid helium amount.";
     debug("Calculating how to spend " + prettify(helium) + " Helium...","perks");
     if(helium < 0) 
         throw "Not enough helium to buy fixed perks.";
@@ -483,7 +466,7 @@ AutoPerks.spendHelium = function(helium) {
         //when we level a T1 perk that has a T2 version, level the T2 alongside the T1 perk.
         //childLevelFunc() tells us how many levels we want in T2.
         //if we cant afford enough levels, proceed to next phase of the algorithm.
-        if(mostEff.child){
+        if(mostEff.child && !mostEff.child.isLocked){
             var child = mostEff.child;
             var childLevelTarget = mostEff.childLevelFunc();
             var childNewLevel = Math.max(0, childLevelTarget);
@@ -541,7 +524,7 @@ AutoPerks.spendHelium = function(helium) {
         }
         loopCounter++;
     }
-
+    //if(!AutoPerks.checkValid()) throw "invalid helium amount.";
     debug("AutoPerks2: Pass Two Complete. Loops ran " + loopT2 + "/" + loopCounter + " T2/Total. Leftover Helium: " + prettify(helium),"perks");
     minMaxMi(true); //recalculate mi efficiency, and also printout amalgamator/fuel info
 };
@@ -570,7 +553,6 @@ AutoPerks.applyCalculations = function(testValidOnly){
     var ret = useQuickImportAT(testValidOnly); //uses adapted code from export/import
     
     game.global.lockTooltip = false;
-    //if(!testValidOnly) numTab(1, true); //used to refresh perk displays. TODO: find a better way.
     return ret;
 };
 
@@ -1630,6 +1612,35 @@ AutoPerks.initializeAmalg = function(noAmalg) {
     carp1perk.spent = carp1cost;
     carp2perk.spent = carp2cost;
     coordperk.spent = coordinatedcost;
+};
+
+AutoPerks.updateDailyMods = function(){
+    AutoPerks.dailyObj = null;
+    if(portalWindowOpen){ //we are respecting to enter a new portal
+        if(game.global.selectedChallenge == "Daily")
+            AutoPerks.dailyObj = getDailyChallenge(readingDaily, true, false);
+        else if(challengeSquaredMode && game.global.selectedChallenge != "")
+            AutoPerks.dailyObj = AutoPerks.Squared;
+    }
+    else if(game.global.challengeActive == "Daily")//get current run challenge/daily
+        AutoPerks.dailyObj = game.global.dailyChallenge;
+    else if(game.global.runningChallengeSquared)
+        AutoPerks.dailyObj = AutoPerks.Squared;
+
+    AutoPerks.battleGUMult = 1;
+    AutoPerks.DailyHousingMult = 1;
+    AutoPerks.DailyBadHealthMult = 1;
+    AutoPerks.DailyWeight = 1;
+    
+    if(AutoPerks.dailyObj === AutoPerks.Squared)
+        AutoPerks.battleGUMult = getMaxBattleGU(AutoPerks.maxZone);
+    else if(AutoPerks.dailyObj != null){
+        AutoPerks.DailyWeight = 1+getDailyHeliumValue(countDailyWeight(getDailyChallenge(readingDaily, true)))/100;
+        if(AutoPerks.dailyObj.hasOwnProperty("large"))
+            AutoPerks.DailyHousingMult = (100 - AutoPerks.dailyObj.large.strength) / 100;
+        if(AutoPerks.dailyObj.hasOwnProperty("badHealth"))
+            AutoPerks.DailyHousingMult = (100 + 20*AutoPerks.dailyObj.badHealth.strength) / 100;
+    }
 };
 
 AutoPerks.firstRun = function(){
