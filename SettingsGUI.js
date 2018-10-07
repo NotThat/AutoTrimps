@@ -896,7 +896,7 @@ function updateCustomButtons() {
       "ManualGather2","BuyUpgradesNew","UsePatience",
       "BuyBuildingsNew","WarpstationCap","WarpstationCoordBuy","MaxHut","MaxHouse","MaxMansion","MaxHotel","MaxResort","MaxGateway","MaxWormhole","MaxCollector","MaxTribute","GymWall","FirstGigastation","DeltaGigastation","WarpstationWall3"
       ,"BuyShieldblock",
-      "DynamicSiphonology","PreferMetal","RunBionicBeforeSpire","CorruptionCalc","VoidCheck","TrimpleZ",
+      "DynamicSiphonology","RunBionicBeforeSpire","CorruptionCalc","VoidCheck","TrimpleZ",
       "SupplyWall","BuyOneTimeOC","MagmiteExplain",
       "SpamGeneral","SpamUpgrades","SpamEquipment","SpamMaps","SpamAmal","SpamBuilding","SpamJobs","SpamGraphs","SpamMagmite","SpamPerks",
     ];
@@ -917,8 +917,6 @@ function updateCustomButtons() {
 
     //document.getElementById('Prestige').value = autoTrimpSettings.Prestige.selected; //dont update this, dynamic prestige takes it over and is handled elsewhere.
 
-    // handle metal preference
-    MODULES["maps"] && (MODULES["maps"].preferGardens = !getPageSetting('PreferMetal'));
     //if player has selected arbalest or gambeson but doesn't have them unlocked, just unselect it for them! It's magic!
     if (document.getElementById('Prestige').selectedIndex > 11 && game.global.slowDone == false) {
         document.getElementById('Prestige').selectedIndex = 11;

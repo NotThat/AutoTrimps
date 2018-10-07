@@ -3,7 +3,6 @@ MODULES["maps"] = {};
 
 var remainingCells = 100;
 
-MODULES["maps"].preferGardens = !getPageSetting('PreferMetal'); //prefer run Garden maps instead of ^^ if we have Decay done
 //- init as default value (10). user can set if they want.
 
 //Initialize Global Vars
@@ -421,7 +420,7 @@ function autoMap() {
                 if(currMap.level === spiremaplvl)
                     selectedMap = currMap;
             }
-            else if (game.global.mapsOwnedArray[highestMap].level >= spiremaplvl && game.global.mapsOwnedArray[highestMap].location == ((customVars.preferGardens && game.global.decayDone) ? 'Plentiful' : 'Mountain'))
+            else if (game.global.mapsOwnedArray[highestMap].level >= spiremaplvl && game.global.mapsOwnedArray[highestMap].location == ((!getPageSetting('PreferMetal') && game.global.decayDone) ? 'Plentiful' : 'Mountain'))
                 selectedMap = game.global.mapsOwnedArray[highestMap];
         }
         else if (needPrestige) { //if needPrestige, TRY to find current level map as the highest level map we own.
@@ -912,7 +911,9 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
         document.getElementById("lootAdvMapsRange").value = lootSlider;
         document.getElementById("difficultyAdvMapsRange").value = diffSlider;
         document.getElementById("sizeAdvMapsRange").value = sizeSlider;
-        document.getElementById('advPerfectCheckbox').checked = perfect;
+
+        var perfBox = document.getElementById('advPerfectCheckbox');
+        if(readNiceCheckbox(perfBox) !== perfect) swapNiceCheckbox(perfBox, perfect);
         updateMapCost();        
         
         if ((updateMapCost(true) <= game.resources.fragments.owned)) {
@@ -974,7 +975,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
     if (cheap)
         mostExpensiveType = "Random";
     else{
-        if(customVars.preferGardens && game.global.decayDone)
+        if(!getPageSetting('PreferMetal') && game.global.decayDone)
             mostExpensiveType = "Plentiful";
         else
             mostExpensiveType = "Mountain";

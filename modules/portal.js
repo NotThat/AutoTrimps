@@ -110,7 +110,6 @@ function doPortal(challenge) {
     //AutoPerks: do this first, because it reflashes the screen.
     if (getPageSetting('AutoAllocatePerks')==1 && (typeof MODULES["perks"] !== 'undefined' || typeof AutoPerks !== 'undefined'))
         AutoPerks.clickAllocate();
-    //if (getPageSetting('AutoAllocatePerks')==2) lootdump(); 
     //Auto Start Daily:
     if (getPageSetting('AutoStartDaily')) {
         selectChallenge('Daily');

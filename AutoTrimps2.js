@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "39.5";
+var ver = "39.6";
 var verDate = "5.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -379,7 +379,7 @@ function ATLoop(makeUp) {
         
         //Stuff to do Every new Portal
         if(game.global.world === 1){
-            if (getPageSetting('AutoAllocatePerks')==2) lootdump(); //TODO: this apparently causes helium inaccuracies if not running on zone 1.
+            if (getPageSetting('AutoAllocatePerks')==2) lootdump();
             zonePostpone = 0;
         }
         

@@ -220,20 +220,25 @@ function dropsAtZone(itemName, nextLevel){
 
 //AutoAllocate Looting II
 function lootdump() {
-    debug("lootdump is disabled while its being validated.");
     return;
-    if(!AutoPerks.checkValid()) throw "lootdump invalid helium amount.";
+    //if(!AutoPerks.checkValid()) throw "lootdump invalid helium amount.";
     viewPortalUpgrades();
     var currLevel = parseFloat(game.portal.Looting_II.level);
     var totalSpent = parseFloat(game.portal.Looting_II.heliumSpent);
     var totalUnspent = parseFloat(game.global.heliumLeftover); //this is for mid-run allocation
 
-    var amt = Math.floor(1/100*(Math.sqrt(2)*Math.sqrt(totalSpent+totalUnspent+451250)-950)) - currLevel;
+    var amt = Math.floor(1/100*(Math.sqrt(2)*Math.sqrt(totalSpent+totalUnspent+451250)-950)) - currLevel; //how many additional levels we want to buy
+    
+    var totalCost = totalUnspent+totalSpent
+    var amt2 = Math.max(0,Math.ceil((Math.sqrt(Math.pow(10000-2*100000,2)+ 8*10000*(game.portal.Looting_II.heliumSpent+game.global.heliumLeftover)) + 10000 - 2*100000)/(2*10000)) - game.portal.Looting_II.level);
+    debug ("amt " + amt + " amt2 " + amt2);
+    
 
     if(amt <= 0){
         cancelPortal();
         return;
     }
+    return;
     game.global.lastCustomAmt = amt;
 
     numTab(5, true);
