@@ -710,10 +710,10 @@ function linearTotalPriceFunc(toLevel){
     return (usedLevel - 1) * usedLevel / 2 * this.increase + this.baseCost * usedLevel;
 }
 
-//returns how many additional levels of this perk we can afford using hel helium. minimum 0
+//returns how many additional levels of this perk we can afford using hel helium. minimum 1
 function getBulkT2(hel){
     var helium = hel+this.spent;
-    return Math.max(0,Math.floor((Math.sqrt(Math.pow(this.increase-2*this.baseCost,2)+ 8*this.increase*helium) + this.increase - 2*this.baseCost)/(2*this.increase)) - this.level);
+    return Math.max(1,Math.floor((Math.sqrt(Math.pow(this.increase-2*this.baseCost,2)+ 8*this.increase*helium) + this.increase - 2*this.baseCost)/(2*this.increase)) - this.level);
 }
 
 //capable perk only
