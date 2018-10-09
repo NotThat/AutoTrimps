@@ -218,45 +218,6 @@ function dropsAtZone(itemName, nextLevel){
     return (game.upgrades[itemName].allowed+1)/2*10-(calcNext ? 0 : 10)+slotModifier;
 }
 
-//AutoAllocate Looting II
-function lootdump() {
-    return;
-    //if(!AutoPerks.checkValid()) throw "lootdump invalid helium amount.";
-    viewPortalUpgrades();
-    var currLevel = parseFloat(game.portal.Looting_II.level);
-    var totalSpent = parseFloat(game.portal.Looting_II.heliumSpent);
-    var totalUnspent = parseFloat(game.global.heliumLeftover); //this is for mid-run allocation
-
-    var amt = Math.floor(1/100*(Math.sqrt(2)*Math.sqrt(totalSpent+totalUnspent+451250)-950)) - currLevel; //how many additional levels we want to buy
-    
-    var totalCost = totalUnspent+totalSpent
-    var amt2 = Math.max(0,Math.ceil((Math.sqrt(Math.pow(10000-2*100000,2)+ 8*10000*(game.portal.Looting_II.heliumSpent+game.global.heliumLeftover)) + 10000 - 2*100000)/(2*10000)) - game.portal.Looting_II.level);
-    debug ("amt " + amt + " amt2 " + amt2);
-    
-
-    if(amt <= 0){
-        cancelPortal();
-        return;
-    }
-    return;
-    game.global.lastCustomAmt = amt;
-
-    numTab(5, true);
-    if (getPortalUpgradePrice("Looting_II")+game.resources.helium.totalSpentTemp <= game.resources.helium.respecMax) {
-        if(!AutoPerks.checkValid()) throw "lootdump invalid helium amount.";
-        buyPortalUpgrade('Looting_II');
-        if(!AutoPerks.checkValid()) throw "lootdump invalid helium amount.";
-        activateClicked();
-        cancelPortal();
-        debug('Bought ' + amt.toExponential(2) + ' Looting II');
-    }
-    else{
-        cancelPortal();
-        debug("Done buying Looting II");
-    }
-    
-}
-
 function fightManualAT(){
     if(wantGoodShield != highDamageHeirloom){
         if(wantGoodShield == undefined)

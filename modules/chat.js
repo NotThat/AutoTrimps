@@ -24,7 +24,7 @@ function initializeChat(){
     wrapper.appendChild(chatFrame);
     wrapper.appendChild(innerWrapper);
 }
-initializeChat();
+//initializeChat();
 
 function collapseChat(){
     //var gameBackground = document.getElementById("wrapper");

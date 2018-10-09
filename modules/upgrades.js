@@ -43,17 +43,21 @@ function buyUpgrades(coordsOnly) {
         }
         
         var dontBuyStartZ = getPageSetting('NoCoordBuyStartZ');
+        var expectedSpireRows = Math.floor((game.global.world - 1 - 100) / 100) * 10; //-1 to handle cases when we're in a spire
+        var actualSpireRows = game.global.spireRows;
+        var spiresSuccessfullyDoneFlag = actualSpireRows >= expectedSpireRows;
+
         if(dontBuyStartZ === game.global.world + 1)
             buyCoords = true;
-        else if (dontBuyStartZ > 0 && game.global.world > dontBuyStartZ && getPageSetting('TillWeHaveAmalg') > 0) { //if dontBuyStartZ is set and we've passed it
+        else if (dontBuyStartZ > 0 && game.global.world > dontBuyStartZ && getPageSetting('TillWeHaveAmalg') > 0 && spiresSuccessfullyDoneFlag) { //if dontBuyStartZ is set and we've passed it, and also did not fail a spire
             if (game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg'))
                 buyCoords = false;
         }
+        
         if (game.global.challengeActive === "Trapper") //no amalgamators in trapper
             buyCoords = true;
     }
     
-    //game.global.lockTooltip = true; //stop annoying warpstation tooltip when buying gigastations
     for (var upgrade in upgradeList) {
         upgrade = upgradeList[upgrade];
         var gameUpgrade = game.upgrades[upgrade];
@@ -77,5 +81,4 @@ function buyUpgrades(coordsOnly) {
             buyUpgrade(upgrade, true, true);
         debug('Upgraded ' + upgrade, "upgrades", "*upload2");
     }
-    //game.global.lockTooltip = false;
 }

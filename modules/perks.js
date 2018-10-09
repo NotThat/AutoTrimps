@@ -281,10 +281,10 @@ AutoPerks.getHelium = function() {
     return respecMax;
 };
 
-AutoPerks.checkValid = function(checkTemp){
+AutoPerks.heliumInaccuracy = function(checkTemp){
     var ret = countHeliumSpent(checkTemp) + game.global.heliumLeftover + game.resources.helium.owned - game.global.totalHeliumEarned;
     debug("countHeliumSpent("+checkTemp+") " + prettify(countHeliumSpent(checkTemp)) + " game.global.heliumLeftover " + prettify(game.global.heliumLeftover) + " game.resources.helium.owned " + prettify(game.resources.helium.owned) + " game.global.totalHeliumEarned " + prettify(game.global.totalHeliumEarned) + " = " + prettify(ret));
-    return ret === 0;
+    return ret;
 };
 
 //green "Allocate Perks" button:
@@ -713,7 +713,7 @@ function linearTotalPriceFunc(toLevel){
 //returns how many additional levels of this perk we can afford using hel helium. minimum 0
 function getBulkT2(hel){
     var helium = hel+this.spent;
-    return Math.max(0,Math.ceil((Math.sqrt(Math.pow(this.increase-2*this.baseCost,2)+ 8*this.increase*helium) + this.increase - 2*this.baseCost)/(2*this.increase)) - this.level);
+    return Math.max(0,Math.floor((Math.sqrt(Math.pow(this.increase-2*this.baseCost,2)+ 8*this.increase*helium) + this.increase - 2*this.baseCost)/(2*this.increase)) - this.level);
 }
 
 //capable perk only
@@ -1613,6 +1613,29 @@ AutoPerks.initializeAmalg = function(noAmalg) {
     carp2perk.spent = carp2cost;
     coordperk.spent = coordinatedcost;
 };
+
+//Auto Dump into Looting II
+function lootdump() {
+    /*var currLevel  = game.portal.Looting_II.level;
+    var totalSpent   = game.portal.Looting_II.heliumSpent;
+    var totalUnspent = game.global.heliumLeftover; //this is for mid-run allocation
+
+    //calculate amt directly
+    var amt = Math.floor(1/100*(Math.sqrt(2)*Math.sqrt(totalSpent+totalUnspent+451250)-950)) - currLevel; //how many additional levels we want to buy
+    */
+    viewPortalUpgrades();
+    numTab(6, true);  
+    if (getPortalUpgradePrice("Looting_II")+game.resources.helium.totalSpentTemp <= game.resources.helium.respecMax){
+        var before = game.portal.Looting_II.level;
+        game.global.lockTooltip = true;
+        buyPortalUpgrade('Looting_II'); 
+        game.global.lockTooltip = false;
+        activateClicked();
+        var after = game.portal.Looting_II.level;
+        debug("Bought " + prettify(after-before) + " levels of Looting_II");
+    }
+    cancelPortal();
+}
 
 AutoPerks.updateDailyMods = function(){
     AutoPerks.dailyObj = null;

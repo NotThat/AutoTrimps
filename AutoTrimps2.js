@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "39.6";
-var verDate = "5.10.18";
+var ver = "40";
+var verDate = "9.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -188,8 +188,8 @@ function initializeAutoTrimps() {
 
 var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
-//changelogList.push({date: verDate, version: ver, description: "", isNew: true});
-changelogList.push({date: "4.10.2018", version: "", description: "Chat ?!?" , isNew: true});
+//changelogList.push({date: "9.10.2018", version: "", description: "Dump into Looting2 enabled again. Chat removed." , isNew: true});
+//changelogList.push({date: "4.10.2018", version: "", description: "Chat ?!?" , isNew: true});
 changelogList.push({date: "3.10.2018", version: "", description: "Auto Prestige Raid added." , isNew: true});
 changelogList.push({date: "2.10.2018", version: "", description: "Reworked Golden Upgrade settings, check the tab. New setting: Match Perks" , isNew: true});
 changelogList.push({date: "29.09.2018", version: "", description: "AutoAllocate reworked - check your weights. Helium/Attack/Health describes your in-run stats, the more the better. You can see the effect of using different Amalgamator count. Row #3 Growth describes the increase of stats per run out of total ever." , isNew: true});
@@ -309,27 +309,30 @@ function pauseRemovalLoop(){
     var iFrame = document.getElementById("chatIFrame");
     var settingsRow = document.getElementById("settingsRow");
     
-    //dont know why wrapper started shrinking on me
-    wrapper.style.width = '100vw';
-    //multiple screen changing buttons set wrapper display to block. chat functionality changes it to flex, so reset to flex every loop
-    if(wrapper.style.display === "block")
-        wrapper.style.display = "flex";
-    
-    //this is ugly but best i found so far. problem is the settingsRow when it opens and closes
-    if(iFrame) {
-        var height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
-        iFrame.style.height = height;
-        chatFrame.style.height = height;
-    }
-    
-    //putting this here so that innerWrapper width gets set to fill screen when if screen changed not through chatFrame resize
-    updateInnerWrapperWidth();
-    //$(document).ready(function() {
-    //    $("#innerWrapper").width($("#wrapper").width() - $("#chatIFrame").width());
-    //});
-    
-    //if(chatFrame) chatFrame.style.height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
-    
+    //chat related stuff:
+    /*
+        //dont know why wrapper started shrinking on me
+        wrapper.style.width = '100vw';
+        //multiple screen changing buttons set wrapper display to block. chat functionality changes it to flex, so reset to flex every loop
+        if(wrapper.style.display === "block")
+            wrapper.style.display = "flex";
+
+        //this is ugly but best i found so far. problem is the settingsRow when it opens and closes
+        if(iFrame) {
+            var height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
+            iFrame.style.height = height;
+            chatFrame.style.height = height;
+        }
+
+        //putting this here so that innerWrapper width gets set to fill screen when if screen changed not through chatFrame resize
+        updateInnerWrapperWidth();
+        //$(document).ready(function() {
+        //    $("#innerWrapper").width($("#wrapper").width() - $("#chatIFrame").width());
+        //});
+
+        //if(chatFrame) chatFrame.style.height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
+    */
+   
     if(!getPageSetting('PauseMsgsVisible')){
         var pauseMsgs = document.getElementsByClassName('pauseMsg');
         var log = document.getElementById('log');
@@ -362,9 +365,8 @@ function ATLoop(makeUp) {
         hiddenBreedTimerLast = hiddenBreedTimer;
     }
     
-    var lastrunworld = currentworld;
+    aWholeNewWorld = currentworld != game.global.world;
     currentworld = game.global.world;
-    aWholeNewWorld = lastrunworld != game.global.world;
  
     if ((game.global.world == 1 && aWholeNewWorld) || (!heirloomsShown && heirloomFlag) || (heirloomCache != game.global.heirloomsExtra.length)){ 
         if (getPageSetting('AutoHeirlooms')) autoHeirlooms();
