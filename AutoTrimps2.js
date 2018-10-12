@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "40.1";
-var verDate = "9.10.18";
+var ver = "40.2";
+var verDate = "13.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -333,6 +333,13 @@ function pauseRemovalLoop(){
         //if(chatFrame) chatFrame.style.height = (document.getElementById("wrapper").clientHeight - document.getElementById("settingsRow").clientHeight) + 'px';
     */
    
+   //fix portal screen
+    var portalWrapper = document.getElementById("portalWrapper");
+    portalWrapper.style["overflow-y"] = "auto";
+    var titleRow = document.getElementById("titleRow");
+    titleRow.style.position = "relative";
+    
+    
     if(!getPageSetting('PauseMsgsVisible')){
         var pauseMsgs = document.getElementsByClassName('pauseMsg');
         var log = document.getElementById('log');

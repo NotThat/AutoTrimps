@@ -504,7 +504,7 @@ AutoPerks.spendHelium = function(helium) {
     var pct = 0.01; //when a T2 perk is most efficient, buy as many as we can afford with helium * pct of our total helium (min 1 level)
     while (mostEff = iterateArr()){
         if(mostEff.isT2){
-            var extraLevels = mostEff.getBulkAmountT2(helium * pct); //returns how many additional levels of this perk we can afford with helium. minimum 0;
+            var extraLevels = Math.max(1,mostEff.getBulkAmountT2(helium * pct)); //returns how many additional levels of this perk we can afford with helium.;
             var newCost = mostEff.getTotalPrice(mostEff.level + extraLevels);
             var oldCost = mostEff.spent;
             var packPrice = newCost-oldCost;
@@ -710,10 +710,10 @@ function linearTotalPriceFunc(toLevel){
     return (usedLevel - 1) * usedLevel / 2 * this.increase + this.baseCost * usedLevel;
 }
 
-//returns how many additional levels of this perk we can afford using hel helium. minimum 1
+//returns how many additional levels of this perk we can afford using hel helium.
 function getBulkT2(hel){
     var helium = hel+this.spent;
-    return Math.max(1,Math.floor((Math.sqrt(Math.pow(this.increase-2*this.baseCost,2)+ 8*this.increase*helium) + this.increase - 2*this.baseCost)/(2*this.increase)) - this.level);
+    return Math.floor((Math.sqrt(Math.pow(this.increase-2*this.baseCost,2)+ 8*this.increase*helium) + this.increase - 2*this.baseCost)/(2*this.increase)) - this.level;
 }
 
 //capable perk only
@@ -1346,8 +1346,12 @@ function minMaxMi(print){
         while(maxLoops--){
             if(AutoPerks.fuelMaxZones <= 10) break;
             AutoPerks.fuelMaxZones -= AutoPerks.FuelZoneCutoff;
+            
+            //we need to check 2 things: hitting amalgoal at amalzone and maintaining it by maxzone
             AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[Math.floor(AutoPerks.fuelMaxZones / AutoPerks.FuelZoneCutoff)]; //must be called before every getAmalFinal
             AutoPerks.finalAmalRatio = getAmalFinal(AutoPerks.basePopAtAmalZ);
+            
+            
             if(AutoPerks.finalAmalRatio < 1.05){ //below threshold, undo last
                 AutoPerks.fuelMaxZones += AutoPerks.FuelZoneCutoff;
                 AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[Math.floor(AutoPerks.fuelMaxZones / AutoPerks.FuelZoneCutoff)]; //must be called before every getAmalFinal
