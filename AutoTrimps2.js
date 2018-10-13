@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "41";
+var ver = "41.1";
 var verDate = "13.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -55,23 +55,12 @@ function startAT() {
     //code to run on script launch:
     if (!local) printChangelog();
     
-    highCritChance = getPlayerCritChance();
-    highCritDamage = getPlayerCritDamageMult();
-    highATK        = calcHeirloomBonus("Shield", "trimpAttack", 1);
-    highPB         = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
-    lowCritChance  = getPlayerCritChance();
-    lowCritDamage  = getPlayerCritDamageMult();
-    lowATK         = 1;
-    lowPB          = 0;
-    
-    if (Fluffy.isActive()) lastFluffDmg = Fluffy.getDamageModifier(); //expensive, so calculate once per zone
-    
-    maxAnti = (game.talents.patience.purchased ? 45 : 30);
-    if(game.global.mapsActive) currMap = getCurrentMapObject();
-    
     equipLowDmgShield();
     equipMainShield();
-    calcBaseDamageinB();
+    
+    oncePerZoneCode();
+    
+    if(game.global.mapsActive) currMap = getCurrentMapObject();
     
     //HTML For adding a 5th tab to the message window
     var ATbutton = document.createElement("button");
@@ -385,39 +374,17 @@ function ATLoop(makeUp) {
     
     //Stuff to do Every new Zone
     if (aWholeNewWorld) {
-        
         //Stuff to do Every new Portal
         if(game.global.world === 1){
             if (getPageSetting('AutoAllocatePerks')==2) lootdump();
             zonePostpone = 0;
         }
         
-        // Auto-close dialogues.
-        switch (document.getElementById('tipTitle').innerHTML) {
-            case 'The Improbability':   // Breaking the Planet
-            case 'Corruption':          // Corruption / True Corruption
-            case 'Spire':               // Spire
-            case 'The Magma':           // Magma
-                cancelTooltip();
-        }
-        if (getPageSetting('AutoEggs')) easterEggClicked();
-        setTitle(); //Set the browser title
-        buildWorldArray();
-        setEmptyStats(); //also clears graph data
-        
-        
-        lastCell = -1;
-        if (Fluffy.isActive()) lastFluffDmg = Fluffy.getDamageModifier(); //expensive, so calculate once per zone
-        
-        AutoMapsCoordOverride = false;
-        maxCoords = -1;
-        
-        if(game.options.menu.ctrlGigas.enabled === 1) game.options.menu.ctrlGigas.enabled = 0; //stops tooltip from showing when buying gigas (hopefully)
+        oncePerZoneCode();
     }
     setScienceNeeded();  //determine how much science is needed
     
-    
-    maxAnti = (game.talents.patience.purchased ? 45 : 30);
+    maxAnti = game.talents.patience.purchased ? 45 : 30;
     if(game.global.mapsActive) currMap = getCurrentMapObject();
     expectedPortalZone = autoTrimpSettings.AutoPortal.selected !== "Custom" ? 0 : getPageSetting('CustomAutoPortal') + (game.global.challengeActive == "Daily" ? getPageSetting('AutoFinishDailyNew') : 0);
     bsZone = (0.5*game.talents.blacksmith.purchased + 0.25*game.talents.blacksmith2.purchased + 0.15*game.talents.blacksmith3.purchased)*(game.global.highestLevelCleared + 1);
@@ -462,6 +429,40 @@ function ATLoop(makeUp) {
     if (userscriptOn) userscripts();
     
     return;
+}
+
+function oncePerZoneCode(){
+    // Auto-close dialogues.
+    switch (document.getElementById('tipTitle').innerHTML) {
+        case 'The Improbability':   // Breaking the Planet
+        case 'Corruption':          // Corruption / True Corruption
+        case 'Spire':               // Spire
+        case 'The Magma':           // Magma
+            cancelTooltip();
+    }
+    if (getPageSetting('AutoEggs')) easterEggClicked();
+    setTitle(); //Set the browser title
+    buildWorldArray();
+    setEmptyStats(); //also clears graph data
+
+    lastCell = -1;
+        
+    highCritChance = getPlayerCritChance();
+    highCritDamage = getPlayerCritDamageMult();
+    highATK        = calcHeirloomBonus("Shield", "trimpAttack", 1);
+    highPB         = (game.heirlooms.Shield.plaguebringer.currentBonus > 0 ? game.heirlooms.Shield.plaguebringer.currentBonus / 100 : 0);
+    lowCritChance  = getPlayerCritChance();
+    lowCritDamage  = getPlayerCritDamageMult();
+    lowATK         = 1;
+    lowPB          = 0;
+    
+    calcBaseDamageinB();
+    if (Fluffy.isActive()) lastFluffDmg = Fluffy.getDamageModifier(); //expensive, so calculate once per zone
+
+    AutoMapsCoordOverride = false;
+    maxCoords = -1;
+
+    if(game.options.menu.ctrlGigas.enabled === 1) game.options.menu.ctrlGigas.enabled = 0; //stops tooltip from showing when buying gigas (hopefully)
 }
 
 //GUI Updates happen on this thread, every 1000ms
