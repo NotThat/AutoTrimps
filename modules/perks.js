@@ -69,9 +69,15 @@ AutoPerks.initializeGUI = function() {
     //Line 2 of the UI
     apGUI.$ratiosLine2 = document.createElement("DIV");
     apGUI.$ratiosLine2.setAttribute('style', 'display: inline-block; text-align: left; width: 100%');
-    var listratiosLine2 = ["Portal Zone","amalGoal","amalZone","coordsBehind"];
-    for (i in listratiosLine2)
-        var input = AutoPerks.createInput(listratiosLine2[i],apGUI.$ratiosLine2);
+    
+    var portalZone   = AutoPerks.createInput("Portal Zone",apGUI.$ratiosLine2);
+    portalZone.setAttribute("onmouseover", 'tooltip("Portal Zone", "customText", event, "The zone you intend to portal on.")');
+    var amalGoal     = AutoPerks.createInput("amalGoal",apGUI.$ratiosLine2);
+    amalGoal.setAttribute("onmouseover", 'tooltip("Amalgamator Goal", "customText", event, "How many Amalgamators do you want to get.")');
+    var amalZone     = AutoPerks.createInput("amalZone",apGUI.$ratiosLine2);
+    amalZone.setAttribute("onmouseover", 'tooltip("Amalgamator Zone", "customText", event, "On which zone do you wish to hit your Amalgamator goal. 1-20 zones after a spire is generally a good place, starting spire 2.")');
+    var coordsBehind = AutoPerks.createInput("coordsBehind",apGUI.$ratiosLine2);
+    coordsBehind.setAttribute("onmouseover", 'tooltip("Coordinations Behind", "customText", event, "How many unspent Coordination upgrades will you have at your Amalgamator Zone. Pick an amount that doesnt slow you down.")');
     
     //check boxes line
     apGUI.$checkBoxesLine3 = document.createElement("DIV");
@@ -84,12 +90,11 @@ AutoPerks.initializeGUI = function() {
     checkBoxMaintainMode.setAttribute("onmouseover", 'tooltip("Maintain Amalgamator only", "customText", event, "Check this box if you in the middle of a run and already have Amalgamator Goal and wish to respec to minimum Carp1 / 2 / Coordinated to maintain it until Portal Zone. Assumes fueling until the end of the run.")');
     var checkBoxSaveSettings = AutoPerks.createInput("SaveATSettings", apGUI.$checkBoxesLine3, true);
     checkBoxSaveSettings.setAttribute("onmouseover", 'tooltip("Save Run Settings to AT", "customText", event, "Will save Fuel Start / Fuel End / Disables Fuel until Amalgamator / Start no Buy Coords / Amalgamator Goal to AT settings. Only occurs when the confirm button is pressed.")');
-    var checkBoxArr = [checkBoxMaxFuel, checkBoxRespecAfterAmal, checkBoxMaintainMode, checkBoxSaveSettings];
-    for (i in checkBoxArr){
+    var checkBoxArr = [portalZone, amalGoal, amalZone, coordsBehind, checkBoxMaxFuel, checkBoxRespecAfterAmal, checkBoxMaintainMode, checkBoxSaveSettings];
+    for (i in checkBoxArr)
         checkBoxArr[i].setAttribute("onmouseout", 'tooltip("hide")');
-    }
-    checkBoxArr[1].disabled = true;
-    //checkBoxArr[2].disabled = true;
+    
+    checkBoxArr[5].disabled = true;
     
     //create text allocate area
     apGUI.$textArea = document.createElement("DIV");
@@ -316,7 +321,6 @@ AutoPerks.clickAllocate = function() {
         
         AutoPerks.initializePerks(); //do this every click, this way we update locked perks etc.
         
-        
         AutoPerks.updateDailyMods(); // current (or selected) challenge modifiers
         AutoPerks.resetPerks();      // set all perks to level 0
         AutoPerks.resetBenefits();   // benefit and benefitBak = 1;
@@ -524,9 +528,33 @@ AutoPerks.spendHelium = function(helium) {
         }
         loopCounter++;
     }
-    //if(!AutoPerks.checkValid()) throw "invalid helium amount.";
+    
     debug("AutoPerks2: Pass Two Complete. Loops ran " + loopT2 + "/" + loopCounter + " T2/Total. Leftover Helium: " + prettify(helium),"perks");
-    minMaxMi(true); //recalculate mi efficiency, and also printout amalgamator/fuel info
+    
+    minMaxMi(); //recalculate mi efficiency
+    
+    var fluffyXP = Fluffy.currentExp[1]; //xp in current evolution only
+    var currEvo = game.global.fluffyPrestige;
+        var prestigeEvoZero = 1000;
+        var xpCount = 0;
+        for(var i = 0; i < 10; i++){
+            xpCount += prestigeEvoZero;
+            prestigeEvoZero *= 4;
+        }
+    for(var i = 0; i < currEvo; i++){
+        fluffyXP += xpCount;
+        xpCount *= 5;
+    }
+    var fluffyGrowth = (AutoPerks.benefitHolderObj.Fluffy.benefit*100 / fluffyXP).toFixed(3) + "%";
+    var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
+    var timeText = timeEstimator(false, 0, AutoPerks.maxZone, false, true);
+    var healthMod = AutoPerks.benefitHolderObj.Health.benefit.toExponential(2); //this includes gear, amalgamators, toughness1/2, resil, and anything breeding related
+    if(AutoPerks.useMaxFuel) AutoPerks.fuelEndZone = AutoPerks.maxZone;
+
+    var msg2 = "Helium: " + heliumMod + " zone " + AutoPerks.maxZone + " will take approx " + timeText + ". Health: " + healthMod + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + /*" Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + "/" + AutoPerks.finalAmalRatio2.toFixed(2) +*/ " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%";
+    var msg3 = "Fluffy Growth: " + fluffyGrowth + " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)";
+    var $text = document.getElementById("textAreaAllocate");
+    $text.innerHTML += msg2 + '<br>' + msg3;
 };
 
 AutoPerks.applyCalculations = function(testValidOnly){
@@ -771,8 +799,7 @@ function benefitHeliumCalc(){
     
     this.benefit = (1 + 0.05*looting1.level) * (1 + 0.0025*looting2.level) * AutoPerks.DailyWeight;
     
-    if(isNaN(this.benefit))
-        throw "Helium NaN benefit";
+    if(isNaN(this.benefit)) throw "Helium NaN benefit";
     
     return this.getValue();
 }
@@ -800,8 +827,7 @@ function benefitAttackCalc(commit, incomeFlag){
     var amalBonus = game.talents.amalg.purchased ? Math.pow(1.5, amalToUse) : (1 + 0.5*amalToUse);
     this.benefit = (1 + 0.05*power1Perk.level) * (1 + 0.01*power2Perk.level) * income * amalBonus;
     
-    if(isNaN(this.benefit))
-        throw "Attack NaN benefit";
+    if(isNaN(this.benefit)) throw "Attack NaN benefit";
     
     return this.getValue();
 }
@@ -843,8 +869,7 @@ function benefitHealthCalc(commit, incomeFlag, popBreedFlag){
     var ResourcefulFudgeFactor = resourceful.level; //resourceful isnt useless, but hard to capture its value. so use this for now. TODO.
     this.benefit = (1 + 0.05*toughness1Perk.level) * (1 + 0.01*toughness2Perk.level)*Math.pow(1.1, resilPerk.level) * income * popBreed * Math.pow(40, amalToUse) * (1 + 0.001*ResourcefulFudgeFactor);
     
-    if(isNaN(this.benefit))
-        throw "Health NaN benefit";
+    if(isNaN(this.benefit)) throw "Health NaN benefit";
     
     return this.getValue();
 }
@@ -865,8 +890,7 @@ function benefitFluffyCalc(){
     
     this.benefit = sumBenefit * cunningCuriousMult * flufffocus * staffBonusXP * AutoPerks.DailyWeight;
 
-    if(isNaN(this.benefit))
-        throw "Fluffy NaN benefit";
+    if(isNaN(this.benefit)) throw "Fluffy NaN benefit";
     
     return this.getValue();
 }
@@ -880,10 +904,8 @@ function benefitDGCalc(){
     //if(miBefore !== miPerRun)
         this.benefit = MiToDGGrowth(miPerRun); //mi changed, update benefit
     
-    if(isNaN(this.benefit))
-        throw "DG NaN benefit";
+    if(isNaN(this.benefit)) throw "DG NaN benefit";
 
-    
     return this.getValue();
 }
 
@@ -1206,11 +1228,11 @@ power2LevelFunc = function(){
 function calcBasePopArr(){
     AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230; //max possible fuel
     AutoPerks.basePopArr = [];
-    for (AutoPerks.fuelMaxZones = 0; AutoPerks.fuelMaxZones <= AutoPerks.amalZone - 230; AutoPerks.fuelMaxZones += AutoPerks.FuelZoneCutoff){
-        AutoPerks.basePopArr[Math.floor(AutoPerks.fuelMaxZones / AutoPerks.FuelZoneCutoff)] = calcBasePop();
-    }
+    for (AutoPerks.fuelMaxZones = 0; AutoPerks.fuelMaxZones <= AutoPerks.amalZone - 230; AutoPerks.fuelMaxZones += 1)
+        AutoPerks.basePopArr[AutoPerks.fuelMaxZones] = calcBasePop();
+    
     AutoPerks.maxFuelBasePopAtMaxZ = calcBasePop(true); //basepop if we fuel from 230 to maxZ
-    AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230; //set max possible fuel until amalZ
+    AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230; //reset to max possible fuel until amalZ
     return AutoPerks.basePopArr;
 }
 
@@ -1222,7 +1244,7 @@ function calcBasePop(useMaxFuel){
     var fuelCapacity = 3 + game.generatorUpgrades["Capacity"].baseIncrease * game.generatorUpgrades["Capacity"].upgrades;
     var supMax = 0.2 + 0.02 * game.generatorUpgrades["Supply"].upgrades;
     var OCEff = 1 - game.generatorUpgrades["Overclocker"].modifier;
-    var magmaCells = (game.talents.magmaFlow.purchased ? 18 : 16);
+    var magmaCells = game.talents.magmaFlow.purchased ? 18 : 16;
     var burn = game.permanentGeneratorUpgrades.Slowburn.owned ? 0.4 : 0.5;
     
     var pop = 1;
@@ -1323,7 +1345,7 @@ function getAmalFinal(basePopAtZ){
 }
 
 function findStartEndFuel(){
-    AutoPerks.fuelStartZone = Math.max(230, 320 - Math.ceil(AutoPerks.fuelMaxZones/2));
+    AutoPerks.fuelStartZone = Math.max(230, Math.min(320 - Math.ceil(AutoPerks.fuelMaxZones/2), AutoPerks.amalZone - AutoPerks.fuelMaxZones));
     AutoPerks.fuelEndZone = Math.min(AutoPerks.amalZone, AutoPerks.fuelStartZone + AutoPerks.fuelMaxZones - 1);
     AutoPerks.totalMi = (game.talents.magmaFlow.purchased ? 18 : 16) * (AutoPerks.maxZone - 230 - AutoPerks.fuelMaxZones);
 }
@@ -1332,10 +1354,15 @@ function saveSecondLine(){
     secondLine = [AutoPerks.maxZone, AutoPerks.amalGoal, AutoPerks.amalZone, AutoPerks.coordsBehind, AutoPerks.userMaxFuel, AutoPerks.userRespecAfterAmal, AutoPerks.userMaintainMode, AutoPerks.userSaveATSettings];
 }
 
-function minMaxMi(print){
+function minMaxMi(){
     //for a given carp1/2/coordinated/amalgamator, figure out min fuel zones in jumps of 10
     AutoPerks.popMult = popMultiplier(); //pop calc, uses carp1/2
-    AutoPerks.finalArmySize = calcCoords(); //uses coordinated
+    //AutoPerks.finalArmySize = calcCoords(); //uses coordinated
+    AutoPerks.calcArmySizes();
+    //AutoPerks.armySizeAmalZ = calcCoords(coordperk.level, AutoPerks.amalZone+99-AutoPerks.coordsBehind);
+    //AutoPerks.armySizeMaxZ  = calcCoords(coordperk.level, AutoPerks.maxZone+99);
+    var amalZToMaxZ = Math.pow(1.009, AutoPerks.maxZone - AutoPerks.amalZone);
+    
     if(AutoPerks.useMaxFuel)
         AutoPerks.fuelMaxZones = AutoPerks.maxZone - 230;
     else
@@ -1345,16 +1372,24 @@ function minMaxMi(print){
         var maxLoops = 500;
         while(maxLoops--){
             if(AutoPerks.fuelMaxZones <= 10) break;
-            AutoPerks.fuelMaxZones -= AutoPerks.FuelZoneCutoff;
+            AutoPerks.fuelMaxZones -= 1;
             
             //we need to check 2 things: hitting amalgoal at amalzone and maintaining it by maxzone
-            AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[Math.floor(AutoPerks.fuelMaxZones / AutoPerks.FuelZoneCutoff)]; //must be called before every getAmalFinal
+            //check pop goal at amalZ
+            AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[AutoPerks.fuelMaxZones]; //must be called before every getAmalFinal
+            AutoPerks.RatioToAmal = Math.pow(10, 10-AutoPerks.clearedSpiresBonus);
+            AutoPerks.finalArmySize = AutoPerks.armySizeAmalZ;
             AutoPerks.finalAmalRatio = getAmalFinal(AutoPerks.basePopAtAmalZ);
             
+            //check pop goal at maxZ
+            AutoPerks.basePopAtMaxZ = AutoPerks.basePopAtAmalZ * amalZToMaxZ;
+            AutoPerks.RatioToAmal = 1000000; //x1000 to preserve amal, x1000 to "reach" next one (forces loop amal loop to fit maintain mode)
+            AutoPerks.finalArmySize = AutoPerks.armySizeMaxZ;
+            AutoPerks.finalAmalRatio2 = getAmalFinal(AutoPerks.basePopAtMaxZ);
             
-            if(AutoPerks.finalAmalRatio < 1.05){ //below threshold, undo last
-                AutoPerks.fuelMaxZones += AutoPerks.FuelZoneCutoff;
-                AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[Math.floor(AutoPerks.fuelMaxZones / AutoPerks.FuelZoneCutoff)]; //must be called before every getAmalFinal
+            if(AutoPerks.finalAmalRatio < 1.05 || AutoPerks.finalAmalRatio2 < 1.05){ //below threshold, undo last
+                AutoPerks.fuelMaxZones += 1;
+                AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[AutoPerks.fuelMaxZones]; //must be called before every getAmalFinal
                 AutoPerks.finalAmalRatio = getAmalFinal(AutoPerks.basePopAtAmalZ);
                 break;
             }
@@ -1363,33 +1398,6 @@ function minMaxMi(print){
     
     findStartEndFuel(); //updates start zone, end zone and Mi
     if(AutoPerks.useMaxFuel) AutoPerks.totalMi = 0;
-    if(print){
-        //var msg1 = "Final - Carp1: " + AutoPerks.perksByName.Carpentry.level + " Carp2: " + AutoPerks.perksByName.Carpentry_II.level.toExponential(2) + " Coordinated: " + AutoPerks.perksByName.Coordinated.level;
-        //var msg2 = "Amalgamators: "+AutoPerks.currAmalgamators + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " pop/army Goal " + AutoPerks.finalAmalRatio.toFixed(2) + " Mi collected: " + AutoPerks.totalMi;
-        var fluffyXP = Fluffy.currentExp[1]; //xp in current evolution only
-        var currEvo = game.global.fluffyPrestige;
-            var prestigeEvoZero = 1000;
-            var xpCount = 0;
-            for(var i = 0; i < 10; i++){
-                xpCount += prestigeEvoZero;
-                prestigeEvoZero *= 4;
-            }
-        for(var i = 0; i < currEvo; i++){
-            fluffyXP += xpCount;
-            xpCount *= 5;
-        }
-        var fluffyGrowth = (AutoPerks.benefitHolderObj.Fluffy.benefit*100 / fluffyXP).toFixed(3) + "%";
-        var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
-        var timeText = timeEstimator(false, 0, AutoPerks.maxZone, false, true);
-        var healthMod = AutoPerks.benefitHolderObj.Health.benefit.toExponential(2); //this includes gear, amalgamators, toughness1/2, resil, and anything breeding related
-        if(AutoPerks.useMaxFuel) AutoPerks.fuelEndZone = AutoPerks.maxZone;
-        
-        var msg2 = "Helium: " + heliumMod + " zone " + AutoPerks.maxZone + " will take approx " + timeText + ". Health: " + healthMod + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + " Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%";
-        var msg3 = "Fluffy Growth: " + fluffyGrowth + " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)";
-        var $text = document.getElementById("textAreaAllocate");
-        $text.innerHTML += msg2 + '<br>' + msg3;
-    }
-    
     return AutoPerks.totalMi;
 }
 
@@ -1475,16 +1483,21 @@ function runsToGetMi(MiCost, MiPerRun){
 
 AutoPerks.getPct = function(){
     return (AutoPerks.perksByName.Carpentry.spent + AutoPerks.perksByName.Carpentry_II.spent + AutoPerks.perksByName.Coordinated.spent) / AutoPerks.totalHelium * 100;
-}
+};
+
+AutoPerks.calcArmySizes = function(){
+    var coordperk = AutoPerks.perksByName.Coordinated;
+    AutoPerks.armySizeAmalZ = calcCoords(coordperk.level, AutoPerks.amalZone+99-AutoPerks.coordsBehind);
+    AutoPerks.armySizeMaxZ  = calcCoords(coordperk.level, AutoPerks.maxZone+99);
+};
 
 //get ready / initialize
-AutoPerks.initializeAmalg = function(noAmalg) {
-    AutoPerks.MAXPCT = 85;      //maximum helium we're willing to spend in carp1/2/coordinated
-    AutoPerks.FuelZoneCutoff = 1; //initially had this at 10 but wasnt sensitive enough to +1 carp level changes
-    AutoPerks.DGGrowthRun = 0; //initialize
+AutoPerks.initializeAmalg = function(){
+    AutoPerks.MAXPCT = 85;        //maximum helium we're willing to spend in carp1/2/coordinated
+    AutoPerks.DGGrowthRun = 0;    //initialize
     //input checks
     if(AutoPerks.amalZone < 230) AutoPerks.amalZone = 230;
-    if(AutoPerks.amalZone > 650) AutoPerks.amalZone = 650;
+    if(AutoPerks.amalZone > 1999) AutoPerks.amalZone = 1999;
     if(AutoPerks.amalGoal < 0) AutoPerks.amalGoal = 0;
     if(AutoPerks.maxZone < AutoPerks.amalZone) AutoPerks.maxZone = AutoPerks.amalZone;
     if(AutoPerks.coordsBehind < 0) AutoPerks.coordsBehind = 0;
@@ -1514,14 +1527,11 @@ AutoPerks.initializeAmalg = function(noAmalg) {
     //we can save the results and pull the previously calculated values for speed
     calcBasePopArr();
     
-    AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[Math.floor(AutoPerks.fuelMaxZones / AutoPerks.FuelZoneCutoff)];
-    AutoPerks.basePopAtMaxZ  = AutoPerks.basePopAtAmalZ * Math.pow(1.009, AutoPerks.maxZone-AutoPerks.amalZone);
-    AutoPerks.basePopToUse  = AutoPerks.useMaxFuel ? AutoPerks.maxFuelBasePopAtMaxZ : AutoPerks.basePopAtMaxZ; //needed for efficiency calculations, but do we need to worry about efficiency in initializeAmalg()?
+    AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[AutoPerks.fuelMaxZones];
+    //AutoPerks.basePopAtMaxZ  = AutoPerks.basePopAtAmalZ * Math.pow(1.009, AutoPerks.maxZone-AutoPerks.amalZone);
     if(AutoPerks.userMaintainMode){ //only need to maintain our amalg at maxZone
-        //AutoPerks.currAmalgamators = game.jobs.Amalgamator.owned;
         AutoPerks.currAmalgamators = AutoPerks.amalGoal;
-        //AutoPerks.amalGoal = game.jobs.Amalgamator.owned;
-        AutoPerks.RatioToAmal = 1000000;
+        AutoPerks.RatioToAmal = 1000000; //x1000 to preserve amal, x1000 to "reach" next one (forces loop amal loop to fit maintain mode)
         var basePopAtZToUse = calcBasePopMaintain();
     }
     else{
@@ -1530,8 +1540,6 @@ AutoPerks.initializeAmalg = function(noAmalg) {
         AutoPerks.RatioToAmal = Math.pow(10, 10-AutoPerks.clearedSpiresBonus);
         var basePopAtZToUse = AutoPerks.basePopAtAmalZ;
     }
-    
-    if(noAmalg) return; //called from firstRun()
     
     var safety = 1.05; //5% to account for tauntimps rng
     while(AutoPerks.currAmalgamators <= AutoPerks.amalGoal){
@@ -1590,7 +1598,7 @@ AutoPerks.initializeAmalg = function(noAmalg) {
             
             var msg = runMode + "Amalgamator #"+AutoPerks.currAmalgamators+(AutoPerks.userMaintainMode ? " maintained. " : " found. ");
             finalMsg = msg + '<br>';
-            if(AutoPerks.currAmalgamators == AutoPerks.amalGoal)
+            if(AutoPerks.currAmalgamators === AutoPerks.amalGoal)
                 break;
             else
                 AutoPerks.currAmalgamators++;
@@ -1616,6 +1624,13 @@ AutoPerks.initializeAmalg = function(noAmalg) {
     carp1perk.spent = carp1cost;
     carp2perk.spent = carp2cost;
     coordperk.spent = coordinatedcost;
+    
+    AutoPerks.calcArmySizes();
+    var amalZToMaxZ = Math.pow(1.009, AutoPerks.maxZone - AutoPerks.amalZone);
+    AutoPerks.basePopAtMaxZ = AutoPerks.basePopAtAmalZ * amalZToMaxZ;
+    AutoPerks.RatioToAmal = 1000000; //x1000 to preserve amal, x1000 to "reach" next one (forces loop amal loop to fit maintain mode)
+    AutoPerks.finalArmySize = AutoPerks.armySizeMaxZ;
+    AutoPerks.finalAmalRatio2 = getAmalFinal(AutoPerks.basePopAtMaxZ);
 };
 
 //Auto Dump into Looting II
@@ -1677,8 +1692,6 @@ AutoPerks.firstRun = function(){
     AutoPerks.initializeGUI();          //create UI elements
     AutoPerks.initializeRatioPreset();  //loads last selected preset.
     AutoPerks.updateFromBoxes();        //populate UI boxes based on selected preset. also updates userWeights from box values
-    
-    AutoPerks.initializeAmalg(true);        //used to get pop for golden GU currently
     
     //these are also calculated here for time estimate function
     AutoPerks.windMod = 1 + 13 * game.empowerments.Wind.getModifier() * 10;
