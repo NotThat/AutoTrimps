@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "41.1";
-var verDate = "13.10.18";
+var ver = "41.2";
+var verDate = "14.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -58,9 +58,9 @@ function startAT() {
     equipLowDmgShield();
     equipMainShield();
     
-    oncePerZoneCode();
-    
     if(game.global.mapsActive) currMap = getCurrentMapObject();
+    
+    oncePerZoneCode();
     
     //HTML For adding a 5th tab to the message window
     var ATbutton = document.createElement("button");

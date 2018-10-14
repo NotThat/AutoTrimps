@@ -43,8 +43,37 @@ var prestigeState = 0;
 
 var status = "";
 
-function calcDmg(){    
+function calcDmg(){
     calcBaseDamageinB();
+    
+    //automaps has its own damage getting settings, run these first.
+    //getDamageCaller() will also call calcBaseDamageinB() if damage is bought.
+    var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
+    var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
+    var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 8) && checkForGoodCell(0);
+    if(game.global.mapsActive && !stackSpire){
+        if(BWRaidNowLogic()){ //bwraid, buy all
+            getDamageCaller(cell.health*8*9999, false, true);
+        }
+        else if(game.global.world % 100 === 0){ //mapping for prestige in spire4 without spire stacking. we probably want all the damage.
+            var requiredDmgToOK = dmgNeededToOKHelper(80, worldArray[80].maxHealth);
+            getDamageCaller(requiredDmgToOK*3, false, true);
+        }
+        else{   
+            if(currMap.location == "Void"){
+                var requiredDmgToOK = dmgNeededToOKHelper(cellNum, cell.health);
+                getDamageCaller(requiredDmgToOK*30*8, false, true); //doing voids in S stance
+            }
+            if(poisonZone() && game.global.world % 10 === 5 && zoneWorth > 1){ //xx5 poison zone potentially mapping +10. if zones worth is high we dont wanna overshoot damage or we wont be able to stack properly next zone(s)
+                var limit = 20;
+                getDamageCaller(8*baseDamageHigh * 3*limit / DHratio, false);
+            }
+            else{
+                var requiredDmgToOK = dmgNeededToOKHelper(cellNum, cell.health);
+                getDamageCaller(requiredDmgToOK*3, false, true);
+            }
+        }
+    }
     
     ourBaseDamage = baseDamageHigh*8;
     
@@ -117,33 +146,6 @@ function calcDmg(){
     DHratio = (ourBaseDamage*0.25 / enemyHealth);
     enoughDamage = DHratio > threshold;
     nextZoneDHratio = DHratio / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2);
-    
-    var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
-    var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
-    var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 8) && checkForGoodCell(0);
-    if(game.global.mapsActive && !stackSpire){
-        if(BWRaidNowLogic()){ //bwraid, buy all
-            getDamageCaller(cell.health*8*9999, false, true);
-        }
-        else if(game.global.world % 100 === 0){ //mapping for prestige in spire4 without spire stacking. we probably want all the damage.
-            var requiredDmgToOK = dmgNeededToOKHelper(80, worldArray[80].maxHealth);
-            getDamageCaller(requiredDmgToOK*3, false, true);
-        }
-        else{   
-            if(currMap.location == "Void"){
-                var requiredDmgToOK = dmgNeededToOKHelper(cellNum, cell.health);
-                getDamageCaller(requiredDmgToOK*30*8, false, true); //doing voids in S stance
-            }
-            if(poisonZone() && game.global.world % 10 === 5 && zoneWorth > 1){ //xx5 poison zone potentially mapping +10. if zones worth is high we dont wanna overshoot damage or we wont be able to stack properly next zone(s)
-                var limit = 20;
-                getDamageCaller(8*baseDamageHigh * 3*limit / DHratio, false);
-            }
-            else{
-                var requiredDmgToOK = dmgNeededToOKHelper(cellNum, cell.health);
-                getDamageCaller(requiredDmgToOK*3, false, true);
-            }
-        }
-    }
     
     if(DHratio < 0.0001)
         formattedRatio = DHratio.toExponential(2);

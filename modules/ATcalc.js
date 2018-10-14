@@ -551,8 +551,6 @@ function getBonusPercentAT(justStacks, forceTime, count){
     return 1 + ((((1 - Math.pow(boostMult, howMany)) * boostMax)) * (Math.pow(expInc, timeOnZone) - 1));
 }
 
-
-
 function approxZoneHP(zoneNum){
     var zone = typeof zoneNum === 'undefined' ? game.global.world : zoneNum;
     var healthy = zone > 300 ? 2 + Math.floor((zone - 300)/15): 0;
@@ -594,4 +592,94 @@ function getMaxBattleGU(zoneNum){
         str += 3;
     }
     return 1 + totalPct/100;
+}
+
+//assumes 60% Void GU from level 1, and 80% VDMC on shield
+//numbers from https://grabarz19.github.io/TrimpsVoidCalculator/
+function expectedVMsAmount(zoneInput){
+    var zone = typeof zoneInput === 'undefined' ? AutoPerks.maxZone : zoneInput;
+    //round down last poison zone 
+    var cycle = cycleZone(zone);
+    if(cycle > 19) zone = zone - cycle + 19; 
+    else if(cycle > 4 && cycle < 15) zone = zone - cycleZone(zone) + 4;
+    
+    var total = Math.round(zone * 0.09653);                        //calculated based on z1000 1000 iterations
+    total += Fluffy.isRewardActive("voidance")     === 1 ? 4  : 0; //Each Portal, start with two double stacked Void Maps.
+    total += Fluffy.isRewardActive("voidelicious") === 1 ? 16 : 0; //Start each Portal with 1 of each uniquely named Void Map (16 total).
+    total += game.talents.voidSpecial.purchased ? Math.floor(AutoPerks.maxZone / 100) : 0;
+    total += game.talents.voidSpecial2.purchased ? Math.floor((AutoPerks.maxZone-50) / 100) : 0;
+    return total;
+}
+
+//efficiencies taken from https://www.reddit.com/r/Trimps/comments/9nf77n/helium_calculator_for_49/
+function VMsEfficiencyMult(VMAmount){
+    //varies depending on max void map stack size. Either 1, 2, 3, 6, 7
+    if(VMAmount < 1) VMAmount = 1;
+    var arr = [];
+    var arr1 = [1];
+    var arr2 = [1,1.02,1.03,1.04,1.06,1.07,1.08,1.09,1.09,1.1,1.11,1.12,1.12,1.13,1.13,1.14,1.14,1.15,1.15,1.16,1.16,1.16,1.17,1.17,1.17,1.18,1.18,1.18,1.18,1.18,1.19,1.19,1.19,1.19,1.19,1.19,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.21,1.21,1.21,1.21,1.21,1.21,1.21,1.21,1.21,1.21,1.21,1.21,1.21,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22,1.22];
+    var arr3 = [1,1.02,1.03,1.05,1.07,1.08,1.1,1.12,1.13,1.15,1.17,1.18,1.2,1.22,1.23,1.24,1.26,1.27,1.29,1.3,1.31,1.32,1.33,1.34,1.35,1.36,1.37,1.38,1.39,1.4,1.41,1.41,1.42,1.43,1.44,1.44,1.45,1.45,1.46,1.46,1.47,1.47,1.48,1.48,1.49,1.49,1.49,1.5,1.5,1.51,1.51,1.51,1.51,1.52,1.52,1.52,1.53,1.53,1.53,1.53,1.54,1.54,1.54,1.54,1.54,1.55,1.55,1.55,1.55,1.55,1.55,1.56,1.56,1.56,1.56,1.56];
+    var arr6 = [1,1.02,1.03,1.05,1.07,1.08,1.1,1.12,1.14,1.16,1.18,1.2,1.22,1.25,1.27,1.29,1.31,1.34,1.36,1.38,1.41,1.43,1.45,1.48,1.5,1.53,1.55,1.58,1.6,1.63,1.65,1.68,1.7,1.73,1.75,1.77,1.8,1.82,1.85,1.87,1.89,1.92,1.94,1.96,1.98,2.01,2.03,2.05,2.07,2.09,2.11,2.13,2.15,2.17,2.19,2.21,2.23,2.24,2.26,2.28,2.29,2.31,2.33,2.34,2.36,2.37,2.38,2.4,2.41,2.42,2.44,2.45,2.46,2.47,2.48,2.49];
+    var arr7 = [1,1.02,1.03,1.05,1.07,1.08,1.1,1.12,1.14,1.16,1.18,1.2,1.22,1.25,1.27,1.29,1.31,1.34,1.36,1.38,1.41,1.43,1.46,1.48,1.51,1.53,1.56,1.58,1.61,1.63,1.66,1.68,1.71,1.74,1.76,1.79,1.82,1.84,1.87,1.89,1.92,1.95,1.97,2,2.02,2.05,2.07,2.1,2.12,2.15,2.17,2.2,2.22,2.25,2.27,2.29,2.32,2.34,2.36,2.39,2.41,2.43,2.45,2.47,2.49,2.51,2.53,2.55,2.57,2.59,2.61,2.63,2.64,2.66,2.68,2.69];
+    var maxVoidStack = Fluffy.getVoidStackCount();
+    if(typeof maxVoidStack === 'undefined') maxVoidStack = 1;
+    switch(maxVoidStack){
+        case 2:
+            arr = arr2;
+            break;
+        case 3:
+            arr = arr3;
+            break;
+        case 6:
+            arr = arr6;
+            break;
+        case 7:
+            arr = arr7;
+            break;
+        default:
+            arr = arr1;
+    }
+    if(VMAmount > arr.length) VMAmount = arr.length;
+    return arr[VMAmount-1];
+}
+
+function singleVMWorth(zoneInput, currentPortal){
+    var zone = typeof zoneInput === 'undefined' ? AutoPerks.maxZone : zoneInput;
+    //round down last poison zone 
+    var cycle = cycleZone(zone);
+    if(cycle > 19) zone = zone - cycle + 19; 
+    else if(cycle > 4 && cycle < 15) zone = zone - cycleZone(zone) + 4;
+    
+    var AA = 1.35*(zone-19);
+    var AAA = Math.pow(1.23, Math.sqrt(AA));
+    var a = Math.floor(AA+AAA);
+    var b = 15;
+    var c = 2;
+    var d = Math.pow(1.005, zone);
+    var e = 1;
+    var f = (getMaxBattleGU(zone)-1)/3-0.3+1; //assumes full helium GU after 60% void
+    var g = 1 + 0.05   * (currentPortal ? game.portal.Looting.level    : AutoPerks.perksByName.Looting.level);
+    var h = 1 + 0.0025 * (currentPortal ? game.portal.Looting_II.level : AutoPerks.perksByName.Looting_II.level);
+    var spireRowBonus = game.talents.stillRowing.purchased ? 0.03 : 0.02;
+    var spireRows = Math.floor((zone - 100)/100) * 10;
+    var i = 1 + (spireRows * spireRowBonus);
+    var j = 1;
+    var k = (game.global.totalSquaredReward / 1000) + 1;
+    var fluffyBonus = Fluffy.isRewardActive("helium");
+    var l = 1 + (fluffyBonus * 0.25);
+    var heliumy = game.singleRunBonuses.heliumy.owned ? 1.25 : 1;
+    var scryHard2 = game.talents.scry2.purchased ? 1.5 : 1;
+    
+    var healthAmount = zone > 300 ? 2 + Math.floor((zone-300)/15) : 0;
+    var maxCorrupted = Math.min(80,Math.floor((zone - 151) / 3) + 2);
+    var corrAmount   = maxCorrupted - healthAmount; //assumes full zone corruption
+    var corruptionValue = corrAmount   * 0.15;
+    var healthValue     = healthAmount * 0.45;
+    var mutationTotal   = corruptionValue + healthValue + 1;
+    var lastPortalZone  = currentPortal ? game.global.lastPortal : AutoPerks.maxZone;
+    var VS = game.talents.voidSpecial.purchased ? 1 + 0.0025 * lastPortalZone : 1;
+    
+    var worth = a*b*c*d*e*f*g*h*i*j*k*l*heliumy*scryHard2*2*mutationTotal*VS; //1 VM helium
+    
+    return worth;
 }

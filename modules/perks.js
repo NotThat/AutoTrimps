@@ -550,9 +550,16 @@ AutoPerks.spendHelium = function(helium) {
     var timeText = timeEstimator(false, 0, AutoPerks.maxZone, false, true);
     var healthMod = AutoPerks.benefitHolderObj.Health.benefit.toExponential(2); //this includes gear, amalgamators, toughness1/2, resil, and anything breeding related
     if(AutoPerks.useMaxFuel) AutoPerks.fuelEndZone = AutoPerks.maxZone;
+    
+    var VMs             = expectedVMsAmount(); //how many VMs we expect to have
+    var VMsEffMult      = VMsEfficiencyMult(VMs);
+    var singleVM        = singleVMWorth();
+    var heliumFromVMs   = VMs*VMsEffMult*singleVM;
+    var totalHelium     = AutoPerks.totalHelium;
+    var heliumGrowth    = (heliumFromVMs*1.4/totalHelium*100).toFixed(3) + '%'; //1.5 to account for non VM helium. TODO
 
-    var msg2 = "Helium: " + heliumMod + " zone " + AutoPerks.maxZone + " will take approx " + timeText + ". Health: " + healthMod + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + /*" Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + "/" + AutoPerks.finalAmalRatio2.toFixed(2) +*/ " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%";
-    var msg3 = "Fluffy Growth: " + fluffyGrowth + " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)";
+    var msg2 = /*"Helium: " + heliumMod + */"Zone " + AutoPerks.maxZone + " will take approx " + timeText + ". Health: " + healthMod + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + /*" Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + "/" + AutoPerks.finalAmalRatio2.toFixed(2) +*/ " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%";
+    var msg3 = "Helium Growth: " + heliumGrowth + " Fluffy Growth: " + fluffyGrowth + " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)";
     var $text = document.getElementById("textAreaAllocate");
     $text.innerHTML += msg2 + '<br>' + msg3;
 };
