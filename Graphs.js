@@ -970,6 +970,7 @@ function setGraphData(graph) {
                 ser.name + ': <b>' +
                 (graphsPretty ? prettify(this.y) : Highcharts.numberFormat(this.y, precision,'.', ',')) + valueSuffix + '</b><br>';
     };
+    
     var additionalParams = {};
     //Makes everything happen.
     if (oldData != JSON.stringify(graphData)){
@@ -1238,6 +1239,19 @@ var filteredLoot = {
 var lootData = {
     metal: [], wood:[], food:[], gems:[]
 };
+
+function getLootData(){
+    var loots = ['metal', 'wood', 'food', 'gems'];
+    for(var r in loots){
+        var name = loots[r];
+        //avoid /0 NaN
+        if(filteredLoot.produced[name])
+            lootData[name].push(filteredLoot.looted[name]/filteredLoot.produced[name]);
+        if(lootData[name].length > 60)lootData[name].shift();
+    }
+}
+setInterval(getLootData, 15000);
+
 //track loot gained. jest == from jest/chronoimp
 function filterLoot (loot, amount, jest, fromGather){
     if(loot != 'wood' && loot != 'metal' && loot != 'food' && loot != 'gems') return;
@@ -1250,19 +1264,6 @@ function filterLoot (loot, amount, jest, fromGather){
     else filteredLoot.looted[loot] += amount;
     //console.log('item is: ' + loot + ' amount is: ' + amount);
 }
-
-function getLootData(){
-    var loots = ['metal', 'wood', 'food', 'gems'];
-    for(var r in loots){
-        var name = loots[r];
-        //avoid /0 NaN
-        if(filteredLoot.produced[name])
-            lootData[name].push(filteredLoot.looted[name]/filteredLoot.produced[name]);
-        if(lootData[name].length > 60)lootData[name].shift();
-    }
-}
-
-setInterval(getLootData, 15000);
 
 //BEGIN overwriting default game functions!!!!!!!!!!!!!!!!!!!!!!
 //(dont panic, this is done to insert the tracking function "filterLoot" in)
@@ -1310,16 +1311,6 @@ setInterval(getLootData, 15000);
 })();
 //END overwriting default game functions!!!!!!!!!!!!!!!!!!!!!!
 
-function lookUpZoneData(zone,portal){
-    if (portal == null)
-        portal = game.global.totalPortals;
-    for (var i=allSaveData.length-1,end=0; i >= 0; i--) {
-        if (allSaveData[i].totalPortals != portal) continue;
-        if (allSaveData[i].world != zone) continue;
-        return allSaveData[i];
-    }
-}
-
 function updateLastPoint(lastCell){
     if(document.getElementById('graphSelection').value != "Efficiency and Stacks")
         return;
@@ -1335,7 +1326,6 @@ function updateLastPoint(lastCell){
     chart1.series[1].addPoint([name, stanceStats.stacks[lastCell]], true, false); //stacks series
 
     var p = chart1.series[1].points[chart1.series[1].points.length - 1];
-    
     
     if(p === undefined || !((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2))
         return;
@@ -1356,5 +1346,3 @@ function updateLastPoint(lastCell){
         });
     }
 }
-//run the main gatherInfo function 1 time every second
-setInterval(gatherInfo, 100);

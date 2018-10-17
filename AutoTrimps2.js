@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "41.3";
+var ver = "41.4";
 var verDate = "17.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -344,13 +344,15 @@ function pauseRemovalLoop(){
 //makeUp = true when game is in catchup mode, so we can skip some unnecessary visuals
 function ATLoop(makeUp) {
     //debug((countHeliumSpent() + game.global.heliumLeftover + game.resources.helium.owned - game.global.totalHeliumEarned).toExponential(2));
-    if (ATrunning == false) return;
+    if (!ATrunning) return;
+    
+    gatherInfo(); //stores graphs data, do this even with AT paused for graph only users.
+        
     if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled || game.global.viewingUpgrades) {
         if(getPageSetting('PauseScript'))
             updateAutoMapsStatus("", "AT paused", true);
         return;
     }
-    ATrunning = true;
     ATmakeUp = makeUp;
     
     trimpsRealMax = game.resources.trimps.realMax();     
