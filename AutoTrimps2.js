@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "41.2";
-var verDate = "14.10.18";
+var ver = "41.3";
+var verDate = "17.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -353,7 +353,7 @@ function ATLoop(makeUp) {
     ATrunning = true;
     ATmakeUp = makeUp;
     
-    trimpsRealMax = game.resources.trimps.realMax();
+    trimpsRealMax = game.resources.trimps.realMax();     
     
     hiddenBreedTimer = game.jobs.Amalgamator.owned > 0 ? Math.floor((getGameTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000);
     if(hiddenBreedTimer != hiddenBreedTimerLast && typeof addbreedTimerInsideText !== 'undefined'){

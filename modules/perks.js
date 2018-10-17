@@ -533,6 +533,7 @@ AutoPerks.spendHelium = function(helium) {
     
     minMaxMi(); //recalculate mi efficiency
     
+    /*
     var fluffyXP = Fluffy.currentExp[1]; //xp in current evolution only
     var currEvo = game.global.fluffyPrestige;
         var prestigeEvoZero = 1000;
@@ -544,7 +545,8 @@ AutoPerks.spendHelium = function(helium) {
     for(var i = 0; i < currEvo; i++){
         fluffyXP += xpCount;
         xpCount *= 5;
-    }
+    }*/
+    var fluffyXP = game.global.fluffyExp;
     var fluffyGrowth = (AutoPerks.benefitHolderObj.Fluffy.benefit*100 / fluffyXP).toFixed(3) + "%";
     var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
     var timeText = timeEstimator(false, 0, AutoPerks.maxZone, false, true);

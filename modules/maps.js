@@ -8,7 +8,6 @@ var remainingCells = 100;
 //Initialize Global Vars
 var customVars = MODULES["maps"];  
 var doVoids = false;
-var presRaiding = false;
 var BWRaidingStatus = false;
 var needToVoid = false;
 var needPrestige = false;
@@ -170,7 +169,7 @@ function autoMap() {
         return;
     }
     
-    if(  ((cycleZone() === 4 || cycleZone() === 19) && game.global.lastClearedCell + 1 < 82 && !game.global.spireActive) //last poison zone mapping (praid, bw raid) tends to take a while, so get books before going into it
+    if(  ((cycleZone() === 4 || cycleZone() === 19) && game.global.lastClearedCell + 1 < 90 && !game.global.spireActive) //last poison zone mapping (praid, bw raid) tends to take a while, so get books before going into it
         || game.global.challengeActive == "Mapology") //TODO: mapology
     {
         if(game.global.preMapsActive)
@@ -672,10 +671,10 @@ function PrestigeRaid() {
         //debug("Prestige Raiding is unlocked until HZE 210.", "maps");
         return true;
     }
+    
     var StartZone = getPageSetting('PRaidSetting') ? praidAutoStart() : getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
-    presRaiding = true; //for message passing to UI
     
     if (PRaidMax > 10){
         PRaidMax = 10;
@@ -710,9 +709,9 @@ function PrestigeRaid() {
             var map = currMap;
             if(currMap.location === "Bionic")
                 statusMsg = "BW Raiding: " + addSpecialsAT(currMap.level);
-            else{
+            else
                 statusMsg = "Prestige Raid: " + addSpecialsAT(maxDesiredLevel);
-            }
+            
             //if this is last run we need of the map, turn off repeat button
             var levelFromThisRun = Math.max(Math.floor(dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-1].special, true)), Math.floor(dropsAtZone(game.global.mapGridArray[game.global.mapGridArray.length-2].special, true)))
             if (levelFromThisRun == currMap.level && game.global.repeatMap) 
@@ -1294,32 +1293,28 @@ function lastDropZone(zone) {
 }
 
 function checkNeedToVoid(){
-    //FIND VOID MAPS LEVEL:
-    var voidMapLevelSetting = getPageSetting('VoidMaps');
+    if(game.global.totalVoidMaps === 0) return false;
+    if(game.global.world >= 300 && !poisonZone()) return false;
+    var voidMapZone = getPageSetting('VoidMaps');
+    
     //Add your daily zone mod onto the void maps level
-    var dailyVoidMod = getPageSetting('VoidMapsDailyMod');
-    if (dailyVoidMod == 999){
-        dailyVoidMod = getPageSetting('AutoFinishDailyNew');
-        if(dailyVoidMod == 999)
-            dailyVoidMod = 0;
+    if (game.global.challengeActive === "Daily"){
+        var dailyVoidMod = getPageSetting('VoidMapsDailyMod');
+        if (dailyVoidMod === 999){
+            dailyVoidMod = getPageSetting('AutoFinishDailyNew');
+            if(dailyVoidMod === 999)
+                dailyVoidMod = 0;
+        }
+        voidMapZone += dailyVoidMod;
     }
-    if (game.global.challengeActive == "Daily")
-        voidMapLevelSetting += dailyVoidMod;
     
-    //decimal void maps are possible, using string function to avoid false float precision (0.29999999992). javascript can compare ints to strings anyway.
-    var voidMapLevelSettingZone = (voidMapLevelSetting + "").split(".")[0];
-    var voidMapLevelSettingMap = (voidMapLevelSetting + "").split(".")[1];
-    if (voidMapLevelSettingMap === undefined || (game.global.challengeActive == 'Lead'))
-        voidMapLevelSettingMap = 90;
-    if (voidMapLevelSettingMap.length == 1) voidMapLevelSettingMap += "0"; //entering 187.70 becomes 187.7, this will bring it back to 187.70
+    if(voidMapZone <= 0 || voidMapZone > game.global.world) return false;
+    
     var voidsuntil = getPageSetting('RunNewVoidsUntilNew');
+    if(voidsuntil === 0 && voidMapZone !== game.global.world) return false;
+    if(voidsuntil > 0 && voidMapZone + voidsuntil < game.global.world) return false;
     
-    doVoids = voidMapLevelSetting > 0 && game.global.totalVoidMaps > 0 && game.global.lastClearedCell + 1 >= voidMapLevelSettingMap &&
-        (game.global.world == voidMapLevelSettingZone ||
-            (game.global.world >= voidMapLevelSettingZone && voidsuntil != 0 && (voidsuntil == -1 || game.global.world <= (voidsuntil + voidMapLevelSettingZone))));
-    if (game.global.totalVoidMaps == 0)
-        doVoids = false;
-    return doVoids;
+    return game.global.lastClearedCell + 1 >= 90;
 }
 
 function findFirstVoidMap(){

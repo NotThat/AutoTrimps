@@ -1,8 +1,45 @@
+function pushData(){
+    var dailyMultGraph = 1 + countDailyWeight() === 0 ? 0 : getDailyHeliumValue(countDailyWeight()) / 100;
+    var getPercent = dailyMultGraph * game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned))*100;
+    var lifetime = game.resources.helium.owned / (game.global.totalHeliumEarned - game.resources.helium.owned)*100;
+
+    allSaveData.push({
+        totalPortals: game.global.totalPortals,
+        heliumOwned: game.resources.helium.owned,
+        currentTime: getGameTime(),
+        portalTime: game.global.portalTime,
+        world: game.global.world,
+        challenge: game.global.challengeActive,
+        voids: game.global.totalVoidMaps,
+        heirlooms: {"value": game.stats.totalHeirlooms.value, "valueTotal":game.stats.totalHeirlooms.valueTotal},
+        nullifium: recycleAllExtraHeirlooms(true),
+        gigas: game.upgrades.Gigastation.done,
+        gigasleft: game.upgrades.Gigastation.allowed - game.upgrades.Gigastation.done,
+        trimps: trimpsRealMax,
+        coord: game.upgrades.Coordination.done,
+        lastwarp: game.global.lastWarp,
+        essence: getTotalDarkEssenceCount(),
+        hehr: getPercent,
+        helife: lifetime,
+        overkill: GraphsVars.OVKcellsInWorld,
+        zonetime: GraphsVars.ZoneStartTime,
+        mapbonus: GraphsVars.MapBonus,
+        magmite: game.global.magmite,
+        magmamancers: game.jobs.Magmamancer.owned,
+        fluffy: game.global.fluffyExp,
+        nursery: game.buildings.Nursery.purchased
+    });
+    //only keep 15 portals worth of runs to prevent filling storage
+    clearData(15);
+    safeSetItems('allSaveData', JSON.stringify(allSaveData));
+}
+
+
 //Initialize the saved data objects, and load data/grab from browser if found.
 var allSaveData = [];
 var graphData = [];
 var tmpGraphData = JSON.parse(localStorage.getItem('allSaveData'));
-if (tmpGraphData !== null) {
+if (tmpGraphData !== null){
     console.log('Graphs: Found allSaveData (portal runs data). Yay!');
     allSaveData = tmpGraphData;
 }
@@ -37,7 +74,7 @@ $graphSel.setAttribute("style", "");
 //$graphSel.setAttribute("onmouseover", 'tooltip(\"Graph\", \"customText\", event, \"What graph would you like to display?\")');
 //$graphSel.setAttribute("onmouseout", 'tooltip("hide")');
 $graphSel.setAttribute("onchange", "drawGraph()");
-for (var item in graphList) {
+for (var item in graphList){
     var $opt = document.createElement("option");
     $opt.value = graphList[item];
     $opt.text = graphList[item];
@@ -56,7 +93,6 @@ $graphFooter.innerHTML += '\
 <div style="flex:0 2 3.5vw;"><input style="width:100%;min-width: 40px;" id="deleteSpecificTextBox"></div>\
 <div style="flex:auto; margin-left: 0.5vw;"><button onclick="deleteSpecific(); drawGraph();">Delete Specific Portal</button></div>\
 <div style="flex:0 100 5%;"></div>\
-<div style="flex:auto; visibility:hidden;"><button  onclick="GraphsImportExportTooltip(\'ExportGraphs\', null, \'update\')" onmouseover=\'tooltip(\"Tips\", \"customText\", event, \"Export Graph Database will make a backup of all the graph data to a text string.<b>DISCLAIMER:</b> Takes quite a long time to generate.\")\' onmouseout=\'tooltip(\"hide\")\'>Export your Graph Database</button></div>\
 <div style="float:right; visibility:hidden; margin-right: 0.5vw;"><button onclick="addGraphNoteLabel()">Add Note/Label</button></div>\
 <div style="float:right; margin-right: 0.5vw;"><button onclick="toggleSpecificGraphs()">Invert Selection</button></div>\
 <div style="float:right; margin-right: 2vw;"><button onclick="toggleAllGraphs()">All Off/On</button></div>';
@@ -68,7 +104,7 @@ document.getElementById("graphFooterLine2").innerHTML += '\
 <input onclick="toggleDarkGraphs()" style="height: 20px; float: right; margin-right: 0.5vw;" type="checkbox" id="blackCB">\
 <span style="float: right; margin-right: 0.5vw;">Black Graphs:</span>';
 //handle the locking mechanism checkbox for the Clear all previous data button:
-function toggleClearButton() {
+function toggleClearButton(){
     document.getElementById('clrAllDataBtn').disabled=!document.getElementById('clrChkbox').checked;
 }
 
@@ -77,7 +113,7 @@ function toggleClearButton() {
 // if (MODULES["graphs"].useDarkAlways)
     // addDarkGraphs();
 //Theme Changer is below
-function addDarkGraphs() {
+function addDarkGraphs(){
     var $oldlink = document.getElementById("dark-graph.css");
     if ($oldlink) return;
     var $link = document.createElement('link');
@@ -89,13 +125,13 @@ function addDarkGraphs() {
     document.head.appendChild($link);
     debug("Adding dark-graph.css file","graphs");
 }
-function removeDarkGraphs() {
+function removeDarkGraphs(){
     var $link = document.getElementById("dark-graph.css");
     if (!$link) return;
     document.head.removeChild($link);
     debug("Removing dark-graph.css file","graphs");
 }
-function toggleDarkGraphs() {
+function toggleDarkGraphs(){
     if (game) {
         var $link = document.getElementById("dark-graph.css");
         var blackCB = document.getElementById('blackCB').checked;
@@ -140,93 +176,6 @@ MODULES["graphs"].themeChanged = function() {
         lastTheme = game.options.menu.darkTheme.enabled;
 };
 MODULES["graphs"].themeChanged();
-
-
-function GraphsImportExportTooltip(what, isItIn, event) {
-    if (game.global.lockTooltip)
-        return;
-    var elem = document.getElementById("tooltipDiv");
-    swapClass("tooltipExtra", "tooltipExtraNone", elem);
-    var ondisplay = null; // if non-null, called after the tooltip is displayed
-    var tooltipText;
-    var costText = "";
-    if (what == "ExportGraphs"){
-        tooltipText = "This is your GRAPH DATABASE save string. There are many like it but this one is yours. Save this save somewhere safe so you can save time next time. <br/><br/><textarea id='exportArea' style='width: 100%' rows='5'>" + JSON.stringify(allSaveData) + "</textarea>";
-        costText = "<div class='maxCenter'><div id='confirmTooltipBtn' class='btn btn-info' onclick='cancelTooltip()'>Got it</div>";
-        if (document.queryCommandSupported('copy')){
-            costText += "<div id='clipBoardBtn' class='btn btn-success'>Copy to Clipboard</div>";
-            ondisplay = function(){
-                document.getElementById('exportArea').select();
-                document.getElementById('clipBoardBtn').addEventListener('click', function(event) {
-                    document.getElementById('exportArea').select();
-                      try {
-                        document.execCommand('copy');
-                      } catch (err) {
-                        document.getElementById('clipBoardBtn').innerHTML = "Error, not copied";
-                      }
-                });
-            };
-        }
-        else {
-            ondisplay = function(){
-                document.getElementById('exportArea').select();
-            };
-        }
-        costText += "</div>";
-    }
-    if (what == "ImportGraphs"){
-        //runs the loadGraphs() function.
-        tooltipText = "Replaces your GRAPH DATABASE with this save string! It'll be fine, I promise.<br/><br/><textarea id='importBox' style='width: 100%' rows='5'></textarea>";
-        costText="<div class='maxCenter'><div id='confirmTooltipBtn' class='btn btn-info' onclick='cancelTooltip(); loadGraphs();'>Import</div><div class='btn btn-info' onclick='cancelTooltip()'>Cancel</div></div>";
-        ondisplay = function () {
-            document.getElementById('importBox').focus();
-        };
-    }
-    if (what == "AppendGraphs"){
-        //runs the appendGraphs() function.
-        tooltipText = "Appends to your GRAPH DATABASE with this save string (combines them)! It'll be fine, I hope.<br/><br/><textarea id='importBox' style='width: 100%' rows='5'></textarea>";
-        costText="<div class='maxCenter'><div id='confirmTooltipBtn' class='btn btn-info' onclick='cancelTooltip(); appendGraphs();'>Import</div><div class='btn btn-info' onclick='cancelTooltip()'>Cancel</div></div>";
-        ondisplay = function () {
-            document.getElementById('importBox').focus();
-        };
-    }
-    game.global.lockTooltip = true;
-    elem.style.left = "33.75%";
-    elem.style.top = "25%";
-    document.getElementById("tipTitle").innerHTML = what;
-    document.getElementById("tipText").innerHTML = tooltipText;
-    document.getElementById("tipCost").innerHTML = costText;
-    elem.style.display = "block";
-    if (ondisplay !== null)
-        ondisplay();
-}
-
-//function to take the text string, and use it to load and overwrite your saved data (for graphs)
-function loadGraphs() {
-    var thestring = document.getElementById("importBox").value.replace(/(\r\n|\n|\r|\s)/gm,"");
-    var tmpset = JSON.parse(thestring);
-    if (tmpset == null)
-        return;
-    //should have done more error checking with at least an error message.
-    allSaveData = tmpset;
-    //refresh
-    drawGraph();
-}
-
-//function to take the text string, and use it to load and append your saved data (for graphs) to the old database
-function appendGraphs() {
-    //currently overwrites:
-    /*
-    var thestring = document.getElementById("importBox").value.replace(/(\r\n|\n|\r|\s)/gm,"");
-    var tmpset = JSON.parse(thestring);
-    if (tmpset == null)
-        return;
-    //should have done more error checking with at least an error message.
-    allSaveData = tmpset;
-    */
-    //refresh
-    drawGraph();
-}
 
 //Remember Checkbox
 var rememberSelectedVisible = [];
@@ -340,7 +289,7 @@ function escapeATWindows() {
 document.addEventListener("keydown",function (event) {
     //Hotkeys have to be enabled, and all these conditions have to be met or else we cant use the hotkey.
 	if (game.options.menu.hotkeys.enabled == 1 && !game.global.preMapsActive && !game.global.lockTooltip && !ctrlPressed && !heirloomsShown && event.keyCode == 27) //27 == escape
-        escapeATWindows();
+            escapeATWindows();
     //TODO this currently escapes out of both tooltips and the settings and its already checking for locked tooltips. Maybe if there IS a tooltip open we should just close that first.
     //Turn off "Settings"/"AutoTrimpsSettings"/"Graphs" Menu on escape.
 }, true);
@@ -350,64 +299,6 @@ function getTotalDarkEssenceCount() {
     var purchased = 10 * (Math.pow(3, countPurchasedTalents()) - 1) / (3 - 1);
     return game.global.essence + purchased;
 }
-
-function pushData() {
-    //debug('Starting Zone ' + game.global.world, "graphs");
-    var dailyMultGraph = (countDailyWeight() === 0 ? 1 : 1 + getDailyHeliumValue(countDailyWeight()) / 100);
-    var getPercent = (dailyMultGraph * game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned)))*100;
-    var lifetime = (game.resources.helium.owned / (game.global.totalHeliumEarned-game.resources.helium.owned))*100;
-    
-    //var resultForGraph = Math.log10(trimpsRealMax/game.resources.trimps.getCurrentSend());
-
-    allSaveData.push({
-        totalPortals: game.global.totalPortals,
-        heliumOwned: game.resources.helium.owned,
-        currentTime: getGameTime(),
-        portalTime: game.global.portalTime,
-        world: game.global.world,
-        challenge: game.global.challengeActive,
-        voids: game.global.totalVoidMaps,
-        heirlooms: {"value": game.stats.totalHeirlooms.value, "valueTotal":game.stats.totalHeirlooms.valueTotal},
-        nullifium: recycleAllExtraHeirlooms(true),
-        gigas: game.upgrades.Gigastation.done,
-        gigasleft: game.upgrades.Gigastation.allowed - game.upgrades.Gigastation.done,
-        trimps: trimpsRealMax,
-        coord: game.upgrades.Coordination.done,
-        lastwarp: game.global.lastWarp,
-        essence: getTotalDarkEssenceCount(),
-        hehr: getPercent.toFixed(4),
-        helife: lifetime.toFixed(4),
-        overkill: GraphsVars.OVKcellsInWorld,
-        zonetime: GraphsVars.ZoneStartTime,
-        mapbonus: GraphsVars.MapBonus,
-        magmite: game.global.magmite,
-        magmamancers: game.jobs.Magmamancer.owned,
-        fluffy: game.global.fluffyExp,
-        nursery: game.buildings.Nursery.purchased
-    });
-    //only keep 15 portals worth of runs to prevent filling storage
-    clearData(15);
-    safeSetItems('allSaveData', JSON.stringify(allSaveData));
-}
-
-//TODO: Cloud Analytics - Experimental function to start tracking graphing data on the cloud server.
-// we want this to be small so we don't transmit the whole 10MB graph-data.
-var graphAnal = [];
-function trackHourlyGraphAnalytics() {
-    graphAnal.push({
-        currentTime: getGameTime(),
-        totalPortals: game.global.totalPortals,
-        heliumOwned: game.resources.helium.owned,
-        highzone: game.global.highestLevelCleared,
-        bones: game.global.b
-        //ratio: document.getElementById("ratioPreset").value
-    });
-    safeSetItems('graphAnal', JSON.stringify(graphAnal));
-}
-//Run once.
-trackHourlyGraphAnalytics();
-//then set Timer loop for 1 hour;
-setInterval(trackHourlyGraphAnalytics, 3600000);
 
 function initializeData() {
     //initialize fresh with a blank array if needed
@@ -444,7 +335,7 @@ function gatherInfo() {
     initializeData();
     //Track portal.
     GraphsVars.aWholeNewPortal = GraphsVars.currentPortal != game.global.totalPortals;
-    if (GraphsVars.aWholeNewPortal) {
+    if (GraphsVars.aWholeNewPortal){
         GraphsVars.currentPortal = game.global.totalPortals;
         //clear filtered loot data upon portaling. < 5 check to hopefully throw out bone portal shenanigans
         filteredLoot = {
@@ -454,12 +345,12 @@ function gatherInfo() {
     }
     //Track zone.
     GraphsVars.aWholeNewWorld = GraphsVars.currentworld != game.global.world;
-    if (GraphsVars.aWholeNewWorld) {
+    if (GraphsVars.aWholeNewWorld){
         GraphsVars.currentworld = game.global.world;
         //if we have reached a new zone, push a new data point (main)
-        if (allSaveData.length > 0 && allSaveData[allSaveData.length - 1].world != game.global.world) {
+        if (allSaveData.length > 0 && allSaveData[allSaveData.length - 1].world != game.global.world)
             pushData();
-        }
+        
         //reset stuff,prepare tracking variables.
         GraphsVars.OVKcellsInWorld = 0;
         GraphsVars.ZoneStartTime = 0;
@@ -467,10 +358,9 @@ function gatherInfo() {
     }
     //Overkill cell tracking:
     if (game.options.menu.overkillColor.enabled == 0) toggleSetting('overkillColor');   //make sure the setting is on.
-    //Detecting the liquification through liquimp - Crude attempt at this, need to store/track more data.
+    //Detecting the liquification through liquimp
     if (!game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp")
         GraphsVars.OVKcellsInWorld = 100;
-        //if (game.stats.zonesLiquified.value > oldzonesLiquified)    //may come in handy; goes up by 1 each zone you liqui-kill.
     else
         //track how many overkill world cells we have beaten in the current level. (game.stats.cellsOverkilled.value for the entire run)
         GraphsVars.OVKcellsInWorld = document.getElementById("grid").getElementsByClassName("cellColorOverkill").length;
@@ -481,87 +371,10 @@ function gatherInfo() {
 }
 
 var dataBase = {}
-var databaseIndexEntry = {
-    Index: 0,
-    Portal: 0,
-    Challenge: 0,
-    World: 0
-}
-var databaseDirtyEntry = {
-    State: false,
-    Reason: "",
-    Index: -1
-}
 var portalExistsArray = [];
 var portalRunArray = [];
 var portalRunIndex = 0;
-
-function chkdsk() {
-    rebuildDataIndex();
-    checkIndexConsistency();
-    checkWorldSequentiality();
-    if (databaseDirtyEntry.State == true) {
-        //
-    }
-
-}
-
-function rebuildDataIndex() {
-    for (var i = 0; i < allSaveData.length-1;  i++) {
-        //database
-        dataBase[i] ={
-            Index: i,
-            Portal: allSaveData[i].totalPortals,
-            Challenge: allSaveData[i].challenge,
-            World: allSaveData[i].world
-        }
-        //reverse lookup quickArray
-        portalRunArray.push({Index: i, Portal: allSaveData[i].totalPortals , Challenge: allSaveData[i].challenge});
-
-        if (typeof portalExistsArray[allSaveData[i].totalPortals] == "undefined")
-            portalExistsArray[allSaveData[i].totalPortals] = {Exists: true, Row: portalRunIndex, Index: i, Challenge: allSaveData[i].challenge};
-        else {
-            databaseDirtyFlag.State = true;
-            databaseDirtyFlag.Reason = 'oreoportal';
-            databaseDirtyFlag.Index = i;
-            row = portalExistsArray[allSaveData[i].totalPortals].Row;
-        }
-        portalRunIndex++;
-    }
-}
-
-function checkIndexConsistency() {
-    for (var i = 0; i < dataBase.length-1;  i++) {
-        if (dataBase[i].Index != i) {
-            databaseDirtyFlag = [true,'index',i];
-            break;
-        }
-    }
-}
-
-function checkWorldSequentiality() {
-    var lastworld,currentworld,nextworld;
-    for (var i = 1; i < dataBase.length-1;  i++) {
-        lastworldEntry = dataBase[i-1];
-        currentworldEntry = dataBase[i];
-        nextworldEntry = dataBase[i+1];
-        lastworld = lastworldEntry.World;
-        currentworld = currentworldEntry.World;
-        nextworld = nextworldEntry.World
-        if (lastworld > currentworld && currentworld != 1) {
-            databaseDirtyFlag.State = true;
-            databaseDirtyFlag.Reason = 'descending';
-            databaseDirtyFlag.Index = i;
-            break;
-        }
-        if (lastworld > currentworld && currentworld == 1 && lastworld == nextworld) {
-            databaseDirtyFlag.State = true;
-            databaseDirtyFlag.Reason = 'badportal';
-            databaseDirtyFlag.Index = i;
-            break;
-        }
-    }
-}
+var graphsPretty = true;
 
 //////////////////////////////////////
 //MAIN GRAPHING FUNCTION - the meat.//
@@ -585,10 +398,59 @@ function setGraphData(graph) {
     var title, xTitle, yTitle, yTitle2, yType, yType2, names, valueSuffix, series, formatter, xminFloor=1, yminFloor=null, yminFloor2=null;
     
     var precision = 0;
+    var graphsPretty = true;
     var oldData = JSON.stringify(graphData);
     valueSuffix = '';
 
     switch (graph) {
+            case 'Efficiency and Stacks':
+            var names = [];
+            var arr1 = [];
+            var arr2 = [];
+            if(typeof stanceStats.cmp !== 'undefined')
+                for(var i = 0; i < stanceStats.cmp.length; i++){
+                    if(!worldArray[i])
+                        names.push(i);
+                    else if(worldArray[i].corrupted === undefined)
+                        names.push(i + "empty");
+                    else
+                        names.push(i + worldArray[i].corrupted);
+                    arr1.push([names[i], stanceStats.cmp[i]]);
+                    arr2.push([names[i], stanceStats.stacks[i]]);
+                }
+            graphData = [];
+            graphData[0] = {name: 'He/hr Efficiency', data: arr1};
+            graphData[1] = {name: 'Stacks', data: arr2, yAxis: 1};
+            var name = (game.global.world == 500 ? "Spire IV" : "Zone " + game.global.world);
+            title = name + ' Helium Efficiency and Stacks';
+            xTitle = 'Cell';
+            yTitle = 'Helium Efficiency';
+            yTitle2 = 'Stacks';
+            yType2 = 'Linear';
+            yminFloor2 = 0;
+            precision = 3;
+            break;    
+        case 'Helium - He/Hr':
+            graphData = allPurposeGraph('heliumhr',true,null,
+                    function specialCalc(e1,e2) {
+                        return Math.floor(e1.heliumOwned / ((e1.currentTime - e1.portalTime) / 3600000));
+                    });
+            title = 'Helium/Hour (Cumulative)';
+            xTitle = 'Zone';
+            yTitle = 'Helium/Hour';
+            yType = 'Linear';
+            yminFloor=0;
+            break;
+        case 'Helium - Total':
+            graphData = allPurposeGraph('heliumOwned',true,null,
+                    function specialCalc(e1,e2) {
+                        return Math.floor(e1.heliumOwned);
+                    });
+            title = 'Helium (Portal Total)';
+            xTitle = 'Zone';
+            yTitle = 'Helium';
+            yType = 'Linear';
+            break;     
         case 'Helium - He/Hr Instant':
             var currentPortal = -1;
             var currentZone = -1;
@@ -619,7 +481,6 @@ function setGraphData(graph) {
                     graphData[graphData.length - 1].data.push(nowhehr);
                 }
                 currentZone = allSaveData[i].world;
-
             }
             title = 'Helium/Hour Instantaneous - between current and last zone.';
             xTitle = 'Zone';
@@ -627,7 +488,6 @@ function setGraphData(graph) {
             yType = 'Linear';
             yminFloor=null;
             break;
-
         case 'Helium - He/Hr Delta':
             var currentPortal = -1;
             var currentZone = -1;
@@ -660,15 +520,68 @@ function setGraphData(graph) {
                 }
                 currentZone = allSaveData[i].world;
                 lasthehr = nowhehr;
-
             }
-            title = 'Helium/Hour Delta(Difference) - between current and last zone.';
+            title = 'Helium/Hour Delta - between current and last zone.';
             xTitle = 'Zone';
             yTitle = 'Difference in Helium/Hour';
             yType = 'Linear';
             yminFloor=null;
             break;
-
+        case 'HeHr % / LifetimeHe':
+            graphData = allPurposeGraph('hehr',true,null);
+            title = 'He/Hr % of LifetimeHe';
+            xTitle = 'Zone';
+            yTitle = 'He/Hr % of LifetimeHe';
+            yType = 'Linear';
+            graphsPretty = false;
+            precision = 4;
+            break;
+        case 'He % / LifetimeHe':
+            graphData = allPurposeGraph('helife',true,null);
+            title = 'He % of LifetimeHe';
+            xTitle = 'Zone';
+            yTitle = 'He % of LifetimeHe';
+            yType = 'Linear';
+            graphsPretty = false;
+            precision = 4;
+            break;
+        case 'Clear Time':
+            graphData = allPurposeGraph('cleartime1',true,null,
+                    function specialCalc(e1,e2) {
+                        return Math.round(((e1.currentTime - e2.currentTime)-(e1.portalTime - e2.portalTime)) / 1000);
+                    });
+            /*graphData = allPurposeGraph('cleartime2',true,null,
+                    function specialCalc(e1,e2) {
+                        return Math.round(e1.zonetime/1000);
+                    });*/       
+            title = 'Time to clear zone';
+            xTitle = 'Zone';
+            yTitle = 'Clear Time';
+            yType = 'Linear';
+            valueSuffix = ' Seconds';
+            yminFloor=0;
+            break;
+        case 'Cumulative Clear Time':
+            graphData = allPurposeGraph('cumucleartime1',true,null,
+                    function specialCalc(e1,e2) {
+                        return Math.round((e1.currentTime - e2.currentTime)-(e1.portalTime - e2.portalTime));
+                    },true);
+            /*graphData = allPurposeGraph('cumucleartime2',true,null,
+                    function specialCalc(e1,e2) {
+                        return Math.round(e1.zonetime);
+                    },true);*/
+            title = 'Cumulative Time (at END of zone#)';
+            xTitle = 'Zone';
+            yTitle = 'Cumulative Clear Time';
+            yType = 'datetime';
+            formatter =  function () {
+                var ser = this.series;
+                return '<span style="color:' + ser.color + '" >�?</span> ' +
+                        ser.name + ': <b>' +
+                        Highcharts.dateFormat('%H:%M:%S', this.y) + '</b><br>';
+            };
+            yminFloor=0;
+            break;
         case 'Run Time':
             var currentPortal = -1;
             var theChallenge = '';
@@ -701,10 +614,15 @@ function setGraphData(graph) {
                 return '<span style="color:' + ser.color + '" >�?</span> ' +
                         ser.name + ': <b>' +
                         Highcharts.dateFormat('%H:%M:%S', this.y) + '</b><br>';
-
             };
             break;
-
+        case 'Map Bonus':
+            graphData = allPurposeGraph('mapbonus',true,"number");
+            title = 'Map Bonus History';
+            xTitle = 'Zone';
+            yTitle = 'Map Bonus Stacks';
+            yType = 'Linear';
+            break;
         case 'Void Maps':
             var currentPortal = -1;
             var totalVoids = 0;
@@ -736,7 +654,62 @@ function setGraphData(graph) {
             yTitle = 'Number of Void Maps';
             yType = 'Linear';
             break;
-
+        case 'Void Map History':
+            graphData = allPurposeGraph('voids',true,"number");
+            title = 'Void Map History (voids finished during the same level acquired (with RunNewVoids) are not counted/tracked)';
+            xTitle = 'Zone';
+            yTitle = 'Number of Void Maps';
+            yType = 'Linear';
+            break;
+        case 'Loot Sources':
+            graphData = [];
+            graphData[0] = {name: 'Metal', data: lootData.metal};
+            graphData[1] = {name: 'Wood', data: lootData.wood};
+            graphData[2] = {name: 'Food', data: lootData.food};
+            graphData[3] = {name: 'Gems', data: lootData.gems};
+            title = 'Current Loot Sources (of all resources gained) - for the last 15 minutes';
+            xTitle = 'Time (every 15 seconds)';
+            yTitle = 'Ratio of looted to gathered';
+            valueSuffix = '%';
+            formatter = function () {
+                return Highcharts.numberFormat(this.y,3);
+            };
+            break;
+        case 'Coordinations':
+            graphData = allPurposeGraph('coord',true,"number");
+            title = 'Coordination History';
+            xTitle = 'Zone';
+            yTitle = 'Coordination';
+            yType = 'Linear';
+            break;
+        case 'GigaStations':
+            graphData = allPurposeGraph('gigas',true,"number");
+            title = 'Gigastation History';
+            xTitle = 'Zone';
+            yTitle = 'Number of Gigas';
+            yType = 'Linear';
+            break;
+        case 'Unused Gigas':
+            graphData = allPurposeGraph('gigasleft',true,"number");
+            title = 'Unused Gigastations';
+            xTitle = 'Zone';
+            yTitle = 'Number of Gigas';
+            yType = 'Linear';
+            break;
+        case 'Last Warpstation':
+            graphData = allPurposeGraph('lastwarp',true,"number");
+            title = 'Warpstation History';
+            xTitle = 'Zone';
+            yTitle = 'Previous Giga\'s Number of Warpstations';
+            yType = 'Linear';
+            break;
+        case 'Trimps':
+            graphData = allPurposeGraph('trimps',true,"number");
+            title = 'Total Trimps Owned';
+            xTitle = 'Zone';
+            yTitle = 'Cumulative Number of Trimps';
+            yType = 'Linear';
+            break;
         case 'Nullifium Gained':
             var currentPortal = -1;
             var totalNull = 0;
@@ -778,221 +751,7 @@ function setGraphData(graph) {
             xTitle = 'Portal';
             yTitle = 'Nullifium Gained';
             yType = 'Linear';
-            break;
-        case 'Efficiency and Stacks':
-       
-            var names = [];
-            var arr1 = [];
-            var arr2 = [];
-            
-            if(typeof stanceStats.cmp !== 'undefined')
-                for(var i = 0; i < stanceStats.cmp.length; i++){
-                    if(!worldArray[i])
-                        names.push(i);
-                    else if(worldArray[i].corrupted === undefined)
-                        names.push(i + "empty");
-                    else
-                        names.push(i + worldArray[i].corrupted);
-                    arr1.push([names[i], stanceStats.cmp[i]]);
-                    arr2.push([names[i], stanceStats.stacks[i]]);
-                }
-            
-            graphData = [];
-            graphData[0] = {name: 'He/hr Efficiency', data: arr1};
-            graphData[1] = {name: 'Stacks', data: arr2, yAxis: 1};
-            var name = (game.global.world == 500 ? "Spire IV" : "Zone " + game.global.world);
-            title = name + ' Helium Efficiency and Stacks';
-            xTitle = 'Cell';
-            yTitle = 'Helium Efficiency';
-            yTitle2 = 'Stacks';
-            yType2 = 'Linear';
-            yminFloor2 = 0;
-            
-            
-            //formatter = function () {
-            //    return Highcharts.numberFormat(this.y,3);
-            //};
-            //yType = 'Linear';
-            //yminFloor = 0;
-            precision = 3;
-            break;
-        case 'Loot Sources':
-            graphData = [];
-            graphData[0] = {name: 'Metal', data: lootData.metal};
-            graphData[1] = {name: 'Wood', data: lootData.wood};
-            graphData[2] = {name: 'Food', data: lootData.food};
-            graphData[3] = {name: 'Gems', data: lootData.gems};
-            title = 'Current Loot Sources (of all resources gained) - for the last 15 minutes';
-            xTitle = 'Time (every 15 seconds)';
-            yTitle = 'Ratio of looted to gathered';
-            valueSuffix = '%';
-            formatter = function () {
-                return Highcharts.numberFormat(this.y,3);
-            };
-            break;
-
-        //all use the same function: allPurposeGraph()
-        case 'Clear Time #2':
-            graphData = allPurposeGraph('cleartime2',true,null,
-                    function specialCalc(e1,e2) {
-                        return Math.round(e1.zonetime/1000);
-                    });
-            title = '(#2) Time to Clear Zone';
-            xTitle = 'Zone';
-            yTitle = 'Clear Time';
-            yType = 'Linear';
-            valueSuffix = ' Seconds';
-            break;
-        case 'Clear Time':
-            graphData = allPurposeGraph('cleartime1',true,null,
-                    function specialCalc(e1,e2) {
-                        return Math.round(((e1.currentTime - e2.currentTime)-(e1.portalTime - e2.portalTime)) / 1000);
-                    });
-            title = 'Time to clear zone';
-            xTitle = 'Zone';
-            yTitle = 'Clear Time';
-            yType = 'Linear';
-            valueSuffix = ' Seconds';
-            yminFloor=0;
-            break;
-        case 'Cumulative Clear Time #2':
-            graphData = allPurposeGraph('cumucleartime2',true,null,
-                    function specialCalc(e1,e2) {
-                        return Math.round(e1.zonetime);
-                    },true);
-            title = '(#2) Cumulative Time (at END of zone#)';
-            xTitle = 'Zone';
-            yTitle = 'Cumulative Clear Time';
-            yType = 'datetime';
-            formatter =  function () {
-                var ser = this.series;
-                return '<span style="color:' + ser.color + '" >�?</span> ' +
-                        ser.name + ': <b>' +
-                        Highcharts.dateFormat('%H:%M:%S', this.y) + '</b><br>';
-
-            };
-            yminFloor=0;
-            break;
-        case 'Cumulative Clear Time':
-            graphData = allPurposeGraph('cumucleartime1',true,null,
-                    function specialCalc(e1,e2) {
-                        return Math.round((e1.currentTime - e2.currentTime)-(e1.portalTime - e2.portalTime));
-                    },true);
-            title = 'Cumulative Time (at END of zone#)';
-            xTitle = 'Zone';
-            yTitle = 'Cumulative Clear Time';
-            yType = 'datetime';
-            formatter =  function () {
-                var ser = this.series;
-                return '<span style="color:' + ser.color + '" >�?</span> ' +
-                        ser.name + ': <b>' +
-                        Highcharts.dateFormat('%H:%M:%S', this.y) + '</b><br>';
-
-            };
-            yminFloor=0;
-            break;
-        case 'Helium - He/Hr':
-            graphData = allPurposeGraph('heliumhr',true,null,
-                    function specialCalc(e1,e2) {
-                        return Math.floor(e1.heliumOwned / ((e1.currentTime - e1.portalTime) / 3600000));
-                    });
-            title = 'Helium/Hour (Cumulative)';
-            xTitle = 'Zone';
-            yTitle = 'Helium/Hour';
-            yType = 'Linear';
-            yminFloor=0;
-            break;
-        case 'Helium - Total':
-            graphData = allPurposeGraph('heliumOwned',true,null,
-                    function specialCalc(e1,e2) {
-                        return prettify(Math.floor(e1.heliumOwned));
-                    });
-            title = 'Helium (Lifetime Total)';
-            xTitle = 'Zone';
-            yTitle = 'Helium';
-            yType = 'Linear';
-            break;
-        case 'HeHr % / LifetimeHe':
-            graphData = allPurposeGraph('hehr',true,"string");
-            title = 'He/Hr % of LifetimeHe';
-            xTitle = 'Zone';
-            yTitle = 'He/Hr % of LifetimeHe';
-            yType = 'Linear';
-            precision = 4;
-            break;
-        case 'He % / LifetimeHe':
-            graphData = allPurposeGraph('helife',true,"string");
-            title = 'He % of LifetimeHe';
-            xTitle = 'Zone';
-            yTitle = 'He % of LifetimeHe';
-            yType = 'Linear';
-            precision = 4;
-            break;
-        case 'Void Map History':
-            graphData = allPurposeGraph('voids',true,"number");
-            title = 'Void Map History (voids finished during the same level acquired (with RunNewVoids) are not counted/tracked)';
-            xTitle = 'Zone';
-            yTitle = 'Number of Void Maps';
-            yType = 'Linear';
-            break;
-        case 'Map Bonus':
-            graphData = allPurposeGraph('mapbonus',true,"number");
-            title = 'Map Bonus History';
-            xTitle = 'Zone';
-            yTitle = 'Map Bonus Stacks';
-            yType = 'Linear';
-            break;
-        case 'Coordinations':
-            graphData = allPurposeGraph('coord',true,"number");
-            title = 'Coordination History';
-            xTitle = 'Zone';
-            yTitle = 'Coordination';
-            yType = 'Linear';
-            break;
-        case 'GigaStations':
-            graphData = allPurposeGraph('gigas',true,"number");
-            title = 'Gigastation History';
-            xTitle = 'Zone';
-            yTitle = 'Number of Gigas';
-            yType = 'Linear';
-            break;
-        case 'Unused Gigas':
-            graphData = allPurposeGraph('gigasleft',true,"number");
-            title = 'Unused Gigastations';
-            xTitle = 'Zone';
-            yTitle = 'Number of Gigas';
-            yType = 'Linear';
-            break;
-        case 'Last Warpstation':
-            graphData = allPurposeGraph('lastwarp',true,"number");
-            title = 'Warpstation History';
-            xTitle = 'Zone';
-            yTitle = 'Previous Giga\'s Number of Warpstations';
-            yType = 'Linear';
-            break;
-        case 'Trimps':
-            graphData = allPurposeGraph('trimps',true,"number");
-            title = 'Total Trimps Owned';
-            xTitle = 'Zone';
-            yTitle = 'Cumulative Number of Trimps';
-            yType = 'Linear';
-            break;
-        case 'Magmite':
-            graphData = allPurposeGraph('magmite',true,"number");
-            title = 'Total Magmite Owned';
-            xTitle = 'Zone (starting at 230)';
-            yTitle = 'Magmite';
-            yType = 'Linear';
-            xminFloor = 230;
-            break;
-        case 'Magmamancers':
-            graphData = allPurposeGraph('magmamancers',true,"number");
-            title = 'Total Magmamancers Owned';
-            xTitle = 'Zone (starting at 230)';
-            yTitle = 'Magmamancers';
-            yType = 'Linear';
-            xminFloor = 230;
-            break;
+            break;   
         case 'Dark Essence':
             graphData = allPurposeGraph('essence',true,"number");
             title = 'Total Dark Essence Owned';
@@ -1036,14 +795,54 @@ function setGraphData(graph) {
             yType = 'Linear';
             xminFloor = 181;
             break;
-        case 'Nurseries':
-            graphData = allPurposeGraph('nursery',true,"number");
-            title = 'Nurseries Bought (Total)';
-            xTitle = 'Zone';// (starting at your NoNurseriesUntil setting)';
-            yTitle = 'Nursery';
+        case 'OverkillCells':
+            var currentPortal = -1;
+            graphData = [];
+            for (var i in allSaveData) {
+                if (allSaveData[i].totalPortals != currentPortal) {
+                    graphData.push({
+                        name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
+                        data: []
+                    });
+                    currentPortal = allSaveData[i].totalPortals;
+                    if(allSaveData[i].world == 1 && currentZone != -1 )
+                        graphData[graphData.length -1].data.push(0);
+
+                    if(currentZone == -1 || allSaveData[i].world != 1) {
+                        var loop = allSaveData[i].world;
+                        while (loop > 0) {
+                            graphData[graphData.length -1].data.push(0);
+                            loop--;
+                        }
+                    }
+                }
+                if(currentZone < allSaveData[i].world && currentZone != -1) {
+                    var num = allSaveData[i].overkill;
+                    if (num)
+                        graphData[graphData.length - 1].data.push(num);
+                }
+                currentZone = allSaveData[i].world;
+            }
+            title = 'Overkilled Cells';
+            xTitle = 'Zone';
+            yTitle = 'Overkilled Cells';
             yType = 'Linear';
-            // if (getPageSetting('NoNurseriesUntil'))
-                // xminFloor = getPageSetting('NoNurseriesUntil');
+            break;    
+        case 'Magmite':
+            graphData = allPurposeGraph('magmite',true,"number");
+            title = 'Total Magmite Owned';
+            xTitle = 'Zone (starting at 230)';
+            yTitle = 'Magmite';
+            yType = 'Linear';
+            xminFloor = 230;
+            break;
+        case 'Magmamancers':
+            graphData = allPurposeGraph('magmamancers',true,"number");
+            title = 'Total Magmamancers Owned';
+            xTitle = 'Zone (starting at 230)';
+            yTitle = 'Magmamancers';
+            yType = 'Linear';
+            xminFloor = 230;
             break;
         case 'Fluffy XP':
             graphData = allPurposeGraph('fluffy',true,"number");
@@ -1098,53 +897,29 @@ function setGraphData(graph) {
             //xminFloor = 300;
             xminFloor = 1;
             break;
-        case 'OverkillCells':
-            var currentPortal = -1;
-            graphData = [];
-            for (var i in allSaveData) {
-                if (allSaveData[i].totalPortals != currentPortal) {
-                    graphData.push({
-                        name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
-                        data: []
-                    });
-                    currentPortal = allSaveData[i].totalPortals;
-                    if(allSaveData[i].world == 1 && currentZone != -1 )
-                        graphData[graphData.length -1].data.push(0);
-
-                    if(currentZone == -1 || allSaveData[i].world != 1) {
-                        var loop = allSaveData[i].world;
-                        while (loop > 0) {
-                            graphData[graphData.length -1].data.push(0);
-                            loop--;
-                        }
-                    }
-                }
-                if(currentZone < allSaveData[i].world && currentZone != -1) {
-                    var num = allSaveData[i].overkill;
-                    if (num)
-                        graphData[graphData.length - 1].data.push(num);
-                }
-                currentZone = allSaveData[i].world;
-            }
-            title = 'Overkilled Cells';
-            xTitle = 'Zone';
-            yTitle = 'Overkilled Cells';
+        case 'Nurseries':
+            graphData = allPurposeGraph('nursery',true,"number");
+            title = 'Nurseries Bought (Total)';
+            xTitle = 'Zone';// (starting at your NoNurseriesUntil setting)';
+            yTitle = 'Nursery';
             yType = 'Linear';
+            // if (getPageSetting('NoNurseriesUntil'))
+                // xminFloor = getPageSetting('NoNurseriesUntil');
             break;
     }//end of switch(graph)
 
     //(internal) default function used to draw non-specific graphs (and some specific ones)
-    function allPurposeGraph(item,extraChecks,typeCheck,funcToRun,useAccumulator) {
+    function allPurposeGraph(item,extraChecks,typeCheck,funcToRun,useAccumulator){
         var currentPortal = -1;
         var currentZone = 0;
         var accumulator = 0;
         graphData = [];
         //begin iterating:
-        for (var i in allSaveData) {
+        for (var i in allSaveData){
             //acts as an "exists" check (for lack of data)
             if (typeCheck && typeof allSaveData[i][item] != typeCheck)
                 continue;
-            if (allSaveData[i].totalPortals != currentPortal) {
+            if (allSaveData[i].totalPortals != currentPortal){
                 graphData.push({
                     name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
                     data: []
@@ -1160,22 +935,22 @@ function setGraphData(graph) {
             }
             //maybe not?runs extra checks for mid-run imports, and pushes 0's to align to the right zone properly.
             if (extraChecks) {
-                if (currentZone != allSaveData[i].world - 1) {
+                if (currentZone != allSaveData[i].world - 1){
                     //console.log(allSaveData[i].totalPortals + allSaveData[i].world);
                     var loop = allSaveData[i].world - 1 - currentZone;
-                    while (loop > 0) {
+                    while (loop > 0){
                         graphData[graphData.length - 1].data.push(allSaveData[i-1][item]*1);
                         loop--;
                     }
                 }
             }
             //write datapoint (one of 3 ways)
-            if (funcToRun && !useAccumulator && currentZone != 0) {
+            if (funcToRun && !useAccumulator && currentZone != 0){
                 var num = funcToRun(allSaveData[i],allSaveData[i-1]);
                 if (num < 0) num = 1;
                 graphData[graphData.length - 1].data.push(num);
             }
-            else if (funcToRun && useAccumulator && currentZone != 0) {
+            else if (funcToRun && useAccumulator && currentZone != 0){
                 accumulator += funcToRun(allSaveData[i],allSaveData[i-1]);
                 if (accumulator < 0) accumulator = 1;
                 graphData[graphData.length - 1].data.push(accumulator);
@@ -1191,23 +966,23 @@ function setGraphData(graph) {
         return graphData;
     }
     //default formatter used (can define a decimal precision, and a suffix)
-    formatter = formatter || function () {
+    formatter = formatter || function (){
         var ser = this.series;
         return '<span style="color:' + ser.color + '" >�?</span> ' +
                 ser.name + ': <b>' +
-                Highcharts.numberFormat(this.y, precision,'.', ',') + valueSuffix + '</b><br>';
+                (graphsPretty ? prettify(this.y) : Highcharts.numberFormat(this.y, precision,'.', ',')) + valueSuffix + '</b><br>';
     };
     var additionalParams = {};
     //Makes everything happen.
-    if (oldData != JSON.stringify(graphData)) {
+    if (oldData != JSON.stringify(graphData)){
         saveSelectedGraphs();
         if (graph != 'Efficiency and Stacks')
-            setGraph(title, xTitle, yTitle, valueSuffix, formatter, graphData, yType, xminFloor, yminFloor, additionalParams);
+            setGraph(title, xTitle, yTitle,                  valueSuffix, formatter, graphData, yType,         xminFloor, yminFloor, additionalParams);
         else
             setGraph2(title, xTitle, yTitle, yTitle2, names, valueSuffix, formatter, graphData, yType, yType2, xminFloor, yminFloor, yminFloor2);
     }
     //put finishing touches on this graph.
-    if (graph == 'Helium - He/Hr Delta') {
+    if (graph == 'Helium - He/Hr Delta'){
         var plotLineoptions = {
                 value: 0,
                 width: 2,
@@ -1216,12 +991,12 @@ function setGraphData(graph) {
         chart1.yAxis[0].addPlotLine(plotLineoptions);
     }
     //put finishing touches on this graph.
-    if (graph == 'Loot Sources') {
+    if (graph == 'Loot Sources'){
         chart1.xAxis[0].tickInterval = 1;
         chart1.xAxis[0].minorTickInterval = 1;
     }
     //put finishing  touches on this graph.
-    if (graph == 'Efficiency and Stacks') {
+    if (graph == 'Efficiency and Stacks'){
         if(stanceStats && stanceStats.wantLessDamage)
             for(var i = 0; i < stanceStats.wantLessDamage.length; i++){
                 if(stanceStats.wantLessDamage[i]){
@@ -1251,20 +1026,20 @@ function setGraphData(graph) {
         //chart1.xAxis[0].minorTickInterval = 1;
     }
     //remember what we had (de)selected, if desired.
-    if (document.getElementById('rememberCB').checked) {
+    if (document.getElementById('rememberCB').checked){
         applyRememberedSelections();
     }
 }
 
 var chart1;
-function setGraph(title, xTitle, yTitle, valueSuffix, formatter, series, yType, xminFloor, yminFloor, additionalParams) {
+function setGraph(title, xTitle, yTitle, valueSuffix, formatter, series, yType, xminFloor, yminFloor, additionalParams){
     chart1 = new Highcharts.Chart({
-        chart: {
+        chart:{
             renderTo: 'graph',
             zoomType: 'xy',
             //move reset button out of the way.
-            resetZoomButton: {
-                position: {
+            resetZoomButton:{
+                position:{
                     align: 'right',
                     verticalAlign: 'top',
                     x: -20,
@@ -1303,7 +1078,12 @@ function setGraph(title, xTitle, yTitle, valueSuffix, formatter, series, yType, 
                 color: '#808080'
             }],
             type: yType,
-            dateTimeLabelFormats: { //force all formats to be hour:minute:second
+            labels: {
+                formatter: function(){
+                    return ((this.value > 1000 || this.value < 0) ? prettify(this.value) : this.value);
+                }
+            }
+            /*dateTimeLabelFormats: { //force all formats to be hour:minute:second
             second: '%H:%M:%S',
             minute: '%H:%M:%S',
             hour: '%H:%M:%S',
@@ -1311,7 +1091,7 @@ function setGraph(title, xTitle, yTitle, valueSuffix, formatter, series, yType, 
             week: '%H:%M:%S',
             month: '%H:%M:%S',
             year: '%H:%M:%S'
-        }
+            }*/
         },
         tooltip: {
             pointFormatter: formatter,
@@ -1329,7 +1109,7 @@ function setGraph(title, xTitle, yTitle, valueSuffix, formatter, series, yType, 
 }
 
 //used for Efficiency and Stacks
-function setGraph2(title, xTitle, yTitle, yTitle2, names, valueSuffix, formatter, series, yType, yType2, xminFloor, yminFloor, yminFloor2, additionalParams) {
+function setGraph2(title, xTitle, yTitle, yTitle2, names, valueSuffix, formatter, series, yType, yType2, xminFloor, yminFloor, yminFloor2, additionalParams){
     chart1 = new Highcharts.Chart({
         chart: {
             alignTicks: false, //without this ticks will go higher than desired. might want gridLineWidth 0 on yaxis#2
@@ -1445,7 +1225,7 @@ function setGraph2(title, xTitle, yTitle, yTitle2, names, valueSuffix, formatter
     });
 }
 
-function setColor(tmp) {
+function setColor(tmp){
     for (var i in tmp) {
         tmp[i].color = (i == tmp.length - 1) ? '#FF0000'  //Current run is in red
                                              : '#90C3D4'; //Old runs are in blue
@@ -1461,7 +1241,7 @@ var lootData = {
     metal: [], wood:[], food:[], gems:[]
 };
 //track loot gained. jest == from jest/chronoimp
-function filterLoot (loot, amount, jest, fromGather) {
+function filterLoot (loot, amount, jest, fromGather){
     if(loot != 'wood' && loot != 'metal' && loot != 'food' && loot != 'gems') return;
     if(jest) {
         filteredLoot.produced[loot] += amount;
@@ -1473,7 +1253,7 @@ function filterLoot (loot, amount, jest, fromGather) {
     //console.log('item is: ' + loot + ' amount is: ' + amount);
 }
 
-function getLootData() {
+function getLootData(){
     var loots = ['metal', 'wood', 'food', 'gems'];
     for(var r in loots){
         var name = loots[r];
@@ -1491,7 +1271,7 @@ setInterval(getLootData, 15000);
 (function(){
     var resAmts;
 
-    function storeResAmts() {
+    function storeResAmts(){
         resAmts = {};
         for (let item in lootData) {
             resAmts[item] = game.resources[item].owned;
@@ -1500,12 +1280,12 @@ setInterval(getLootData, 15000);
 
     const oldJestimpLoot = game.badGuys.Jestimp.loot;
     game.badGuys.Jestimp.loot =
-    function() {
+    function(){
         storeResAmts();
         var toReturn = oldJestimpLoot.apply(this, arguments);
-        for (let item in resAmts) {
+        for (let item in resAmts){
             var gained = game.resources[item].owned - resAmts[item];
-            if (gained > 0) {
+            if (gained > 0){
                 filterLoot(item, gained, true);
             }
         }
@@ -1514,12 +1294,12 @@ setInterval(getLootData, 15000);
 
     const oldChronoimpLoot = game.badGuys.Chronoimp.loot;
     game.badGuys.Chronoimp.loot =
-    function () {
+    function (){
         storeResAmts();
         var toReturn = oldChronoimpLoot.apply(this, arguments);
-        for (let item in resAmts) {
+        for (let item in resAmts){
             var gained = game.resources[item].owned - resAmts[item];
-            if (gained > 0) {
+            if (gained > 0){
                 filterLoot(item, gained, true);
             }
         }
@@ -1532,7 +1312,7 @@ setInterval(getLootData, 15000);
 })();
 //END overwriting default game functions!!!!!!!!!!!!!!!!!!!!!!
 
-function lookUpZoneData(zone,portal) {
+function lookUpZoneData(zone,portal){
     if (portal == null)
         portal = game.global.totalPortals;
     for (var i=allSaveData.length-1,end=0; i >= 0; i--) {
