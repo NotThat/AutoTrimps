@@ -1,7 +1,5 @@
 function pushData(){
-    var dailyMultGraph = 1 + countDailyWeight() === 0 ? 0 : getDailyHeliumValue(countDailyWeight()) / 100;
-    var getPercent = dailyMultGraph * game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned))*100;
-    var lifetime = game.resources.helium.owned / (game.global.totalHeliumEarned - game.resources.helium.owned)*100;
+    var dailyMultGraph = 1 + (countDailyWeight() === 0 ? 0 : getDailyHeliumValue(countDailyWeight()) / 100);
 
     allSaveData.push({
         totalPortals: game.global.totalPortals,
@@ -19,8 +17,8 @@ function pushData(){
         coord: game.upgrades.Coordination.done,
         lastwarp: game.global.lastWarp,
         essence: getTotalDarkEssenceCount(),
-        hehr: getPercent,
-        helife: lifetime,
+        hehr: dailyMultGraph * game.stats.heliumHour.value() / (game.global.totalHeliumEarned - (game.global.heliumLeftover + game.resources.helium.owned))*100,
+        helife: game.resources.helium.owned / (game.global.totalHeliumEarned - game.resources.helium.owned)*100,
         overkill: GraphsVars.OVKcellsInWorld,
         zonetime: GraphsVars.ZoneStartTime,
         mapbonus: GraphsVars.MapBonus,
