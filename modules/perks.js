@@ -311,8 +311,7 @@ AutoPerks.clickAllocate = function() {
         AutoPerks.compoundingImp = Math.pow(1.003, AutoPerks.maxZone * 3 - 1);
         AutoPerks.windMod = 1 + 13 * game.empowerments.Wind.getModifier() * 10; //13 minimum stacks
 
-        AutoPerks.sharpBonusMult = 1; //TODO: checkbox this
-        //AutoPerks.sharpBonusMult = 1.5; //TODO: checkbox this
+        AutoPerks.sharpBonusMult = 1; //AutoPerks.sharpBonusMult = 1.5; //TODO: checkbox this
 
         /* benefitStat captures how much of a stat we have, and what the change will be from increasing a perk.
          * increasing a weight by a factor of 2 means we are willing to spend twice as much helium for the same increase.
@@ -328,8 +327,9 @@ AutoPerks.clickAllocate = function() {
                                      // on firstRun() because DG stats and helium mightve changed
         //calculates attack / health of non tough cell 50 corrupted enemy at AutoPerks.maxZone
         AutoPerks.zoneHealth = approxZoneHP(AutoPerks.maxZone); //this is health approx of the entire zone
-        AutoPerks.enemyDamage = calcEnemyAttack("Corruption", "corruptDbl", corruptHealthyStatScaleAT(3, AutoPerks.maxZone), 'Snimp', 50, 1);
-
+        AutoPerks.enemyDamage = calcEnemyAttack("Corruption", "corruptDbl", corruptHealthyStatScaleAT(3, AutoPerks.maxZone), 'Snimp', 50, 1, AutoPerks.maxZone);
+        //TODO: add daily/challenge modifiers to enemyDamage
+        
         var helium = AutoPerks.totalHelium;
 
         // Get fixed perks
@@ -550,7 +550,8 @@ AutoPerks.spendHelium = function(helium) {
     var fluffyGrowth = (AutoPerks.benefitHolderObj.Fluffy.benefit*100 / fluffyXP).toFixed(3) + "%";
     var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
     var timeText = timeEstimator(false, 0, AutoPerks.maxZone, false, true);
-    var healthMod = AutoPerks.benefitHolderObj.Health.benefit.toExponential(2); //this includes gear, amalgamators, toughness1/2, resil, and anything breeding related
+    var healthMod = (AutoPerks.benefitHolderObj.Health.benefit*calcEndHealthAA(AutoPerks.maxZone)).toExponential(2); //this includes gear, amalgamators, toughness1/2, resil, and anything breeding related
+    var healthToDamageRatio = (healthMod / AutoPerks.enemyDamage);
     if(AutoPerks.useMaxFuel) AutoPerks.fuelEndZone = AutoPerks.maxZone;
     
     var VMs             = expectedVMsAmount(); //how many VMs we expect to have
@@ -558,10 +559,10 @@ AutoPerks.spendHelium = function(helium) {
     var singleVM        = singleVMWorth();
     var heliumFromVMs   = VMs*VMsEffMult*singleVM;
     var totalHelium     = AutoPerks.totalHelium;
-    var heliumGrowth    = (heliumFromVMs*1.4/totalHelium*100).toFixed(3) + '%'; //1.5 to account for non VM helium. TODO
+    var heliumGrowth    = (heliumFromVMs*1.4/totalHelium*100).toFixed(3) + '%'; //1.4 to account for non VM helium. TODO
 
-    var msg2 = /*"Helium: " + heliumMod + */"Zone " + AutoPerks.maxZone + " will take approx " + timeText + ". Health: " + healthMod + " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + /*" Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + "/" + AutoPerks.finalAmalRatio2.toFixed(2) +*/ " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%";
-    var msg3 = "Helium Growth: " + heliumGrowth + " Fluffy Growth: " + fluffyGrowth + " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)";
+    var msg2 = /*"Helium: " + heliumMod + */"Zone " + AutoPerks.maxZone + " will take approx " + timeText + ". Enemy Damage / Army Health: " + prettify(healthToDamageRatio)+ " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone + /*" Pop/Army Goal: " + AutoPerks.finalAmalRatio.toFixed(2) + "/" + AutoPerks.finalAmalRatio2.toFixed(2) +*/ " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%";
+    var msg3 = (AutoPerks.dailyObj === AutoPerks.Squared ? "" : "Helium Growth: " + heliumGrowth + " ") + "Fluffy Growth: " + fluffyGrowth + " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)";
     var $text = document.getElementById("textAreaAllocate");
     $text.innerHTML += msg2 + '<br>' + msg3;
 };
@@ -806,7 +807,7 @@ function benefitHeliumCalc(){
     var looting1 = AutoPerks.useLivePerks ? game.portal["Looting"] : AutoPerks.perksByName.Looting;
     var looting2 = AutoPerks.useLivePerks ? game.portal["Looting_II"] : AutoPerks.perksByName.Looting_II;
     
-    this.benefit = (1 + 0.05*looting1.level) * (1 + 0.0025*looting2.level) * AutoPerks.DailyWeight;
+    this.benefit = (AutoPerks.dailyObj === AutoPerks.Squared) ? 1 : (1 + 0.05*looting1.level) * (1 + 0.0025*looting2.level) * AutoPerks.DailyWeight;
     
     if(isNaN(this.benefit)) throw "Helium NaN benefit";
     
@@ -846,7 +847,7 @@ function benefitHealthCalc(commit, incomeFlag, popBreedFlag){
     var toughness1Perk = AutoPerks.useLivePerks ? game.portal["Toughness"] : AutoPerks.perksByName.Toughness;
     var toughness2Perk = AutoPerks.useLivePerks ? game.portal["Toughness_II"] : AutoPerks.perksByName.Toughness_II;
     var resourceful    = AutoPerks.useLivePerks ? game.portal["Resourceful"] : AutoPerks.perksByName.Resourceful; //resourceful isnt useless, but hard to capture its value. so use this for now. TODO.
-    var amalToUse  = AutoPerks.useLivePerks ? AutoPerks.amalGoal : AutoPerks.currAmalgamators;
+    var amalToUse      = AutoPerks.useLivePerks ? AutoPerks.amalGoal : AutoPerks.currAmalgamators;
     var income;
     if(incomeFlag){
         if(commit){ //we leveled a perk, so update AutoPerks.equipmentAttack and AutoPerks.equipmentHealth
@@ -1603,7 +1604,7 @@ AutoPerks.initializeAmalg = function(){
             carp2cost =         carp2perk.spent;
             coordinatedcost =   coordperk.spent;
             var runMode = "";
-            if(AutoPerks.dailyObj === AutoPerks.Squared) runMode = "C2 mode (Battle GU, max fuel): ";
+            if(AutoPerks.dailyObj === AutoPerks.Squared) runMode = "C2 mode (Battle GU, max fuel, helium weight 0): ";
             else if(AutoPerks.dailyObj !== null) runMode = "Daily Mode (max fuel), x" + (AutoPerks.DailyWeight).toFixed(2) + ": ";
             
             var msg = runMode + "Amalgamator #"+AutoPerks.currAmalgamators+(AutoPerks.userMaintainMode ? " maintained. " : " found. ");

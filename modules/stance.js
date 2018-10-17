@@ -880,7 +880,7 @@ function buildWorldArray(){
     currentBadGuyNum = -1;
     
     if (!game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
-        var atk = calcEnemyAttack(game.global.gridArray[0].mutation, game.global.gridArray[0].corrupted, 1, game.global.gridArray[0].name, 0, 1);
+        var atk = calcEnemyAttack(game.global.gridArray[0].mutation, game.global.gridArray[0].corrupted, 1, game.global.gridArray[0].name, 0, 1, game.global.world);
         worldArray[0] = {health: game.global.gridArray[0].maxHealth, maxHealth: game.global.gridArray[0].maxHealth, attack: atk};
         return;
     }
@@ -938,7 +938,7 @@ function buildWorldArray(){
             mutationMultAtk = 1;
         }
         
-        //enemy.attack = calcEnemyAttack(enemy.mutation, enemy.corrupted, mutationMultAtk, enemy.name, i, oblitMult);
+        enemy.attack = calcEnemyAttack(enemy.mutation, enemy.corrupted, mutationMultAtk, enemy.name, i, oblitMult, game.global.world);
         enemy.maxHealth =  getEnemyHealthAT(i, enemy.name, true, game.global.world) * mutationMult * dailyHPMult; //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
         if(game.global.spireActive)                      enemy.maxHealth = getSpireStats(i+1, enemy.name, "health");
         if(game.global.challengeActive == "Obliterated") enemy.maxHealth *= oblitMult;

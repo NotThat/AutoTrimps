@@ -288,12 +288,32 @@ function calcEndDamageAA(base, zone){
     return base;
 }
 
+function calcEndHealthAA(zone){
+   var coords = zone + 99;
+    var soldiers = calcCoords(0, coords);
+    var base = soldiers;
+    
+    var form = 0.5;
+    base *= form;
+    
+    base *= AutoPerks.battleGUMult;
+    
+    var magMult = Math.pow(0.8, zone-230+1);
+    base *= magMult;
+        
+    if (game.global.totalSquaredReward > 0){
+        var sqr = ((game.global.totalSquaredReward / 100) + 1);
+        base *= sqr;
+    }
+    
+    return base;
+}
 
 
-function calcEnemyAttack(mutation, corrupted, atkScale, name, level, oblitMult){
+function calcEnemyAttack(mutation, corrupted, atkScale, name, level, oblitMult, zone){
     var attack;
     
-    attack = game.global.getEnemyAttack(level, name) * atkScale * 1.2; //1.2 for max damage (hopefully)
+    attack = getEnemyAttackAT(level, name, true, zone) * atkScale * 1.2; //1.2 for max damage (hopefully)
     
     if (game.global.spireActive && checkIfSpireWorld()){// && !game.global.mapsActive){
         attack = getSpireStats(level, name, "attack");
@@ -345,6 +365,32 @@ function calcEnemyAttack(mutation, corrupted, atkScale, name, level, oblitMult){
         }
     }
     return attack;
+}
+
+function getEnemyAttackAT(level, name, ignoreImpStat, zone){
+    var amt = 0;
+    var world = zone;
+    amt += 50 * Math.sqrt(world) * Math.pow(3.27, world / 2);
+    amt -= 10;
+    if (world == 1){
+        amt *= 0.35;
+        amt = (amt * 0.20) + ((amt * 0.75) * (level / 100));
+    }
+    else if (world == 2){
+        amt *= 0.5;
+        amt = (amt * 0.32) + ((amt * 0.68) * (level / 100));
+    }
+    else if (world < 60)
+        amt = (amt * 0.375) + ((amt * 0.7) * (level / 100));
+    else{
+        amt = (amt * 0.4) + ((amt * 0.9) * (level / 100));
+        amt *= Math.pow(1.15, world - 59);
+    }
+    if (world < 60) amt *= 0.85;
+    //if (world > 6 && game.global.mapsActive) amt *= 1.1;
+    if (!ignoreImpStat)
+        amt *= game.badGuys[name].attack;
+    return Math.floor(amt);
 }
 
 function dmgNeededToOK(cellNum){

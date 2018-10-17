@@ -540,8 +540,8 @@ function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
         var cell = (!game.global.mapsActive && !game.global.preMapsActive) ? game.global.lastClearedCell : 50;
         if (exitcell > 1)
             cell = exitcell;*/
-        cell = 100;
-        enemyDamage = getSpireStats(cell, "Snimp", "attack");
+        //cell = 100;
+        enemyDamage = getSpireStats(100, "Snimp", "attack");
         enemyDamage = calcDailyAttackMod(enemyDamage); //daily mods: badStrength,badMapStrength,bloodthirst
     }
     else{
