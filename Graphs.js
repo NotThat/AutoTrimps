@@ -426,7 +426,7 @@ function setGraphData(graph) {
             yTitle2 = 'Stacks';
             yType2 = 'Linear';
             yminFloor2 = 0;
-            precision = 3;
+            //precision = 3;
             break;    
         case 'Helium - He/Hr':
             graphData = allPurposeGraph('heliumhr',true,null,
@@ -848,7 +848,13 @@ function setGraphData(graph) {
             xTitle = 'Zone';
             yTitle = 'Fluffy XP';
             yType = 'Linear';
-            //xminFloor = 300;
+            graphsPretty = false;
+            formatter =  function () {
+                var ser = this.series;
+                return '<span style="color:' + ser.color + '" >�?</span> ' +
+                        ser.name + ': <b>' +
+                        this.y.toExponential(4) + '</b><br>';
+            };
             xminFloor = 1;
             break;
         case 'Fluffy XP PerHour':

@@ -44,15 +44,17 @@ var easyRatioThreshold = 10;
 //returns damage in B
 function formationToBModifier(){
     switch (game.global.formation){
-        case 0:
+        case 0: //X
             return 0.5;
-        case 2:
+        case 2: //D
             return 0.125;
-        case 3:
-            return  1;
-        case 4:
+        case 4: //S
             var ret = (isScryhardActive()) ? 0.5 : 1;
             return ret;
+        case 3: //B
+        case 1: //H
+        default:
+            return 1;
     }
 }
 

@@ -1506,8 +1506,9 @@ AutoPerks.initializeAmalg = function(){
     AutoPerks.DGGrowthRun = 0;    //initialize
     //input checks
     if(AutoPerks.amalZone < 230) AutoPerks.amalZone = 230;
-    if(AutoPerks.amalZone > 1999) AutoPerks.amalZone = 1999;
+    if(AutoPerks.amalZone > 999) AutoPerks.amalZone = 999;
     if(AutoPerks.amalGoal < 0) AutoPerks.amalGoal = 0;
+    if(AutoPerks.maxZone > 999) AutoPerks.maxZone = 999;
     if(AutoPerks.maxZone < AutoPerks.amalZone) AutoPerks.maxZone = AutoPerks.amalZone;
     if(AutoPerks.coordsBehind < 0) AutoPerks.coordsBehind = 0;
     saveSecondLine();

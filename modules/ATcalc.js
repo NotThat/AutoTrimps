@@ -520,6 +520,7 @@ function timeEstimator(currZoneFlag, fromCell, zone, isPoison, toText){
     var ret = Math.max(minTime, time);
     
     if(toText){
+        if(!isFinite(dmgToUse)) return "Infinity";
         var timeText = "";
         if(ret < 60) timeText = Math.floor(ret) + "s";
         else if (ret < 3600)  timeText = Math.floor(ret/60) + "m" + Math.floor(ret % 60) + "s";
@@ -527,8 +528,8 @@ function timeEstimator(currZoneFlag, fromCell, zone, isPoison, toText){
         else timeText = Math.floor(ret / 86400) + "d" + Math.floor((ret % 86400)/3600) + "h";
         return timeText;// + " " + Math.floor(ret);
     }
-    else
-        return ret;
+    else if(!isFinite(dmgToUse)) return Number.MAX_VALUE;
+    else return ret;
 }
 
 function getBonusPercentAT(justStacks, forceTime, count){
