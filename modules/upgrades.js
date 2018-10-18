@@ -10,7 +10,7 @@ function buyUpgrades(coordsOnly) {
         buyCoords = true;
         
         if((getPageSetting('AutoStance')==1) && getPageSetting('DelayCoordsForWind')){
-            if(!allowBuyingCoords){ //only buy coords if autostance3 allows it
+            if(!allowBuyingCoords){ //only buy coords if autostance1 allows it
                 if(game.upgrades.Coordination.done < maxCoords)
                     buyCoords = true;
                 else
@@ -72,6 +72,8 @@ function buyUpgrades(coordsOnly) {
         if (game.upgrades.Scientists.done < game.upgrades.Scientists.allowed && upgrade != 'Scientists') continue;
         
         if (upgrade == 'Coordination'){
+            //var buyCoordsFlag = game.global.challengeActive != "Trapper" && game.resources.trimps.owned/trimpsRealMax <= 0.9; //only buy coordination when we're above 90% pop
+            //if(buyCoords && !buyCoordsFlag)
             if(buyCoords)
                 buyUpgrade(upgrade, true, true);
             else

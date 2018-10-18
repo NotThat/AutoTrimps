@@ -86,8 +86,19 @@ function calcDmg(){
     }
     
     //if autostance forces not to buy coordinations, factor those in. otherwise we'll enter maps for more damage thinking that we dont have enough.
-    if(buyCoords == false && canAffordCoordinationTrimps() && getPageSetting('AutoStance')){
-        var missingCoords = game.global.world - 1 + (game.global.world > 230 ? 100 : 0) - game.upgrades.Coordination.done;
+    if(buyCoords == false && game.upgrades.Coordination.done < game.upgrades.Coordination.allowed && getPageSetting('AutoStance')){
+        //calculate how many coordinations we could buy if we wanted to.
+        var coordinationMult = 1 + 0.25 * Math.pow(0.98, game.portal["Coordinated"].level);
+        var armySize = game.portal.Coordinated.currentSend;
+        var population = trimpsRealMax;
+        var missingCoords = 0;
+        for(var i = game.upgrades.Coordination.done; i < game.upgrades.Coordination.allowed; i++){
+            var tmp = Math.ceil(armySize * coordinationMult);
+            if(tmp*3 >= population) break;
+            missingCoords++;
+            armySize = tmp;
+        }
+        //debug("missingCoords = " + missingCoords);
         ourBaseDamage = ourBaseDamage * Math.pow(1.25, missingCoords);
     }
     
@@ -403,18 +414,8 @@ function autoMap() {
     if ((shouldDoMaps || doVoids || needPrestige || shouldDoMapsVanillaRepeat) && selectedMap == "world") {
         selectedMap = "create";
         
-        if (doVoids){
-            if(game.global.mapsActive && currMap.location === "Void")
-                selectedMap = currMap;
-            else
-                selectedMap = findFirstVoidMap(); //returns map object or false
 
-            if(!selectedMap){
-                debug("No void found. Continuing.");
-                return;
-            }
-        }
-        else if (preSpireFarming) { //if preSpireFarming x minutes is true, switch over from wood maps to metal maps.
+        if (preSpireFarming) { //if preSpireFarming x minutes is true, switch over from wood maps to metal maps.
             statusMsg = "Spire Farm: ";
             var spiremaplvl = game.talents.mapLoot.purchased ? game.global.world - 1 : game.global.world;
             if (game.global.mapsActive) {
@@ -428,6 +429,17 @@ function autoMap() {
             if (game.global.world == game.global.mapsOwnedArray[highestMap].level)
                 selectedMap = game.global.mapsOwnedArray[highestMap];
             statusMsg = "Prestige: " + getRemainingSpecials(game.global.world);
+        }
+        else if (doVoids){
+            if(game.global.mapsActive && currMap.location === "Void")
+                selectedMap = currMap;
+            else
+                selectedMap = findFirstVoidMap(); //returns map object or false
+
+            if(!selectedMap){
+                debug("No void found. Continuing.");
+                return;
+            }
         }
         else if (siphonMap != -1) //use the siphonology adjusted map
             selectedMap = game.global.mapsOwnedArray[siphonMap];

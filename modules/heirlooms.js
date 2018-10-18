@@ -581,16 +581,14 @@ function equipLowDmgShield(){
 }
 
 function equipSelectedShield(good){
-    if(good != highDamageHeirloom){
-        if(good == undefined)
-            debug("error: equipSelectedShield good is undefined!");
-        if(highDamageHeirloom == undefined)
-            debug("error: equipSelectedShield highDamageHeirloom undefined!");
-        if(good)
-            equipMainShield();
-        else
-            equipLowDmgShield();
-    }
+    if(good == undefined)
+        debug("error: equipSelectedShield good is undefined!");
+    if(highDamageHeirloom == undefined)
+        debug("error: equipSelectedShield highDamageHeirloom undefined!");
+    if(good)
+        equipMainShield();
+    else
+        equipLowDmgShield();
 }
 
 function findMainShield(){

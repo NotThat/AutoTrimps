@@ -426,7 +426,7 @@ function autoStance() {
         cmp       *= game.empowerments.Wind.getModifier() * dailyMult / OmniThreshold; //cmp is in OmniThreshold units
         cmpActual *= game.empowerments.Wind.getModifier() * dailyMult / OmniThreshold;
 
-        calculateZoneWorth(cellNum);
+        calculateZoneWorth(0);
 
         //we have high shield here
         var limit = 10;

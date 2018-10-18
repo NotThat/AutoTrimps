@@ -227,8 +227,8 @@ function calcDmgManual(printout){
 //TODO: golden battle, sharp trimps, daily bonuses, 
 function calcEndDamageAA(base, zone){
     var coords = zone + 99;
-    var soldiers = calcCoords(0, coords);
-    base *= soldiers;
+    //var soldiers = calcCoords(0, coords);
+    //base *= soldiers;
     
     var achievements = 1 + (game.global.achievementBonus / 100);
     base *= achievements;
@@ -288,13 +288,56 @@ function calcEndDamageAA(base, zone){
     return base;
 }
 
+//health if we send a new army right this moment
+function calcCurrSendHealth(){
+    var base = 50;
+    var equipmentList = ["Shield", "Boots", "Helmet", "Pants", "Shoulderguards", "Breastplate", "Gambeson"];
+    for(var i = 0; i < equipmentList.length; i++){
+        if(game.equipment[equipmentList[i]].locked !== 0) continue;
+        var healthBonus = game.equipment[equipmentList[i]].healthCalculated;
+        var level       = game.equipment[equipmentList[i]].level;
+        base += healthBonus*level;
+    }
+    
+    var soldiers = game.resources.trimps.maxSoldiers;
+    base *= soldiers;
+    
+    if(game.global.world >= 230){
+        var magMult = Math.pow(0.8, game.global.world-230+1);
+        base *= magMult;
+    }
+    
+    var resilPerk      = game.portal["Resilience"];
+    var toughness1Perk = game.portal["Toughness"];
+    var toughness2Perk = game.portal["Toughness_II"];
+    
+    base *= (1 + 0.05*toughness1Perk.level) * (1 + 0.01*toughness2Perk.level)*Math.pow(1.1, resilPerk.level);
+    
+    if (game.global.totalSquaredReward > 0){
+        var sqr = ((game.global.totalSquaredReward / 100) + 1);
+        base *= sqr;
+    }
+    
+    if (game.jobs.Amalgamator.owned > 0){
+        var amal = Math.pow(40, game.jobs.Amalgamator.owned);
+        base *= amal;
+    }
+    
+    var formation = 0.5;
+    base *= formation;
+    
+    base *= Math.pow(1.01, game.global.lowestGen);
+    
+    return base;
+}
+
 function calcEndHealthAA(zone){
    var coords = zone + 99;
-    var soldiers = calcCoords(0, coords);
-    var base = soldiers;
+    //var soldiers = calcCoords(0, coords);
+    //var base = soldiers;
     
     var form = 0.5;
-    base *= form;
+    var base = form;
     
     base *= AutoPerks.battleGUMult;
     
