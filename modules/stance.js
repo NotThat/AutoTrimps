@@ -114,6 +114,7 @@ function autoStance() {
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     var nextCell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum + 1] : game.global.gridArray[cellNum + 1];
+    var chosenFormation = 2; //default to D stance
     
     var stackSpire = (game.global.world == 500) && ((getPageSetting('StackSpire4') == 1 && game.global.challengeActive == "Daily") || getPageSetting('StackSpire4') == 2) && (game.global.spireDeaths <= 5) && (game.global.challengeActive ? typeof game.global.dailyChallenge.bogged === 'undefined' : true);
 
@@ -339,22 +340,22 @@ function autoStance() {
         var remainingDrops = countRemainingEssenceDrops(); //how many cells with De remaining
         if(getPageSetting('AutoStance') == 2){ //DE mode
             if(remainingDrops > 0)
-                goDefaultStance(4);
+                chosenFormation = 4;
             else
-                goDefaultStance(2);
+                chosenFormation = 2;
         }
         else{
             if(getPageSetting('AutoStance') == 3)  //push mode
-                goDefaultStance(2); //D if we have it, X otherwise
+                chosenFormation = 2; //D if we have it, X otherwise
             else{ //hybrid mode
             if(poisonZone()){
                 if(remainingDrops > 0)
-                    goDefaultStance(4);
+                    chosenFormation = 4;
                 else
-                    goDefaultStance(2);
+                    chosenFormation = 2;
             }
             else
-                goDefaultStance(2);
+                chosenFormation = 2;
             }
         }
     }
@@ -404,8 +405,6 @@ function autoStance() {
         return;
     }
     else{ //wind zone with helium mode
-        var chosenFormation;
-
         var cmp = 0; //cmp uses nextStartingStacks which includes an approximation of how many more hits we need
         var cmpActual = 0; //this is precise (used for display)
 
