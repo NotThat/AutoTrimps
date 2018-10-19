@@ -58,46 +58,32 @@ function formationToBModifier(){
     }
 }
 
-function ATgetPlayerNonCritDamageMult(critChance, critDamage){
-    var base = 5;
-    if (Fluffy.isRewardActive("megaCrit")) base += 2;
-    if (game.talents.crit.purchased) base += 1;
-    if(critChance < 0)
-        return 0.2;
-    else if(critChance < 1)
-        return 1;
-    else if (critChance < 2)
-        return critDamage;
-    else if (critChance < 3)
-        return Math.pow(base, 1)*critDamage;
-    else if (critChance < 3)
-        return Math.pow(base, 2)*critDamage;
-    else if (critChance < 4)
-        return Math.pow(base, 3)*critDamage;
-    debug("error critChance too large " + critChance);
-    return 1;
-}
-
 function ATgetPlayerCritDamageMult(critChance, critDamage){ //this multiplies ATgetPlayerNonCritDamageMult() for total crit mult
     var base = 5;
-    if (Fluffy.isRewardActive("megaCrit")) base += 2;
     if (game.talents.crit.purchased) base += 1;
-    if(critChance < 1)
-        return critDamage;
-    else if (critChance < 2)
-        return Math.pow(base,1);
-    else if (critChance < 3)
-        return Math.pow(base, 2);
-    else if (critChance < 3)
-        return Math.pow(base, 3);
-    else if (critChance < 4)
-        return Math.pow(base, 4);
-    debug("error critChance too large " + critChance);
-    return 1;
+    if (Fluffy.isRewardActive("megaCrit")) base += 2;
+    if     (critChance < 0)   return 0.2;
+    else if(critChance === 0) return 1;
+    else if(critChance === 1) return critDamage;
+    else if(critChance === 2) return critDamage * Math.pow(base, 1);
+    else if(critChance >= 3)  return critDamage * Math.pow(base, 2); //triple crit highest in game ATM, red crit
+    else throw "error in ATgetPlayerCritDamageMult: unexpected crit chance " + critChance;
+}
+
+function calcCritModifier(critChance, critDamage){
+    var base = 5;
+    if(game.talents.crit.purchased) base += 1;
+    if(Fluffy.isRewardActive("megaCrit")) base += 2;
+    if(critChance > 3) critChance = 3; //triple crit highest in game ATM, red crit
+    
+    if  (critChance < 0 ) return 0.2*calcCritModifier(critChance+1, critDamage);
+    if  (critChance <= 1) return critChance * critDamage + (1-critChance);
+    if  (critChance <= 2) return (base*(critChance-1) + (2-critChance))*critDamage;
+    else                  return base*calcCritModifier(critChance-1, critDamage);
 }
 
 function calcBaseDamageinB() {
-    calcDmgManual(); //this returns our damage, also factoring in the new damage from prestige/levels/coordinations that the game will only calculate on the next cell.
+    calcArmyDamage(false, true); //this returns our damage, also factoring in the new damage from prestige/levels/coordinations that the game will only calculate on the next cell.
 
     baseBlock = game.global.soldierCurrentBlock;
 
@@ -154,7 +140,7 @@ function autoStance() {
     wantGoodShield = true;
     calcBaseDamageinB();
             
-    handleGA(); //controlls GA (when settings allow) and activates GA #3
+    handleGA(true); //controlls GA (when settings allow) and activates GA #3
     
     var enemyHealth = cell.health;  //current health
     //var enemyMaxHealth = cell.maxHealth; //in future can do some prediction with plaguebringer and expected minimum enemy max health of world zone
@@ -879,30 +865,13 @@ function buildWorldArray(){
     currentBadGuyNum = -1;
     
     if (!game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
-        var atk = calcEnemyAttack(game.global.gridArray[0].mutation, game.global.gridArray[0].corrupted, 1, game.global.gridArray[0].name, 0, 1, game.global.world);
+        var atk = calcEnemyAttack(game.global.gridArray[0].mutation, game.global.gridArray[0].corrupted, game.global.gridArray[0].name, 1, game.global.world, true);
         worldArray[0] = {health: game.global.gridArray[0].maxHealth, maxHealth: game.global.gridArray[0].maxHealth, attack: atk};
         return;
     }
     
     var dailyHPMult = 1;
     var dailyATKMult = 1;
-    var oblitMult = 1;
-    if(game.global.challengeActive == "Daily"){
-        if(typeof game.global.dailyChallenge.badHealth !== 'undefined')
-            dailyHPMult *= dailyModifiers.badHealth.getMult(game.global.dailyChallenge.badHealth.strength);
-        if(typeof game.global.dailyChallenge.empower !== 'undefined')
-            dailyHPMult *= dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
-
-        if(typeof game.global.dailyChallenge.badHealth !== 'undefined')
-            dailyATKMult *= dailyModifiers.badHealth.getMult(game.global.dailyChallenge.badHealth.strength);
-        if(typeof game.global.dailyChallenge.empower !== 'undefined')
-            dailyATKMult *= dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
-    }
-    else if(game.global.challengeActive == "Obliterated"){
-        oblitMult = Math.pow(10,12);
-        var zoneModifier = Math.floor(game.global.world / 10);
-        oblitMult *= Math.pow(10, zoneModifier);
-    }
     
     var mutationMultCorrupted       = mutations.Corruption.statScale(10);
     var mutationMultCorruptedAtk    = mutations.Corruption.statScale(3);
@@ -937,10 +906,10 @@ function buildWorldArray(){
             mutationMultAtk = 1;
         }
         
-        enemy.attack = calcEnemyAttack(enemy.mutation, enemy.corrupted, mutationMultAtk, enemy.name, i, oblitMult, game.global.world);
-        enemy.maxHealth =  getEnemyHealthAT(i, enemy.name, true, game.global.world) * mutationMult * dailyHPMult; //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
-        if(game.global.spireActive)                      enemy.maxHealth = getSpireStats(i+1, enemy.name, "health");
-        if(game.global.challengeActive == "Obliterated") enemy.maxHealth *= oblitMult;
+        enemy.attack = calcEnemyAttack(enemy.mutation, enemy.corrupted, enemy.name, i+1, game.global.world, true);
+        enemy.maxHealth =  calcEnemyHealth(enemy.mutation, enemy.corrupted, enemy.name, i+1, game.global.world, true) * dailyHPMult; //ignore imp stat = true. corrupted/healthy enemies get their health from mutation not their baseimp
+        if(game.global.spireActive)                      enemy.maxHealth = getSpireStatsAT(game.global.world, i+1, enemy.name, "health");
+        if(game.global.challengeActive == "Obliterated") enemy.maxHealth *= oblitMultAT;
         if (enemy.corrupted == "corruptTough")         enemy.maxHealth *= 5;   //the player has no access to corruption type before reaching them, and neither do we
         else if (enemy.corrupted == "healthyTough")    enemy.maxHealth *= 7.5; //the player has no access to corruption type before reaching them, and neither do we
         //if(enemy.mutation == "Corruption")               enemy.maxHealth *= 5;   //so we take the worst possible case.
@@ -951,9 +920,9 @@ function buildWorldArray(){
     }
     //last cell special case
     worldArray[99].baseWorth = 1;
-    worldArray[99].maxHealth = getEnemyHealthAT(99, "Omnipotrimp", false, game.global.world) * mutationMultCorrupted * dailyHPMult; //ignore imp stat = false
+    worldArray[99].maxHealth = calcEnemyHealth(worldArray[99].mutation, worldArray[99].corrupted, worldArray[99].name, 100, game.global.world, true) * dailyHPMult; //ignore imp stat = false
     if(game.global.spireActive)
-        worldArray[99].maxHealth = getSpireStats(i+1, worldArray[99].name, "health") * dailyHPMult;
+        worldArray[99].maxHealth = getSpireStatsAT(game.global.world, i+1, worldArray[99].name, "health") * dailyHPMult;
     worldArray[99].health = worldArray[99].maxHealth;
     
     var pbMult = (lowPB > -1 ? lowPB : game.heirlooms.Shield.plaguebringer.currentBonus / 100); //weaker shield should have more PB. PB isnt that good of a damage modifier.    

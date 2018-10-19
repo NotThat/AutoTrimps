@@ -71,39 +71,6 @@ function getScienceCostToUpgrade(upgrade) {
     }
 }
 
-
-function getEnemyMaxAttack(world, level, name, diff, corrupt) {
-    var amt = 0;
-    //var adjWorld = ((world - 1) * 100) + level;
-    amt += 50 * Math.sqrt(world) * Math.pow(3.27, world / 2);
-    amt -= 10;
-    if (world == 1){
-        amt *= 0.35;
-        amt = (amt * 0.20) + ((amt * 0.75) * (level / 100));
-    }
-    else if (world == 2){
-        amt *= 0.5;
-        amt = (amt * 0.32) + ((amt * 0.68) * (level / 100));
-    }
-    else if (world < 60)
-        amt = (amt * 0.375) + ((amt * 0.7) * (level / 100));
-    else{
-        amt = (amt * 0.4) + ((amt * 0.9) * (level / 100));
-        amt *= Math.pow(1.15, world - 59);
-    }
-    if (world < 60) amt *= 0.85;
-    //if (world > 6 && game.global.mapsActive) amt *= 1.1;
-    if (diff) {
-        amt *= diff;
-    }
-    if (!corrupt)
-        amt *= game.badGuys[name].attack;
-    else {
-        amt *= getCorruptScale("attack");
-    }
-    return Math.floor(amt);
-}
-
 function getEnemyMaxHealth(world, level, corrupt) {
     if (!level)
         level = 30;
@@ -130,26 +97,6 @@ function getEnemyMaxHealth(world, level, corrupt) {
 	   amt *= getBadCoordLevel();
 	}
     return Math.floor(amt);
-}
-
-function getCurrentEnemy(current) {
-    if (!current)
-        current = 1;
-    var enemy;
-    if (!game.global.mapsActive && !game.global.preMapsActive) {
-        if (typeof game.global.gridArray[game.global.lastClearedCell + current] === 'undefined') {
-            enemy = game.global.gridArray[game.global.gridArray.length - 1];
-        } else {
-            enemy = game.global.gridArray[game.global.lastClearedCell + current];
-        }
-    } else if (game.global.mapsActive && !game.global.preMapsActive) {
-        if (typeof game.global.mapGridArray[game.global.lastClearedMapCell + current] === 'undefined') {
-            enemy = game.global.mapGridArray[game.global.gridArray.length - 1];
-        } else {
-            enemy = game.global.mapGridArray[game.global.lastClearedMapCell + current];
-        }
-    }
-    return enemy;
 }
 
 function getCorruptedCellsNum() {

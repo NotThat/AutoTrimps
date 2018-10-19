@@ -98,7 +98,6 @@ function calcDmg(){
             missingCoords++;
             armySize = tmp;
         }
-        //debug("missingCoords = " + missingCoords);
         ourBaseDamage = ourBaseDamage * Math.pow(1.25, missingCoords);
     }
     
@@ -112,35 +111,22 @@ function calcDmg(){
         ourBaseDamage *= 1 + (0.2 * game.global.mapBonus); //add map bonus
     }
     
-    //get average enemyhealth and damage for the next zone, cell 50, snimp type and multiply it by a max range fluctuation of 1.2
-    enemyHealth = getEnemyMaxHealth(game.global.world, 50);
-    if (game.global.challengeActive == "Toxicity") {
-        enemyHealth *= 2;
-    }
-    else if (game.global.challengeActive == "Obliterated"){
-        var oblitMult = Math.pow(10,12);
-        var zoneModifier = Math.floor(game.global.world / 10);
-        oblitMult *= Math.pow(10, zoneModifier);
-        enemyHealth *= oblitMult;
-    }    
-    
-    if (game.global.challengeActive == "Daily"){
-        if (typeof game.global.dailyChallenge.badHealth !== 'undefined'){
-                enemyHealth *= dailyModifiers.badHealth.getMult(game.global.dailyChallenge.badHealth.strength);
-        }
-        if (typeof game.global.dailyChallenge.empower !== 'undefined'){
-                        enemyHealth *= dailyModifiers.empower.getMult(game.global.dailyChallenge.empower.strength, game.global.dailyChallenge.empower.stacks);
-        }
-    }
+    //get enemyhealth for the next zone, cell 50, snimp type. non corrupted / healthy. we add those next
+    enemyHealth = calcEnemyHealth(null, null, 'Snimp', 51, game.global.world, true);
     
     //Corruption Zone Proportionality Farming Calculator:
-    if (game.global.world >= mutations.Corruption.start(true)) {
+    if (game.global.world >= mutations.Corruption.start(true)){
         var cptnum = getCorruptedCellsNum(); //count corrupted cells
         var cpthlth = getCorruptScale("health"); //get corrupted health mod
         var cptpct = cptnum / 100; //percentage of zone which is corrupted.
         var hlthprop = cptpct * cpthlth; //Proportion of cells corrupted * health of a corrupted cell
-        if (hlthprop >= 1) //dont allow sub-1 numbers to make the number less
-            enemyHealth *= hlthprop;
+        
+        var healthyNum = mutations.Healthy.cellCount();
+        var healthyScale = corruptHealthyStatScaleAT(14, game.global.world);
+        var healthyPercent = healthyNum / 100;
+        var healthyProp = healthyPercent * healthyScale;
+        if (healthyProp + hlthprop >= 1) //dont allow sub-1 numbers to make the number less
+            enemyHealth *= hlthprop + healthyProp;
     }
     
     if (windZone() && getPageSetting('AutoStance') == 1 && !game.global.runningChallengeSquared)

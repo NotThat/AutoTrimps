@@ -527,46 +527,16 @@ function dmgToCompare(good, noCrit){
 }
 
 var wantedHP = 1;
-function calcEnemyDamage(){ //enemy damage calculation and sets enoughHealthE
-    //EQUIPMENT HAS ITS OWN DAMAGE CALC SECTION:
-    //spire is a special case.
-    var enemyDamage = 0;
-    if (game.global.spireActive) {
-        /*var exitcell;
-        if(game.global.challengeActive == "Daily")
-            exitcell = getPageSetting('ExitSpireCellDailyC2');
-        else
-            exitcell = getPageSetting('ExitSpireCell');
-        var cell = (!game.global.mapsActive && !game.global.preMapsActive) ? game.global.lastClearedCell : 50;
-        if (exitcell > 1)
-            cell = exitcell;*/
-        //cell = 100;
-        enemyDamage = getSpireStats(100, "Snimp", "attack");
-        enemyDamage = calcDailyAttackMod(enemyDamage); //daily mods: badStrength,badMapStrength,bloodthirst
-    }
-    else{
-        enemyDamage = getEnemyMaxAttack(game.global.world + 1, 50, 'Snimp', 1.2);
-        enemyDamage = calcDailyAttackMod(enemyDamage); //daily mods: badStrength,badMapStrength,bloodthirst
-    }
-
-    //below challenge multiplier not necessarily accurate, just fudge factors
-    if(game.global.challengeActive == "Toxicity") {
-        //ignore damage changes (which would effect how much health we try to buy) entirely since we die in 20 attacks anyway?
-        if(game.global.world < 61)
-            enemyDamage *= 2;
-    }
-    else if(game.global.challengeActive == 'Lead') {
-        enemyDamage *= 2.5;
-    }
+function calcEnemyDamage(){
+    //calculate the attack of cell 99 current zone enemy
+    var enemyDamage = calcEnemyAttack(game.global.gridArray[99].mutation, game.global.gridArray[99].corrupted, game.global.gridArray[99].name, 100,  game.global.world, true);
     
-    //chilled
-    if (getEmpowerment() == "Ice"){
-        enemyDamage *= game.empowerments.Ice.getCombatModifier();
-    }
-    enemyDamage *= getCorruptScale("attack");
-
     var safetyNet = 2.65;
-    if(!game.global.preMapsActive && (getCurrentEnemy(1).corrupted == "corruptBleed" || getCurrentEnemy(1).corrupted == "healthyBleed"))
+    
+    var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
+    var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
+    
+    if(!game.global.preMapsActive && (cell.corrupted == "corruptBleed" || cell.corrupted == "healthyBleed"))
         safetyNet = 3.65;
     
     wantedHP = safetyNet*enemyDamage;

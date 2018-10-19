@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "42";
-var verDate = "18.10.18";
+var ver = "43";
+var verDate = "20.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -167,7 +167,7 @@ function initializeAutoTrimps() {
     ATscriptLoad('','SettingsGUI');   //populate Settings GUI
     ATscriptLoad('','Graphs');        //populate Graphs
     //Load modules:
-    ATmoduleList = ['chat', 'jQuery', 'jQuery-UI', 'query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'battlecalc', 'maps', 'breedtimer', 'dynprestige', 'magmite', 'other', 'import-export', 'perks', 'fight-info', 'performance', 'ATcalc'];
+    ATmoduleList = ['chat', 'jQuery', 'jQuery-UI', 'query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'maps', 'breedtimer', 'dynprestige', 'magmite', 'other', 'import-export', 'perks', 'fight-info', 'performance', 'ATcalc'];
     for (var m in ATmoduleList) 
         ATscriptLoad(modulepath, ATmoduleList[m]);
     
@@ -179,7 +179,8 @@ var changelogList = [];
 //changelogList.push({date: " ", version: " ", description: "", isNew: true});  //TEMPLATE
 //changelogList.push({date: "9.10.2018", version: "", description: "Dump into Looting2 enabled again. Chat removed." , isNew: true});
 //changelogList.push({date: "4.10.2018", version: "", description: "Chat ?!?" , isNew: true});
-changelogList.push({date: "3.10.2018", version: "", description: "Auto Prestige Raid added." , isNew: true});
+changelogList.push({date: "20.10.2018", version: "", description: "Pumpkins patch." , isNew: true});
+changelogList.push({date: "3.10.2018", version: "", description: "Auto Prestige Raid added."});
 changelogList.push({date: "2.10.2018", version: "", description: "Reworked Golden Upgrade settings, check the tab. New setting: Match Perks" , isNew: true});
 changelogList.push({date: "29.09.2018", version: "", description: "AutoAllocate reworked - check your weights. Helium/Attack/Health describes your in-run stats, the more the better. You can see the effect of using different Amalgamator count. Row #3 Growth describes the increase of stats per run out of total ever." , isNew: true});
 changelogList.push({date: "29.09.2018", version: "", description: "Will Trimpicide to pick up an Amalgamator when in Start no Coord Buy range.", isNew: true});
@@ -253,6 +254,8 @@ var heirloomFlag = false;
 var heirloomCache;
 var magmiteSpenderChanged = false;
 
+var oblitMultAT = 1;
+var coordMultAT = 1;
 var windMult = 1;
 var poisonMultFixed=0.05;
 var poisonMult = 1;
@@ -346,6 +349,12 @@ function ATLoop(makeUp) {
     //debug((countHeliumSpent() + game.global.heliumLeftover + game.resources.helium.owned - game.global.totalHeliumEarned).toExponential(2));
     if (!ATrunning) return;
     
+    if(loadedScriptAmount !== expectedScriptAmount){ //ATLoop can sometime pass starting checks due to asynchronous nature, so check again just in case
+        debug("Error: A Module was not loaded, " + loadedScriptAmount + " out of " + expectedScriptAmount);
+        debug(ATmoduleList);
+        return;
+    }
+    
     gatherInfo(); //stores graphs data, do this even with AT paused for graph only users.
         
     if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled || game.global.viewingUpgrades) {
@@ -362,6 +371,11 @@ function ATLoop(makeUp) {
         if (!makeUp) addbreedTimerInsideText.textContent = hiddenBreedTimer + 's'; //add breed time for next army;
         hiddenBreedTimerLast = hiddenBreedTimer;
     }
+    
+    maxAnti = game.talents.patience.purchased ? 45 : 30;
+    if(game.global.mapsActive) currMap = getCurrentMapObject();
+    expectedPortalZone = autoTrimpSettings.AutoPortal.selected !== "Custom" ? 0 : getPageSetting('CustomAutoPortal') + (game.global.challengeActive == "Daily" ? getPageSetting('AutoFinishDailyNew') : 0);
+    bsZone = (0.5*game.talents.blacksmith.purchased + 0.25*game.talents.blacksmith2.purchased + 0.15*game.talents.blacksmith3.purchased)*(game.global.highestLevelCleared + 1);    
     
     aWholeNewWorld = currentworld != game.global.world;
     currentworld = game.global.world;
@@ -385,11 +399,6 @@ function ATLoop(makeUp) {
         oncePerZoneCode();
     }
     setScienceNeeded();  //determine how much science is needed
-    
-    maxAnti = game.talents.patience.purchased ? 45 : 30;
-    if(game.global.mapsActive) currMap = getCurrentMapObject();
-    expectedPortalZone = autoTrimpSettings.AutoPortal.selected !== "Custom" ? 0 : getPageSetting('CustomAutoPortal') + (game.global.challengeActive == "Daily" ? getPageSetting('AutoFinishDailyNew') : 0);
-    bsZone = (0.5*game.talents.blacksmith.purchased + 0.25*game.talents.blacksmith2.purchased + 0.15*game.talents.blacksmith3.purchased)*(game.global.highestLevelCleared + 1);
     
     var AS = getPageSetting('AutoStance');
     if(AS < 2)       statusMsg = "Advancing";
@@ -463,8 +472,22 @@ function oncePerZoneCode(){
 
     AutoMapsCoordOverride = false;
     maxCoords = -1;
+    
+    oblitMultAT = game.global.challengeActive == "Obliterated" ? calcOblitMult(game.global.world) : 1;
+    coordMultAT = game.global.challengeActive == "Coordinate" ? calcCoordMult(game.global.world) : 1;
 
     if(game.options.menu.ctrlGigas.enabled === 1) game.options.menu.ctrlGigas.enabled = 0; //stops tooltip from showing when buying gigas (hopefully)
+}
+
+function calcOblitMult(zone){
+    return Math.pow(10,12) * Math.pow(10, Math.floor(zone / 10));
+}
+
+function calcCoordMult(zone){
+    var num = 1;
+    for (var i = 0; i < zone; i++)
+        num = Math.ceil(num * 1.25);
+    return num;
 }
 
 //GUI Updates happen on this thread, every 1000ms

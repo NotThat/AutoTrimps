@@ -29,47 +29,57 @@ function addToolTipToArmyCount() {
 }
 addToolTipToArmyCount();
 
-function handleGA(){
-    if(game.global.world < 71 || !game.global.Geneticistassist)
-        return;
-    
+function handleGA(currentGame, dailyObj){
     var GATimer = -1;
-    if(getPageSetting('GASetting')){ //AT controls GA timer
-        GATimer = (game.talents.patience.purchased ? 45 : 30);
-        if (typeof game.global.dailyChallenge.bogged != 'undefined' || game.global.challengeActive == "Nom"){ //fixed %dmg taken every attack
-            var stacks = 0;
-            if (game.global.challengeActive == "Nom")
-                stacks = 5;
-            else
-                stacks = game.global.dailyChallenge.bogged.strength;
-            GATimer = Math.floor(100/(4*stacks));
-        }
-        if (typeof game.global.dailyChallenge.plague != 'undefined' || game.global.challengeActive == "Electricity"){ //%dmg taken per stack, 1 stack every attack
-            var stacks = 0;
-            if(typeof game.global.dailyChallenge.plague != 'undefined')
-                stacks = game.global.dailyChallenge.plague.strength;
-            else
-                stacks = game.challenges.Electricity.stacks;
-            switch(stacks){
-                case 1:
-                    GATimer = 3;
-                    break;
-                case 2:
-                case 3:
-                    GATimer = 2;
-                    break
-                default:
-                    GATimer = 1;
-            }
+    
+    var dailyActive = currentGame ? game.global.challengeActive == "Daily" : (dailyObj !== AutoPerks.Squared && dailyObj !== null);
+    var theDailyObj = currentGame ? game.global.dailyChallenge : dailyObj;
+    var C2name      = currentGame ? game.global.challengeActive : AutoPerks.C2Name;
+    var zone        = currentGame ? game.global.world           : AutoPerks.maxZone;
+
+    if(zone < 71) return 0;
+    
+    GATimer = (game.talents.patience.purchased ? 45 : 30);
+    if (typeof theDailyObj.bogged != 'undefined' || C2name == "Nom"){ //fixed %dmg taken every attack
+        var stacks = 0;
+        if (C2name == "Nom")
+            stacks = 5;
+        else
+            stacks = theDailyObj.bogged.strength;
+        GATimer = Math.floor(100/(4*stacks));
+    }
+    if (typeof theDailyObj.plague != 'undefined' || C2name == "Electricity"){ //%dmg taken per stack, 1 stack every attack
+        var stacks = 0;
+        if(typeof theDailyObj.plague != 'undefined')
+            stacks = theDailyObj.plague.strength;
+        else
+            stacks = game.challenges.Electricity.stacks;
+        switch(stacks){
+            case 1:
+                GATimer = 3;
+                break;
+            case 2:
+            case 3:
+                GATimer = 2;
+                break
+            default:
+                GATimer = 1;
         }
     }
-    else if(getPageSetting('GASettingManual') > 0) //manual input
+    
+    if(currentGame && getPageSetting('GASettingManual') > 0) //manual input
         GATimer = getPageSetting('GASettingManual');
     
-    if(isActiveSpireAT() && getPageSetting('GASettingSpire') > 0) //spire manual input
+    if(currentGame && isActiveSpireAT() && getPageSetting('GASettingSpire') > 0) //spire manual input
         GATimer = getPageSetting('GASettingSpire');
-    if(game.global.Geneticistassist && GATimer > 0)
+
+    
+
+    if(getPageSetting('GASetting') && currentGame && game.global.Geneticistassist && GATimer > 0 && game.global.Geneticistassist)
         game.global.GeneticistassistSteps = [-1, 0.5, 0.6, GATimer];
 
-    switchOnGA(); //under normal uses getTargetAntiStack should turn autoGA back on, but if loading from a save it could stay off
+    if(getPageSetting('GASetting') && currentGame)
+        switchOnGA(); //under normal uses getTargetAntiStack should turn autoGA back on, but if loading from a save it could stay off
+    
+    return GATimer;
 }

@@ -62,10 +62,12 @@ function autoMagmiteSpender() {
                 CapObj.miCostPerPct= CapObj.cost / CapObj.effInc;
             var upgrade,item;
             //(try to) Buy Efficiency if its cheaper than Capacity in terms of Magmite cost per percent.
-            if (EffObj.miCostPerPct <= CapObj.miCostPerPct)
+            if(getPageSetting('ForceEffOnly')) //only buy efficiency
+                item = EffObj.name;
+            else if (EffObj.miCostPerPct <= CapObj.miCostPerPct)
                 item = EffObj.name;
             //if not, (try to) Buy Capacity if its cheaper than the cost of Supply.
-            else {
+            else{
                 const supCost = sup.cost();
                 var wall = getPageSetting('SupplyWall');
                 // If no wall, try to buy Capacity if it's cheaper.
@@ -95,13 +97,13 @@ function autoMagmiteSpender() {
             else
                 repeat = false;
         }
-        else if (MODULES["magmite"].algorithm == 1) {
+        else if (MODULES["magmite"].algorithm == 1){
             //Method 1(old):
             //list of available multi upgrades
             var names = ["Efficiency","Capacity","Supply"];
             var lowest = [null,null];   //keep track of cheapest one
             //cycle through:
-            for (var i=0; i < names.length; i++) {
+            for (var i=0; i < names.length; i++){
                 var item = names[i];
                 var upgrade = game.generatorUpgrades[item];
                 if (typeof upgrade === 'undefined')
@@ -115,7 +117,7 @@ function autoMagmiteSpender() {
                     lowest = [item,cost];
             }
             //if we can afford anything, buy it:
-            if (game.global.magmite >= lowest[1]) {
+            if (game.global.magmite >= lowest[1]){
                 buyGeneratorUpgrade(lowest[0]);
                 debug("Auto Spending " + lowest[1] + " Magmite on: " + lowest[0] + " #" + game.generatorUpgrades[lowest[0]].upgrades, "magmite");
                 didSpend = true;
@@ -125,17 +127,17 @@ function autoMagmiteSpender() {
                 repeat = false;
         }
     }
- }
- //dont get trapped in a while loop cause something stupid happened.
- catch (err) {
-     debug("AutoSpendMagmite Error encountered: " + err.message,"magmite");
- }
- //print the result
- if (didSpend)
-     debug("Leftover magmite: " + game.global.magmite,"magmite");
+}
+//dont get trapped in a while loop cause something stupid happened.
+catch (err) {
+    debug("AutoSpendMagmite Error encountered: " + err.message,"magmite");
+}
+//print the result
+if (didSpend)
+    debug("Leftover magmite: " + game.global.magmite,"magmite");
 }
 
-/** Early Mode */
+
 function autoGenerator() {
     const MI = 0, FUEL = 1, HYBRID = 2;
 
@@ -147,8 +149,8 @@ function autoGenerator() {
     if(game.global.world < 230)
         return;
     
-    var dailyFlag = game.global.challengeActive == "Daily";// && getPageSetting('AutoGenDC');
-    var c2Flag = game.global.runningChallengeSquared;// && getPageSetting('AutoGenC2');
+    var dailyFlag = game.global.challengeActive == "Daily";
+    var c2Flag = game.global.runningChallengeSquared;
     if(c2Flag || dailyFlag){
         if(game.global.generatorMode != FUEL)
             changeGeneratorState(FUEL);
