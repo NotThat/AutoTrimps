@@ -121,7 +121,7 @@ function calcArmyDamage(printout, currentGame, theZone, dailyObj, armySizeUncapp
     }
     
     //Sugar Rush
-    if(game.global.sugarRush > 0){ //remaining time on sugar rush
+    if(game.global.sugarRush > 0 || (!currentGame && sugarEventAT)){ //remaining time on sugar rush
         var sugar = 2 + Math.floor((zone - 200) / 100);
          dmg *= sugar;
          if(printout) debug("sugar rush x" + sugar + " dmg " + dmg.toExponential(2));

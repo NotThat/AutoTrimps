@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "43";
+var ver = "43.1";
 var verDate = "20.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -233,6 +233,7 @@ var MODULESdefault = {};
 var ATMODULES = {};
 var ATmoduleList = [];
 
+var sugarEventAT = true;
 var bestBuilding;
 var scienceNeeded;
 var breedFire = false;
