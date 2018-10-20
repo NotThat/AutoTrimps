@@ -67,7 +67,7 @@ function handleGA(currentGame, dailyObj){
         }
     }
     
-    if(currentGame && getPageSetting('GASettingManual') > 0) //manual input
+    if(currentGame && !getPageSetting('GASetting') && getPageSetting('GASettingManual') > 0) //manual input
         GATimer = getPageSetting('GASettingManual');
     
     if(currentGame && isActiveSpireAT() && getPageSetting('GASettingSpire') > 0) //spire manual input

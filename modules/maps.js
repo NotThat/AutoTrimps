@@ -646,7 +646,7 @@ function praidAutoStartHelper(){
     if(cycle < 5)        return 0.003;    //xx6-xx0 poison
     else if (cycle < 10) return 0.6;      //xx1-xx5 wind
     else if (cycle < 15) return 0.5;    //xx6-xx0 ice
-    else if (cycle < 20) return 0.003;   //xx1-xx5 poison
+    else if (cycle < 20) return 0.001;   //xx1-xx5 poison
     else if (cycle < 25) return 5;      //xx6-xx0 wind
     else                 return 1;      //xx1-xx5 ice
 }
