@@ -223,10 +223,7 @@ function fightManualAT(){
     //if(game.resources.trimps.owned/trimpsRealMax < 0.9999){
     if(game.resources.trimps.owned/trimpsRealMax < 1){
         var nextArmyHealth = calcCurrSendHealth(true);
-        
-        var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
-        var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
-        var enemyDamage    = cell.attack;
+        var enemyDamage    = currEnemyDamage();
         
         if(nextArmyHealth/enemyDamage < 1000) return;
     }

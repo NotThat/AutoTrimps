@@ -30,8 +30,6 @@ function addToolTipToArmyCount() {
 addToolTipToArmyCount();
 
 function handleGA(currentGame, dailyObj){
-    var GATimer = -1;
-    
     var dailyActive = currentGame ? game.global.challengeActive == "Daily" : (dailyObj !== AutoPerks.Squared && dailyObj !== null);
     var theDailyObj = currentGame ? game.global.dailyChallenge : dailyObj;
     var C2name      = currentGame ? game.global.challengeActive : AutoPerks.C2Name;
@@ -39,7 +37,7 @@ function handleGA(currentGame, dailyObj){
 
     if(zone < 71) return 0;
     
-    GATimer = (game.talents.patience.purchased ? 45 : 30);
+    var GATimer = (game.talents.patience.purchased ? 45 : 30);
     if (typeof theDailyObj.bogged != 'undefined' || C2name == "Nom"){ //fixed %dmg taken every attack
         var stacks = 0;
         if (C2name == "Nom")
@@ -70,10 +68,8 @@ function handleGA(currentGame, dailyObj){
     if(currentGame && !getPageSetting('GASetting') && getPageSetting('GASettingManual') > 0) //manual input
         GATimer = getPageSetting('GASettingManual');
     
-    if(currentGame && isActiveSpireAT() && getPageSetting('GASettingSpire') > 0) //spire manual input
+    if(((currentGame && isActiveSpireAT()) || (!currentGame && zone >= 200 && zone % 100 === 0)) && getPageSetting('GASettingSpire') > 0) //spire manual input
         GATimer = getPageSetting('GASettingSpire');
-
-    
 
     if(getPageSetting('GASetting') && currentGame && game.global.Geneticistassist && GATimer > 0 && game.global.Geneticistassist)
         game.global.GeneticistassistSteps = [-1, 0.5, 0.6, GATimer];
