@@ -309,7 +309,7 @@ AutoPerks.clickAllocate = function() {
         AutoPerks.breedMult   = 1;
         AutoPerks.gearLevels  = 0;
         AutoPerks.compoundingImp = Math.pow(1.003, AutoPerks.maxZone * 3 - 1);
-        AutoPerks.windMod = 1 + 13 * game.empowerments.Wind.getModifier() * 10; //13 minimum stacks
+        AutoPerks.windMod = 1 + (AutoPerks.maxZone >= 241 ? 13 * game.empowerments.Wind.getModifier() * 10 : 0); //13 minimum stacks
 
         AutoPerks.sharpBonusMult = 1; //AutoPerks.sharpBonusMult = 1.5; //TODO: checkbox this
 
@@ -327,8 +327,9 @@ AutoPerks.clickAllocate = function() {
                                      // on firstRun() because DG stats and helium mightve changed
         //calculates attack / health of non tough cell 50 corrupted enemy at AutoPerks.maxZone
         AutoPerks.zoneHealth = approxZoneHP(AutoPerks.maxZone); //this is health approx of the entire zone
-        AutoPerks.enemyDamage = calcEnemyAttack("Corruption", "corruptDbl", 'Snimp', 99, AutoPerks.maxZone, !portalWindowOpen, AutoPerks.dailyObj);
-        debug("AutoPerks.zoneHealth " + AutoPerks.zoneHealth.toExponential(2) + " AutoPerks.enemyDamage " + AutoPerks.enemyDamage.toExponential(2));
+        var corrupt = AutoPerks.maxZone >= mutations.Corruption.start(true) ? "Corruption" : null;
+        AutoPerks.enemyDamage = calcEnemyAttack(corrupt, null, 'Snimp', 99, AutoPerks.maxZone, false, AutoPerks.dailyObj);
+        //debug("AutoPerks.zoneHealth " + AutoPerks.zoneHealth.toExponential(2) + " AutoPerks.enemyDamage " + AutoPerks.enemyDamage.toExponential(2));
         
         var helium = AutoPerks.totalHelium;
 
@@ -453,7 +454,7 @@ AutoPerks.spendHelium = function(helium) {
             AutoPerks.workPerks[i].efficiency = AutoPerks.workPerks[i].getBenefit()/price;
             if(AutoPerks.workPerks[i].efficiency < 0)
                 throw AutoPerks.workPerks[i].name + " " + AutoPerks.workPerks[i].level + " efficiency is negative " + prettify(AutoPerks.workPerks[i].efficiency);
-
+            
             effQueue.add(AutoPerks.workPerks[i]);
         }
         if(AutoPerks.workPerks.length === 0) return false; //all done
@@ -533,24 +534,11 @@ AutoPerks.spendHelium = function(helium) {
     
     minMaxMi(); //recalculate mi efficiency
     
-    /*
-    var fluffyXP = Fluffy.currentExp[1]; //xp in current evolution only
-    var currEvo = game.global.fluffyPrestige;
-        var prestigeEvoZero = 1000;
-        var xpCount = 0;
-        for(var i = 0; i < 10; i++){
-            xpCount += prestigeEvoZero;
-            prestigeEvoZero *= 4;
-        }
-    for(var i = 0; i < currEvo; i++){
-        fluffyXP += xpCount;
-        xpCount *= 5;
-    }*/
     var fluffyGrowth = (game.global.fluffyExp === 0 ? 0 : ((AutoPerks.benefitHolderObj.Fluffy.benefit*100 / game.global.fluffyExp).toFixed(3)));
     var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
-    var timeText = timeEstimator(false, 0, AutoPerks.maxZone, false, true);
+    var timeText = timeEstimator(false, 0, AutoPerks.maxZone, true);
     
-    var healthMod = calcCurrSendHealth(!portalWindowOpen, false, AutoPerks.maxZone, AutoPerks.dailyObj, AutoPerks.fullSoldiers, AutoPerks.battleGUMult, AutoPerks.currAmalgamators, AutoPerks.equipmentHealth, AutoPerks.breedMult).toExponential(2);
+    var healthMod = calcCurrSendHealth(false, false, AutoPerks.maxZone, AutoPerks.dailyObj, AutoPerks.fullSoldiers, AutoPerks.battleGUMult, AutoPerks.currAmalgamators, AutoPerks.equipmentHealth, AutoPerks.breedMult);
     var healthToDamageRatio = (healthMod / AutoPerks.enemyDamage);
     if(AutoPerks.useMaxFuel) AutoPerks.fuelEndZone = AutoPerks.maxZone;
     
@@ -560,7 +548,7 @@ AutoPerks.spendHelium = function(helium) {
     var heliumFromVMs   = VMs*VMsEffMult*singleVM;
     var totalHelium     = AutoPerks.totalHelium;
     var heliumGrowth    = (heliumFromVMs*1.4*AutoPerks.DailyWeight/totalHelium*100).toFixed(3) + '%'; //1.4 to account for non VM helium. TODO
-    var missingCoords   = AutoPerks.maxZone + 99 - AutoPerks.calcCoordsCoordsPurchased;
+    var missingCoords   = (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.maxZone - AutoPerks.calcCoordsCoordsPurchased;
     
     var spireText = AutoPerks.maxZone >= 200 && AutoPerks.maxZone % 100 === 0 ? "Spire " : "Zone ";
     var msg2 = spireText + AutoPerks.maxZone + " will take approx " + timeText + ". Army Health / Enemy Damage: " + prettify(healthToDamageRatio)+ (AutoPerks.maxZone >= 230 ? " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone : "") + " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%" + (missingCoords === 0 ? "" : " Missing Coords: " + missingCoords);
@@ -966,7 +954,7 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
     AutoPerks.prestiges = Math.floor((AutoPerks.maxZone-1)/10) * 2 + 2 + cycleModifier; //roundup to next xx5 zone for prestige, anticipating praid cycles
     
     var prestigeMod = (AutoPerks.prestiges - 3) * 0.85 + 2;
-    AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1); //this is the cost of all gear at max prestige level 1
+    AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1) * (AutoPerks.ChallengeName == "Obliterated" ? 1e12 : 1); //this is the cost of all gear at max prestige level 1
     
     var minimumLevels = 20;
     if(AutoPerks.totalResources >= AutoPerks.gearCost*minimumLevels)
@@ -979,7 +967,7 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
             prestigesDropped++;
             AutoPerks.prestiges--;
             prestigeMod = (AutoPerks.prestiges - 3) * 0.85 + 2;
-            AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1);
+            AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1) * (AutoPerks.ChallengeName == "Obliterated" ? 1e12 : 1);
         }
         if(maxLoops === 0)
             throw "Error: calcIncome() maxLoops is 0.";
@@ -1095,7 +1083,7 @@ function calcPopBreed(toRet){
     var lumberjacks = finalPopSize * 0.001;
     var gatheredResources = lumberjacks * lumberjackEff;
     AutoPerks.lootedResources = calcLootedResources();
-    var nurseries = calculateMaxNurseries(AutoPerks.lootedResources + gatheredResources);
+    var nurseries = calculateMaxNurseries(AutoPerks.lootedResources + gatheredResources) / (AutoPerks.maxZone >= 230 ? 5 : 1); //use all nurseries below 230
 
     if(AutoPerks.maxZone < 70){
         AutoPerks.breedMult = 1;
@@ -1109,7 +1097,7 @@ function calcPopBreed(toRet){
                 * AutoPerks.compoundingImp
                 * 0.1           //broken planet
                 * (1 + 0.1*pheroPerk.level)
-                * Math.pow(1.01, nurseries / 5);
+                * Math.pow(1.01, nurseries);
     
     var desiredAmalMult = (armySize / (AutoPerks.AntiStacks === 0 ? 1 : AutoPerks.AntiStacks)) / breed;
     var geneticists = Math.floor(Math.log(desiredAmalMult) / Math.log(0.98));
@@ -1420,8 +1408,8 @@ function minMaxMi(){
     AutoPerks.popMult = popMultiplier(); //pop calc, uses carp1/2
     //AutoPerks.finalArmySize = calcCoords(); //uses coordinated
     AutoPerks.calcArmySizes();
-    //AutoPerks.armySizeAmalZ = calcCoords(coordperk.level, AutoPerks.amalZone+99-AutoPerks.coordsBehind);
-    //AutoPerks.armySizeMaxZ  = calcCoords(coordperk.level, AutoPerks.maxZone+99);
+    //AutoPerks.armySizeAmalZ = calcCoords(coordperk.level, (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.amalZone-AutoPerks.coordsBehind);
+    //AutoPerks.armySizeMaxZ  = calcCoords(coordperk.level, (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.maxZone);
     var amalZToMaxZ = Math.pow(1.009, AutoPerks.maxZone - AutoPerks.amalZone);
     
     if(AutoPerks.useMaxFuel)
@@ -1548,8 +1536,8 @@ AutoPerks.getPct = function(){
 
 AutoPerks.calcArmySizes = function(){
     var coordperk = AutoPerks.perksByName.Coordinated;
-    AutoPerks.armySizeAmalZ = calcCoords(coordperk.level, AutoPerks.amalZone+99-AutoPerks.coordsBehind);
-    AutoPerks.armySizeMaxZ  = calcCoords(coordperk.level, AutoPerks.maxZone+99);
+    AutoPerks.armySizeAmalZ = calcCoords(coordperk.level, (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.amalZone-AutoPerks.coordsBehind);
+    AutoPerks.armySizeMaxZ  = calcCoords(coordperk.level, (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.maxZone);
 };
 
 //get ready / initialize
@@ -1567,7 +1555,7 @@ AutoPerks.initializeAmalg = function(){
     AutoPerks.updateFromBoxes();                                                                     //update the boxes
     
     //army calc
-    AutoPerks.coordsUsed = AutoPerks.userMaintainMode ? AutoPerks.maxZone+99 : AutoPerks.amalZone+99-AutoPerks.coordsBehind;
+    AutoPerks.coordsUsed = (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.userMaintainMode ? AutoPerks.maxZone : AutoPerks.amalZone-AutoPerks.coordsBehind;
     AutoPerks.finalArmySize = calcCoords(); //uses coordinated
     
     //step 1: find max amalgamators we can afford. calculate carp1/2/coordinated along the way
@@ -1657,7 +1645,7 @@ AutoPerks.initializeAmalg = function(){
             carp2cost =         carp2perk.spent;
             coordinatedcost =   coordperk.spent;
             var runMode = "";
-            if(AutoPerks.dailyObj === AutoPerks.Squared) runMode = AutoPerks.C2Name+" (Battle GU, max fuel, helium weight 0): ";
+            if(AutoPerks.dailyObj === AutoPerks.Squared) runMode = AutoPerks.ChallengeName+" (Battle GU, max fuel, helium weight 0): ";
             else if(AutoPerks.dailyObj != "") runMode = "Daily Mode (max fuel, x" + (AutoPerks.DailyWeight).toFixed(2) + " bonus): ";
             
             var msg = runMode + "Amalgamator #"+AutoPerks.currAmalgamators+(AutoPerks.userMaintainMode ? " maintained. " : " found. ");
@@ -1670,7 +1658,6 @@ AutoPerks.initializeAmalg = function(){
         else{
             var msg1 = "Could not reach Amalgamator #"+AutoPerks.currAmalgamators+". Carp1: " + carp1perk.level + " Carp2: " + carp2perk.level.toExponential(2) + " Coordinated: " + coordperk.level + " "+pct.toFixed(2)+"% of total helium used. Pop/Army Goal: " + (AutoPerks.finalAmalRatio).toFixed(2);
             finalMsg = msg1 + '<br>' + finalMsg;
-            debug(msg1);
             
             AutoPerks.currAmalgamators--;
             break;
@@ -1681,7 +1668,7 @@ AutoPerks.initializeAmalg = function(){
     if(AutoPerks.currAmalgamators < 0) AutoPerks.currAmalgamators = 0;
     AutoPerks.amalMultPre = Math.pow(1000, AutoPerks.currAmalgamators-1);
     
-    AutoPerks.coordsUsed = AutoPerks.maxZone+99;
+    AutoPerks.coordsUsed = (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.maxZone;
     carp1perk.level = carp1;
     carp2perk.level = carp2;
     coordperk.level = coordinated;
@@ -1722,24 +1709,22 @@ function lootdump() {
 
 AutoPerks.updateDailyMods = function(){
     AutoPerks.dailyObj = "";
-    AutoPerks.C2Name   = "";
+    AutoPerks.ChallengeName = game.global.challengeActive;
     if(portalWindowOpen){ //we are respecting to enter a new portal
         if(game.global.selectedChallenge == "Daily")
             AutoPerks.dailyObj = getDailyChallenge(readingDaily, true, false);
-        else if(challengeSquaredMode && game.global.selectedChallenge != ""){
+        else if(challengeSquaredMode && game.global.selectedChallenge != "")
             AutoPerks.dailyObj = AutoPerks.Squared;
-            AutoPerks.C2Name   = game.global.selectedChallenge;
-        }
+        AutoPerks.ChallengeName = game.global.selectedChallenge;
     }
-    else if(game.global.challengeActive == "Daily")//get current run challenge/daily
+    else if(game.global.challengeActive == "Daily")
         AutoPerks.dailyObj = game.global.dailyChallenge;
-    else if(game.global.runningChallengeSquared){
+    else if(game.global.runningChallengeSquared)
         AutoPerks.dailyObj = AutoPerks.Squared;
-        AutoPerks.C2Name   = game.global.selectedChallenge;
-    }
     
     AutoPerks.AntiStacks = handleGA(false, AutoPerks.dailyObj);
-    AutoPerks.OblitMod   = AutoPerks.C2Name == "Obliterated" ? calcOblitMult(AutoPerks.maxZone) : 1;
+    AutoPerks.OblitMod   = AutoPerks.ChallengeName == "Obliterated" ? calcOblitMult(AutoPerks.maxZone) : 1;
+    AutoPerks.CoordMod   = AutoPerks.ChallengeName == 'Coordinate'  ? calcCoordMult(AutoPerks.maxZone) : 1;
     AutoPerks.battleGUMult = 1;
     AutoPerks.DailyHousingMult = 1;
     AutoPerks.DailyBadHealthMult = 1;
@@ -1765,11 +1750,9 @@ AutoPerks.firstRun = function(){
     AutoPerks.updateFromBoxes();        //populate UI boxes based on selected preset. also updates userWeights from box values
     
     //these are also calculated here for time estimate function
-    AutoPerks.windMod = 1 + 13 * game.empowerments.Wind.getModifier() * 10;
+    AutoPerks.windMod = 1 + (AutoPerks.maxZone >= 241 ? 13 * game.empowerments.Wind.getModifier() * 10 : 0); //13 minimum stacks
     AutoPerks.compoundingImp = Math.pow(1.003, AutoPerks.maxZone * 3 - 1);
 }
-
-AutoPerks.firstRun(); //set some things up on loading. click Allocate does everything else
 
 
 

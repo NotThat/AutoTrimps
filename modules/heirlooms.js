@@ -191,9 +191,22 @@ function heirloomUpgradeHighlighting() {
 }
 
 //Automatically upgrades the best mod on the equipped shield and equipped staff. Runs until you run out of nullifium.
-function autoNull(){try {
-    for(var e,d=[game.global.ShieldEquipped,game.global.StaffEquipped],o=0;2>o;o++){var l=d[o];if(e=evaluateHeirloomMods(0,l.type+"Equipped",!0),e.index){selectedMod=e.index;var a=getModUpgradeCost(l,selectedMod);if(game.global.nullifium<a)continue;game.global.nullifium-=a;var i=getModUpgradeValue(l,selectedMod),t=l.mods[selectedMod];t[1]=i,"undefined"!=typeof t[3]?t[3]++:(t[2]=0,t[3]=1),game.heirlooms[l.type][l.mods[selectedMod][0]].currentBonus=i}}
-    } catch (err) {
+function autoNull(){
+    try {
+        for(var e,d=[game.global.ShieldEquipped,game.global.StaffEquipped],o=0;2>o;o++){
+            var l=d[o];
+            if(e=evaluateHeirloomMods(0, l.type + "Equipped", !0),e.index){
+                selectedMod=e.index;
+                var a=getModUpgradeCost(l,selectedMod);
+                if(game.global.nullifium < a)
+                    continue;
+                game.global.nullifium -= a;
+                var i=getModUpgradeValue(l,selectedMod),t=l.mods[selectedMod];
+                t[1]=i,"undefined"!=typeof t[3] ? t[3]++ : (t[2]=0,t[3]=1),game.heirlooms[l.type][l.mods[selectedMod][0]].currentBonus=i
+            }
+        }
+    } 
+    catch (err){
         debug("AutoSpendNull Error encountered, no Heirloom detected?: " + err.message,"general");
     }
 }

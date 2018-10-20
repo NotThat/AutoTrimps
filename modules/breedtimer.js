@@ -30,9 +30,8 @@ function addToolTipToArmyCount() {
 addToolTipToArmyCount();
 
 function handleGA(currentGame, dailyObj){
-    var dailyActive = currentGame ? game.global.challengeActive == "Daily" : (dailyObj !== AutoPerks.Squared && dailyObj !== null);
-    var theDailyObj = currentGame ? game.global.dailyChallenge : dailyObj;
-    var C2name      = currentGame ? game.global.challengeActive : AutoPerks.C2Name;
+    var theDailyObj = currentGame ? game.global.dailyChallenge  : dailyObj;
+    var C2name      = currentGame ? game.global.challengeActive : AutoPerks.ChallengeName;
     var zone        = currentGame ? game.global.world           : AutoPerks.maxZone;
 
     if(zone < 71) return 0;

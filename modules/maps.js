@@ -641,14 +641,17 @@ function updateAutoMapsStatus(get, msg, final) {
 }
 
 function praidAutoStartHelper(){
-    if(game.global.world < 230) return 1;
+    var score = 1;
+    if(game.global.challengeActive == "Obliterated") score = score / 400;
+    
+    if(game.global.world < 230) return score*1;
     var cycle = cycleZone();
-    if(cycle < 5)        return 0.003;    //xx6-xx0 poison
-    else if (cycle < 10) return 0.6;      //xx1-xx5 wind
-    else if (cycle < 15) return 0.5;    //xx6-xx0 ice
-    else if (cycle < 20) return 0.001;   //xx1-xx5 poison
-    else if (cycle < 25) return 5;      //xx6-xx0 wind
-    else                 return 1;      //xx1-xx5 ice
+    if(cycle < 5)        return score*0.003;    //xx6-xx0 poison
+    else if (cycle < 10) return score*0.6;      //xx1-xx5 wind
+    else if (cycle < 15) return score*0.5;    //xx6-xx0 ice
+    else if (cycle < 20) return score*0.001;   //xx1-xx5 poison
+    else if (cycle < 25) return score*5;      //xx6-xx0 wind
+    else                 return score*1;      //xx1-xx5 ice
 }
 
 function praidAutoStart(){
@@ -657,7 +660,7 @@ function praidAutoStart(){
     var DHRatioIn5 = DHratio / HPMultTill5;
     var score = DHRatioIn5 * praidAutoStartHelper();
     //debug(score.toFixed(0) + " " + DHRatioIn5.toFixed(0) + " " + praidAutoStartHelper());
-    if(score < 100 && calculateMaxAfford(game.equipment["Dagger"], false, true, false, false, 1) < 2)
+    if(score < 100 && calculateMaxAfford(game.equipment["Dagger"], false, true, false, false, 1) < 4)
         return game.global.world;
     else 
         return 999;

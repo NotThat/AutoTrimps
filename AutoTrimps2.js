@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "43.3";
+var ver = "43.4";
 var verDate = "20.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -62,6 +62,8 @@ function startAT() {
     
     oncePerZoneCode();
     
+    AutoPerks.firstRun(); //set some things up on loading. click Allocate does everything else
+    
     //HTML For adding a 5th tab to the message window
     var ATbutton = document.createElement("button");
     ATbutton.innerHTML = 'AutoTrimps';
@@ -87,6 +89,16 @@ function startAT() {
     //Start guiLoop
     setInterval(guiLoop, runInterval*10);
     setInterval(pauseRemovalLoop, runInterval); //TODO: this cleaner. hookup to game maybe?
+    
+    //hook up into load() - load game function
+    load = (function() {
+        var cached_function = load;
+        return function() {
+            var result = cached_function.apply(this, arguments);
+            oncePerZoneCode();
+            return result;
+        };
+    })();
     
     //hook up into runGameLoop()
     runGameLoop = (function(makeUp, now) {
@@ -241,7 +253,6 @@ var hiddenBreedTimer;
 var hiddenBreedTimerLast;
 
 var enoughDamage = true;
-var baseBlock = 0;
 
 var preBuyAmt;
 var preBuyFiring;
@@ -357,8 +368,8 @@ function ATLoop(makeUp) {
     }
     
     gatherInfo(); //stores graphs data, do this even with AT paused for graph only users.
-        
-    if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled || game.global.viewingUpgrades) {
+    
+    if(getPageSetting('PauseScript') || game.options.menu.pauseGame.enabled){
         if(getPageSetting('PauseScript'))
             updateAutoMapsStatus("", "AT paused", true);
         return;
@@ -453,12 +464,11 @@ function oncePerZoneCode(){
             cancelTooltip();
     }
     if (getPageSetting('AutoEggs')) easterEggClicked();
-    setTitle(); //Set the browser title
-    buildWorldArray();
-    setEmptyStats(); //also clears graph data
+
+    oblitMultAT = game.global.challengeActive == "Obliterated" ? calcOblitMult(game.global.world) : 1;
+    coordMultAT = game.global.challengeActive == "Coordinate" ? calcCoordMult(game.global.world) : 1;
 
     lastCell = -1;
-        
     highCritChance = getPlayerCritChance();
     highCritDamage = getPlayerCritDamageMult();
     highATK        = calcHeirloomBonus("Shield", "trimpAttack", 1);
@@ -468,16 +478,18 @@ function oncePerZoneCode(){
     lowATK         = 1;
     lowPB          = 0;
     
-    calcBaseDamageinB();
     if (Fluffy.isActive()) lastFluffDmg = Fluffy.getDamageModifier(); //expensive, so calculate once per zone
 
     AutoMapsCoordOverride = false;
     maxCoords = -1;
-    
-    oblitMultAT = game.global.challengeActive == "Obliterated" ? calcOblitMult(game.global.world) : 1;
-    coordMultAT = game.global.challengeActive == "Coordinate" ? calcCoordMult(game.global.world) : 1;
 
     if(game.options.menu.ctrlGigas.enabled === 1) game.options.menu.ctrlGigas.enabled = 0; //stops tooltip from showing when buying gigas (hopefully)
+    
+    setTitle(); //Set the browser title
+    buildWorldArray();
+    setEmptyStats(); //also clears graph data
+    
+    calcBaseDamageinB();
 }
 
 function calcOblitMult(zone){
