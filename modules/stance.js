@@ -811,7 +811,7 @@ function buildWorldArray(){
     } 
     
     if (!game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
-        var atk = calcEnemyAttack(game.global.gridArray[0].mutation, game.global.gridArray[0].corrupted, game.global.gridArray[0].name, 1, game.global.world, true);
+        var atk = calcEnemyAttack(game.global.gridArray[0].mutation, game.global.gridArray[0].corrupted, game.global.gridArray[0].name, 0, game.global.world, true);
         worldArray[0] = {health: game.global.gridArray[0].maxHealth, maxHealth: game.global.gridArray[0].maxHealth, attack: atk};
         return;
     }
@@ -836,8 +836,8 @@ function buildWorldArray(){
             enemy.baseWorth = 0;
         }
         
-        enemy.attack =    calcEnemyAttack(enemy.mutation, enemy.corrupted, enemy.name, i+1, game.global.world, true);
-        enemy.maxHealth = calcEnemyHealth(enemy.mutation, enemy.corrupted, enemy.name, i+1, game.global.world, true);
+        enemy.attack =    calcEnemyAttack(enemy.mutation, enemy.corrupted, enemy.name, i, game.global.world, true);
+        enemy.maxHealth = calcEnemyHealth(enemy.mutation, enemy.corrupted, enemy.name, i, game.global.world, true);
         if (enemy.corrupted == "corruptTough")         enemy.maxHealth *= 5;   //the player has no access to corruption type before reaching them, and neither do we
         else if (enemy.corrupted == "healthyTough")    enemy.maxHealth *= 7.5; //the player has no access to corruption type before reaching them, and neither do we
         //if(enemy.mutation == "Corruption")               enemy.maxHealth *= 5;   //so we take the worst possible case.
@@ -848,7 +848,7 @@ function buildWorldArray(){
     }
     //last cell special case
     worldArray[99].baseWorth = 1;
-    worldArray[99].maxHealth = calcEnemyHealth(worldArray[99].mutation, worldArray[99].corrupted, worldArray[99].name, 100, game.global.world, true); //ignore imp stat = false
+    worldArray[99].maxHealth = calcEnemyHealth(worldArray[99].mutation, worldArray[99].corrupted, worldArray[99].name, 99, game.global.world, true); //ignore imp stat = false
     if(game.global.spireActive)
         worldArray[99].maxHealth = getSpireStatsAT(game.global.world, i+1, worldArray[99].name, "health");
     worldArray[99].health = worldArray[99].maxHealth;

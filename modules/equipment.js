@@ -529,7 +529,7 @@ function dmgToCompare(good, noCrit){
 var wantedHP = 1;
 function calcEnemyDamage(){
     //calculate the attack of cell 99 current zone enemy
-    var enemyDamage = calcEnemyAttack(game.global.gridArray[99].mutation, game.global.gridArray[99].corrupted, game.global.gridArray[99].name, 100,  game.global.world, true);
+    var enemyDamage = calcEnemyAttack(game.global.gridArray[99].mutation, game.global.gridArray[99].corrupted, game.global.gridArray[99].name, 99,  game.global.world, true);
     
     var safetyNet = 2.65;
     

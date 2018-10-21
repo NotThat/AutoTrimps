@@ -21,6 +21,7 @@ var spireMapBonusFarming = false;
 var stackSpireOneTime = true;
 var spireTime = 0;
 var vanillaMapatZone = false;
+var PRaidStartZone = 999;
 
 var baseLevel;
 var sizeSlider;
@@ -112,7 +113,7 @@ function calcDmg(){
     }
     
     //get enemyhealth for the next zone, cell 50, snimp type. non corrupted / healthy. we add those next
-    enemyHealth = calcEnemyHealth(null, null, 'Snimp', 51, game.global.world, true);
+    enemyHealth = calcEnemyHealth(null, null, 'Snimp', 50, game.global.world, true);
     
     //Corruption Zone Proportionality Farming Calculator:
     if (game.global.world >= mutations.Corruption.start(true)){
@@ -214,6 +215,7 @@ function autoMap() {
     spireMapBonusFarming = false; 
     needPrestige = (lastPrestigeZone() < lastDropZone()) || (lastPrestigeZone() == lastDropZone() && prestigeState != 2 && game.global.world !== expectedPortalZone);
     
+    PRaidStartZone = getPageSetting('PRaidSetting') ? Math.min(PRaidStartZone, praidAutoStart()) : getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid
     if (!needPrestige && (getPageSetting('PRaidingZoneStart') > 0 || getPageSetting('PRaidSetting'))){
         if(!PrestigeRaid()){ //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
             PRaidingActive = true;
@@ -644,12 +646,12 @@ function praidAutoStartHelper(){
     var score = 1;
     if(game.global.challengeActive == "Obliterated") score = score / 400;
     
-    if(game.global.world < 230) return score*1;
+    if(game.global.world < 230) return score;
     var cycle = cycleZone();
-    if(cycle < 5)        return score*0.003;    //xx6-xx0 poison
-    else if (cycle < 10) return score*0.6;      //xx1-xx5 wind
+    if(cycle < 5)        return score*0.003;  //xx6-xx0 poison
+    else if (cycle < 10) return score*0.6;    //xx1-xx5 wind
     else if (cycle < 15) return score*0.5;    //xx6-xx0 ice
-    else if (cycle < 20) return score*0.001;   //xx1-xx5 poison
+    else if (cycle < 20) return score*0.001;  //xx1-xx5 poison
     else if (cycle < 25) return score*5;      //xx6-xx0 wind
     else                 return score*1;      //xx1-xx5 ice
 }
@@ -673,7 +675,6 @@ function PrestigeRaid() {
         return true;
     }
     
-    var StartZone = getPageSetting('PRaidSetting') ? praidAutoStart() : getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
     
@@ -689,7 +690,7 @@ function PrestigeRaid() {
     //at the zone where we BW, we want the most gear from normal maps that is possible.
     if (BWRaidNowLogic())
         PRaidMax = 10;
-    else if (StartZone === -1 || game.global.world < StartZone || PRaidMax <= 0){
+    else if (PRaidStartZone === -1 || game.global.world < PRaidStartZone || PRaidMax <= 0){
         if(!isActiveSpireAT() || !getPageSetting('PRaidSpire'))
             return true; 
     }

@@ -307,13 +307,14 @@ function resetAutoTrimps(imported,profname) {
         ATrunning = true; //restart AT.
     }
     setTimeout(waitRemoveLoad(imported),101);
-    if (imported) {
+    if (imported){
         debug("Successfully imported new AT settings...", "profile");
         if (profname)   //pass in existing profile name to use:
             ImportExportTooltip("message", "Successfully Imported Autotrimps Settings File!: " + profname);
         else            //or prompt to create a new name:
             ImportExportTooltip('NameSettingsProfiles');
-    } else {
+    } 
+    else{
         debug("Successfully reset AT settings to Defaults...", "profile");
         ImportExportTooltip("message", "Autotrimps has been successfully reset to its defaults!");
     }
@@ -321,16 +322,17 @@ function resetAutoTrimps(imported,profname) {
 
 //import autotrimps settings from a textbox
 //For importing a new AT Config on the fly and reloading/applying all the settings.
-function loadAutoTrimps() {
+function loadAutoTrimps(){
     //try the import
     try {
         var thestring = document.getElementById("importBox").value.replace(/[\n\r]/gm, "");
         var tmpset = JSON.parse(thestring);
-        if (tmpset == null) {
+        if (tmpset == null){
             debug("Error importing AT settings, the string is empty.", "profile");
             return;
         }
-    } catch (err) {
+    } 
+    catch (err){
         debug("Error importing AT settings, the string is bad." + err.message, "profile");
         return;
     }
@@ -339,8 +341,8 @@ function loadAutoTrimps() {
 }
 
 //remove stale values from past autotrimps versions
-function cleanupAutoTrimps() {
-    for (var setting in autoTrimpSettings) {
+function cleanupAutoTrimps(){
+    for (var setting in autoTrimpSettings){
         var $elem = document.getElementById(autoTrimpSettings[setting].id);
         if ($elem == null)
             delete autoTrimpSettings[setting];
@@ -348,22 +350,22 @@ function cleanupAutoTrimps() {
 }
 
 //export MODULE variables to a textbox
-function exportModuleVars() {
+function exportModuleVars(){
     return JSON.stringify(compareModuleVars());
 }
 
 //diff two modules to find the difference;
-function compareModuleVars() {
+function compareModuleVars(){
     var diffs = {};
     var mods = Object.keys(MODULES);
-    for (var i in mods) {
+    for (var i in mods){
         var mod = mods[i];
         var vars = Object.keys(MODULES[mods[i]]);
-        for (var j in vars) {
+        for (var j in vars){
             var vj = vars[j];
             var a = MODULES[mod][vj];
             var b = MODULESdefault[mod][vj];
-            if (JSON.stringify(a)!=JSON.stringify(b)) {
+            if (JSON.stringify(a)!=JSON.stringify(b)){
                 if (typeof diffs[mod] === 'undefined')
                     diffs[mod] = {};
                 diffs[mod][vj] = a;
@@ -374,12 +376,12 @@ function compareModuleVars() {
 }
 
 //import MODULE variables from a textbox
-function importModuleVars() {
+function importModuleVars(){
     //try the import
     try {
         var thestring = document.getElementById("importBox").value;
         var strarr = thestring.split(/\n/);
-        for (var line in strarr) {
+        for (var line in strarr){
             var s = strarr[line];
             s = s.substring(0, s.indexOf(';')+1); //cut after the ;
             s = s.replace(/\s/g,'');    //regexp remove ALL(/g) whitespaces(\s)
@@ -396,9 +398,9 @@ function importModuleVars() {
 }
 
 //reset MODULE variables to default, (and/or then import)
-function resetModuleVars(imported) {
+function resetModuleVars(imported){
     ATrunning = false; //stop AT, wait, remove
-    function waitRemoveLoad(imported) {
+    function waitRemoveLoad(imported){
         localStorage.removeItem('storedMODULES');
         MODULES = JSON.parse(JSON.stringify(MODULESdefault));
         //load everything again, anew

@@ -13,13 +13,15 @@ presetObj("a1",             1,    1,  1,    1,   1);
 presetObj("a2",             1,    1,  1,    1,   1);
 presetObj("--------------", 1,    1,  1,    1,   1);
 
-var preset_Custom = JSON.parse(localStorage.getItem('AutoPerksCustomRatios'));
-var secondLine    = JSON.parse(localStorage.getItem('AutoPerksSecondLine'));
-if(Array.isArray(preset_Custom) || preset_Custom == null){
-    preset_Custom = presetObj("Custom", 1, 1, 1, 1, 1);
-    safeSetItems('AutoPerksCustomRatios', JSON.stringify(preset_Custom) );
+if(typeof autoTrimpSettings.APSecond_Line === 'undefined'){
+    autoTrimpSettings.APSecond_Line = JSON.parse(localStorage.getItem('AutoPerksSecondLine')); //pre v43.4 format
 }
-else presetList.push(preset_Custom);
+if(typeof autoTrimpSettings.APPreset_Custom === 'undefined'){
+    autoTrimpSettings.APPreset_Custom = JSON.parse(localStorage.getItem('AutoPerksCustomRatios')); //pre v43.4 format
+    if(typeof autoTrimpSettings.APPreset_Custom === 'undefined')
+        autoTrimpSettings.APPreset_Custom = presetObj("Custom", 1, 1, 1, 1, 1); //create fresh
+}
+presetList.push(autoTrimpSettings.APPreset_Custom);
 
 //Custom Creation for all perk customRatio boxes in Trimps Perk Window
 AutoPerks.createInput = function(perkname,div, isCheckBox) {
@@ -134,12 +136,11 @@ AutoPerks.initializeGUI = function() {
 //loads saved preset ID from memory, selects it, and updates all the boxes to fit
 AutoPerks.initializeRatioPreset = function() {
     var $rp = document.getElementById("ratioPreset");
-    var savedID = JSON.parse(localStorage.getItem('AutoperkSelectedRatioPresetID'));
-    if(typeof savedID === 'undefined' || savedID > presetList.length-1)
-        savedID = 0;
-    $rp.selectedIndex = savedID;
+    if(typeof autoTrimpSettings.APSavedID === 'undefined' || autoTrimpSettings.APSavedID > presetList.length-1)
+        autoTrimpSettings.APSavedID = 0;
+    $rp.selectedIndex = autoTrimpSettings.APSavedID;
     
-    var chosenPreset = presetList[savedID];
+    var chosenPreset = presetList[autoTrimpSettings.APSavedID];
     var perkname;
     var $perkRatioBoxes = document.getElementsByClassName("perkRatios");
     for(var i = 0; i < $perkRatioBoxes.length; i++) {
@@ -152,23 +153,20 @@ AutoPerks.initializeRatioPreset = function() {
 };
 
 //a perk box value was changed
-AutoPerks.switchAndSaveCustomRatio = function(perkname, value) {
+AutoPerks.switchAndSaveCustomRatio = function(name, value) {
     //select the custom preset if it isnt already
     var $rp = document.getElementById("ratioPreset");
     if ($rp.selectedIndex != $rp.length-1)
         ($rp.selectedIndex = $rp.length-1);
     
-    //update custom preset with new value and save to localstorage
-    preset_Custom[perkname] = parseFloat(value);
+    //update custom preset with new value
+    autoTrimpSettings.APPreset_Custom[name] = parseFloat(value);
     
     AutoPerks.updatePerkRatios(); //updates perk ratios from boxes into the data structures
-        
-    saveSecondLine();
     
-    safeSetItems('AutoperkSelectedRatioPresetID', $rp.selectedIndex);
-    safeSetItems('AutoperkSelectedRatioPresetName', $rp.selectedOptions[0].id);
-    safeSetItems('AutoPerksCustomRatios', JSON.stringify(preset_Custom));   
-    safeSetItems('AutoPerksSecondLine',   JSON.stringify(secondLine));
+    autoTrimpSettings.APSavedID = $rp.selectedIndex;
+    saveSecondLine();
+    saveSettings(); //save settings to memory
 };
 
 //sets the ratioboxes with the default ratios embedded in the script when perks are instanciated.
@@ -188,22 +186,21 @@ AutoPerks.updateFromBoxes = function() {
             $perkRatioBoxes[i].value = presetObj[perkname];
     }
     
-    $perkRatioBoxes[5].value = (secondLine != null && typeof secondLine[0] !== 'undefined') ? secondLine[0] : 560;
-    $perkRatioBoxes[6].value = (secondLine != null && typeof secondLine[1] !== 'undefined') ? secondLine[1] : 6;
-    $perkRatioBoxes[7].value = (secondLine != null && typeof secondLine[2] !== 'undefined') ? secondLine[2] : 420;
-    $perkRatioBoxes[8].value = (secondLine != null && typeof secondLine[3] !== 'undefined') ? secondLine[3] : 105;
+    $perkRatioBoxes[5].value    = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[0] !== 'undefined' ? autoTrimpSettings.APSecond_Line[0] : 560;
+    $perkRatioBoxes[6].value    = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[1] !== 'undefined' ? autoTrimpSettings.APSecond_Line[1] : 6;
+    $perkRatioBoxes[7].value    = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[2] !== 'undefined' ? autoTrimpSettings.APSecond_Line[2] : 420;
+    $perkRatioBoxes[8].value    = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[3] !== 'undefined' ? autoTrimpSettings.APSecond_Line[3] : 105;
     
     //check boxes
-    $perkRatioBoxes[9].checked  = (secondLine != null && typeof secondLine[4] !== 'undefined') ? secondLine[4] : false;
-    $perkRatioBoxes[10].checked = (secondLine != null && typeof secondLine[5] !== 'undefined') ? secondLine[5] : false;
-    $perkRatioBoxes[11].checked = (secondLine != null && typeof secondLine[6] !== 'undefined') ? secondLine[6] : false;
-    $perkRatioBoxes[12].checked = (secondLine != null && typeof secondLine[7] !== 'undefined') ? secondLine[7] : false;
+    $perkRatioBoxes[9].checked  = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[4] !== 'undefined' ? autoTrimpSettings.APSecond_Line[4] : false;
+    $perkRatioBoxes[10].checked = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[5] !== 'undefined' ? autoTrimpSettings.APSecond_Line[5] : false;
+    $perkRatioBoxes[11].checked = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[6] !== 'undefined' ? autoTrimpSettings.APSecond_Line[6] : false;
+    $perkRatioBoxes[12].checked = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[7] !== 'undefined' ? autoTrimpSettings.APSecond_Line[7] : false;
     
     AutoPerks.updatePerkRatios(); //updates perk ratios from boxes into the data structures
  
-    //save the last ratio used to localstorage
-    safeSetItems('AutoperkSelectedRatioPresetID', ratioSet);
-    safeSetItems('AutoperkSelectedRatioPresetName', $rp.selectedOptions[0].id);
+    autoTrimpSettings.APSavedID =  ratioSet;
+    saveSettings(); //save settings to memory
 };
 
 //updates the internal perk variables with values grabbed from the custom ratio input boxes that the user may have changed.
@@ -328,7 +325,7 @@ AutoPerks.clickAllocate = function() {
         //calculates attack / health of non tough cell 50 corrupted enemy at AutoPerks.maxZone
         AutoPerks.zoneHealth = approxZoneHP(AutoPerks.maxZone); //this is health approx of the entire zone
         var corrupt = AutoPerks.maxZone >= mutations.Corruption.start(true) ? "Corruption" : null;
-        AutoPerks.enemyDamage = calcEnemyAttack(corrupt, null, 'Snimp', 99, AutoPerks.maxZone, false, AutoPerks.dailyObj);
+        AutoPerks.enemyDamage = calcEnemyAttack(corrupt, null, 'Snimp', 98, AutoPerks.maxZone, false, AutoPerks.dailyObj);
         //debug("AutoPerks.zoneHealth " + AutoPerks.zoneHealth.toExponential(2) + " AutoPerks.enemyDamage " + AutoPerks.enemyDamage.toExponential(2));
         
         var helium = AutoPerks.totalHelium;
@@ -1400,7 +1397,7 @@ function findStartEndFuel(){
 }
 
 function saveSecondLine(){
-    secondLine = [AutoPerks.maxZone, AutoPerks.amalGoal, AutoPerks.amalZone, AutoPerks.coordsBehind, AutoPerks.userMaxFuel, AutoPerks.userRespecAfterAmal, AutoPerks.userMaintainMode, AutoPerks.userSaveATSettings];
+    autoTrimpSettings.APSecond_Line = [AutoPerks.maxZone, AutoPerks.amalGoal, AutoPerks.amalZone, AutoPerks.coordsBehind, AutoPerks.userMaxFuel, AutoPerks.userRespecAfterAmal, AutoPerks.userMaintainMode, AutoPerks.userSaveATSettings];
 }
 
 function minMaxMi(){
@@ -1552,6 +1549,7 @@ AutoPerks.initializeAmalg = function(){
     if(AutoPerks.maxZone < AutoPerks.amalZone) AutoPerks.maxZone = AutoPerks.amalZone;
     if(AutoPerks.coordsBehind < 0) AutoPerks.coordsBehind = 0;
     saveSecondLine();
+    saveSettings();
     AutoPerks.updateFromBoxes();                                                                     //update the boxes
     
     //army calc

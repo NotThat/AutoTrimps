@@ -345,7 +345,7 @@ function currEnemyDamage(){
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
 
-    return calcEnemyAttack(cell.mutation, cell.corrupted, cell.name, cellNum+1, game.global.world, true).toExponential(2);
+    return calcEnemyAttack(cell.mutation, cell.corrupted, cell.name, cellNum, game.global.world, true).toExponential(2);
 }
 
 function currEnemyHealth(){
@@ -353,7 +353,7 @@ function currEnemyHealth(){
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     
-    return calcEnemyHealth(cell.mutation, cell.corrupted, cell.name, cellNum+1, game.global.world, true).toExponential(2);
+    return calcEnemyHealth(cell.mutation, cell.corrupted, cell.name, cellNum, game.global.world, true).toExponential(2);
 }
 
 function calcEnemyAttack(mutation, corrupted, name, level, zone, currentGame, dailyObj){
@@ -365,7 +365,7 @@ function calcEnemyAttack(mutation, corrupted, name, level, zone, currentGame, da
     if(mutation == "Healthy") atkScale = corruptHealthyStatScaleAT(5, zone);
     else if(mutation == "Corruption") atkScale = corruptHealthyStatScaleAT(3, zone);
     
-    var attack = isSpire ? getSpireStatsAT(zone, level, name, "attack") : getEnemyAttackAT(zone, level, name, atkScale !== 1) * atkScale * 1.2; //1.2 for max damage (hopefully)
+    var attack = isSpire ? getSpireStatsAT(zone, level+1, name, "attack") : getEnemyAttackAT(zone, level+1, name, atkScale !== 1) * atkScale * 1.2; //1.2 for max damage (hopefully)
     
     if (corrupted == "corruptStrong") attack *= 2; 
     if (corrupted == "healthyStrong") attack *= 2.5;
@@ -415,7 +415,7 @@ function calcEnemyHealth(mutation, corrupted, name, level, zone, currentGame, da
     if(mutation == "Healthy") healthScale = corruptHealthyStatScaleAT(14, zone);
     else if(mutation == "Corruption") healthScale = corruptHealthyStatScaleAT(10, zone);
     
-    var amt = isSpire ? getSpireStatsAT(zone, level, name, "health") : getEnemyHealthAT(zone, level, name, healthScale !== 1) * healthScale;
+    var amt = isSpire ? getSpireStatsAT(zone, level+1, name, "health") : getEnemyHealthAT(zone, level+1, name, healthScale !== 1) * healthScale;
     
     if (corrupted == "corruptTough")         amt *= 5;
     else if (corrupted == "healthyTough")    amt *= 7.5;
@@ -480,7 +480,7 @@ function getEnemyHealthAT(zone, level, name, ignoreImpStat){
     return amt;
 }
 
-//helper function for calcEnemyAttack copied from game, allowing us to input a zone.
+//helper function copied from game, allowing us to input a zone.
 function getEnemyAttackAT(zone, level, name, ignoreImpStat){
     var amt = 0;
     var world = zone;
@@ -723,10 +723,10 @@ function approxZoneHP(zoneNum){
     var corruptMult = (3 + 5 + 1.3) / 6; //1.3 for dodge, 5 for tough
     var healthyMult = (4 + 7.5) / 5; //7.5 for tough
     
-    var amt = calcEnemyHealth("Healthy",    null, 'Snimp', 30, zone, !portalWindowOpen, AutoPerks.dailyObj)*healthyCells*healthyMult
-        +     calcEnemyHealth("Corruption", null, 'Snimp', 70, zone, !portalWindowOpen, AutoPerks.dailyObj)*corruptedCells*corruptMult
-        +     calcEnemyHealth(null,         null, 'Snimp', 70, zone, !portalWindowOpen, AutoPerks.dailyObj)*nonColoredCells
-        +     calcEnemyHealth("Corruption", null, "Omnipotrimp", 100, zone, !portalWindowOpen, AutoPerks.dailyObj);
+    var amt = calcEnemyHealth("Healthy",    null, 'Snimp',       30, zone, false, AutoPerks.dailyObj) * healthyCells   * healthyMult
+        +     calcEnemyHealth("Corruption", null, 'Snimp',       70, zone, false, AutoPerks.dailyObj) * corruptedCells * corruptMult
+        +     calcEnemyHealth(null,         null, 'Snimp',       70, zone, false, AutoPerks.dailyObj) * nonColoredCells
+        +     calcEnemyHealth("Corruption", null, "Omnipotrimp", 99, zone, false, AutoPerks.dailyObj);
     return amt;
 }
 
