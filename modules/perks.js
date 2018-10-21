@@ -16,9 +16,9 @@ presetObj("--------------", 1,    1,  1,    1,   1);
 if(typeof autoTrimpSettings.APSecond_Line === 'undefined'){
     autoTrimpSettings.APSecond_Line = JSON.parse(localStorage.getItem('AutoPerksSecondLine')); //pre v43.4 format
 }
-if(typeof autoTrimpSettings.APPreset_Custom === 'undefined'){
+if(typeof autoTrimpSettings.APPreset_Custom === 'undefined' || !autoTrimpSettings.APPreset_Custom.hasOwnProperty("header")){
     autoTrimpSettings.APPreset_Custom = JSON.parse(localStorage.getItem('AutoPerksCustomRatios')); //pre v43.4 format
-    if(typeof autoTrimpSettings.APPreset_Custom === 'undefined')
+    if(typeof autoTrimpSettings.APPreset_Custom === 'undefined' || !autoTrimpSettings.APPreset_Custom.hasOwnProperty("header"))
         autoTrimpSettings.APPreset_Custom = presetObj("Custom", 1, 1, 1, 1, 1); //create fresh
 }
 presetList.push(autoTrimpSettings.APPreset_Custom);
