@@ -1,48 +1,60 @@
 //Create blank AutoPerks object
 var AutoPerks = {};
-
 AutoPerks.Squared = "ChallengeSquared";
-var presetList = [];
-function presetObj(header, Helium, Attack, Health, Fluffy, DG) {
-    var preset = {header:header, Helium:Helium, Attack:Attack, Health:Health, Fluffy:Fluffy, DG:DG};
-    presetList.push(preset);
+
+AutoPerks.makeDefaultValueBoxes = function(){
+    return presetObj("default", 2200, 333, 11, 1500, 55, 605, 7, 522, 21);
+}
+
+function presetObj(header, Helium, Attack, Health, Fluffy, DG, maxZone, amalGoal, amalZone, coordsBehind){
+    if(typeof autoTrimpSettings.APValueBoxes === 'undefined') autoTrimpSettings.APValueBoxes = {};
+    var preset = {header:header, 
+        Helium:      autoTrimpSettings.APValueBoxes.Helium       || Helium,       
+        Attack:      autoTrimpSettings.APValueBoxes.Attack       || Attack, 
+        Health:      autoTrimpSettings.APValueBoxes.Health       || Health, 
+        Fluffy:      autoTrimpSettings.APValueBoxes.Fluffy       || Fluffy,       
+        DG:          autoTrimpSettings.APValueBoxes.DG           || DG, 
+        maxZone:     autoTrimpSettings.APValueBoxes.maxZone      || maxZone,    
+        amalGoal:    autoTrimpSettings.APValueBoxes.amalGoal     || amalGoal,
+        amalZone:    autoTrimpSettings.APValueBoxes.amalZone     || amalZone, 
+        coordsBehind:autoTrimpSettings.APValueBoxes.coordsBehind || coordsBehind};
     return preset;
 }
 
-presetObj("a1",             1,    1,  1,    1,   1);
-presetObj("a2",             1,    1,  1,    1,   1);
-presetObj("--------------", 1,    1,  1,    1,   1);
+AutoPerks.makeDefaultCheckBoxes = function(){
+    return presetCheckObj("default", false, false, false, true);
+}
 
-if(typeof autoTrimpSettings.APSecond_Line === 'undefined'){
-    autoTrimpSettings.APSecond_Line = JSON.parse(localStorage.getItem('AutoPerksSecondLine')); //pre v43.4 format
+function presetCheckObj(header, userMaxFuel, userRespecAfterAmal, userMaintainMode, userSaveATSettings){
+    if(typeof autoTrimpSettings.APCheckBoxes === 'undefined') autoTrimpSettings.APCheckBoxes = {};
+    var preset = {header:header, 
+        userMaxFuel:        autoTrimpSettings.APCheckBoxes.userMaxFuel         || userMaxFuel, 
+        userRespecAfterAmal:autoTrimpSettings.APCheckBoxes.userRespecAfterAmal || userRespecAfterAmal,
+        userMaintainMode:   autoTrimpSettings.APCheckBoxes.userMaintainMode    || userMaintainMode, 
+        userSaveATSettings: autoTrimpSettings.APCheckBoxes.userSaveATSettings  || userSaveATSettings};
+    return preset;
 }
-if(typeof autoTrimpSettings.APPreset_Custom === 'undefined' || !autoTrimpSettings.APPreset_Custom.hasOwnProperty("header")){
-    autoTrimpSettings.APPreset_Custom = JSON.parse(localStorage.getItem('AutoPerksCustomRatios')); //pre v43.4 format
-    if(typeof autoTrimpSettings.APPreset_Custom === 'undefined' || !autoTrimpSettings.APPreset_Custom.hasOwnProperty("header"))
-        autoTrimpSettings.APPreset_Custom = presetObj("Custom", 1, 1, 1, 1, 1); //create fresh
-}
-presetList.push(autoTrimpSettings.APPreset_Custom);
 
 //Custom Creation for all perk customRatio boxes in Trimps Perk Window
-AutoPerks.createInput = function(perkname,div, isCheckBox) {
-    var perk1input = document.createElement("Input");
-    if(isCheckBox) perk1input.setAttribute("type", "checkbox");
-    perk1input.id = perkname + (isCheckBox ? '' : 'Ratio');
-    perk1input.perkname = perkname;
+AutoPerks.createInput = function(name,div, isCheckBox) {
+    var input = document.createElement("Input");
+    if(isCheckBox) input.setAttribute("type", "checkbox");
+    input.id = name + (isCheckBox ? '' : 'Ratio');
+    input.name = name;
 
     var oldstyle = 'text-align: center; width: calc(100vw/25); font-size: 1.0vw; ';
-    if(game.options.menu.darkTheme.enabled != 2) perk1input.setAttribute("style", oldstyle + " color: black;");
-    else perk1input.setAttribute('style', oldstyle);
-    perk1input.setAttribute('class', 'perkRatios');
-    perk1input.setAttribute('onchange', 'AutoPerks.switchAndSaveCustomRatio(this.perkname, this.value)');
-    var perk1label = document.createElement("Label");
-    perk1label.id = perkname + 'Label';
-    perk1label.innerHTML = perkname;
-    perk1label.setAttribute('style', 'margin-right: 0.7vw; width: calc(100vw/18); color: white; font-size: 0.9vw; font-weight: lighter; margin-left: 0.3vw; ');
+    if(game.options.menu.darkTheme.enabled != 2) input.setAttribute("style", oldstyle + " color: black;");
+    else input.setAttribute('style', oldstyle);
+    input.setAttribute('class', 'perkRatios');
+    isCheckBox ? input.setAttribute('onchange', 'AutoPerks.UpdateCustomCheckBox(this.name, this.checked)') : input.setAttribute('onchange', 'AutoPerks.UpdateCustomValueBox(this.name, this.value)');
+    var label = document.createElement("Label");
+    label.id = name + 'Label';
+    label.innerHTML = name;
+    label.setAttribute('style', 'margin-right: 0.7vw; width: calc(100vw/18); color: white; font-size: 0.9vw; font-weight: lighter; margin-left: 0.3vw; ');
     //add to the div.
-    div.appendChild(perk1input);
-    div.appendChild(perk1label);
-    return perk1input;
+    div.appendChild(input);
+    div.appendChild(label);
+    return input;
 };
 
 AutoPerks.GUI = {};
@@ -72,7 +84,7 @@ AutoPerks.initializeGUI = function() {
     apGUI.$ratiosLine2 = document.createElement("DIV");
     apGUI.$ratiosLine2.setAttribute('style', 'display: inline-block; text-align: left; width: 100%');
     
-    var portalZone   = AutoPerks.createInput("Portal Zone",apGUI.$ratiosLine2);
+    var portalZone   = AutoPerks.createInput("maxZone",apGUI.$ratiosLine2);
     portalZone.setAttribute("onmouseover", 'tooltip("Portal Zone", "customText", event, "The zone you intend to portal on.")');
     var amalGoal     = AutoPerks.createInput("amalGoal",apGUI.$ratiosLine2);
     amalGoal.setAttribute("onmouseover", 'tooltip("Amalgamator Goal", "customText", event, "How many Amalgamators do you want to get.")');
@@ -102,28 +114,7 @@ AutoPerks.initializeGUI = function() {
     apGUI.$textArea = document.createElement("DIV");
     apGUI.$textArea.setAttribute('style', 'display: inline-block; text-align: left; width: 100%; background-color: #ffffff; font-size: 15px; color: #000000'); //black on white background                       ";
     apGUI.$textArea.id ='textAreaAllocate';
-    //Create ratioPreset dropdown
-    apGUI.$ratioPresetLabel = document.createElement("Label");
-    apGUI.$ratioPresetLabel.id = 'Ratio Preset Label';
-    apGUI.$ratioPresetLabel.innerHTML = "Ratio Preset:";
-    apGUI.$ratioPresetLabel.setAttribute('style', 'margin-right: 0.5vw; color: white; font-size: 0.9vw;');
-    apGUI.$ratioPreset = document.createElement("select");
-    apGUI.$ratioPreset.id = 'ratioPreset';
-    apGUI.$ratioPreset.setAttribute('onchange', 'AutoPerks.updateFromBoxes()');
-    var oldstyle = 'text-align: center; width: 8vw; font-size: 0.8vw; font-weight: lighter; ';
-    if(game.options.menu.darkTheme.enabled != 2) apGUI.$ratioPreset.setAttribute("style", oldstyle + " color: black;");
-    else apGUI.$ratioPreset.setAttribute('style', oldstyle);
-    //Populate ratio preset dropdown list from HTML above:
-    //Ratio preset dropdown list
-    var presetListHtml = "";
-    for (i = 0; i < presetList.length; i++)
-        presetListHtml += '<option>'+presetList[i].header+'</option>';
-    presetListHtml += '</select>';
-    apGUI.$ratioPreset.innerHTML = presetListHtml;
-
-    //Add the presets dropdown to UI Line 1
-    apGUI.$ratiosLine1.appendChild(apGUI.$ratioPresetLabel);
-    apGUI.$ratiosLine1.appendChild(apGUI.$ratioPreset);
+    
     apGUI.$customRatios.appendChild(apGUI.$ratiosLine2);
     apGUI.$customRatios.appendChild(apGUI.$checkBoxesLine3);
     apGUI.$customRatios.appendChild(apGUI.$textArea);
@@ -133,94 +124,36 @@ AutoPerks.initializeGUI = function() {
     $portalWrapper.appendChild(apGUI.$customRatios);
 };
 
-//loads saved preset ID from memory, selects it, and updates all the boxes to fit
-AutoPerks.initializeRatioPreset = function() {
-    var $rp = document.getElementById("ratioPreset");
-    if(typeof autoTrimpSettings.APSavedID === 'undefined' || autoTrimpSettings.APSavedID > presetList.length-1)
-        autoTrimpSettings.APSavedID = 0;
-    $rp.selectedIndex = autoTrimpSettings.APSavedID;
+//a value box has changed
+AutoPerks.UpdateCustomValueBox = function(name, value){
+    autoTrimpSettings.APValueBoxes = AutoPerks.makeDefaultValueBoxes(); //make sure datastructure intact
     
-    var chosenPreset = presetList[autoTrimpSettings.APSavedID];
-    var perkname;
-    var $perkRatioBoxes = document.getElementsByClassName("perkRatios");
-    for(var i = 0; i < $perkRatioBoxes.length; i++) {
-        perkname = $perkRatioBoxes[i].perkname;
-        if(typeof chosenPreset !== 'undefined' && chosenPreset.hasOwnProperty(perkname))
-            $perkRatioBoxes[i].value = chosenPreset.perkname;
-        else
-            $perkRatioBoxes[i].value = "";
-    }
+    //update new value
+    autoTrimpSettings.APValueBoxes[name] = parseFloat(value);
+    AutoPerks.benefitHolderObj[name].weightUser = Math.max(0, autoTrimpSettings.APValueBoxes[name]);
+    
+    saveSettings(); //save to local storage
 };
 
-//a perk box value was changed
-AutoPerks.switchAndSaveCustomRatio = function(name, value) {
-    //select the custom preset if it isnt already
-    var $rp = document.getElementById("ratioPreset");
-    if ($rp.selectedIndex != $rp.length-1)
-        ($rp.selectedIndex = $rp.length-1);
+//a check box has changed
+AutoPerks.UpdateCustomCheckBox = function(name, value){
+    autoTrimpSettings.APCheckBoxes = AutoPerks.makeDefaultCheckBoxes(); //make sure datastructure intact
     
-    //update custom preset with new value
-    autoTrimpSettings.APPreset_Custom[name] = parseFloat(value);
-    
-    AutoPerks.updatePerkRatios(); //updates perk ratios from boxes into the data structures
-    
-    autoTrimpSettings.APSavedID = $rp.selectedIndex;
-    saveSecondLine();
-    saveSettings(); //save settings to memory
+    //update new value
+    autoTrimpSettings.APCheckBoxes["user"+name] = value;
+
+    saveSettings(); //save to local storage
 };
 
-//sets the ratioboxes with the default ratios embedded in the script when perks are instanciated.
-// (and everytime the ratio-preset dropdown-selector is changed)
-//loads custom ratio selections from localstorage if applicable
+//update UI from datastructures
 AutoPerks.updateFromBoxes = function() {
     var $perkRatioBoxes = document.getElementsByClassName("perkRatios");
-    var $rp = document.getElementById("ratioPreset");
-    if (!$rp || !$perkRatioBoxes || !$rp.selectedOptions[0]) return;
-    var ratioSet = $rp.selectedIndex;
-    var presetObj = presetList[ratioSet];
-    var perkname;
-    //set ratio boxes values from currently selected preset
-    for(var i = 0; i < 5; i++) {
-        perkname = $perkRatioBoxes[i].perkname;
-        if(presetObj.hasOwnProperty(perkname))
-            $perkRatioBoxes[i].value = presetObj[perkname];
-    }
     
-    $perkRatioBoxes[5].value    = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[0] !== 'undefined' ? autoTrimpSettings.APSecond_Line[0] : 560;
-    $perkRatioBoxes[6].value    = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[1] !== 'undefined' ? autoTrimpSettings.APSecond_Line[1] : 6;
-    $perkRatioBoxes[7].value    = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[2] !== 'undefined' ? autoTrimpSettings.APSecond_Line[2] : 420;
-    $perkRatioBoxes[8].value    = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[3] !== 'undefined' ? autoTrimpSettings.APSecond_Line[3] : 105;
+    for(var i = 0; i < 9; i++) //set ratio boxes values from currently selected preset
+        $perkRatioBoxes[i].value = autoTrimpSettings.APValueBoxes[$perkRatioBoxes[i].name];
     
-    //check boxes
-    $perkRatioBoxes[9].checked  = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[4] !== 'undefined' ? autoTrimpSettings.APSecond_Line[4] : false;
-    $perkRatioBoxes[10].checked = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[5] !== 'undefined' ? autoTrimpSettings.APSecond_Line[5] : false;
-    $perkRatioBoxes[11].checked = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[6] !== 'undefined' ? autoTrimpSettings.APSecond_Line[6] : false;
-    $perkRatioBoxes[12].checked = typeof autoTrimpSettings.APSecond_Line !== 'undefined' && typeof autoTrimpSettings.APSecond_Line[7] !== 'undefined' ? autoTrimpSettings.APSecond_Line[7] : false;
-    
-    AutoPerks.updatePerkRatios(); //updates perk ratios from boxes into the data structures
- 
-    autoTrimpSettings.APSavedID =  ratioSet;
-    saveSettings(); //save settings to memory
-};
-
-//updates the internal perk variables with values grabbed from the custom ratio input boxes that the user may have changed.
-AutoPerks.updatePerkRatios = function() {
-    var $perkRatioBoxes = document.getElementsByClassName('perkRatios');
-    for(var i = 0; i < 5; i++) {
-        var newWeight = parseFloat($perkRatioBoxes[i].value);
-        AutoPerks.benefitHolder[i].weightUser = Math.max(0, newWeight);
-    }
-    AutoPerks.maxZone       = parseFloat($perkRatioBoxes[5].value);
-    AutoPerks.amalGoal      = parseFloat($perkRatioBoxes[6].value);
-    AutoPerks.amalZone      = parseFloat($perkRatioBoxes[7].value);
-    AutoPerks.coordsBehind  = parseFloat($perkRatioBoxes[8].value);
-    
-    AutoPerks.userMaxFuel           = $perkRatioBoxes[9].checked; 
-    AutoPerks.userRespecAfterAmal   = $perkRatioBoxes[10].checked;
-    AutoPerks.userMaintainMode      = $perkRatioBoxes[11].checked;
-    AutoPerks.userSaveATSettings    = $perkRatioBoxes[12].checked;
-    
-    AutoPerks.useMaxFuel = AutoPerks.userMaxFuel || AutoPerks.dailyObj != "";//use max fuel in dailies and c2
+    for(var i = 9; i < 13; i++) //set ratio boxes values from currently selected preset
+        $perkRatioBoxes[i].checked = autoTrimpSettings.APCheckBoxes["user"+$perkRatioBoxes[i].name];
 };
 
 AutoPerks.resetPerks = function(){
@@ -305,8 +238,8 @@ AutoPerks.clickAllocate = function() {
         AutoPerks.gearLevels  = 1;
         AutoPerks.breedMult   = 1;
         AutoPerks.gearLevels  = 0;
-        AutoPerks.compoundingImp = Math.pow(1.003, AutoPerks.maxZone * 3 - 1);
-        AutoPerks.windMod = 1 + (AutoPerks.maxZone >= 241 ? 13 * game.empowerments.Wind.getModifier() * 10 : 0); //13 minimum stacks
+        AutoPerks.compoundingImp = Math.pow(1.003, autoTrimpSettings.APValueBoxes.maxZone * 3 - 1);
+        AutoPerks.windMod = 1 + (autoTrimpSettings.APValueBoxes.maxZone >= 241 ? 13 * game.empowerments.Wind.getModifier() * 10 : 0); //13 minimum stacks
 
         AutoPerks.sharpBonusMult = 1; //AutoPerks.sharpBonusMult = 1.5; //TODO: checkbox this
 
@@ -315,17 +248,21 @@ AutoPerks.clickAllocate = function() {
          * finally, perk.efficiency equals perk.calculateBenefit() / perk.cost
          */
         
+        autoTrimpSettings.APValueBoxes = AutoPerks.makeDefaultValueBoxes(); //create fresh
+        autoTrimpSettings.APCheckBoxes = AutoPerks.makeDefaultCheckBoxes(); //create fresh
         AutoPerks.initializePerks(); //do this every click, this way we update locked perks etc.
         
         AutoPerks.updateDailyMods(); // current (or selected) challenge modifiers
+        AutoPerks.useMaxFuel = autoTrimpSettings.APCheckBoxes.userMaxFuel || AutoPerks.dailyObj != "";//use max fuel in dailies and c2
+        
         AutoPerks.resetPerks();      // set all perks to level 0
         AutoPerks.resetBenefits();   // benefit and benefitBak = 1;
         AutoPerks.initializeAmalg(); // calculates amalgamator related variables. also pumps carp1/2/coord. doing this every allocate instead of 
                                      // on firstRun() because DG stats and helium mightve changed
-        //calculates attack / health of non tough cell 50 corrupted enemy at AutoPerks.maxZone
-        AutoPerks.zoneHealth = approxZoneHP(AutoPerks.maxZone); //this is health approx of the entire zone
-        var corrupt = AutoPerks.maxZone >= mutations.Corruption.start(true) ? "Corruption" : null;
-        AutoPerks.enemyDamage = calcEnemyAttack(corrupt, null, 'Snimp', 98, AutoPerks.maxZone, false, AutoPerks.dailyObj);
+        //calculates attack / health of non tough cell 50 corrupted enemy at autoTrimpSettings.APValueBoxes.maxZone
+        AutoPerks.zoneHealth = approxZoneHP(autoTrimpSettings.APValueBoxes.maxZone); //this is health approx of the entire zone
+        var corrupt = autoTrimpSettings.APValueBoxes.maxZone >= mutations.Corruption.start(true) ? "Corruption" : null;
+        AutoPerks.enemyDamage = calcEnemyAttack(corrupt, null, 'Snimp', 98, autoTrimpSettings.APValueBoxes.maxZone, false, AutoPerks.dailyObj);
         //debug("AutoPerks.zoneHealth " + AutoPerks.zoneHealth.toExponential(2) + " AutoPerks.enemyDamage " + AutoPerks.enemyDamage.toExponential(2));
         
         var helium = AutoPerks.totalHelium;
@@ -426,8 +363,8 @@ AutoPerks.spendHelium = function(helium) {
         var inc = AutoPerks.workPerks[i].getBenefit();
         var price = AutoPerks.workPerks[i].getPrice();
         AutoPerks.workPerks[i].efficiency = inc/price;
-        if(AutoPerks.workPerks[i].efficiency < 0)
-            throw "Setup: " + AutoPerks.workPerks[i].name + " " + AutoPerks.workPerks[i].level + " efficiency is negative " + prettify(AutoPerks.workPerks[i].efficiency);
+        if(AutoPerks.workPerks[i].efficiency < 0 || isNaN(AutoPerks.workPerks[i].efficiency))
+            throw "Setup: " + AutoPerks.workPerks[i].name + " " + AutoPerks.workPerks[i].level + " efficiency is " + prettify(AutoPerks.workPerks[i].efficiency);
     }
 
     var mostEff, price, inc;
@@ -533,11 +470,11 @@ AutoPerks.spendHelium = function(helium) {
     
     var fluffyGrowth = (game.global.fluffyExp === 0 ? 0 : ((AutoPerks.benefitHolderObj.Fluffy.benefit*100 / game.global.fluffyExp).toFixed(3)));
     var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
-    var timeText = timeEstimator(false, 0, AutoPerks.maxZone, true);
+    var timeText = timeEstimator(false, 0, autoTrimpSettings.APValueBoxes.maxZone, true);
     
-    var healthMod = calcCurrSendHealth(false, false, AutoPerks.maxZone, AutoPerks.dailyObj, AutoPerks.fullSoldiers, AutoPerks.battleGUMult, AutoPerks.currAmalgamators, AutoPerks.equipmentHealth, AutoPerks.breedMult);
+    var healthMod = calcCurrSendHealth(false, false, autoTrimpSettings.APValueBoxes.maxZone, AutoPerks.dailyObj, AutoPerks.fullSoldiers, AutoPerks.battleGUMult, AutoPerks.currAmalgamators, AutoPerks.equipmentHealth, AutoPerks.breedMult);
     var healthToDamageRatio = (healthMod / AutoPerks.enemyDamage);
-    if(AutoPerks.useMaxFuel) AutoPerks.fuelEndZone = AutoPerks.maxZone;
+    if(AutoPerks.useMaxFuel) AutoPerks.fuelEndZone = autoTrimpSettings.APValueBoxes.maxZone;
     
     var VMs             = expectedVMsAmount(); //how many VMs we expect to have
     var VMsEffMult      = VMsEfficiencyMult(VMs);
@@ -545,10 +482,10 @@ AutoPerks.spendHelium = function(helium) {
     var heliumFromVMs   = VMs*VMsEffMult*singleVM;
     var totalHelium     = AutoPerks.totalHelium;
     var heliumGrowth    = (heliumFromVMs*1.4*AutoPerks.DailyWeight/totalHelium*100).toFixed(3) + '%'; //1.4 to account for non VM helium. TODO
-    var missingCoords   = (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.maxZone - AutoPerks.calcCoordsCoordsPurchased;
+    var missingCoords   = (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + autoTrimpSettings.APValueBoxes.maxZone - AutoPerks.calcCoordsCoordsPurchased;
     
-    var spireText = AutoPerks.maxZone >= 200 && AutoPerks.maxZone % 100 === 0 ? "Spire " : "Zone ";
-    var msg2 = spireText + AutoPerks.maxZone + " will take approx " + timeText + ". Army Health / Enemy Damage: " + prettify(healthToDamageRatio)+ (AutoPerks.maxZone >= 230 ? " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone : "") + " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%" + (missingCoords === 0 ? "" : " Missing Coords: " + missingCoords);
+    var spireText = autoTrimpSettings.APValueBoxes.maxZone >= 200 && autoTrimpSettings.APValueBoxes.maxZone % 100 === 0 ? "Spire " : "Zone ";
+    var msg2 = spireText + autoTrimpSettings.APValueBoxes.maxZone + " will take approx " + timeText + ". Army Health / Enemy Damage: " + prettify(healthToDamageRatio)+ (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone : "") + " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%" + (missingCoords === 0 ? "" : " Missing Coords: " + missingCoords);
     var msg3 = (AutoPerks.dailyObj === AutoPerks.Squared ? "" : "Helium Growth: " + heliumGrowth + " ") + (fluffyGrowth > 0 ? "Fluffy Growth: " + fluffyGrowth + "%" : "") + " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)";
     var $text = document.getElementById("textAreaAllocate");
     $text.innerHTML += msg2 + '<br>' + msg3;
@@ -778,8 +715,8 @@ function getBenefitValue(){
 function calcZeroState(){
     minMaxMi();
     
-    if(AutoPerks.userMaintainMode) AutoPerks.basePopAtMaxZ = calcBasePopMaintain();
-    else                           AutoPerks.basePopAtMaxZ = AutoPerks.basePopAtAmalZ * Math.pow(1.009, AutoPerks.maxZone-AutoPerks.amalZone);
+    if(autoTrimpSettings.APCheckBoxes.userMaintainMode) AutoPerks.basePopAtMaxZ = calcBasePopMaintain();
+    else                           AutoPerks.basePopAtMaxZ = AutoPerks.basePopAtAmalZ * Math.pow(1.009, autoTrimpSettings.APValueBoxes.maxZone-autoTrimpSettings.APValueBoxes.amalZone);
     
     AutoPerks.basePopToUse  = AutoPerks.useMaxFuel ? AutoPerks.maxFuelBasePopAtMaxZ : AutoPerks.basePopAtMaxZ;
     
@@ -804,7 +741,7 @@ function benefitHeliumCalc(){
 function benefitAttackCalc(commit, incomeFlag){
     var power1Perk = AutoPerks.useLivePerks ? game.portal["Power"] : AutoPerks.perksByName.Power;
     var power2Perk = AutoPerks.useLivePerks ? game.portal["Power_II"] : AutoPerks.perksByName.Power_II;
-    var amalToUse  = AutoPerks.useLivePerks ? AutoPerks.amalGoal : AutoPerks.currAmalgamators;
+    var amalToUse  = AutoPerks.useLivePerks ? autoTrimpSettings.APValueBoxes.amalGoal : AutoPerks.currAmalgamators;
     var coordPerk  = AutoPerks.useLivePerks ? game.portal["Coordinated"] : AutoPerks.perksByName.Coordinated;
     calcCoords(coordPerk.level) * Math.pow(1000, amalToUse); //updates AutoPerks.fullSoldiers
 
@@ -836,7 +773,7 @@ function benefitHealthCalc(commit, incomeFlag, popBreedFlag){
     var toughness1Perk = AutoPerks.useLivePerks ? game.portal["Toughness"] : AutoPerks.perksByName.Toughness;
     var toughness2Perk = AutoPerks.useLivePerks ? game.portal["Toughness_II"] : AutoPerks.perksByName.Toughness_II;
     var resourceful    = AutoPerks.useLivePerks ? game.portal["Resourceful"] : AutoPerks.perksByName.Resourceful; //resourceful isnt useless, but hard to capture its value. so use this for now. TODO.
-    var amalToUse      = AutoPerks.useLivePerks ? AutoPerks.amalGoal : AutoPerks.currAmalgamators;
+    var amalToUse      = AutoPerks.useLivePerks ? autoTrimpSettings.APValueBoxes.amalGoal : AutoPerks.currAmalgamators;
     var coordPerk      = AutoPerks.useLivePerks ? game.portal["Coordinated"] : AutoPerks.perksByName.Coordinated;
     calcCoords(coordPerk.level) * Math.pow(1000, amalToUse); //updates AutoPerks.fullSoldiers
     
@@ -886,8 +823,8 @@ function benefitFluffyCalc(){
     var cunningCuriousMult = (50 + curiousPerk.level * 30) * (1 + cunningPerk.level * 0.25);
     var startZone = 301 - 2*classyPerk.level;
     
-    var sumBenefit = AutoPerks.maxZone < startZone + 1 ? 0 : (1 - Math.pow(1.015, AutoPerks.maxZone - startZone + 1)) / (-0.015); //sum of a geometric series
-    for(var zone = 400; zone <= AutoPerks.maxZone; zone += 100)
+    var sumBenefit = autoTrimpSettings.APValueBoxes.maxZone < startZone + 1 ? 0 : (1 - Math.pow(1.015, autoTrimpSettings.APValueBoxes.maxZone - startZone + 1)) / (-0.015); //sum of a geometric series
+    for(var zone = 400; zone <= autoTrimpSettings.APValueBoxes.maxZone; zone += 100)
         sumBenefit += 2*Math.pow(1.015,zone - startZone); //spire 3+ c50 rewards 2x zone reward
     
     this.benefit = sumBenefit * cunningCuriousMult * flufffocus * staffBonusXP * AutoPerks.DailyWeight;
@@ -899,7 +836,7 @@ function benefitFluffyCalc(){
 }
 
 function benefitDGCalc(){
-    if(AutoPerks.userMaintainMode) return 1; //using max fuel for amalg maintain mode
+    if(autoTrimpSettings.APCheckBoxes.userMaintainMode) return 1; //using max fuel for amalg maintain mode
     
     //when we change DG perks, we potentially change the amount of Mi we get and DG growth. if Mi changed we need to recalculate AutoPerks.benefitDG
     //var miBefore = AutoPerks.totalMi;
@@ -924,34 +861,35 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
                         AutoPerks.basePopToUse *
                         popMultiplier() *
                         Math.pow(1.25, 60) *                //basic books
-                        Math.pow(1.6, AutoPerks.maxZone-60) * //advanced books
+                        Math.pow(1.6, autoTrimpSettings.APValueBoxes.maxZone-60) * //advanced books
                         2 *                                 //bounty
                         AutoPerks.compoundingImp *          //same bonus as whipimp
                         (1 + 0.05*motivation1Perk.level) * 
                         (1 + 0.01*motivation2Perk.level) *
                         AutoPerks.windMod *
                         staffBonusMining *
-                        2;                                 //sharing food
+                        2 *                                 //sharing food
+                        AutoPerks.DailyResourceMult;          //daily         
                         
-    AutoPerks.cacheResources = calcCacheReward(); //LMC
+    AutoPerks.cacheResources = calcCacheReward() * AutoPerks.DailyResourceMult; //LMC
 
-    AutoPerks.baseZoneLoot = baseZoneDrop();
+    AutoPerks.baseZoneLoot = baseZoneDrop() * AutoPerks.DailyResourceMult;
     var tBonus = 1.166;
     if (game.talents.turkimp4.purchased) tBonus = 1.333;
     else if (game.talents.turkimp3.purchased) tBonus = 1.249;
-    AutoPerks.lootedResources = calcLootedResources();
+    AutoPerks.lootedResources = calcLootedResources() * AutoPerks.DailyResourceMult;
     
     AutoPerks.totalResources = (AutoPerks.cacheResources + AutoPerks.gatheredResources + tBonus * staffBonusDrop * AutoPerks.lootedResources); //out of these 3, AutoPerks.cacheResources is the predominent one (from LMC maps)
     
     var baseCost = 1315 * Math.pow(0.95, artisanPerk.level); //total all gear level 1 basecost
     
     var cycleModifier = 0;
-    var cycle = cycleZone(AutoPerks.maxZone);
+    var cycle = autoTrimpSettings.APValueBoxes.maxZone >= 236 ? cycleZone(autoTrimpSettings.APValueBoxes.maxZone) : -1;
     if(cycle <= 4 || (cycle >= 15 && cycle <= 24)) cycleModifier = 2;
-    AutoPerks.prestiges = Math.floor((AutoPerks.maxZone-1)/10) * 2 + 2 + cycleModifier; //roundup to next xx5 zone for prestige, anticipating praid cycles
+    AutoPerks.prestiges = Math.floor((autoTrimpSettings.APValueBoxes.maxZone-1)/10) * 2 + 2 + cycleModifier; //roundup to next xx5 zone for prestige, anticipating praid cycles
     
     var prestigeMod = (AutoPerks.prestiges - 3) * 0.85 + 2;
-    AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1) * (AutoPerks.ChallengeName == "Obliterated" ? 1e12 : 1); //this is the cost of all gear at max prestige level 1
+    AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1) * AutoPerks.DailyEquipmentMult * (AutoPerks.ChallengeName == "Obliterated" ? 1e12 : 1); //this is the cost of all gear at max prestige level 1
     
     var minimumLevels = 20;
     if(AutoPerks.totalResources >= AutoPerks.gearCost*minimumLevels)
@@ -964,7 +902,7 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
             prestigesDropped++;
             AutoPerks.prestiges--;
             prestigeMod = (AutoPerks.prestiges - 3) * 0.85 + 2;
-            AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1) * (AutoPerks.ChallengeName == "Obliterated" ? 1e12 : 1);
+            AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1) * AutoPerks.DailyEquipmentMult * (AutoPerks.ChallengeName == "Obliterated" ? 1e12 : 1);
         }
         if(maxLoops === 0)
             throw "Error: calcIncome() maxLoops is 0.";
@@ -985,8 +923,8 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
 function calcLootedResources(){
     var looting1        = AutoPerks.useLivePerks ? game.portal["Looting"] : AutoPerks.perksByName.Looting;
     var looting2        = AutoPerks.useLivePerks ? game.portal["Looting_II"] : AutoPerks.perksByName.Looting_II;
-    var spireBonus = 1 + 10 * Math.floor((AutoPerks.maxZone - 100) / 100) * (game.talents.stillRowing.purchased ? 0.03 : 0.02);
-    AutoPerks.lootedResources = AutoPerks.baseZoneLoot *
+    var spireBonus = 1 + 10 * Math.floor((autoTrimpSettings.APValueBoxes.maxZone - 100) / 100) * (game.talents.stillRowing.purchased ? 0.03 : 0.02);
+    var looted                = AutoPerks.baseZoneLoot *
                                 AutoPerks.basePopToUse *
                                 popMultiplier() *
                                 (1 + 0.05*looting1.level) * 
@@ -994,7 +932,7 @@ function calcLootedResources(){
                                 AutoPerks.compoundingImp * 
                                 spireBonus * 
                                 AutoPerks.windMod;
-    return AutoPerks.lootedResources;
+    return looted;
 }
 
 function calcCacheReward(){
@@ -1032,7 +970,7 @@ function getJobModifierAT(){
     
     var base = 0.5 *
     Math.pow(1.25, 60) *                //basic books
-    Math.pow(1.6, AutoPerks.maxZone-60) * //advanced books
+    Math.pow(1.6, autoTrimpSettings.APValueBoxes.maxZone-60) * //advanced books
     2 *                                     //bounty
     AutoPerks.compoundingImp *
     (1 + 0.05*motivation1Perk.level) *
@@ -1043,24 +981,24 @@ function getJobModifierAT(){
 
 function getPlayerModifierAT(){
     var base = 10;
-    base = base * Math.pow(2, Math.floor(AutoPerks.maxZone / 2));
+    base = base * Math.pow(2, Math.floor(autoTrimpSettings.APValueBoxes.maxZone / 2));
     return base;
 }
 
 function baseZoneDrop(){
     var amt = 0;
-    var tempModifier = 0.5 * Math.pow(1.25, (AutoPerks.maxZone >= 59) ? 59 : AutoPerks.maxZone);
+    var tempModifier = 0.5 * Math.pow(1.25, (autoTrimpSettings.APValueBoxes.maxZone >= 59) ? 59 : autoTrimpSettings.APValueBoxes.maxZone);
     //Mega books
-    if (AutoPerks.maxZone >= 60) {
-        if (game.global.frugalDone) tempModifier *= Math.pow(1.6, AutoPerks.maxZone - 59);
-        else tempModifier *= Math.pow(1.5, AutoPerks.maxZone - 59);
+    if (autoTrimpSettings.APValueBoxes.maxZone >= 60) {
+        if (game.global.frugalDone) tempModifier *= Math.pow(1.6, autoTrimpSettings.APValueBoxes.maxZone - 59);
+        else tempModifier *= Math.pow(1.5, autoTrimpSettings.APValueBoxes.maxZone - 59);
     }
     //Bounty
-    if (AutoPerks.maxZone >= 15) tempModifier *= 2;
+    if (autoTrimpSettings.APValueBoxes.maxZone >= 15) tempModifier *= 2;
     //Whipimp
     if (game.unlocks.impCount.Whipimp) tempModifier *= Math.pow(1.003, game.unlocks.impCount.Whipimp);
     var avgSec = tempModifier;
-    if (AutoPerks.maxZone < 100)
+    if (autoTrimpSettings.APValueBoxes.maxZone < 100)
         amt = avgSec * 3.5;
     else
         amt = avgSec * 5;
@@ -1071,18 +1009,18 @@ function calcPopBreed(toRet){
     //we want the value of breeding translated into health.
     var coordPerk = AutoPerks.useLivePerks ? game.portal["Coordinated"] : AutoPerks.perksByName.Coordinated;
     var pheroPerk = AutoPerks.useLivePerks ? game.portal["Pheromones"] : AutoPerks.perksByName.Pheromones;
-    var amalToUse = AutoPerks.useLivePerks ? AutoPerks.amalGoal : AutoPerks.currAmalgamators;
+    var amalToUse = AutoPerks.useLivePerks ? autoTrimpSettings.APValueBoxes.amalGoal : AutoPerks.currAmalgamators;
     var armySize  = calcCoords(coordPerk.level) * Math.pow(1000, amalToUse);
     
     var finalPopSize  = AutoPerks.basePopToUse * popMultiplier();
     
     var lumberjackEff = getJobModifierAT();
     var lumberjacks = finalPopSize * 0.001;
-    var gatheredResources = lumberjacks * lumberjackEff;
-    AutoPerks.lootedResources = calcLootedResources();
-    var nurseries = calculateMaxNurseries(AutoPerks.lootedResources + gatheredResources) / (AutoPerks.maxZone >= 230 ? 5 : 1); //use all nurseries below 230
+    var gatheredResources = lumberjacks * lumberjackEff * AutoPerks.DailyResourceMult;
+    AutoPerks.lootedResources = calcLootedResources() * AutoPerks.DailyResourceMult;
+    var nurseries = calculateMaxNurseries(AutoPerks.lootedResources + gatheredResources) / (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 5 : 1); //use all nurseries below 230
 
-    if(AutoPerks.maxZone < 70){
+    if(autoTrimpSettings.APValueBoxes.maxZone < 70){
         AutoPerks.breedMult = 1;
         AutoPerks.maxNurseries = nurseries;
         return 1;
@@ -1090,11 +1028,12 @@ function calcPopBreed(toRet){
     
     var breed =   0.0085        //how many trimps are bred each second before geneticists.
                 * finalPopSize/2
-                * Math.pow(1.1, Math.floor(AutoPerks.maxZone / 5)) //potency
+                * Math.pow(1.1, Math.floor(autoTrimpSettings.APValueBoxes.maxZone / 5)) //potency
                 * AutoPerks.compoundingImp
                 * 0.1           //broken planet
                 * (1 + 0.1*pheroPerk.level)
-                * Math.pow(1.01, nurseries);
+                * Math.pow(1.01, nurseries)
+                * AutoPerks.DailyBreedingMult; //toxic daily modifier
     
     var desiredAmalMult = (armySize / (AutoPerks.AntiStacks === 0 ? 1 : AutoPerks.AntiStacks)) / breed;
     var geneticists = Math.floor(Math.log(desiredAmalMult) / Math.log(0.98));
@@ -1124,16 +1063,16 @@ function calculateMaxNurseries(resourcesAvailable){
 }
 
 AutoPerks.initializePerks = function () {
-    var bHel   = {calc: benefitHeliumCalc};
-    var bAtk   = {calc: benefitAttackCalc};
-    var bHlth  = {calc: benefitHealthCalc};
-    var bFluff = {calc: benefitFluffyCalc};
-    var bDG    = {calc: benefitDGCalc};
+    var bHel   = {calc: benefitHeliumCalc, weightUser:autoTrimpSettings.APValueBoxes.Helium};
+    var bAtk   = {calc: benefitAttackCalc, weightUser:autoTrimpSettings.APValueBoxes.Attack};
+    var bHlth  = {calc: benefitHealthCalc, weightUser:autoTrimpSettings.APValueBoxes.Health};
+    var bFluff = {calc: benefitFluffyCalc, weightUser:autoTrimpSettings.APValueBoxes.Fluffy};
+    var bDG    = {calc: benefitDGCalc,     weightUser:autoTrimpSettings.APValueBoxes.DG};
     
     AutoPerks.benefitHolderObj = {Helium:bHel, Attack:bAtk, Health:bHlth, Fluffy:bFluff, DG:bDG};
     AutoPerks.benefitHolder    = [bHel, bAtk, bHlth, bFluff, bDG];
     for(var i = 0; i < AutoPerks.benefitHolder.length; i++)
-        AutoPerks.benefitHolder[i].getValue = getBenefitValue;
+        AutoPerks.benefitHolder[i].getValue   = getBenefitValue;
     
     //Fixed perks: These perks do not get changed by autoperks.
     var siphonology     = {name: "Siphonology",     baseCost: 100000};
@@ -1237,7 +1176,7 @@ power2LevelFunc = function(){
 
 function calcStartingPop(){ //this is pre carp1/2 population
     //simplification, assume 10 of each building. the purpose is mostly to have something other than 1
-    var zone = AutoPerks.maxZone > 230 ? 230 : AutoPerks.maxZone; //beyond 230, pop comes from DG.
+    var zone = autoTrimpSettings.APValueBoxes.maxZone > 230 ? 230 : autoTrimpSettings.APValueBoxes.maxZone; //beyond 230, pop comes from DG.
     var startingPop = 10; 
     startingPop += 10 * 6;  //huts
     startingPop += 10 * 10; //houses
@@ -1260,13 +1199,13 @@ function calcStartingPop(){ //this is pre carp1/2 population
 
 function calcBasePopArr(){
     AutoPerks.startingPop = calcStartingPop();
-    AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230; //max possible fuel
+    AutoPerks.fuelMaxZones = autoTrimpSettings.APValueBoxes.amalZone - 230; //max possible fuel
     AutoPerks.basePopArr = [];
-    for (AutoPerks.fuelMaxZones = 0; AutoPerks.fuelMaxZones <= AutoPerks.amalZone - 230; AutoPerks.fuelMaxZones += 1)
+    for (AutoPerks.fuelMaxZones = 0; AutoPerks.fuelMaxZones <= autoTrimpSettings.APValueBoxes.amalZone - 230; AutoPerks.fuelMaxZones += 1)
         AutoPerks.basePopArr[AutoPerks.fuelMaxZones] = calcBasePop();
     
     AutoPerks.maxFuelBasePopAtMaxZ = calcBasePop(true); //basepop if we fuel from 230 to maxZ
-    AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230; //reset to max possible fuel until amalZ
+    AutoPerks.fuelMaxZones = autoTrimpSettings.APValueBoxes.amalZone - 230; //reset to max possible fuel until amalZ
     return AutoPerks.basePopArr;
 }
 
@@ -1287,13 +1226,13 @@ function calcBasePop(useMaxFuel){
     var popTick = Math.floor(Math.sqrt(fuelCapacity)* 500000000 * (1 + 0.1*eff) * OCEff);
     if(useMaxFuel){
         var start   = 230;
-        var endFuel = AutoPerks.maxZone;
-        var endZone = AutoPerks.maxZone;
+        var endFuel = autoTrimpSettings.APValueBoxes.maxZone;
+        var endZone = autoTrimpSettings.APValueBoxes.maxZone;
     }
     else{
         var start   = AutoPerks.fuelStartZone;
         var endFuel = AutoPerks.fuelEndZone;
-        var endZone = AutoPerks.amalZone;
+        var endZone = autoTrimpSettings.APValueBoxes.amalZone;
     }
     for (var i = start; i < endZone; i++){
         pop *= 1.009; //tauntimp average increase
@@ -1329,7 +1268,7 @@ function calcBasePopMaintain(){
     
     var popTick = Math.floor(Math.sqrt(fuelCapacity)* 500000000 * (1 + 0.1*eff) * OCEff);
     
-    for (var i = game.global.world; i < AutoPerks.maxZone; i++){
+    for (var i = game.global.world; i < autoTrimpSettings.APValueBoxes.maxZone; i++){
         basePop *= 1.009; //tauntimp average increase        
         var fuelFromMagmaCell = Math.min(0.2 + (i-230) * 0.01, supMax);
         var fuelFromZone = magmaCells * fuelFromMagmaCell;
@@ -1391,13 +1330,9 @@ function getAmalFinal(basePopAtZ){
 }
 
 function findStartEndFuel(){
-    AutoPerks.fuelStartZone = Math.max(230, Math.min(320 - Math.ceil(AutoPerks.fuelMaxZones/2), AutoPerks.amalZone - AutoPerks.fuelMaxZones));
-    AutoPerks.fuelEndZone = Math.min(AutoPerks.amalZone, AutoPerks.fuelStartZone + AutoPerks.fuelMaxZones - 1);
-    AutoPerks.totalMi = (game.talents.magmaFlow.purchased ? 18 : 16) * (AutoPerks.maxZone - 230 - AutoPerks.fuelMaxZones);
-}
-
-function saveSecondLine(){
-    autoTrimpSettings.APSecond_Line = [AutoPerks.maxZone, AutoPerks.amalGoal, AutoPerks.amalZone, AutoPerks.coordsBehind, AutoPerks.userMaxFuel, AutoPerks.userRespecAfterAmal, AutoPerks.userMaintainMode, AutoPerks.userSaveATSettings];
+    AutoPerks.fuelStartZone = Math.max(230, Math.min(320 - Math.ceil(AutoPerks.fuelMaxZones/2), autoTrimpSettings.APValueBoxes.amalZone - AutoPerks.fuelMaxZones));
+    AutoPerks.fuelEndZone = Math.min(autoTrimpSettings.APValueBoxes.amalZone, AutoPerks.fuelStartZone + AutoPerks.fuelMaxZones - 1);
+    AutoPerks.totalMi = (game.talents.magmaFlow.purchased ? 18 : 16) * (autoTrimpSettings.APValueBoxes.maxZone - 230 - AutoPerks.fuelMaxZones);
 }
 
 function minMaxMi(){
@@ -1405,16 +1340,16 @@ function minMaxMi(){
     AutoPerks.popMult = popMultiplier(); //pop calc, uses carp1/2
     //AutoPerks.finalArmySize = calcCoords(); //uses coordinated
     AutoPerks.calcArmySizes();
-    //AutoPerks.armySizeAmalZ = calcCoords(coordperk.level, (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.amalZone-AutoPerks.coordsBehind);
-    //AutoPerks.armySizeMaxZ  = calcCoords(coordperk.level, (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.maxZone);
-    var amalZToMaxZ = Math.pow(1.009, AutoPerks.maxZone - AutoPerks.amalZone);
+    //AutoPerks.armySizeAmalZ = calcCoords(coordperk.level, (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + autoTrimpSettings.APValueBoxes.amalZone-autoTrimpSettings.APValueBoxes.coordsBehind);
+    //AutoPerks.armySizeMaxZ  = calcCoords(coordperk.level, (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + autoTrimpSettings.APValueBoxes.maxZone);
+    var amalZToMaxZ = Math.pow(1.009, autoTrimpSettings.APValueBoxes.maxZone - autoTrimpSettings.APValueBoxes.amalZone);
     
     if(AutoPerks.useMaxFuel)
-        AutoPerks.fuelMaxZones = AutoPerks.maxZone - 230;
+        AutoPerks.fuelMaxZones = autoTrimpSettings.APValueBoxes.maxZone - 230;
     else
-        AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230;
+        AutoPerks.fuelMaxZones = autoTrimpSettings.APValueBoxes.amalZone - 230;
     
-    if(AutoPerks.benefitHolderObj.DG.weightUser > 0 && !AutoPerks.useMaxFuel && !AutoPerks.userMaintainMode){ //if DG weight is 0, always use max fuel
+    if(AutoPerks.benefitHolderObj.DG.weightUser > 0 && !AutoPerks.useMaxFuel && !autoTrimpSettings.APCheckBoxes.userMaintainMode){ //if DG weight is 0, always use max fuel
         var maxLoops = 500;
         while(maxLoops--){
             if(AutoPerks.fuelMaxZones <= 10) break;
@@ -1533,8 +1468,8 @@ AutoPerks.getPct = function(){
 
 AutoPerks.calcArmySizes = function(){
     var coordperk = AutoPerks.perksByName.Coordinated;
-    AutoPerks.armySizeAmalZ = calcCoords(coordperk.level, (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.amalZone-AutoPerks.coordsBehind);
-    AutoPerks.armySizeMaxZ  = calcCoords(coordperk.level, (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.maxZone);
+    AutoPerks.armySizeAmalZ = calcCoords(coordperk.level, (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + autoTrimpSettings.APValueBoxes.amalZone-autoTrimpSettings.APValueBoxes.coordsBehind);
+    AutoPerks.armySizeMaxZ  = calcCoords(coordperk.level, (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + autoTrimpSettings.APValueBoxes.maxZone);
 };
 
 //get ready / initialize
@@ -1542,18 +1477,16 @@ AutoPerks.initializeAmalg = function(){
     AutoPerks.MAXPCT = 85;        //maximum helium we're willing to spend in carp1/2/coordinated
     AutoPerks.DGGrowthRun = 0;    //initialize
     //input checks
-    //if(AutoPerks.amalZone < 230) AutoPerks.amalZone = 230;
-    if(AutoPerks.amalZone > 999) AutoPerks.amalZone = 999;
-    if(AutoPerks.amalGoal < 0) AutoPerks.amalGoal = 0;
-    if(AutoPerks.maxZone > 999) AutoPerks.maxZone = 999;
-    if(AutoPerks.maxZone < AutoPerks.amalZone) AutoPerks.maxZone = AutoPerks.amalZone;
-    if(AutoPerks.coordsBehind < 0) AutoPerks.coordsBehind = 0;
-    saveSecondLine();
-    saveSettings();
-    AutoPerks.updateFromBoxes();                                                                     //update the boxes
+    //if(autoTrimpSettings.APValueBoxes.amalZone < 230) autoTrimpSettings.APValueBoxes.amalZone = 230;
+    if(autoTrimpSettings.APValueBoxes.amalZone > 999) autoTrimpSettings.APValueBoxes.amalZone = 999;
+    if(autoTrimpSettings.APValueBoxes.amalGoal < 0) autoTrimpSettings.APValueBoxes.amalGoal = 0;
+    if(autoTrimpSettings.APValueBoxes.maxZone > 999) autoTrimpSettings.APValueBoxes.maxZone = 999;
+    if(autoTrimpSettings.APValueBoxes.maxZone < autoTrimpSettings.APValueBoxes.amalZone) autoTrimpSettings.APValueBoxes.maxZone = autoTrimpSettings.APValueBoxes.amalZone;
+    if(autoTrimpSettings.APValueBoxes.coordsBehind < 0) autoTrimpSettings.APValueBoxes.coordsBehind = 0;
+    AutoPerks.updateFromBoxes();        //populate UI boxes based on selected preset. also updates userWeights from box values
     
     //army calc
-    AutoPerks.coordsUsed = (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.userMaintainMode ? AutoPerks.maxZone : AutoPerks.amalZone-AutoPerks.coordsBehind;
+    AutoPerks.coordsUsed = (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + autoTrimpSettings.APCheckBoxes.userMaintainMode ? autoTrimpSettings.APValueBoxes.maxZone : autoTrimpSettings.APValueBoxes.amalZone-autoTrimpSettings.APValueBoxes.coordsBehind;
     AutoPerks.finalArmySize = calcCoords(); //uses coordinated
     
     //step 1: find max amalgamators we can afford. calculate carp1/2/coordinated along the way
@@ -1569,29 +1502,29 @@ AutoPerks.initializeAmalg = function(){
     var coordinatedcost = 0;
     var finalMsg = '';
     
-    AutoPerks.fuelMaxZones = AutoPerks.amalZone - 230; //max possible fuel
+    AutoPerks.fuelMaxZones = autoTrimpSettings.APValueBoxes.amalZone - 230; //max possible fuel
     
-    //calcBasePop only needs to be calculated once for each AutoPerks.fuelMaxZones and AutoPerks.amalZone
+    //calcBasePop only needs to be calculated once for each AutoPerks.fuelMaxZones and autoTrimpSettings.APValueBoxes.amalZone
     //we can save the results and pull the previously calculated values for speed
     calcBasePopArr();
     
     AutoPerks.basePopAtAmalZ = AutoPerks.fuelMaxZones <= 0 ? AutoPerks.startingPop : AutoPerks.basePopArr[AutoPerks.fuelMaxZones];
-    //AutoPerks.basePopAtMaxZ  = AutoPerks.basePopAtAmalZ * Math.pow(1.009, AutoPerks.maxZone-AutoPerks.amalZone);
-    if(AutoPerks.userMaintainMode){ //only need to maintain our amalg at maxZone
-        AutoPerks.currAmalgamators = AutoPerks.amalGoal;
+    //AutoPerks.basePopAtMaxZ  = AutoPerks.basePopAtAmalZ * Math.pow(1.009, autoTrimpSettings.APValueBoxes.maxZone-autoTrimpSettings.APValueBoxes.amalZone);
+    if(autoTrimpSettings.APCheckBoxes.userMaintainMode){ //only need to maintain our amalg at maxZone
+        AutoPerks.currAmalgamators = autoTrimpSettings.APValueBoxes.amalGoal;
         AutoPerks.RatioToAmal = 1000000; //x1000 to preserve amal, x1000 to "reach" next one (forces loop amal loop to fit maintain mode)
         var basePopAtZToUse = calcBasePopMaintain();
     }
     else{
         AutoPerks.currAmalgamators = 0;
-        AutoPerks.clearedSpiresBonus = Math.min(4, Math.floor((AutoPerks.amalZone - 200) / 100));
+        AutoPerks.clearedSpiresBonus = Math.min(4, Math.floor((autoTrimpSettings.APValueBoxes.amalZone - 200) / 100));
         AutoPerks.RatioToAmal = Math.pow(10, 10-AutoPerks.clearedSpiresBonus);
         var basePopAtZToUse = AutoPerks.basePopAtAmalZ;
     }
     
     var safety = 1.05; //5% to account for tauntimps rng
-    while(AutoPerks.currAmalgamators <= AutoPerks.amalGoal){
-        if(AutoPerks.amalGoal === 0) break;
+    while(AutoPerks.currAmalgamators <= autoTrimpSettings.APValueBoxes.amalGoal){
+        if(autoTrimpSettings.APValueBoxes.amalGoal === 0) break;
         
         AutoPerks.amalMultPre = Math.pow(1000, AutoPerks.currAmalgamators-1);
         AutoPerks.popMult = popMultiplier(); //carp1/2 multiplier
@@ -1646,9 +1579,9 @@ AutoPerks.initializeAmalg = function(){
             if(AutoPerks.dailyObj === AutoPerks.Squared) runMode = AutoPerks.ChallengeName+" (Battle GU, max fuel, helium weight 0): ";
             else if(AutoPerks.dailyObj != "") runMode = "Daily Mode (max fuel, x" + (AutoPerks.DailyWeight).toFixed(2) + " bonus): ";
             
-            var msg = runMode + "Amalgamator #"+AutoPerks.currAmalgamators+(AutoPerks.userMaintainMode ? " maintained. " : " found. ");
+            var msg = runMode + "Amalgamator #"+AutoPerks.currAmalgamators+(autoTrimpSettings.APCheckBoxes.userMaintainMode ? " maintained. " : " found. ");
             finalMsg = msg + '<br>';
-            if(AutoPerks.currAmalgamators === AutoPerks.amalGoal)
+            if(AutoPerks.currAmalgamators === autoTrimpSettings.APValueBoxes.amalGoal)
                 break;
             else
                 AutoPerks.currAmalgamators++;
@@ -1666,7 +1599,7 @@ AutoPerks.initializeAmalg = function(){
     if(AutoPerks.currAmalgamators < 0) AutoPerks.currAmalgamators = 0;
     AutoPerks.amalMultPre = Math.pow(1000, AutoPerks.currAmalgamators-1);
     
-    AutoPerks.coordsUsed = (AutoPerks.maxZone >= 230 ? 99 : -1) + AutoPerks.maxZone;
+    AutoPerks.coordsUsed = (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + autoTrimpSettings.APValueBoxes.maxZone;
     carp1perk.level = carp1;
     carp2perk.level = carp2;
     coordperk.level = coordinated;
@@ -1675,7 +1608,7 @@ AutoPerks.initializeAmalg = function(){
     coordperk.spent = coordinatedcost;
     
     AutoPerks.calcArmySizes();
-    var amalZToMaxZ = Math.pow(1.009, AutoPerks.maxZone - AutoPerks.amalZone);
+    var amalZToMaxZ = Math.pow(1.009, autoTrimpSettings.APValueBoxes.maxZone - autoTrimpSettings.APValueBoxes.amalZone);
     AutoPerks.basePopAtMaxZ = AutoPerks.basePopAtAmalZ * amalZToMaxZ;
     AutoPerks.RatioToAmal = 1000000; //x1000 to preserve amal, x1000 to "reach" next one (forces loop amal loop to fit maintain mode)
     AutoPerks.finalArmySize = AutoPerks.armySizeMaxZ;
@@ -1684,13 +1617,6 @@ AutoPerks.initializeAmalg = function(){
 
 //Auto Dump into Looting II
 function lootdump() {
-    /*var currLevel  = game.portal.Looting_II.level;
-    var totalSpent   = game.portal.Looting_II.heliumSpent;
-    var totalUnspent = game.global.heliumLeftover; //this is for mid-run allocation
-
-    //calculate amt directly
-    var amt = Math.floor(1/100*(Math.sqrt(2)*Math.sqrt(totalSpent+totalUnspent+451250)-950)) - currLevel; //how many additional levels we want to buy
-    */
     viewPortalUpgrades();
     numTab(6, true);  
     if (getPortalUpgradePrice("Looting_II")+game.resources.helium.totalSpentTemp <= game.resources.helium.respecMax){
@@ -1721,35 +1647,38 @@ AutoPerks.updateDailyMods = function(){
         AutoPerks.dailyObj = AutoPerks.Squared;
     
     AutoPerks.AntiStacks = handleGA(false, AutoPerks.dailyObj);
-    AutoPerks.OblitMod   = AutoPerks.ChallengeName == "Obliterated" ? calcOblitMult(AutoPerks.maxZone) : 1;
-    AutoPerks.CoordMod   = AutoPerks.ChallengeName == 'Coordinate'  ? calcCoordMult(AutoPerks.maxZone) : 1;
-    AutoPerks.battleGUMult = 1;
-    AutoPerks.DailyHousingMult = 1;
-    AutoPerks.DailyBadHealthMult = 1;
-    AutoPerks.DailyWeight = 1;
+    AutoPerks.OblitMod   = AutoPerks.ChallengeName == "Obliterated" ? calcOblitMult(autoTrimpSettings.APValueBoxes.maxZone) : 1;
+    AutoPerks.CoordMod   = AutoPerks.ChallengeName == 'Coordinate'  ? calcCoordMult(autoTrimpSettings.APValueBoxes.maxZone) : 1;
+    AutoPerks.DailyHousingMult  =     (AutoPerks.dailyObj.hasOwnProperty("large")         ? dailyModifiers.large.getMult(AutoPerks.dailyObj.large.strength) : 1);
+    AutoPerks.DailyResourceMult = 1 * (AutoPerks.dailyObj.hasOwnProperty("famine")        ? dailyModifiers.famine.getMult(AutoPerks.dailyObj.famine.strength) : 1)
+                                    * (AutoPerks.dailyObj.hasOwnProperty("karma")         ? dailyModifiers.karma.getMult(AutoPerks.dailyObj.karma.strength, 150) : 1) //150 stacks (1 per cell kill)
+                                    * (AutoPerks.dailyObj.hasOwnProperty("dedication")    ? dailyModifiers.dedication.getMult(AutoPerks.dailyObj.dedication.strength) : 1); 
+    AutoPerks.DailyBreedingMult = 1 * (AutoPerks.dailyObj.hasOwnProperty("toxic")         ? dailyModifiers.toxic.getMult(AutoPerks.dailyObj.toxic.strength, 150) : 1) //150 stacks (1 per cell kill)
+                                    * (AutoPerks.dailyObj.hasOwnProperty("dysfunctional") ? dailyModifiers.dysfunctional.getMult(AutoPerks.dailyObj.dysfunctional.strength) : 1); 
+    AutoPerks.DailyEquipmentMult =    (AutoPerks.dailyObj.hasOwnProperty("metallicThumb") ? dailyModifiers.metallicThumb.getMult(AutoPerks.dailyObj.metallicThumb.strength) : 1);
     
+    AutoPerks.battleGUMult = 1;
+    AutoPerks.DailyWeight = 1;
     if(AutoPerks.dailyObj === AutoPerks.Squared)
-        AutoPerks.battleGUMult = getMaxBattleGU(AutoPerks.maxZone);
-    else if(AutoPerks.dailyObj != ""){
-        AutoPerks.DailyWeight = 1+ (portalWindowOpen ? getDailyHeliumValue(countDailyWeight(getDailyChallenge(readingDaily, true)))/100 : getDailyHeliumValue(countDailyWeight())/100);
-        if(AutoPerks.dailyObj.hasOwnProperty("large"))
-            AutoPerks.DailyHousingMult = (100 - AutoPerks.dailyObj.large.strength) / 100;
-        if(AutoPerks.dailyObj.hasOwnProperty("badHealth"))
-            AutoPerks.DailyHousingMult = (100 + 20*AutoPerks.dailyObj.badHealth.strength) / 100;
-    }
+        AutoPerks.battleGUMult = getMaxBattleGU(autoTrimpSettings.APValueBoxes.maxZone);
+    else if(AutoPerks.dailyObj != "" && AutoPerks.dailyObj != AutoPerks.Squared)
+        AutoPerks.DailyWeight = 1 + (portalWindowOpen ? getDailyHeliumValue(countDailyWeight(getDailyChallenge(readingDaily, true)))/100 : getDailyHeliumValue(countDailyWeight())/100);    
 };
 
 AutoPerks.firstRun = function(){
+    autoTrimpSettings.APValueBoxes = AutoPerks.makeDefaultValueBoxes(); //create fresh
+    autoTrimpSettings.APCheckBoxes = AutoPerks.makeDefaultCheckBoxes(); //create fresh
+    
     AutoPerks.useLivePerks = false; //by default, use perk setup as calculated by AutoPerks.
     AutoPerks.updateDailyMods(); // current (or selected) challenge modifiers
     AutoPerks.initializePerks();        //create data structures
     AutoPerks.initializeGUI();          //create UI elements
-    AutoPerks.initializeRatioPreset();  //loads last selected preset.
+    //AutoPerks.initializeRatioPreset();  //loads last selected preset.
     AutoPerks.updateFromBoxes();        //populate UI boxes based on selected preset. also updates userWeights from box values
     
     //these are also calculated here for time estimate function
-    AutoPerks.windMod = 1 + (AutoPerks.maxZone >= 241 ? 13 * game.empowerments.Wind.getModifier() * 10 : 0); //13 minimum stacks
-    AutoPerks.compoundingImp = Math.pow(1.003, AutoPerks.maxZone * 3 - 1);
+    AutoPerks.windMod = 1 + (autoTrimpSettings.APValueBoxes.maxZone >= 241 ? 13 * game.empowerments.Wind.getModifier() * 10 : 0); //13 minimum stacks
+    AutoPerks.compoundingImp = Math.pow(1.003, autoTrimpSettings.APValueBoxes.maxZone * 3 - 1);
 }
 
 

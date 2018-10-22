@@ -32,7 +32,7 @@ addToolTipToArmyCount();
 function handleGA(currentGame, dailyObj){
     var theDailyObj = currentGame ? game.global.dailyChallenge  : dailyObj;
     var C2name      = currentGame ? game.global.challengeActive : AutoPerks.ChallengeName;
-    var zone        = currentGame ? game.global.world           : AutoPerks.maxZone;
+    var zone        = currentGame ? game.global.world           : autoTrimpSettings.APValueBoxes.maxZone;
 
     if(zone < 71) return 0;
     

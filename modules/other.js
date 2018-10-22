@@ -219,10 +219,9 @@ function dropsAtZone(itemName, nextLevel){
 }
 
 function fightManualAT(){
-    //run a check to see how much health we'll have if we attack now, and compares it to enemy health. if its not looking good only fight when we have full pop.
-    //if(game.resources.trimps.owned/trimpsRealMax < 0.9999){
+    //run a check to see how much health we'll have if we attack now, and compare it to enemy health. if its not looking good only fight when we have full pop.
     if(game.resources.trimps.owned/trimpsRealMax < 1){
-        var nextArmyHealth = calcCurrSendHealth(true);
+        var nextArmyHealth = calcCurrSendHealth(true, false, game.global.world);
         var enemyDamage    = currEnemyDamage();
         
         if(nextArmyHealth/enemyDamage < 1000) return;

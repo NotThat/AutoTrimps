@@ -53,7 +53,7 @@ function calcArmyDamage(printout, currentGame, zone, dailyObj, armySizeUncapped,
     var antiStacks = currentGame ? game.global.antiStacks : AutoPerks.AntiStacks;
     if (antiStacks > 0) {
         var anticipationLevel = currentGame ? game.portal.Anticipation.level : AutoPerks.perksByName.Anticipation.level;
-        var anti = ((antiStacks * anticipationLevel * game.portal.Anticipation.modifier) + 1);
+        var anti = 1 + antiStacks * anticipationLevel * game.portal.Anticipation.modifier;
         dmg *= anti;
         if (printout) debug("anti " + anti + " dmg " + dmg.toExponential(2));
     }
@@ -126,7 +126,7 @@ function calcArmyDamage(printout, currentGame, zone, dailyObj, armySizeUncapped,
          if(printout) debug("sugar rush x" + sugar + " dmg " + dmg.toExponential(2));
     }
     
-    if (currentGame && game.global.mapsActive && game.talents.bionic2.purchased && currMap.level > game.global.world){
+    if (currentGame && game.global.mapsActive && game.talents.bionic2.purchased && currMap.level > zone){
         dmg *= 1.5;
         if (printout) debug("Bionic Magnet II + 50% dmg " + dmg.toExponential(2));
     }
@@ -172,27 +172,33 @@ function calcArmyDamage(printout, currentGame, zone, dailyObj, armySizeUncapped,
     if (challengeName == "Daily"){
         var theDailyObj = currentGame ? game.global.dailyChallenge : dailyObj;
         if (typeof theDailyObj.weakness !== 'undefined'){
-            var weak = dailyModifiers.weakness.getMult(theDailyObj.weakness.strength, theDailyObj.weakness.stacks);
+            var weak = 1;
+            if(currentGame) 
+                weak = dailyModifiers.weakness.getMult(theDailyObj.weakness.strength, theDailyObj.weakness.stacks);
+            else
+                weak = 1 - theDailyObj.weakness.stacks * 0.09; //9 stacks, capped
+            
             dmg *= weak;
             if (printout) debug("daily weak " + weak.toFixed(2) + " dmg " + dmg.toExponential(2));
         }
-        if (typeof theDailyObj.oddTrimpNerf !== 'undefined' && ((game.global.world % 2) == 1)){
+        if (typeof theDailyObj.oddTrimpNerf !== 'undefined' && ((zone % 2) == 1)){
             var nerf = dailyModifiers.oddTrimpNerf.getMult(theDailyObj.oddTrimpNerf.strength);
             dmg *= nerf;
             if (printout) debug("daily nerf " + nerf.toFixed(2) + " dmg " + dmg.toExponential(2));
         }
-        if (typeof theDailyObj.evenTrimpBuff !== 'undefined' && ((game.global.world % 2) == 0)){
+        if (typeof theDailyObj.evenTrimpBuff !== 'undefined' && ((zone % 2) == 0)){
             var buff = dailyModifiers.evenTrimpBuff.getMult(theDailyObj.evenTrimpBuff.strength);
             dmg *= buff;
             if (printout) debug("daily buff " + buff.toFixed(2) + " dmg " + dmg.toExponential(2));
         }
         if (typeof theDailyObj.rampage !== 'undefined'){
-            var ramp = dailyModifiers.rampage.getMult(theDailyObj.rampage.strength, theDailyObj.rampage.stacks);
+            var stacks = currentGame ? theDailyObj.rampage.stacks : dailyModifiers.rampage.getMaxStacks(theDailyObj.rampage.strength);
+            var ramp = dailyModifiers.rampage.getMult(theDailyObj.rampage.strength, stacks);
             dmg *= ramp;
             if (printout) debug("daily ramp " + ramp.toFixed(2) + " dmg " + dmg.toExponential(2));
         }
         if (typeof theDailyObj.minDamage !== 'undefined'){
-            min = (1-dailyModifiers.minDamage.getMult(theDailyObj.minDamage.strength));
+            min = 1 - dailyModifiers.minDamage.getMult(theDailyObj.minDamage.strength);
             if (printout) debug("daily min " + min.toFixed(2));
         }
         if (typeof theDailyObj.maxDamage !== 'undefined'){   
@@ -303,9 +309,8 @@ function calcCurrSendHealth(currentGame, printout, zone, dailyObj, armySizeUncap
     base *= formation;
     if(printout) debug("formation: " + formation + " after: " + base.toExponential(2));
     
-    var theZone = currentGame ? game.global.world : zone;
-    if(theZone >= 230){
-        var magMult = Math.pow(0.8, theZone-229);
+    if(zone >= 230){
+        var magMult = Math.pow(0.8, zone-229);
         base *= magMult;
         if(printout) debug("magMult: " + magMult.toExponential(2) + " after: " + base.toExponential(2));
     }
@@ -328,12 +333,11 @@ function calcCurrSendHealth(currentGame, printout, zone, dailyObj, armySizeUncap
     if (challengeName == "Daily"){
         var theDailyObj = currentGame ? game.global.dailyChallenge : dailyObj;
         
-        //TODO health relevant dailies
-        //if (typeof theDailyObj.weakness !== 'undefined'){
-        //    var weak = dailyModifiers.weakness.getMult(theDailyObj.weakness.strength, theDailyObj.weakness.stacks);
-        //    dmg *= weak;
-        //    if (printout) debug("daily weak " + weak.toFixed(2) + " dmg " + dmg.toExponential(2));
-        //}
+        if(typeof theDailyObj.pressure !== 'undefined'){
+            var stacks = currentGame ? theDailyObj.pressure.stacks : 600/dailyModifiers.pressure.timePerStack(theDailyObj.pressure.strength);
+            var pressure = dailyModifiers.pressure.getMult(theDailyObj.pressure.strength, stacks);
+            base *= pressure;
+        }  
     }
     
     return base;
@@ -389,6 +393,11 @@ function calcEnemyAttack(mutation, corrupted, name, level, zone, currentGame, da
             var theDailyObj = currentGame ? game.global.dailyChallenge : dailyObj;
             if (typeof theDailyObj.badStrength !== 'undefined')
                 attack *= dailyModifiers.badStrength.getMult(theDailyObj.badStrength.strength);
+            
+            if (typeof theDailyObj.crits !== 'undefined'){
+                var critMult = dailyModifiers.crits.getMult(theDailyObj.crits.strength);
+                attack *= 1 + 0.25 * critMult;
+            }
             
             if(currentGame){
                 if (typeof theDailyObj.empower !== 'undefined' && !game.global.mapsActive)
@@ -747,7 +756,7 @@ function getMaxBattleGU(zoneNum){
 //assumes 60% Void GU from level 1, and 80% VDMC on shield
 //numbers from https://grabarz19.github.io/TrimpsVoidCalculator/
 function expectedVMsAmount(zoneInput){
-    var zone = typeof zoneInput === 'undefined' ? AutoPerks.maxZone : zoneInput;
+    var zone = typeof zoneInput === 'undefined' ? autoTrimpSettings.APValueBoxes.maxZone : zoneInput;
     //round down last poison zone 
     var cycle = cycleZone(zone);
     if(cycle > 19) zone = zone - cycle + 19; 
@@ -756,8 +765,8 @@ function expectedVMsAmount(zoneInput){
     var total = Math.round(zone * 0.09653);                        //calculated based on z1000 1000 iterations
     total += Fluffy.isRewardActive("voidance")     === 1 ? 4  : 0; //Each Portal, start with two double stacked Void Maps.
     total += Fluffy.isRewardActive("voidelicious") === 1 ? 16 : 0; //Start each Portal with 1 of each uniquely named Void Map (16 total).
-    total += game.talents.voidSpecial.purchased ? Math.floor(AutoPerks.maxZone / 100) : 0;
-    total += game.talents.voidSpecial2.purchased ? Math.floor((AutoPerks.maxZone-50) / 100) : 0;
+    total += game.talents.voidSpecial.purchased ? Math.floor(autoTrimpSettings.APValueBoxes.maxZone / 100) : 0;
+    total += game.talents.voidSpecial2.purchased ? Math.floor((autoTrimpSettings.APValueBoxes.maxZone-50) / 100) : 0;
     return total;
 }
 
@@ -794,7 +803,7 @@ function VMsEfficiencyMult(VMAmount){
 }
 
 function singleVMWorth(zoneInput, currentPortal){
-    var zone = typeof zoneInput === 'undefined' ? AutoPerks.maxZone : zoneInput;
+    var zone = typeof zoneInput === 'undefined' ? autoTrimpSettings.APValueBoxes.maxZone : zoneInput;
     //round down last poison zone 
     var cycle = cycleZone(zone);
     if(cycle > 19) zone = zone - cycle + 19; 
@@ -826,7 +835,7 @@ function singleVMWorth(zoneInput, currentPortal){
     var corruptionValue = corrAmount   * 0.15;
     var healthValue     = healthAmount * 0.45;
     var mutationTotal   = corruptionValue + healthValue + 1;
-    var lastPortalZone  = currentPortal ? game.global.lastPortal : AutoPerks.maxZone;
+    var lastPortalZone  = currentPortal ? game.global.lastPortal : autoTrimpSettings.APValueBoxes.maxZone;
     var VS = 1 + game.talents.voidSpecial.purchased ? 0.0025 * lastPortalZone : 0;
     
     var worth = a*b*c*d*e*f*g*h*i*j*k*l*heliumy*scryHard2*2*mutationTotal*VS; //1 VM helium

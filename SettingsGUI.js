@@ -370,13 +370,11 @@ function initializeAllSettings() {
     createSetting('PAggression', ['PRaid: Light', 'PRaid: Aggressive'], 'How aggressively should AT chase after prestige. Aggressive costs more fragments. If you have a plagued staff with fragment drop then you probably want aggressive mode.', 'multitoggle', 1, null, 'Maps');
     createSetting('PRaidingMaxZones', 'Max Extra Zones', 'Caps maximum extra Zones AT should ever buy chasing prestige. If BW Raid is enabled then will always attempt to prestige raid the highest possible before beginning BW raiding.', 'value', 10, null, 'Maps');
     
-    createSetting('BWraidDailyCOnly', 'BW Raiding Daily/C2 Only', 'Only BW raid in dailies and challenges', 'boolean', false, null, 'Maps');
+    //createSetting('BWraidDailyCOnly', 'BW Raiding Daily/C2 Only', 'Only BW raid in dailies and challenges', 'boolean', false, null, 'Maps');
+    createSetting('BWRaidSetting', ['Never','C2 Only', 'C2 + Dailies', 'Always'], 'When to raid BW.', 'multitoggle', 0, null, 'Maps');
     createSetting('BWraidingmin', 'BWRaid Start', 'Starting this zone, BWRaid becomes a possibility. BW Raiding always takes place at the last Poison zone.', 'value', 999, null, 'Maps');
     createSetting('BWraidingmaxLevel', 'BWRaid Max Extra', 'The maximum level difference between world zone and BW map level.', 'value', 20, null, 'Maps');
     createSetting('BWraidingmax', 'BWRaid Cap', 'The highest level BW map to raid.', 'value', 999, null, 'Maps');
-
-
-
 
 //Spire
     //Line 1
