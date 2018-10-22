@@ -10,15 +10,15 @@ AutoPerks.makeDefaultValueBoxes = function(){
 function presetObj(header, Helium, Attack, Health, Fluffy, DG, maxZone, amalGoal, amalZone, coordsBehind){
     if(typeof autoTrimpSettings.APValueBoxes === 'undefined') autoTrimpSettings.APValueBoxes = {};
     var preset = {header:header, 
-        Helium:      autoTrimpSettings.APValueBoxes.Helium       || Helium,       
-        Attack:      autoTrimpSettings.APValueBoxes.Attack       || Attack, 
-        Health:      autoTrimpSettings.APValueBoxes.Health       || Health, 
-        Fluffy:      autoTrimpSettings.APValueBoxes.Fluffy       || Fluffy,       
-        DG:          autoTrimpSettings.APValueBoxes.DG           || DG, 
-        maxZone:     autoTrimpSettings.APValueBoxes.maxZone      || maxZone,    
-        amalGoal:    autoTrimpSettings.APValueBoxes.amalGoal     || amalGoal,
-        amalZone:    autoTrimpSettings.APValueBoxes.amalZone     || amalZone, 
-        coordsBehind:autoTrimpSettings.APValueBoxes.coordsBehind || coordsBehind};
+        Helium:      typeof autoTrimpSettings.APValueBoxes.Helium       !== 'undefined' ? autoTrimpSettings.APValueBoxes.Helium       : Helium,       
+        Attack:      typeof autoTrimpSettings.APValueBoxes.Attack       !== 'undefined' ? autoTrimpSettings.APValueBoxes.Attack       : Attack, 
+        Health:      typeof autoTrimpSettings.APValueBoxes.Health       !== 'undefined' ? autoTrimpSettings.APValueBoxes.Health       : Health, 
+        Fluffy:      typeof autoTrimpSettings.APValueBoxes.Fluffy       !== 'undefined' ? autoTrimpSettings.APValueBoxes.Fluffy       : Fluffy,       
+        DG:          typeof autoTrimpSettings.APValueBoxes.DG           !== 'undefined' ? autoTrimpSettings.APValueBoxesDG            : DG, 
+        maxZone:     typeof autoTrimpSettings.APValueBoxes.maxZone      !== 'undefined' ? autoTrimpSettings.APValueBoxes.maxZone      : maxZone,    
+        amalGoal:    typeof autoTrimpSettings.APValueBoxes.amalGoal     !== 'undefined' ? autoTrimpSettings.APValueBoxes.amalGoal     : amalGoal,
+        amalZone:    typeof autoTrimpSettings.APValueBoxes.amalZone     !== 'undefined' ? autoTrimpSettings.APValueBoxes.amalZone     : amalZone, 
+        coordsBehind:typeof autoTrimpSettings.APValueBoxes.coordsBehind !== 'undefined' ? autoTrimpSettings.APValueBoxes.coordsBehind : coordsBehind};
     return preset;
 }
 
@@ -29,10 +29,10 @@ AutoPerks.makeDefaultCheckBoxes = function(){
 function presetCheckObj(header, userMaxFuel, userRespecAfterAmal, userMaintainMode, userSaveATSettings){
     if(typeof autoTrimpSettings.APCheckBoxes === 'undefined') autoTrimpSettings.APCheckBoxes = {};
     var preset = {header:header, 
-        userMaxFuel:        autoTrimpSettings.APCheckBoxes.userMaxFuel         || userMaxFuel, 
-        userRespecAfterAmal:autoTrimpSettings.APCheckBoxes.userRespecAfterAmal || userRespecAfterAmal,
-        userMaintainMode:   autoTrimpSettings.APCheckBoxes.userMaintainMode    || userMaintainMode, 
-        userSaveATSettings: autoTrimpSettings.APCheckBoxes.userSaveATSettings  || userSaveATSettings};
+        userMaxFuel:        typeof autoTrimpSettings.APCheckBoxes.userMaxFuel         !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userMaxFuel          : userMaxFuel,
+        userRespecAfterAmal:typeof autoTrimpSettings.APCheckBoxes.userRespecAfterAmal !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userRespecAfterAmal  : userRespecAfterAmal,
+        userMaintainMode:   typeof autoTrimpSettings.APCheckBoxes.userMaintainMode    !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userMaintainMode     : userMaintainMode, 
+        userSaveATSettings: typeof autoTrimpSettings.APCheckBoxes.userSaveATSettings  !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userSaveATSettings   : userSaveATSettings};
     return preset;
 }
 
@@ -131,7 +131,8 @@ AutoPerks.UpdateCustomValueBox = function(name, value){
     
     //update new value
     autoTrimpSettings.APValueBoxes[name] = parseFloat(value);
-    AutoPerks.benefitHolderObj[name].weightUser = Math.max(0, autoTrimpSettings.APValueBoxes[name]);
+    if(typeof AutoPerks.benefitHolderObj[name] !== 'undefined') //helium, attack, health, fluffy, dg
+        AutoPerks.benefitHolderObj[name].weightUser = Math.max(0, autoTrimpSettings.APValueBoxes[name]);
     
     saveSettings(); //save to local storage
 };

@@ -10,6 +10,7 @@
  */
 
 function calcArmyDamage(printout, currentGame, zone, dailyObj, armySizeUncapped, battleGUBonus, amalgamators, gearDamage, sharpBonusMult){
+    if(typeof zone === 'undefined') zone = game.global.world;
     var dmg = 6;
     if (printout) debug("base damage:" + dmg);
     
