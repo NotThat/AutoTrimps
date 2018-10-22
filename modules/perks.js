@@ -130,6 +130,7 @@ AutoPerks.UpdateCustomValueBox = function(name, value){
     autoTrimpSettings.APValueBoxes = AutoPerks.makeDefaultValueBoxes(); //make sure datastructure intact
     
     //update new value
+    if(isNaN(value) || value == "" || !jQuery.isNumeric(parseFloat(value))) value = 0;
     autoTrimpSettings.APValueBoxes[name] = parseFloat(value);
     if(typeof AutoPerks.benefitHolderObj[name] !== 'undefined') //helium, attack, health, fluffy, dg
         AutoPerks.benefitHolderObj[name].weightUser = Math.max(0, autoTrimpSettings.APValueBoxes[name]);
