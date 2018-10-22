@@ -2,6 +2,7 @@
 var AutoPerks = {};
 AutoPerks.Squared = "ChallengeSquared";
 
+//someday might implement presets back
 AutoPerks.makeDefaultValueBoxes = function(){
     return presetObj("default", 2200, 333, 11, 1500, 55, 605, 7, 522, 21);
 }
@@ -146,7 +147,7 @@ AutoPerks.UpdateCustomCheckBox = function(name, value){
 };
 
 //update UI from datastructures
-AutoPerks.updateFromBoxes = function() {
+AutoPerks.updateBoxesUI = function() {
     var $perkRatioBoxes = document.getElementsByClassName("perkRatios");
     
     for(var i = 0; i < 9; i++) //set ratio boxes values from currently selected preset
@@ -1483,7 +1484,7 @@ AutoPerks.initializeAmalg = function(){
     if(autoTrimpSettings.APValueBoxes.maxZone > 999) autoTrimpSettings.APValueBoxes.maxZone = 999;
     if(autoTrimpSettings.APValueBoxes.maxZone < autoTrimpSettings.APValueBoxes.amalZone) autoTrimpSettings.APValueBoxes.maxZone = autoTrimpSettings.APValueBoxes.amalZone;
     if(autoTrimpSettings.APValueBoxes.coordsBehind < 0) autoTrimpSettings.APValueBoxes.coordsBehind = 0;
-    AutoPerks.updateFromBoxes();        //populate UI boxes based on selected preset. also updates userWeights from box values
+    AutoPerks.updateBoxesUI();        //populate UI boxes based on selected preset. also updates userWeights from box values
     
     //army calc
     AutoPerks.coordsUsed = (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + autoTrimpSettings.APCheckBoxes.userMaintainMode ? autoTrimpSettings.APValueBoxes.maxZone : autoTrimpSettings.APValueBoxes.amalZone-autoTrimpSettings.APValueBoxes.coordsBehind;
@@ -1670,11 +1671,10 @@ AutoPerks.firstRun = function(){
     autoTrimpSettings.APCheckBoxes = AutoPerks.makeDefaultCheckBoxes(); //create fresh
     
     AutoPerks.useLivePerks = false; //by default, use perk setup as calculated by AutoPerks.
-    AutoPerks.updateDailyMods(); // current (or selected) challenge modifiers
-    AutoPerks.initializePerks();        //create data structures
-    AutoPerks.initializeGUI();          //create UI elements
-    //AutoPerks.initializeRatioPreset();  //loads last selected preset.
-    AutoPerks.updateFromBoxes();        //populate UI boxes based on selected preset. also updates userWeights from box values
+    AutoPerks.updateDailyMods();    // current (or selected) challenge modifiers
+    AutoPerks.initializePerks();    //create data structures
+    AutoPerks.initializeGUI();      //create UI elements
+    AutoPerks.updateBoxesUI();      //populate UI boxest
     
     //these are also calculated here for time estimate function
     AutoPerks.windMod = 1 + (autoTrimpSettings.APValueBoxes.maxZone >= 241 ? 13 * game.empowerments.Wind.getModifier() * 10 : 0); //13 minimum stacks
