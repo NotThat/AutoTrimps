@@ -259,7 +259,7 @@ function autoStance(){
     
     if (getPageSetting('AutoStance') > 1){ //2 - DE mode 3 - push mode
         //consider trimpicide for max stacks
-        var timeEstimate = timeEstimator(true, cellNum); //rough estimate of how long it will take to finish zone
+        var timeEstimate = timeEstimator(true, cellNum, game.global.world, game.global.dailyChallenge); //rough estimate of how long it will take to finish zone
         var timeFlag = timeEstimate > 50 || DHratio < easyRatioThreshold;
         if(timeFlag && hiddenBreedTimer > maxAnti && game.global.antiStacks < maxAnti-1){
             wantedAnticipation = maxAnti;
@@ -325,7 +325,7 @@ function autoStance(){
         }
         
         //consider trimpicide for max stacks
-        var timeEstimate = timeEstimator(true, cellNum); //rough estimate of how long it will take to finish zone
+        var timeEstimate = timeEstimator(true, cellNum, game.global.world, game.global.dailyChallenge); //rough estimate of how long it will take to finish zone
         var timeFlag = timeEstimate > 50 || DHratio*2 < easyRatioThreshold;
         if(timeFlag && hiddenBreedTimer > maxAnti && game.global.antiStacks < maxAnti-1){
             debug("Trimpiciding to get max stacks", "trimpicide");
@@ -430,7 +430,7 @@ function autoStance(){
                         break;
                     }
                 }
-                var timeEstimate = timeEstimator(true, cellNum); //rough estimate of how long it will take to finish zone
+                var timeEstimate = timeEstimator(true, cellNum, game.global.world, game.global.dailyChallenge); //rough estimate of how long it will take to finish zone
                 var careAboutArmyReadyFlag = (game.global.world % 5 === 0 || nextZoneDHratio <= poisonMult * windMult);
                 var timeFlag = timeEstimate > 50 || DHratio/2 > easyRatioThreshold || !careAboutArmyReadyFlag;
                 if(!goodCellFlag && timeFlag && zoneWorth >= 0.1){

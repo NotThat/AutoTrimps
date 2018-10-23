@@ -400,6 +400,7 @@ function calcEnemyAttack(mutation, corrupted, name, level, zone, currentGame, da
                 attack *= 1 + 0.25 * critMult;
             }
             
+            
             if(currentGame){
                 if (typeof theDailyObj.empower !== 'undefined' && !game.global.mapsActive)
                     attack *= dailyModifiers.empower.getMult(theDailyObj.empower.strength, theDailyObj.empower.stacks);
@@ -409,6 +410,11 @@ function calcEnemyAttack(mutation, corrupted, name, level, zone, currentGame, da
                 
                 //if (typeof theDailyObj.badMapStrength !== 'undefined' && game.global.mapsActive)
                 //  attack *= dailyModifiers.badMapStrength.getMult(theDailyObj.badMapStrength.strength);
+            }
+            
+            if (typeof theDailyObj.mirrored !== 'undefined'){
+                var ourDamage = currentGame ? calcArmyDamage(false, true, game.global.world) : calcArmyDamage(false, false, zone, AutoPerks.dailyObj, AutoPerks.fullSoldiers, AutoPerks.battleGUMult, AutoPerks.currAmalgamators, AutoPerks.equipmentAttack, AutoPerks.sharpBonusMult);
+                attack += ourDamage * dailyModifiers.mirrored.getMult(theDailyObj.mirrored.strength) * (1 + dailyModifiers.mirrored.getReflectChance(theDailyObj.mirrored.strength));
             }
         }
     }
@@ -626,7 +632,7 @@ function isScryhardActive(){
     return isScryerBonusActive() && game.talents.scry.purchased && !game.global.mapsActive && (getCurrentWorldCell().mutation == "Corruption" || getCurrentWorldCell().mutation == "Healthy");
 }
 
-function timeEstimator(currentGame, fromCell, zone, toText){
+function timeEstimator(currentGame, fromCell, zone, dailyObj, toText){
     var totalHP = 0;
     var time = 0;
     
@@ -645,6 +651,9 @@ function timeEstimator(currentGame, fromCell, zone, toText){
             totalHP += worldArray[i].maxHealth;
     else
         totalHP = approxZoneHP(zone);
+    
+    if (typeof dailyObj.slippery !== 'undefined') //dodge daily
+        totalHP = totalHP / (1+dailyModifiers.slippery.getMult(dailyObj.slippery.strength));
     
     var damageDone = 0;
     if(totalHP / dmgToUse > 200){ //if longer than 200s, get max map bonus

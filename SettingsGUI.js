@@ -718,7 +718,7 @@ function settingChanged(id) {
 }
 
 //Popup Tooltip - ask them to enter some numerical input. (STANDARDIZED)
-function autoSetValueToolTip(id, text,negative) {
+function autoSetValueToolTip(id, text,negative) {   
     ranstring = text;
     var elem = document.getElementById("tooltipDiv");
     var tooltipText = 'Type a number below. You can also use shorthand such as 2e5 or 200k.';

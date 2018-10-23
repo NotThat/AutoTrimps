@@ -265,8 +265,6 @@ AutoPerks.clickAllocate = function() {
         //calculates attack / health of non tough cell 50 corrupted enemy at autoTrimpSettings.APValueBoxes.maxZone
         AutoPerks.zoneHealth = approxZoneHP(autoTrimpSettings.APValueBoxes.maxZone); //this is health approx of the entire zone
         var corrupt = autoTrimpSettings.APValueBoxes.maxZone >= mutations.Corruption.start(true) ? "Corruption" : null;
-        AutoPerks.enemyDamage = calcEnemyAttack(corrupt, null, 'Snimp', 98, autoTrimpSettings.APValueBoxes.maxZone, false, AutoPerks.dailyObj);
-        //debug("AutoPerks.zoneHealth " + AutoPerks.zoneHealth.toExponential(2) + " AutoPerks.enemyDamage " + AutoPerks.enemyDamage.toExponential(2));
         
         var helium = AutoPerks.totalHelium;
 
@@ -473,9 +471,10 @@ AutoPerks.spendHelium = function(helium) {
     
     var fluffyGrowth = (game.global.fluffyExp === 0 ? 0 : ((AutoPerks.benefitHolderObj.Fluffy.benefit*100 / game.global.fluffyExp).toFixed(3)));
     var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
-    var timeText = timeEstimator(false, 0, autoTrimpSettings.APValueBoxes.maxZone, true);
+    var timeText = timeEstimator(false, 0, autoTrimpSettings.APValueBoxes.maxZone, AutoPerks.dailyObj, true);
     
     var healthMod = calcCurrSendHealth(false, false, autoTrimpSettings.APValueBoxes.maxZone, AutoPerks.dailyObj, AutoPerks.fullSoldiers, AutoPerks.battleGUMult, AutoPerks.currAmalgamators, AutoPerks.equipmentHealth, AutoPerks.breedMult);
+    AutoPerks.enemyDamage = calcEnemyAttack(corrupt, null, 'Snimp', 98, autoTrimpSettings.APValueBoxes.maxZone, false, AutoPerks.dailyObj);
     var healthToDamageRatio = (healthMod / AutoPerks.enemyDamage);
     if(AutoPerks.useMaxFuel) AutoPerks.fuelEndZone = autoTrimpSettings.APValueBoxes.maxZone;
     
@@ -998,8 +997,9 @@ function baseZoneDrop(){
     }
     //Bounty
     if (autoTrimpSettings.APValueBoxes.maxZone >= 15) tempModifier *= 2;
-    //Whipimp
-    if (game.unlocks.impCount.Whipimp) tempModifier *= Math.pow(1.003, game.unlocks.impCount.Whipimp);
+    
+    tempModifier *= AutoPerks.compoundingImp;
+    
     var avgSec = tempModifier;
     if (autoTrimpSettings.APValueBoxes.maxZone < 100)
         amt = avgSec * 3.5;
