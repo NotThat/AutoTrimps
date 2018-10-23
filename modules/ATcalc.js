@@ -166,9 +166,14 @@ function calcArmyDamage(printout, currentGame, zone, dailyObj, armySizeUncapped,
     
     var min = 1;
     var max = 1.2;
+       
+    //if we are currently in a damily with crit chance up/down, and are in portal screen, dont include those in the calculation
+    var currCritUp   = typeof game.global.dailyChallenge.trimpCritChanceUp   != 'undefined' ? dailyModifiers.trimpCritChanceUp.getMult(game.global.dailyChallenge.trimpCritChanceUp.strength) : 0;
+    var currCritDown = typeof game.global.dailyChallenge.trimpCritChanceDown != 'undefined' ? dailyModifiers.trimpCritChanceDown.getMult(game.global.dailyChallenge.trimpCritChanceDown.strength) : 0;
+    var currDailyToNewPortalMod = (currentGame ? 0 : - currCritUp + currCritDown);
     
-    var lowCritChanceTmp  = lowCritChance;
-    var highCritChanceTmp = highCritChance;
+    var lowCritChanceTmp  = lowCritChance  + currDailyToNewPortalMod;
+    var highCritChanceTmp = highCritChance + currDailyToNewPortalMod;
     
     if (challengeName == "Daily"){
         var theDailyObj = currentGame ? game.global.dailyChallenge : dailyObj;
@@ -225,6 +230,7 @@ function calcArmyDamage(printout, currentGame, zone, dailyObj, armySizeUncapped,
     if(currentGame && printout) debug("x"+baseModifier+ " multiplier to B stance. new damage: " + dmg.toExponential(2));
     
     var dmgLow = dmg / highATK * lowATK;
+    
     //calculate unlucky non crit and lucky crit only versions of the damages for each of the shields
     var lowNoCritTmp    = dmgLow * ATgetPlayerCritDamageMult(Math.floor(lowCritChanceTmp),  lowCritDamage);
     var lowCritOnlyTmp  = dmgLow * ATgetPlayerCritDamageMult( Math.ceil(lowCritChanceTmp),  lowCritDamage);
@@ -654,7 +660,7 @@ function timeEstimator(currentGame, fromCell, zone, dailyObj, toText){
     
     if (typeof dailyObj.slippery !== 'undefined') //dodge daily
         totalHP = totalHP / (1+dailyModifiers.slippery.getMult(dailyObj.slippery.strength));
-    
+
     var damageDone = 0;
     if(totalHP / dmgToUse > 200){ //if longer than 200s, get max map bonus
         time = 200;
@@ -672,7 +678,12 @@ function timeEstimator(currentGame, fromCell, zone, dailyObj, toText){
         var magmamancerStacks = 0;
         var magmaDmgMult = 1;
         var time = -300;
+        var sugarRemoved = false;
         do{
+            if(sugarEventAT && time >= 1500 && !sugarRemoved){
+                dmgToUse = dmgToUse / (2 + Math.floor((zone - 200) / 100)); //if zone lasts >25m we lose the damage buff
+                sugarRemoved = true;
+            }
             if(magmamancerStacks > 12) break;
             magmaDmgMult = getBonusPercentAT(false, magmamancerStacks++);
             damageDone += 600 * dmgToUse * magmaDmgMult;

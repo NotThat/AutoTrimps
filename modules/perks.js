@@ -511,7 +511,7 @@ AutoPerks.applyCalculations = function(testValidOnly){
             game.global.lockTooltip = false;
             return;
         }
-        clearPerksAT(); //without drawing
+        clearPerks();
     }
     
     var ret = useQuickImportAT(testValidOnly); //uses adapted code from export/import
@@ -611,31 +611,6 @@ function respecPerksAT(){
     document.getElementById("clearPerksBtn").style.display = "inline-block";
     if (selectedPreset)
         swapClass('tab', 'tabNotSelected', document.getElementById('presetTabLoad'));
-}
-
-//copied from main.js with displayPortalUpgrades commented for speed
-function clearPerksAT(){
-	if (!game.global.respecActive) return;
-	game.resources.helium.respecMax = (game.global.viewingUpgrades) ? game.global.heliumLeftover : game.global.heliumLeftover + game.resources.helium.owned;
-	game.resources.helium.totalSpentTemp = 0;
-	for (var item in game.portal){
-		if (game.portal[item].locked) continue;
-		var portUpgrade = game.portal[item];
-		if (typeof portUpgrade.level === 'undefined') continue;
-		portUpgrade.levelTemp = 0;
-		portUpgrade.levelTemp -= portUpgrade.level;
-		game.resources.helium.respecMax += portUpgrade.heliumSpent;
-		portUpgrade.heliumSpentTemp = 0;
-		portUpgrade.heliumSpentTemp -= portUpgrade.heliumSpent;
-	}
-	//displayPortalUpgrades(true);
-	document.getElementById("portalHeliumOwned").innerHTML = prettify(game.resources.helium.respecMax);
-	if (game.global.viewingUpgrades) {
-		document.getElementById("respecPortalBtn").style.display = "none";
-		document.getElementById("activatePortalBtn").innerHTML = "Confirm";
-		document.getElementById("activatePortalBtn").style.display = "inline-block";
-	}
-	document.getElementById("totalHeliumSpent").innerHTML = prettify(countHeliumSpent(true));
 }
 
 //internal test function
@@ -1589,7 +1564,15 @@ AutoPerks.initializeAmalg = function(){
             coordinatedcost =   coordperk.spent;
             var runMode = "";
             if(AutoPerks.dailyObj === AutoPerks.Squared) runMode = AutoPerks.ChallengeName+" (Battle GU, max fuel, helium weight 0): ";
-            else if(AutoPerks.dailyObj != "") runMode = "Daily Mode (max fuel, x" + (AutoPerks.DailyWeight).toFixed(2) + " bonus): ";
+            else if(AutoPerks.dailyObj != ""){
+                var mods = "";
+                for(var propertyName in AutoPerks.dailyObj){
+                    if(propertyName == "seed") continue;
+                    mods += propertyName.charAt(0).toUpperCase() + propertyName.substr(1) + ",";
+                }
+                
+                runMode = "Daily: " + mods + " (max fuel, x" + (AutoPerks.DailyWeight).toFixed(2) + " bonus): ";
+            }
             
             var msg = runMode + "Amalgamator #"+AutoPerks.currAmalgamators+(autoTrimpSettings.APCheckBoxes.userMaintainMode ? " maintained. " : " found. ");
             finalMsg = msg + '<br>';

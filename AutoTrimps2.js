@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "44.4";
-var verDate = "22.10.18";
+var ver = "44.5";
+var verDate = "23.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -40,7 +40,7 @@ function startAT() {
     }
     
     //wait until all the scripts are loaded into page
-    if(loadedScriptAmount !== expectedScriptAmount){
+    if(loadedScriptAmount !== expectedScriptAmount || !window.jQuery){ //jquery is a dependacy of jquery-ui, so check for it specifically here
         setTimeout(startAT, 100);
         return;
     }
