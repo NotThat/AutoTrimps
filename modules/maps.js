@@ -21,7 +21,6 @@ var spireMapBonusFarming = false;
 var stackSpireOneTime = true;
 var spireTime = 0;
 var vanillaMapatZone = false;
-var PRaidStartZone = 999;
 
 var baseLevel;
 var sizeSlider;
@@ -38,6 +37,7 @@ var minDesiredLevel;
 var lastMsg; //stores last message, stops spam to console
 var AutoMapsCoordOverride = false;
 var PRaidingActive = false; //used for coordination purchase during praids
+var enoughDamage = true;
 
 var prestigeState = 0;
 
@@ -45,6 +45,8 @@ var status = "";
 
 function calcDmg(){
     calcBaseDamageinB();
+    
+    if (game.global.gridArray.length === 0 || worldArray.length === 0) return; //world grid not created yet
     
     //automaps has its own damage getting settings, run these first.
     //getDamageCaller() will also call calcBaseDamageinB() if damage is bought.
@@ -77,7 +79,7 @@ function calcDmg(){
     
     ourBaseDamage = baseDamageHigh*8;
     
-    if(getPageSetting('AutoStance') == 2) //when in DE farming mode, we climb in S
+    if(getPageSetting('AutoStance') === 2) //when in DE farming mode, we climb in S
         ourBaseDamage = ourBaseDamage / (game.talents.scry.purchased ? 4 : 8);
 
     //calculate dmg with max anticipation in autogen setting #3 (so if its lower than max, our max is lower than max
@@ -112,60 +114,36 @@ function calcDmg(){
         ourBaseDamage *= 1 + (0.2 * game.global.mapBonus); //add map bonus
     }
     
-    //get enemyhealth for the next zone, cell 50, snimp type. non corrupted / healthy. we add those next
-    enemyHealth = calcEnemyHealth(null, null, 'Snimp', 50, game.global.world, true);
-    
-    //Corruption Zone Proportionality Farming Calculator:
-    if (game.global.world >= mutations.Corruption.start(true)){
-        var cptnum = getCorruptedCellsNum(); //count corrupted cells
-        var cpthlth = getCorruptScale("health"); //get corrupted health mod
-        var cptpct = cptnum / 100; //percentage of zone which is corrupted.
-        var hlthprop = cptpct * cpthlth; //Proportion of cells corrupted * health of a corrupted cell
-        
-        var healthyNum = mutations.Healthy.cellCount();
-        var healthyScale = corruptHealthyStatScaleAT(14, game.global.world);
-        var healthyPercent = healthyNum / 100;
-        var healthyProp = healthyPercent * healthyScale;
-        if (healthyProp + hlthprop >= 1) //dont allow sub-1 numbers to make the number less
-            enemyHealth *= hlthprop + healthyProp;
-    }
-    
-    if (windZone() && getPageSetting('AutoStance') == 1 && !game.global.runningChallengeSquared)
-        windMult = 0.125; //in windstacking zones, we want less dmg since we can equip high damage shield to compensate
+    if (windZone() && getPageSetting('AutoStance') == 1 && !game.global.runningChallengeSquared && zoneWorth > 1)
+        windMult = 0.125; //in windstacking zones, we want less dmg since more attacks is not as bad
     else
         windMult = 1;
+    
     poisonMult = (getEmpowerment() == "Poison" ? poisonMultFixed : 1);
     
-    remainingCells = 99 - game.global.lastClearedCell;
+    var zoneRemainingHealth = sumCurrZoneHP(game.global.lastClearedCell + 1);
+    var zoneHP = sumCurrZoneHP();
     
-    threshold = poisonMult * windMult * remainingCells * 0.01;
+    threshold = poisonMult * windMult * zoneRemainingHealth / zoneHP;
     
-    DHratio = (ourBaseDamage*0.25 / enemyHealth);
-    enoughDamage = DHratio > threshold;
+    DHratio = (ourBaseDamage*0.25*100) / zoneHP;
     nextZoneDHratio = DHratio / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2);
+    enoughDamage = DHratio > threshold;
     
     if(DHratio < 0.0001)
         formattedRatio = DHratio.toExponential(2);
-    else if (DHratio < 1)
-        formattedRatio = DHratio.toFixed(3);
-    else if (DHratio < 10000)
-        formattedRatio = DHratio.toFixed(1);
-    else
-        formattedRatio = DHratio.toExponential(2);
+    else formattedRatio = prettify(DHratio);
 }
 
 function autoMap() {
     wantGoodShield = true;
     AutoMapsCoordOverride = false;
-    calcDmg(); //checks enoughdamage/health to decide going after map bonus. calculating it here so we can display hd ratio in world screen
+    calcDmg(); //checks dmg to decide going after map bonus. calculating it here so we can display hd ratio in world screen
     
     if(getPageSetting('AutoMaps') === 0) return;
     
     //exit and do nothing if we are prior to zone 6 (maps haven't been unlocked):
-    if (!game.global.mapsUnlocked || !(ourBaseDamage > 0)) { //if we have no damage, why bother running anything? (this fixes weird bugs)
-        enoughDamage = true;
-        return;
-    }
+    if (!game.global.mapsUnlocked) return;
     
     if(  (game.global.world >= 236 && (cycleZone() === 4 || cycleZone() === 19) && game.global.lastClearedCell + 1 < 90 && !game.global.spireActive) //last poison zone mapping (praid, bw raid) tends to take a while, so get books before going into it
         || game.global.challengeActive == "Mapology") //TODO: mapology
@@ -217,7 +195,7 @@ function autoMap() {
     
     PRaidStartZone = getPageSetting('PRaidSetting') ? Math.min(PRaidStartZone, praidAutoStart()) : getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid
     if (!needPrestige && (getPageSetting('PRaidingZoneStart') > 0 || getPageSetting('PRaidSetting'))){
-        if(!PrestigeRaid()){ //prestigeraid is not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
+        if(!PrestigeRaid()){ //not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
             PRaidingActive = true;
             return; 
         }
@@ -470,8 +448,6 @@ function autoMap() {
             
             if((DHratio / ourBaseDamage * ourBaseDamagePlusOne) > threshold)
                 repeatChoice = 2; //psuedo 'repeat off' if we dont need more damage
-            //DHratio = (ourBaseDamage*0.25 / enemyHealth);
-            //enoughDamage = DHratio > threshold;
             
             if(preSpireFarming)
                 repeatChoice = 0;
@@ -651,7 +627,7 @@ function praidAutoStartHelper(){
     if(cycle < 5)        return score*0.003;  //xx6-xx0 poison
     else if (cycle < 10) return score*0.6;    //xx1-xx5 wind
     else if (cycle < 15) return score*0.5;    //xx6-xx0 ice
-    else if (cycle < 20) return score*0.001;  //xx1-xx5 poison
+    else if (cycle < 20) return score*0.003;  //xx1-xx5 poison
     else if (cycle < 25) return score*5;      //xx6-xx0 wind
     else                 return score*1;      //xx1-xx5 ice
 }
@@ -661,7 +637,6 @@ function praidAutoStart(){
     var HPMultTill5 = Math.pow(2, zonesToEndOf5);
     var DHRatioIn5 = DHratio / HPMultTill5;
     var score = DHRatioIn5 * praidAutoStartHelper();
-    //debug(score.toFixed(0) + " " + DHRatioIn5.toFixed(0) + " " + praidAutoStartHelper());
     if(score < 100 && calculateMaxAfford(game.equipment["Dagger"], false, true, false, false, 1) < 4)
         return game.global.world;
     else 
@@ -703,7 +678,9 @@ function PrestigeRaid() {
     if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 2) //have all
         return true; 
     if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 1 && game.global.world % 100 !== 0 && !BWRaidNowLogic() && (maxDesiredLevel >= expectedPortalZone || bsZone >= maxDesiredLevel)) //when to skip last gambes
-        return true; 
+        return true;
+    if(expectedPortalZone == game.global.world && game.global.totalVoidMaps === 0) //last zone and we dont need any void maps
+        return true;
     
     if (game.global.mapsActive){ //if we are in a map
         //do we need prestige from this map?
@@ -727,7 +704,7 @@ function PrestigeRaid() {
         return false;
     }
     
-    //this code prevents PrestigeRaid() from killing our army and going into map screen under certain conditions:    
+    //this code prevents us from killing our army and going into map screen under certain conditions:    
     if (game.global.soldierHealth > 1000){//if we have an army currently fighting
         if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
             if (game.resources.trimps.owned < trimpsRealMax){ //and we dont have another army ready, then we may as well stay in the world until another army is ready. may not be true for some dailies

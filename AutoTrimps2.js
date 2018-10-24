@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "44.5";
-var verDate = "23.10.18";
+var ver = "45";
+var verDate = "24.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -114,9 +114,9 @@ function startAT() {
     activateClicked = (function(makeUp, now) {
         var cached_function = activateClicked;
         return function(makeUp, now) {
-            if(AutoPerks.userSaveATSettings){ //save relevant AT settings
-                setPageSetting('TillWeHaveAmalg',   AutoPerks.amalGoal); //amal goal
-                setPageSetting('NoCoordBuyStartZ',  (AutoPerks.amalZone - AutoPerks.coordsBehind)); //start no coord buy
+            if(autoTrimpSettings.APCheckBoxes.userSaveATSettings){ //save relevant AT settings
+                setPageSetting('TillWeHaveAmalg',   autoTrimpSettings.APValueBoxes.amalGoal); //amal goal
+                setPageSetting('NoCoordBuyStartZ',  (autoTrimpSettings.APValueBoxes.amalZone - autoTrimpSettings.APValueBoxes.coordsBehind)); //start no coord buy
                 setPageSetting('FuelFromZ',         AutoPerks.fuelStartZone); //fuel start zone
                 setPageSetting('FuelToZ',           AutoPerks.fuelEndZone); //fuel end zone
                 setPageSetting('FuelUntilAmal',     false); //fuel until amalgamator
@@ -244,8 +244,6 @@ var breedFire = false;
 var hiddenBreedTimer;
 var hiddenBreedTimerLast;
 
-var enoughDamage = true;
-
 var preBuyAmt;
 var preBuyFiring;
 var preBuyTooltip;
@@ -263,7 +261,6 @@ var coordMultAT = 1;
 var windMult = 1;
 var poisonMultFixed=0.05;
 var poisonMult = 1;
-var enemyHealth=1;
 var threshold=1;
 var DHratio = 0;
 var formattedRatio = "";
@@ -276,6 +273,7 @@ var lastCell = -1;
 var bsZone;
 var holdingBack = false;
 var trimpsRealMax = game.resources.trimps.realMax();
+var PRaidStartZone = 999;
 
 var highCritChance;
 var highCritDamage;
@@ -344,12 +342,7 @@ function pauseRemovalLoop(){
     }
 }
 
-////////////////////////////////////////
-//Main LOGIC Loop///////////////////////
-////////////////////////////////////////
-////////////////////////////////////////
-//makeUp = true when game is in catchup mode, so we can skip some unnecessary visuals
-function ATLoop(makeUp) {
+function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can skip some unnecessary visuals
     //debug((countHeliumSpent() + game.global.heliumLeftover + game.resources.helium.owned - game.global.totalHeliumEarned).toExponential(2));
     if (!ATrunning) return;
     
@@ -398,6 +391,7 @@ function ATLoop(makeUp) {
         if(game.global.world === 1){
             if (getPageSetting('AutoAllocatePerks')==2) lootdump();
             zonePostpone = 0;
+            PRaidStartZone = 999;
         }
         
         oncePerZoneCode();

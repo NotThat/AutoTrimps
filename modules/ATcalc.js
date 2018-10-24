@@ -374,9 +374,10 @@ function calcEnemyAttack(mutation, corrupted, name, level, zone, currentGame, da
     
     var atkScale = 1;
     if(mutation == "Healthy") atkScale = corruptHealthyStatScaleAT(5, zone);
-    else if(mutation == "Corruption") atkScale = corruptHealthyStatScaleAT(3, zone);
+    else if(mutation == "Corruption" || level == 99) atkScale = corruptHealthyStatScaleAT(3, zone);
     
-    var attack = isSpire ? getSpireStatsAT(zone, level+1, name, "attack") : getEnemyAttackAT(zone, level+1, name, atkScale !== 1) * atkScale * 1.2; //1.2 for max damage (hopefully)
+    var ignoreImpStats = isSpire || mutation == "Corruption" || mutation == "Healthy";
+    var attack = isSpire ? getSpireStatsAT(zone, level+1, name, "attack") : getEnemyAttackAT(zone, level+1, name, ignoreImpStats) * atkScale * 1.2; //1.2 for max damage (hopefully)
     
     if (corrupted == "corruptStrong") attack *= 2; 
     if (corrupted == "healthyStrong") attack *= 2.5;
@@ -435,9 +436,10 @@ function calcEnemyHealth(mutation, corrupted, name, level, zone, currentGame, da
     
     var healthScale = 1;
     if(mutation == "Healthy") healthScale = corruptHealthyStatScaleAT(14, zone);
-    else if(mutation == "Corruption") healthScale = corruptHealthyStatScaleAT(10, zone);
-    
-    var amt = isSpire ? getSpireStatsAT(zone, level+1, name, "health") : getEnemyHealthAT(zone, level+1, name, healthScale !== 1) * healthScale;
+    else if(mutation == "Corruption" || level == 99) healthScale = corruptHealthyStatScaleAT(10, zone);
+
+    var ignoreImpStats = isSpire || mutation == "Corruption" || mutation == "Healthy";
+    var amt = isSpire ? getSpireStatsAT(zone, level+1, name, "health") : getEnemyHealthAT(zone, level+1, name, ignoreImpStats) * healthScale;
     
     if (corrupted == "corruptTough")         amt *= 5;
     else if (corrupted == "healthyTough")    amt *= 7.5;
@@ -652,11 +654,8 @@ function timeEstimator(currentGame, fromCell, zone, dailyObj, toText){
     
     var isPoison = poisonZone(zone); //TODO: implement poison
 
-    if(currentGame)
-        for (var i = fromCell; i<100; i++)
-            totalHP += worldArray[i].maxHealth;
-    else
-        totalHP = approxZoneHP(zone);
+    if(currentGame) totalHP = sumCurrZoneHP(fromCell);
+    else            totalHP = approxZoneHP(zone);
     
     if (typeof dailyObj.slippery !== 'undefined') //dodge daily
         totalHP = totalHP / (1+dailyModifiers.slippery.getMult(dailyObj.slippery.strength));
@@ -694,8 +693,8 @@ function timeEstimator(currentGame, fromCell, zone, dailyObj, toText){
             damageDone -= 600 * dmgToUse * magmaDmgMult;
             time += (totalHP - damageDone) / (dmgToUse * magmaDmgMult);
         }
-        
     }
+    
     var OC = 1 + Fluffy.isRewardActive("overkiller") + (game.talents.overkill.purchased ? 1 : 0);
     var minTime = Math.ceil(100 / 4 / OC);
     var ret = Math.max(minTime, time);
@@ -718,7 +717,7 @@ function getBonusPercentAT(justStacks, forceTime, count){
     var boostMax = 3;
     var expInc = 1.2;
     var timeOnZone;
-    var howMany = typeof count === 'undefined' ? 31500 : count;
+    var howMany = typeof count === 'undefined' ? 31500 : count; //TODO: calculate actual magmamancers count based on gems
     if (typeof forceTime === 'undefined'){
         var timeOnZone = getGameTime() - game.global.zoneStarted;
         if (game.talents.magmamancer.purchased) timeOnZone += 300000;
@@ -729,13 +728,13 @@ function getBonusPercentAT(justStacks, forceTime, count){
     }
     else timeOnZone = forceTime;
     if (justStacks) return timeOnZone;
-    //return 1 + ((((1 - Math.pow(boostMult, this.owned)) * boostMax)) * (Math.pow(expInc, timeOnZone) - 1));
     return 1 + ((((1 - Math.pow(boostMult, howMany)) * boostMax)) * (Math.pow(expInc, timeOnZone) - 1));
 }
 
-function sumCurrZoneHP(){
+function sumCurrZoneHP(fromCell){
+    var start = typeof fromCell === 'undefined' ? 0 : fromCell;
     var sum = 0;
-    for (var i = 0; i < 100; i++)
+    for (var i = start; i < worldArray.length; i++)
         sum += worldArray[i].maxHealth;
     return sum;
 }
@@ -749,16 +748,79 @@ function approxZoneHP(zoneNum){
     
     var nonColoredCells = 99 - corruptedCells - healthyCells;
     
+    var array = [];
+    var corrupteds = [];
+    for (var w = 0; w < 100; w++){
+            corrupteds.push("");
+    }
+    //if(healthyCells > 0) corrupteds   = healthyPattern(corrupteds, healthyCells);
+    //if(corruptedCells > 0) corrupteds = corruptionPattern(corrupteds, corruptedCells);
+    //debug(corrupteds);
     //corruptDbl,corruptCrit,corruptBleed,corruptStrong,corruptTough,corruptDodge,healthyDbl,healthyCrit,healthyBleed, healthyStrong, healthyTough, none
     var corruptMult = (3 + 5 + 1.3) / 6; //1.3 for dodge, 5 for tough
     var healthyMult = (4 + 7.5) / 5; //7.5 for tough
     
-    var amt = calcEnemyHealth("Healthy",    null, 'Snimp',       30, zone, false, AutoPerks.dailyObj) * healthyCells   * healthyMult
-        +     calcEnemyHealth("Corruption", null, 'Snimp',       70, zone, false, AutoPerks.dailyObj) * corruptedCells * corruptMult
-        +     calcEnemyHealth(null,         null, 'Snimp',       70, zone, false, AutoPerks.dailyObj) * nonColoredCells
-        +     calcEnemyHealth("Corruption", null, "Omnipotrimp", 99, zone, false, AutoPerks.dailyObj);
+    var healthyMid = Math.floor(healthyCells / 2);
+    var corruptMid = healthyCells + Math.floor(corruptedCells / 2);
+    var emptyMid   = healthyCells + corruptedCells + Math.floor((100 - healthyCells - corruptedCells) / 2);
+    
+    //debug("healthy " + healthyCells + " corrupt " + corruptedCells);
+    var amt = calcEnemyHealth("Healthy",    null, 'Snimp',       healthyMid, zone, false, AutoPerks.dailyObj) * healthyCells   * healthyMult
+        +     calcEnemyHealth("Corruption", null, 'Snimp',       corruptMid, zone, false, AutoPerks.dailyObj) * corruptedCells * corruptMult
+        +     calcEnemyHealth(null,         null, 'Snimp',       emptyMid, zone, false, AutoPerks.dailyObj) * nonColoredCells
+        +     calcEnemyHealth(null,         null, "Omnipotrimp", 99, zone, false, AutoPerks.dailyObj);
     return amt;
 }
+
+/*function healthyPattern(currentArray, possible){
+    var spread = (Math.floor(possible / 6) + 1) * 10;
+    if (spread > 100) spread = 100;
+    var corruptions = [];
+    for (var x = 0; x < currentArray.length; x++){
+            if (currentArray[x] == "Corruption") corruptions.push(x);
+            if (corruptions.length >= spread) break;
+    }
+    var addCorrupteds = getAmountInRange(corruptions.length, possible);
+    for (var a = 0; a < currentArray.length; a++){
+     currentArray[corruptions[addCorrupteds[a]]] = "Healthy";
+    }
+    return currentArray;
+}
+
+function corruptionPattern(currentArray, possible){
+    var spread = (Math.floor(possible / 6) + 1) * 10;
+    if (spread > 100) spread = 100;
+    var addCorrupteds = getAmountInRange(spread, possible);
+    for (var a = 0; a < addCorrupteds.length; a++){
+        if (currentArray[addCorrupteds[a]] != "") continue;
+        currentArray[addCorrupteds[a]] = "Corruption";
+    }
+    return currentArray;
+}
+
+
+function buildGridAT(zone) {
+    var world = typeof zone === 'undefined' ? game.global.world : zone;
+
+
+    for (var i = 0; i < 100; i++) {
+        var newCell = {
+            level: i + 1,
+            maxHealth: -1,
+            health: -1,
+            attack: -1,
+            name: "Snimp"//getRandomBadGuy(null, i + 1, 100, world, imports, corrupteds[i], vms[i])
+        };
+		if (corrupteds[i] != "") {
+			newCell.mutation = corrupteds[i];
+			if ((typeof mutations[corrupteds[i]].effects !== 'undefined'))
+				newCell.corrupted = getSeededRandomFromArray(game.global.mutationSeed++, mutations[corrupteds[i]].effects);
+		}
+		array.push(newCell);
+    }
+    return array;
+}*/
+
 
 function getMaxBattleGU(zoneNum){
     var zone = typeof zoneNum === 'undefined' ? game.global.world : zoneNum;

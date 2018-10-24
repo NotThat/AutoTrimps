@@ -308,6 +308,7 @@ function resetAutoTrimps(imported,profname) {
     }
     setTimeout(waitRemoveLoad(imported),101);
     if (imported){
+        AutoPerks.updateBoxesUI();
         debug("Successfully imported new AT settings...", "profile");
         if (profname)   //pass in existing profile name to use:
             ImportExportTooltip("message", "Successfully Imported Autotrimps Settings File!: " + profname);

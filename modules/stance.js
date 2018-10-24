@@ -151,7 +151,7 @@ function autoStance(){
             getDamageCaller(desiredDamage, false);
         }
         else
-            getDamageCaller(1.5*dmgNeededToOK(cellNum), false, true);
+            getDamageCaller(3*dmgNeededToOK(cellNum), false, true);
         
         //spire gets its own fightManual() condition
         if (game.global.soldierHealth <= 0 && game.global.challengeActive == "Trapper" || (game.global.breedBack <= 0 && (hiddenBreedTimer > wantedAnticipation || typeof game.global.dailyChallenge.empower === 'undefined')))
@@ -173,7 +173,6 @@ function autoStance(){
         if (game.global.challengeActive == "Trapper" || (game.global.breedBack <= 0 && (hiddenBreedTimer > wantedAnticipation || typeof game.global.dailyChallenge.empower === 'undefined')) || (DHratio > easyRatioThreshold && !stackSpire)){
             if(typeof game.global.dailyChallenge.bogged !== 'undefined' && DHratio > 10 && !stackSpire){ //bogged is special because death occurs all the time
                 wantGoodShield = false;
-                //equipLowDmgShield();
             }
             fightManualAT();
         }
@@ -326,7 +325,7 @@ function autoStance(){
         
         //consider trimpicide for max stacks
         var timeEstimate = timeEstimator(true, cellNum, game.global.world, game.global.dailyChallenge); //rough estimate of how long it will take to finish zone
-        var timeFlag = timeEstimate > 50 || DHratio*2 < easyRatioThreshold;
+        var timeFlag = timeEstimate > 50 || DHratio < easyRatioThreshold*2;
         if(timeFlag && hiddenBreedTimer > maxAnti && game.global.antiStacks < maxAnti-1){
             debug("Trimpiciding to get max stacks", "trimpicide");
             wantedAnticipation = maxAnti;
@@ -363,9 +362,8 @@ function autoStance(){
 
         calculateZoneWorth(0);
 
-        //we have high shield here
         var limit = 10;
-        if(stackSpire){ //getDamageCaller(worldArray[(game.global.lastClearedCell + 1)].maxHealth / 500, true, false);
+        if(stackSpire){
             if(cellNum < 99){
                 if(checkForGoodCell(cellNum))
                     getDamageCaller(worldArray[cellNum+1].maxHealth / 200, true, false);
@@ -402,7 +400,6 @@ function autoStance(){
             else
                 worldArray[cellNum].PBWorth = 0;*/
 
-            //if(stacks >= 200 || nextStartingStacks >= 200)
             if(stacks >= 200) //stats keeping
                 wantMoreDamage = true;
 
@@ -414,7 +411,7 @@ function autoStance(){
             if(hiddenBreedTimer > maxAnti && game.global.antiStacks < maxAnti-1 && !stackSpire && typeof game.global.dailyChallenge.bogged === 'undefined'){
                 //scenario 1:
                 if(DHratio < 3){
-                    debug("Zone is hard. Trimpiciding to get max stacks", "trimpicide");
+                    debug("DHratio < 3. Trimpiciding to get max stacks", "trimpicide");
                     wantedAnticipation = maxAnti;
                     stackConservingTrimpicide();
                     trimpicides++;
@@ -433,7 +430,7 @@ function autoStance(){
                 var timeEstimate = timeEstimator(true, cellNum, game.global.world, game.global.dailyChallenge); //rough estimate of how long it will take to finish zone
                 var careAboutArmyReadyFlag = (game.global.world % 5 === 0 || nextZoneDHratio <= poisonMult * windMult);
                 var timeFlag = timeEstimate > 50 || DHratio/2 > easyRatioThreshold || !careAboutArmyReadyFlag;
-                if(!goodCellFlag && timeFlag && zoneWorth >= 0.1){
+                if(!goodCellFlag && timeFlag){
                     //debug("timeEstimate = " + timeEstimate.toFixed(0) +"s", "trimpicide");
                     debug("Trimpiciding to get max stacks", "trimpicide");
                     wantedAnticipation = maxAnti;
@@ -645,11 +642,11 @@ function stancePrintout(cellNum, stacks, nextStartingStacks, cmp, expectedNumHit
     var critSpanA = (critSpan === "" ? 0 : critSpan);
     var critText;
     
-    if (critSpan === "")            critText = "0";
+    /*if (critSpan === "")            critText = "0";
     else if (critSpanA === "Crit!") critText = "1";
     else if (critSpanA === "CRIT!") critText = "2";
     else if (critSpanA === "CRIT!!") critText = "3";
-    else critText = "?";
+    else critText = "?";*/
    
     var letter = " ";
     switch (game.global.formation) {
@@ -669,7 +666,7 @@ function stancePrintout(cellNum, stacks, nextStartingStacks, cmp, expectedNumHit
     //var shield = (highDamageHeirloom ? "+" : "-");
     var want = (wantGoodShield ? "+" : "-");
     if(lastDamageDealtA > 0){
-        var msg = want+game.global.world + "." + cellNumA + " " + stacksA+"W"+"("+nextStartingStacksA+") "+cmpA.toFixed(2)+" " + critText +"C " + expectedNumHitsSA.toFixed(0)+"/" + expectedNumHitsXA.toFixed(0)+"/" + expectedNumHitsDA.toFixed(0) + " " + game.global.antiStacks + letter + " " + corruptedtmpA;
+        var msg = want+game.global.world + "." + cellNumA + " " + stacksA+"W"+"("+nextStartingStacksA+") "+cmpA.toFixed(2)+" " + /*critText +"C " +*/ expectedNumHitsSA.toFixed(0)+"/" + expectedNumHitsXA.toFixed(0)+"/" + expectedNumHitsDA.toFixed(0) + " " + game.global.antiStacks + letter + " " + corruptedtmpA;
         if (!(lastDebug == msg))
             debug(msg, "wind");
         lastDebug = msg;
@@ -819,39 +816,22 @@ function buildWorldArray(){
     for (var i = 0; i < 100; i++){
         var enemy = {mutation: "", finalWorth: "", corrupted: "", name: "", health: "", maxHealth: "", attack: 0, baseHelium: "", spireBonus: "", pbHits: "", nextPBDmg: "", baseWorth: "", geoRelativeCellWorth: "", PBWorth: ""};
         
-        //enemy.name    = game.global.gridArray[i].name; //the player has no access to imp names before reaching them, so neither do we
-        enemy.name      = game.global.gridArray[0].name;
+        enemy.name    = game.global.gridArray[i].name; //the player has no access to imp names before reaching them, so neither do we
         enemy.mutation  = game.global.gridArray[i].mutation;
-        //enemy.corrupted = game.global.gridArray[i].corrupted;
+        enemy.corrupted = game.global.gridArray[i].corrupted;
         
-        if(enemy.mutation == "Corruption"){
-            enemy.baseWorth = 0.15;
-            enemy.corrupted = "corruptTough";
-        }
-        else if(enemy.mutation == "Healthy"){
-            enemy.baseWorth = 0.45;
-            enemy.corrupted = "healthyTough";
-        }
-        else{
-            enemy.baseWorth = 0;
-        }
+        if(enemy.mutation == "Corruption")   enemy.baseWorth = 0.15;
+        else if(enemy.mutation == "Healthy") enemy.baseWorth = 0.45;
+        else                                 enemy.baseWorth = 0;
         
-        enemy.attack =    calcEnemyAttack(enemy.mutation, enemy.corrupted, enemy.name, i, game.global.world, true);
+        enemy.attack    = calcEnemyAttack(enemy.mutation, enemy.corrupted, enemy.name, i, game.global.world, true);
         enemy.maxHealth = calcEnemyHealth(enemy.mutation, enemy.corrupted, enemy.name, i, game.global.world, true);
-        if (enemy.corrupted == "corruptTough")         enemy.maxHealth *= 5;   //the player has no access to corruption type before reaching them, and neither do we
-        else if (enemy.corrupted == "healthyTough")    enemy.maxHealth *= 7.5; //the player has no access to corruption type before reaching them, and neither do we
-        //if(enemy.mutation == "Corruption")               enemy.maxHealth *= 5;   //so we take the worst possible case.
-        //else if(enemy.mutation == "Healthy")             enemy.maxHealth *= 7.5;
-        enemy.health = enemy.maxHealth;
+        enemy.health    = enemy.maxHealth;
 
         worldArray.push(enemy);
     }
     //last cell special case
     worldArray[99].baseWorth = 1;
-    worldArray[99].maxHealth = calcEnemyHealth(worldArray[99].mutation, worldArray[99].corrupted, worldArray[99].name, 99, game.global.world, true); //ignore imp stat = false
-    if(game.global.spireActive)
-        worldArray[99].maxHealth = getSpireStatsAT(game.global.world, i+1, worldArray[99].name, "health");
-    worldArray[99].health = worldArray[99].maxHealth;
     
     var pbMult = (lowPB > -1 ? lowPB : game.heirlooms.Shield.plaguebringer.currentBonus / 100); //weaker shield should have more PB. PB isnt that good of a damage modifier.    
     
