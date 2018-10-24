@@ -693,7 +693,7 @@ function calcZeroState(){
     minMaxMi();
     
     if(autoTrimpSettings.APCheckBoxes.userMaintainMode) AutoPerks.basePopAtMaxZ = calcBasePopMaintain();
-    else                           AutoPerks.basePopAtMaxZ = AutoPerks.basePopAtAmalZ * Math.pow(1.009, autoTrimpSettings.APValueBoxes.maxZone-autoTrimpSettings.APValueBoxes.amalZone);
+    else AutoPerks.basePopAtMaxZ = AutoPerks.basePopAtAmalZ * (AutoPerks.currAmalgamators > 0 ? Math.pow(1.009, autoTrimpSettings.APValueBoxes.maxZone-autoTrimpSettings.APValueBoxes.amalZone) : 1);
     
     AutoPerks.basePopToUse  = AutoPerks.useMaxFuel ? AutoPerks.maxFuelBasePopAtMaxZ : AutoPerks.basePopAtMaxZ;
     
