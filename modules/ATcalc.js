@@ -941,7 +941,7 @@ function singleVMWorth(zoneInput, currentPortal){
     var scryHard2 = game.talents.scry2.purchased ? 1.5 : 1;
     
     var healthAmount = zone > 300 ? 2 + Math.floor((zone-300)/15) : 0;
-    var maxCorrupted = Math.min(80,Math.floor((zone - 151) / 3) + 2);
+    var maxCorrupted = Math.max(0,Math.min(80,Math.floor((zone - 151) / 3) + 2));
     var corrAmount   = maxCorrupted - healthAmount; //assumes full zone corruption
     var corruptionValue = corrAmount   * 0.15;
     var healthValue     = healthAmount * 0.45;
