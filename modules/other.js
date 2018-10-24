@@ -140,17 +140,22 @@ function exitSpireCell() {
         endSpire();
 }
 
-function lastPrestigeZone(){
-    var max=1;
+function lastPrestigeZone(getMin){
+    var max = 1;
+    var min = 999;
     var tmp;
     
     var prestigeList = ['Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest', 'Bootboost', 'Hellishmet', 'Pantastic', 'Smoldershoulder', 'Bestplate', 'GambesOP'];
     for (var i in prestigeList) {
         tmp = dropsAtZone(prestigeList[i], false);
+        var dropAt = (game.upgrades[prestigeList[i]].allowed+1)/2*10
         
         if (tmp>max)
             max=tmp;
+        if (dropAt < min)
+            min = dropAt;
     }
+    if(getMin) return Math.min(game.global.world, Math.floor(min/10)*10+5);
     
     prestigeState = 0;
     if(max % 1 > 0.35 && max % 1 < 0.45){

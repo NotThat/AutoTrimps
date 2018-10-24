@@ -380,7 +380,6 @@ function autoMap() {
     if ((shouldDoMaps || doVoids || needPrestige || shouldDoMapsVanillaRepeat) && selectedMap == "world") {
         selectedMap = "create";
         
-
         if (preSpireFarming) { //if preSpireFarming x minutes is true, switch over from wood maps to metal maps.
             statusMsg = "Spire Farm: ";
             var spiremaplvl = game.talents.mapLoot.purchased ? game.global.world - 1 : game.global.world;
@@ -392,9 +391,14 @@ function autoMap() {
                 selectedMap = game.global.mapsOwnedArray[highestMap];
         }
         else if (needPrestige) { //if needPrestige, TRY to find current level map as the highest level map we own.
-            if (game.global.world == game.global.mapsOwnedArray[highestMap].level)
-                selectedMap = game.global.mapsOwnedArray[highestMap];
-            statusMsg = "Prestige: " + getRemainingSpecials(game.global.world);
+            var level = lastPrestigeZone(true);
+            for(var i = 0; i < game.global.mapsOwnedArray.length; i++){
+                if (level == game.global.mapsOwnedArray[i].level && !game.global.mapsOwnedArray[i].noRecycle){
+                    selectedMap = game.global.mapsOwnedArray[i];
+                    break;
+                }
+            }
+            statusMsg = "Prestige: " + addSpecialsAT(game.global.world);
         }
         else if (doVoids){
             if(game.global.mapsActive && currMap.location === "Void")
@@ -456,7 +460,7 @@ function autoMap() {
             else if (currMap.noRecycle && currMap.name != 'Bionic Wonderland')
                 repeatClicked();
             
-            if(specials > 0)            statusMsg = "Prestige: " + specials;
+            if(specials > 0)            statusMsg = "Prestige: " + addSpecialsAT(game.global.world);//specials;
             else if(repeatChoice === 0) statusMsg = "Mapping at z" + game.global.world;
             else if(repeatChoice == 1)  statusMsg = "Map bonus ";
             while (game.options.menu.repeatUntil.enabled != repeatChoice) { //select the correct repeat until option
@@ -478,7 +482,7 @@ function autoMap() {
             mapsClicked(); //go back to world
         } else {
             if (selectedMap == "create") {
-                var lvl = (needPrestige ? game.global.world : siphlvl);
+                var lvl = (needPrestige ? lastPrestigeZone(true) : siphlvl);
                 var flag;
                 if(needPrestige)
                     flag = decideMapParams(lvl, lvl, "Prestigious", enoughDamage); //cheap or no cheap

@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "45.4";
+var ver = "45.5";
 var verDate = "24.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -429,7 +429,7 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
     if (getPageSetting('AutoStance')>0) autoStance();    //autostance() is in charge of world combat
     equipSelectedShield(wantGoodShield);
     
-    if(!game.global.Geneticistassist) manualGeneticists(); //autogeneticistassist unlocks after clearing cell 80 of bw 4 (z170)
+    if(!game.global.Geneticistassist) breedAT(); //autogeneticistassist unlocks after clearing cell 80 of bw 4 (z170)
     
     if (getPageSetting('UseAutoGen')) autoGenerator();          //"Auto Generator ON" (magmite.js)
     var forcePrecZ = (getPageSetting('ForcePresZ')<0) || (game.global.world<getPageSetting('ForcePresZ'));                                                      //dagger push etc
