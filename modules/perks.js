@@ -472,7 +472,7 @@ AutoPerks.spendHelium = function(helium) {
     var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
     var timeText = timeEstimator(false, 0, autoTrimpSettings.APValueBoxes.maxZone, AutoPerks.dailyObj, true);
     
-    var healthMod = calcCurrSendHealth(false, false, autoTrimpSettings.APValueBoxes.maxZone, AutoPerks.dailyObj, AutoPerks.fullSoldiers, AutoPerks.battleGUMult, AutoPerks.currAmalgamators, AutoPerks.equipmentHealth, AutoPerks.breedMult);
+    var healthMod = calcCurrSendHealth(false, false, false, autoTrimpSettings.APValueBoxes.maxZone, AutoPerks.dailyObj, AutoPerks.fullSoldiers, AutoPerks.battleGUMult, AutoPerks.currAmalgamators, AutoPerks.equipmentHealth, AutoPerks.breedMult);
     var corrupt = autoTrimpSettings.APValueBoxes.maxZone >= mutations.Corruption.start(true) ? "Corruption" : null;
     AutoPerks.enemyDamage = calcEnemyAttack(corrupt, null, 'Snimp', 98, autoTrimpSettings.APValueBoxes.maxZone, false, AutoPerks.dailyObj);
     var healthToDamageRatio = (healthMod / AutoPerks.enemyDamage);

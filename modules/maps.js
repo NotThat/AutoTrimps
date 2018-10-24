@@ -664,8 +664,14 @@ function PrestigeRaid() {
     if (BWRaidNowLogic())
         PRaidMax = 10;
     else if (PRaidStartZone === -1 || game.global.world < PRaidStartZone || PRaidMax <= 0){
-        if(!isActiveSpireAT() || !getPageSetting('PRaidSpire'))
-            return true; 
+        //if(isActiveSpireAT() || getPageSetting('PRaidSpireMulti') == 0)
+        //    return true; 
+        //normal raiding setting are kicking us out, but first check for spire raiding specific settings:
+        if(!game.global.spireActive) return true; //not in spire, leave
+        if(getPageSetting('PRaidSpireMulti') == 0) return true; //spire raiding off, leave
+        var spireMinus1Level = Math.ceil(getPageSetting('IgnoreSpiresUntil')/100)*100-100; //1 spire before first active spire
+        if(game.global.world < spireMinus1Level) return true; //we're below spire minus 1, leave
+        if(!isActiveSpireAT() && getPageSetting('PRaidSpireMulti') != 2) return true; //we're at spire minus 1, but spire raiding is only in active spires
     }
     
     var havePrestigeUpTo = lastPrestigeZone(); // check currently owned prestige levels
@@ -1081,9 +1087,7 @@ function findDesiredMapLevel(PRaidMax, PAggro, havePrestigeUpTo){
     var empowerment = getEmpowerment();
     var lastDigitZone = game.global.world % 10;
     
-    //are we in an active spire? if so we always want +5 map levels
-    if(game.global.world % 100 == 0 && game.global.world >= getPageSetting('IgnoreSpiresUntil')){
-        //debug("active spire mode");
+    if(game.global.spireActive){
         maxDesiredLevel = game.global.world + 5;
         minDesiredLevel = game.global.world + 1;
     }

@@ -275,7 +275,7 @@ function corruptHealthyStatScaleAT(base, zone){
 }
 
 //health if we send a new army right this moment, or used by auto allocate for next game
-function calcCurrSendHealth(currentGame, printout, zone, dailyObj, armySizeUncapped, battleGUBonus, amalgamators, gearHealth, breedMult){
+function calcCurrSendHealth(currentGame, getNurseCount, printout, zone, dailyObj, armySizeUncapped, battleGUBonus, amalgamators, gearHealth, breedMult){
     var base = 50;
     if(printout) debug("base health: " + base);
         
@@ -307,10 +307,6 @@ function calcCurrSendHealth(currentGame, printout, zone, dailyObj, armySizeUncap
     
     base *= (1 + 0.05*toughness1Perk.level) * (1 + 0.01*toughness2Perk.level)*Math.pow(1.1, resilPerk.level);
     if(printout) debug("after toughness1/2/resil: " + base.toExponential(2));
-    
-    //geneticists bonus
-    base *= currentGame ? Math.pow(1.01, game.global.lowestGen) : breedMult; //breedMult includes 1/5 max nurseries built
-    if(printout) debug("after geneticists: " + base.toExponential(2));
     
     var formation = 0.5;
     base *= formation;
@@ -347,7 +343,39 @@ function calcCurrSendHealth(currentGame, printout, zone, dailyObj, armySizeUncap
         }  
     }
     
-    return base;
+    //geneticists bonus
+    if(getNurseCount){ //we want to calculate how many nurseries are needed to match damage of cell 99
+        //calcCurrSendHealth(true, true, false, game.global.world)
+        
+        if(worldArray.length < 100) return 0;
+        var armySize = game.portal.Coordinated.currentSend * Math.pow(1000, game.jobs.Amalgamator.owned);
+        var breed =   0.0085        //how many trimps are bred each second before geneticists.
+                * trimpsRealMax/2
+                * Math.pow(1.1, Math.floor(zone / 5)) //potency
+                * game.unlocks.impCount.Venimp
+                * 0.1           //broken planet
+                * (1 + 0.1*game.portal["Pheromones"].level);
+                
+                //* Math.pow(1.01, nurseries)
+                //* AutoPerks.DailyBreedingMult; //toxic daily modifier
+        
+        var desiredBreedRate = (armySize / 45) / breed; //breed per sec
+        var geneticists = Math.floor(Math.log(desiredBreedRate) / Math.log(0.98)); //geneticists amount
+        //debug(geneticists);
+        var damage = 1.5*worldArray[98].attack * 0.15; //cell 98 damage*15% pierces block
+        var health = base*Math.pow(1.01, geneticists); //our health
+        var genNeeded = Math.floor(Math.log(damage/health) / Math.log(1.01));
+        var genDiff = Math.max(0,genNeeded);
+        var nurseNeeded = Math.ceil(genDiff * Math.log(1.02) / Math.log(1.01));
+        //debug("health:" + health.toExponential(2) + " attack:" + damage.toExponential(2) + " genNeeded:" + genNeeded + " nurseNeeded:" + nurseNeeded + " genDiff:"+genDiff);
+        return nurseNeeded;
+    }
+    else{
+        base *= currentGame ? Math.pow(1.01, game.global.lowestGen) : breedMult; //breedMult includes 1/5 max nurseries built
+        if(printout) debug("after geneticists: " + base.toExponential(2));
+
+        return base;
+    }
 }
 
 //helper functions to check our accuracy
@@ -377,7 +405,7 @@ function calcEnemyAttack(mutation, corrupted, name, level, zone, currentGame, da
     else if(mutation == "Corruption" || level == 99) atkScale = corruptHealthyStatScaleAT(3, zone);
     
     var ignoreImpStats = isSpire || mutation == "Corruption" || mutation == "Healthy";
-    var attack = isSpire ? getSpireStatsAT(zone, level+1, name, "attack") : getEnemyAttackAT(zone, level+1, name, ignoreImpStats) * atkScale * 1.2; //1.2 for max damage (hopefully)
+    var attack = isSpire ? getSpireStatsAT(zone, level+1, name, "attack")*1.2 : getEnemyAttackAT(zone, level+1, name, ignoreImpStats) * atkScale * 1.2; //1.2 for max damage (hopefully)
     
     if (corrupted == "corruptStrong") attack *= 2; 
     if (corrupted == "healthyStrong") attack *= 2.5;
