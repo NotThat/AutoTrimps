@@ -808,8 +808,9 @@ function buildWorldArray(){
     } 
     
     if (!game.global.mapsActive && game.global.gridArray && game.global.gridArray[0] && game.global.gridArray[0].name == "Liquimp"){
-        var atk = calcEnemyAttack(game.global.gridArray[0].mutation, game.global.gridArray[0].corrupted, game.global.gridArray[0].name, 0, game.global.world, true);
-        worldArray[0] = {health: game.global.gridArray[0].maxHealth, maxHealth: game.global.gridArray[0].maxHealth, attack: atk};
+        var atk    = calcEnemyAttack(game.global.gridArray[0].mutation, game.global.gridArray[0].corrupted, game.global.gridArray[0].name, 0, game.global.world, true);
+        var health = calcEnemyHealth(game.global.gridArray[0].mutation, game.global.gridArray[0].corrupted, game.global.gridArray[0].name, 0, game.global.world, true);
+        worldArray[0] = {health: health, maxHealth: health, attack: atk};
         return;
     }
     

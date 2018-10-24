@@ -124,7 +124,7 @@ function calcDmg(){
     var zoneRemainingHealth = sumCurrZoneHP(game.global.lastClearedCell + 1);
     var zoneHP = sumCurrZoneHP();
     
-    threshold = poisonMult * windMult * zoneRemainingHealth / zoneHP;
+    threshold = poisonMult * windMult * zoneRemainingHealth / zoneHP * 1;
     
     DHratio = (ourBaseDamage*0.25*100) / zoneHP;
     nextZoneDHratio = DHratio / (game.jobs.Magmamancer.getBonusPercent() * ((game.global.mapBonus * .2) + 1) * 2);
@@ -645,10 +645,8 @@ function praidAutoStart(){
 
 //returns true when done
 function PrestigeRaid() {
-    if(game.global.highestLevelCleared < 210){
-        //debug("Prestige Raiding is unlocked until HZE 210.", "maps");
+    if(game.global.highestLevelCleared < 210) //locked until hze 210
         return true;
-    }
     
     var PAggro = getPageSetting('PAggression'); //0 - light 1 - aggressive. 
     var PRaidMax = getPageSetting('PRaidingMaxZones'); //max zones to plus map
@@ -699,7 +697,7 @@ function PrestigeRaid() {
         else{
             if (game.global.repeatMap) //make sure repeat button is turned off 
                 repeatClicked();
-            statusMsg = "Prestige Raid: " + getRemainingSpecials(maxDesiredLevel);
+            statusMsg = "Prestige Raid: " + addSpecialsAT(maxDesiredLevel);
         }
         return false;
     }
@@ -767,7 +765,7 @@ function PrestigeRaid() {
     
     runMap();
     currMap = map;
-    statusMsg = "Prestige Raid: " + addSpecialsAT(currMap.level);
+    statusMsg = "Prestige Raid: " + addSpecialsAT(maxDesiredLevel);
 
     if (!game.global.repeatMap) {
         repeatClicked();
