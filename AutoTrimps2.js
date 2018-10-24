@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "45.3";
+var ver = "45.4";
 var verDate = "24.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -266,6 +266,7 @@ var DHratio = 0;
 var formattedRatio = "";
 var nextZoneDHratio = 0;
 var maxAnti;
+var attacksPerSecondAT = 1 / (Math.pow(0.95, game.portal.Agility.level) - (game.talents.hyperspeed.purchased ? 0.1 : 0) - (game.talents.hyperspeed2.purchased && game.global.world <= Math.floor(game.global.highestLevelCleared/2) ? 0.1 : 0));
 var wantedAnticipation = maxAnti;
 var highestPrestigeOwned = 0;
 var allowBuyingCoords = true;
@@ -370,6 +371,7 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
     }
     
     maxAnti = game.talents.patience.purchased ? 45 : 30;
+    attacksPerSecondAT = 1 / (Math.pow(0.95, game.portal.Agility.level) - (game.talents.hyperspeed.purchased ? 0.1 : 0) - (game.talents.hyperspeed2.purchased && game.global.world <= Math.floor(game.global.highestLevelCleared/2) ? 0.1 : 0));
     if(game.global.mapsActive) currMap = getCurrentMapObject();
     expectedPortalZone = autoTrimpSettings.AutoPortal.selected !== "Custom" ? 0 : getPageSetting('CustomAutoPortal') + (game.global.challengeActive == "Daily" ? getPageSetting('AutoFinishDailyNew') : 0);
     bsZone = (0.5*game.talents.blacksmith.purchased + 0.25*game.talents.blacksmith2.purchased + 0.15*game.talents.blacksmith3.purchased)*(game.global.highestLevelCleared + 1);    
@@ -426,6 +428,8 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
     
     if (getPageSetting('AutoStance')>0) autoStance();    //autostance() is in charge of world combat
     equipSelectedShield(wantGoodShield);
+    
+    if(!game.global.Geneticistassist) manualGeneticists(); //autogeneticistassist unlocks after clearing cell 80 of bw 4 (z170)
     
     if (getPageSetting('UseAutoGen')) autoGenerator();          //"Auto Generator ON" (magmite.js)
     var forcePrecZ = (getPageSetting('ForcePresZ')<0) || (game.global.world<getPageSetting('ForcePresZ'));                                                      //dagger push etc

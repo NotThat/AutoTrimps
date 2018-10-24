@@ -351,8 +351,8 @@ function calcCurrSendHealth(currentGame, getNurseCount, printout, zone, dailyObj
         var armySize = game.portal.Coordinated.currentSend * Math.pow(1000, game.jobs.Amalgamator.owned);
         var breed =   0.0085        //how many trimps are bred each second before geneticists.
                 * trimpsRealMax/2
-                * Math.pow(1.1, Math.floor(zone / 5)) //potency
-                * game.unlocks.impCount.Venimp
+                * Math.pow(1.1, game.upgrades.Potency.done)//Math.pow(1.1, Math.floor(zone / 5))
+                * Math.pow(1.003, game.unlocks.impCount.Venimp)
                 * 0.1           //broken planet
                 * (1 + 0.1*game.portal["Pheromones"].level);
                 

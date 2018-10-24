@@ -29,11 +29,36 @@ function addToolTipToArmyCount() {
 }
 addToolTipToArmyCount();
 
+function manualGeneticists(){
+    var desiredBreedTime = handleGA(true);
+    var armySize = game.portal.Coordinated.currentSend * Math.pow(1000, game.jobs.Amalgamator.owned);
+    var breed =   0.0085        //how many trimps are bred each second before geneticists.
+            * trimpsRealMax / 2
+            * Math.pow(1.1, game.upgrades.Potency.done) //potency
+            * Math.pow(1.003, game.unlocks.impCount.Venimp)
+            * (game.global.world >= 60 ? 0.1 : 1)       //broken planet
+            * (1 + 0.1*game.portal["Pheromones"].level)
+            * Math.pow(1.01, game.buildings.Nursery.owned);
+            //* AutoPerks.DailyBreedingMult; //toxic daily modifier
+
+    var desiredBreedRate = (armySize / desiredBreedTime) / breed; //breed per sec
+    var geneticists = Math.floor(Math.log(desiredBreedRate) / Math.log(0.98)); //geneticists amount
+    var delta = geneticists - game.jobs.Geneticist.owned;
+    if(delta > 0) safeBuyJob("Geneticist", delta);
+    else if(delta < 0) safeFireJob("Geneticist", -delta);
+}
+
+function getDesiredGenes(ovr, weirdNum12){
+    var breed_speed = 0.00085 * Math.pow(1.1,game.upgrades.Potency.done) * Math.pow(1.01,game.buildings.Nursery.owned) * (1 + 0.1*game.portal.Pheromones.level) * Math.pow(1.003,game.unlocks.impCount.Venimp);
+    var maxGenes = (Math.floor(Math.log(weirdNum12 * breed_speed * game.resources.trimps.owned / game.resources.trimps.soldiers) / -Math.log(0.98)));
+    return maxGenes;
+}
+
 function handleGA(currentGame, dailyObj){
     var theDailyObj = currentGame ? game.global.dailyChallenge  : dailyObj;
     var C2name      = currentGame ? game.global.challengeActive : AutoPerks.ChallengeName;
     var zone        = currentGame ? game.global.world           : autoTrimpSettings.APValueBoxes.maxZone;
-
+    
     if(zone < 71) return 0;
     
     var GATimer = (game.talents.patience.purchased ? 45 : 30);
@@ -43,7 +68,7 @@ function handleGA(currentGame, dailyObj){
             stacks = 5;
         else
             stacks = theDailyObj.bogged.strength;
-        GATimer = Math.floor(100/(4*stacks));
+        GATimer = Math.floor(100/(attacksPerSecondAT*stacks));
     }
     if (typeof theDailyObj.plague != 'undefined' || C2name == "Electricity"){ //%dmg taken per stack, 1 stack every attack
         var stacks = 0;

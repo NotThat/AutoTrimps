@@ -6,7 +6,7 @@ function getFreeWorkers(){
     return (game.global.challengeActive !== "Trapper" ? Math.ceil(trimpsRealMax / 2) : game.resources.trimps.owned-game.resources.trimps.getCurrentSend()) - game.resources.trimps.employed;
 }
 
-function safeBuyJob(jobTitle, amount) {
+function safeBuyJob(jobTitle, amount){
     if (!Number.isFinite(amount) || amount === 0 || typeof amount === 'undefined' || Number.isNaN(amount)) {
         debug("Exiting out of safeBuyJob early " + jobTitle + " " + amount);
         return false;
@@ -164,7 +164,7 @@ function buyJobs() {
         safeBuyJob('Miner', game.jobs.Miner.owned * -1);
     if (!ratiobuy('Lumberjack', lumberjackRatio, totalRatio, subtract) && breedFire)
         safeBuyJob('Lumberjack', game.jobs.Lumberjack.owned * -1);
-
+    
     //Magmamancers code:
     if (game.jobs.Magmamancer.locked) return;
     var timeOnZone = Math.floor((getGameTime() - game.global.zoneStarted) / 60000);
