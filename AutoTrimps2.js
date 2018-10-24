@@ -429,7 +429,7 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
     if (getPageSetting('AutoStance')>0) autoStance();    //autostance() is in charge of world combat
     equipSelectedShield(wantGoodShield);
     
-    if(!game.global.Geneticistassist) breedAT(); //autogeneticistassist unlocks after clearing cell 80 of bw 4 (z170)
+    if(!game.global.Geneticistassist && game.jobs.Geneticist.locked === 0) breedAT(); //autogeneticistassist unlocks after clearing cell 80 of bw 4 (z170)
     
     if (getPageSetting('UseAutoGen')) autoGenerator();          //"Auto Generator ON" (magmite.js)
     var forcePrecZ = (getPageSetting('ForcePresZ')<0) || (game.global.world<getPageSetting('ForcePresZ'));                                                      //dagger push etc
