@@ -65,7 +65,7 @@ function buyFoodEfficientHousing() {
     var foodHousing = ["Hut", "House", "Mansion", "Hotel", "Resort"];
     var unlockedHousing = [];
     for (var house in foodHousing) {
-        if (game.buildings[foodHousing[house]].locked === 0 && getPageSetting("Max"+foodHousing[house]) > 0) {
+        if (game.buildings[foodHousing[house]].locked === 0 && getPageSetting("Max"+foodHousing[house]) !== 0) {
             unlockedHousing.push(foodHousing[house]);
         }
     }
@@ -100,12 +100,12 @@ function buyFoodEfficientHousing() {
     }
 }
 
-function buyGemEfficientHousing() {
+function buyGemEfficientHousing(){
     var gemHousing = ["Hotel", "Resort", "Gateway", "Collector", "Warpstation"];
     var unlockedHousing = [];
 
-    for (var house in gemHousing) {
-        if (game.buildings[gemHousing[house]].locked === 0 && (house == 4 || getPageSetting("Max"+gemHousing[house]) > 0)) {
+    for (var house in gemHousing){
+        if (game.buildings[gemHousing[house]].locked === 0 && (house == 4 || getPageSetting("Max"+gemHousing[house]) !== 0)){
             unlockedHousing.push(gemHousing[house]);
         }
     }
@@ -113,7 +113,7 @@ function buyGemEfficientHousing() {
         return;
     
     var obj = {};
-    for (var house in unlockedHousing) {
+    for (var house in unlockedHousing){
         var building = game.buildings[unlockedHousing[house]];
         var cost = getBuildingItemPrice(building, "gems", false, 1);
         var ratio = cost / building.increase.by;
@@ -123,73 +123,39 @@ function buyGemEfficientHousing() {
         obj[unlockedHousing[house]] = ratio;
         document.getElementById(unlockedHousing[house]).style.border = "1px solid #FFFFFF";
     }
-    var keysSorted = Object.keys(obj).sort(function (a, b) {
+    var keysSorted = Object.keys(obj).sort(function (a, b){
             return obj[a] - obj[b];
         });
     bestBuilding = null;
     //loop through the array and find the first one that isn't limited by max settings
-    for (var best in keysSorted) {
+    for (var best in keysSorted){
         var max = getPageSetting('Max' + keysSorted[best]);
         if (max === false) max = -1;
-        if (game.buildings[keysSorted[best]].owned < max || max == -1) {
+        if (game.buildings[keysSorted[best]].owned < max || max == -1){
             bestBuilding = keysSorted[best];
-            document.getElementById(bestBuilding).style.border = "1px solid #00CC00";
             //WarpStation Cap:
-            var skipWarp = false;
-            if (getPageSetting('WarpstationCap') && bestBuilding == "Warpstation") {
+            
+            if (getPageSetting('WarpstationCap') && bestBuilding == "Warpstation"){
                 //Warpstation Cap - if we are past the basewarp+deltagiga level, "cap" and just wait for next giga.
                 if (game.buildings.Warpstation.owned >= (Math.floor(game.upgrades.Gigastation.done * getPageSetting('DeltaGigastation')) + getPageSetting('FirstGigastation')))
-                    skipWarp = true;
+                    continue;
             }
             //WarpStation Wall:
             var warpwallpct = getPageSetting('WarpstationWall3');
-            if (warpwallpct > 1 && bestBuilding == "Warpstation") {
+            if (warpwallpct > 1 && bestBuilding == "Warpstation"){
                 //Warpstation Wall - allow only warps that cost 1/n'th less then current metal (try to save metal for next prestige)
                 if (getBuildingItemPrice(game.buildings.Warpstation, "metal", false, 1) * Math.pow(1 - game.portal.Resourceful.modifier, game.portal.Resourceful.level) > (game.resources.metal.owned / warpwallpct))
-                    skipWarp = true;
+                    continue;
             }
-            if (skipWarp)
-                bestBuilding = null;
-            //'Buy Warp to Hit Coord': (override Cap/Wall)
-            var getcoord = getPageSetting('WarpstationCoordBuy');
-            if (getcoord && skipWarp) {
-                var toTip = game.buildings.Warpstation;
-/*
-                //calc Cost
-                var warpMetalOK = getBuildingItemPrice(toTip, "metal", false, 1) * Math.pow(1 - game.portal.Resourceful.modifier, game.portal.Resourceful.level) / game.resources.metal.owned;
-                var warpGemsOK = getBuildingItemPrice(toTip, "gems", false, 1) * Math.pow(1 - game.portal.Resourceful.modifier, game.portal.Resourceful.level) / game.resources.gems.owned;
-                //var afford = Math.floor(Math.min(warpMetalOK,warpGemsOK));
-                if (warpMetalOK <= 1 && warpGemsOK <= 1) {
-*/
-                if (canAffordBuilding("Warpstation")) {
-                    var howMany = calculateMaxAfford(game.buildings["Warpstation"], true);
-                    //calc trimps needed to next Coord
-                    var needCoord = game.upgrades.Coordination.allowed - game.upgrades.Coordination.done > 0;
-                    var coordReplace = (game.portal.Coordinated.level) ? (25 * Math.pow(game.portal.Coordinated.modifier, game.portal.Coordinated.level)).toFixed(3) : 25;
-                    if (!canAffordCoordinationTrimps()){
-                        var nextCount = (game.portal.Coordinated.level) ? game.portal.Coordinated.currentSend : game.resources.trimps.maxSoldiers;
-                        var amtToGo = ((nextCount * 3) - trimpsRealMax);
-                        //calc amount of trimps that warpstation increases by
-                        var increase = toTip.increase.by;
-                        if (game.portal.Carpentry.level && toTip.increase.what == "trimps.max") increase *= Math.pow(1.1, game.portal.Carpentry.level);
-                        if (game.portal.Carpentry_II.level && toTip.increase.what == "trimps.max") increase *= (1 + (game.portal.Carpentry_II.modifier * game.portal.Carpentry_II.level));
-                        //do it
-                        if (amtToGo < increase*howMany)
-                            bestBuilding = "Warpstation";
-                    }
-                }
-            }
-            break;
+            
+            //if we found something make it green and buy it
+            if (bestBuilding)
+                safeBuyBuilding(bestBuilding);
+            
         }
-    }
-
-    //if we found something make it green and buy it
-    if (bestBuilding) {
-        safeBuyBuilding(bestBuilding);
     }
 }
 
-//Main Decision Function that determines cost efficiency and Buys all housing (gems), or calls buyFoodEfficientHousing, and also non-storage buildings (Gym,Tribute,Nursery)s
 function buyBuildings() {
     if ((game.jobs.Miner.locked && game.global.challengeActive != 'Metal') || (game.jobs.Scientist.locked && game.global.challengeActive != "Scientist"))
         return;
@@ -199,7 +165,7 @@ function buyBuildings() {
     buyFoodEfficientHousing();  //["Hut", "House", "Mansion", "Hotel", "Resort"];
     buyGemEfficientHousing();   //["Hotel", "Resort", "Gateway", "Collector", "Warpstation"];
     //WormHoles:
-    if (getPageSetting('MaxWormhole') > 0 && game.buildings.Wormhole.owned < getPageSetting('MaxWormhole') && !game.buildings.Wormhole.locked) {
+    if ((game.buildings.Wormhole.owned < getPageSetting('MaxWormhole') || getPageSetting('MaxWormhole') < 0) && !game.buildings.Wormhole.locked) {
         safeBuyBuilding('Wormhole');
     }
     //Buy non-housing buildings:
@@ -220,10 +186,11 @@ function buyBuildings() {
         needGymystic = false;  //needs reset after buyBuildings
     }
     //Tributes:
-    if (!game.buildings.Tribute.locked && getPageSetting('MaxTribute') > 0 && getPageSetting('MaxTribute') > game.buildings.Tribute.owned){
+    var tributes = getPageSetting('MaxTribute');
+    if (!game.buildings.Tribute.locked && tributes !== 0 && (tributes > game.buildings.Tribute.owned || tributes < 0)){
         safeBuyBuilding('Tribute');
     }
-
+    
     if(game.global.spireActive && !isActiveSpireAT() && getPageSetting('NurseriesSurvive')){
         var howMany = calcCurrSendHealth(true, true, false, game.global.world);
         if(howMany > 0){
@@ -236,12 +203,12 @@ function buyBuildings() {
     
     var nursminlvl = getPageSetting('NoNurseriesUntil');
     var maxNursery = (isActiveSpireAT() ? getPageSetting('PreSpireNurseries') : getPageSetting('MaxNursery'));
-    if ((game.global.world < nursminlvl && !isActiveSpireAT()) || game.buildings.Nursery.owned >= maxNursery || maxNursery <= 0 || (getPageSetting('NoNurseriesIce') && (getEmpowerment() == "Ice") && game.global.world > nursminlvl+5)) {
+    if (((game.global.world < nursminlvl || nursminlvl < 0) && !isActiveSpireAT()) || (game.buildings.Nursery.owned >= maxNursery && maxNursery >= 0) || maxNursery === 0 || (getPageSetting('NoNurseriesIce') && (getEmpowerment() == "Ice") && game.global.world > nursminlvl+5)) {
         postBuy2(oldBuy);
         return;
     }
     
-    var nwr = customVars.nursCostRatio; //nursery to warpstation/collector cost ratio. Also for extra gems.
+    /*var nwr = customVars.nursCostRatio; //nursery to warpstation/collector cost ratio. Also for extra gems.
     var nursCost = getBuildingItemPrice(game.buildings.Nursery, "gems", false, 1);
     var warpCost = getBuildingItemPrice(game.buildings.Warpstation, "gems", false, 1);
     var collCost = getBuildingItemPrice(game.buildings.Collector, "gems", false, 1);
@@ -250,9 +217,9 @@ function buyBuildings() {
     var buyWithExtraGems = (!game.buildings.Warpstation.locked && nursCost * resomod < nwr * game.resources.gems.owned);
     if ((buyWithExtraGems ||
          ((nursCost < nwr * warpCost || game.buildings.Warpstation.locked) &&
-          (nursCost < nwr * collCost || game.buildings.Collector.locked || !game.buildings.Warpstation.locked)))) {
+          (nursCost < nwr * collCost || game.buildings.Collector.locked || !game.buildings.Warpstation.locked)))) {*/
            safeBuyBuilding('Nursery');
-    }
+    //}
     postBuy2(oldBuy);
 }
 
