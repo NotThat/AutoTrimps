@@ -1402,3 +1402,11 @@ function addSpecialsAT(mapLevel, isBionic){
     
     return count;
 }
+
+function calcAttacksPerSecond(){
+    var agility = Math.pow(0.95, game.portal.Agility.level);
+    var hyper1  = (game.talents.hyperspeed.purchased ? 0.1 : 0);
+    var hyper2  = (game.talents.hyperspeed2.purchased && game.global.world <= Math.floor((game.global.highestLevelCleared+1)/2) ? 0.1 : 0);
+    var fa      = (game.global.mapsActive && currMap.bonus == "fa" ? 0.1 : 0);
+    return 1 / (agility - hyper1 - Math.max(hyper2, fa)); //hyper2 and fa do not stack
+}
