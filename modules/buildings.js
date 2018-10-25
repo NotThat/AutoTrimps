@@ -220,7 +220,7 @@ function buyBuildings() {
         needGymystic = false;  //needs reset after buyBuildings
     }
     //Tributes:
-    if (!game.buildings.Tribute.locked && (getPageSetting('MaxTribute') > game.buildings.Tribute.owned || getPageSetting('MaxTribute') == -1)) {
+    if (!game.buildings.Tribute.locked && getPageSetting('MaxTribute') > 0 && getPageSetting('MaxTribute') > game.buildings.Tribute.owned){
         safeBuyBuilding('Tribute');
     }
 
