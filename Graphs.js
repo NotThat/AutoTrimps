@@ -546,23 +546,24 @@ function setGraphData(graph) {
         case 'Clear Time':
             graphData = allPurposeGraph('cleartime1',true,null,
                     function specialCalc(e1,e2) {
-                        return Math.round(((e1.currentTime - e2.currentTime)-(e1.portalTime - e2.portalTime)) / 1000);
-                    });
-            /*graphData = allPurposeGraph('cleartime2',true,null,
-                    function specialCalc(e1,e2) {
-                        return Math.round(e1.zonetime/1000);
-                    });*/       
+                        return (((e1.currentTime - e2.currentTime)-(e1.portalTime - e2.portalTime)) / 1000);
+                    });     
             title = 'Time to clear zone';
             xTitle = 'Zone';
             yTitle = 'Clear Time';
-            yType = 'Linear';
-            valueSuffix = ' Seconds';
+            yType = 'datetime';
+            formatter =  function () {
+                var ser = this.series;
+                return '<span style="color:' + ser.color + '" >�?</span> ' +
+                        ser.name + ': <b>' +
+                        Highcharts.dateFormat('%H:%M:%S', 1000*this.y) + '</b><br>';
+            };
             yminFloor=0;
             break;
         case 'Cumulative Clear Time':
             graphData = allPurposeGraph('cumucleartime1',true,null,
                     function specialCalc(e1,e2) {
-                        return Math.round((e1.currentTime - e2.currentTime)-(e1.portalTime - e2.portalTime));
+                        return Math.round(((e1.currentTime - e2.currentTime)-(e1.portalTime - e2.portalTime)) / 1000);
                     },true);
             /*graphData = allPurposeGraph('cumucleartime2',true,null,
                     function specialCalc(e1,e2) {
@@ -576,7 +577,7 @@ function setGraphData(graph) {
                 var ser = this.series;
                 return '<span style="color:' + ser.color + '" >�?</span> ' +
                         ser.name + ': <b>' +
-                        Highcharts.dateFormat('%H:%M:%S', this.y) + '</b><br>';
+                        Highcharts.dateFormat('%H:%M:%S', 1000*this.y) + '</b><br>';
             };
             yminFloor=0;
             break;
@@ -1085,18 +1086,20 @@ function setGraph(title, xTitle, yTitle, valueSuffix, formatter, series, yType, 
             type: yType,
             labels: {
                 formatter: function(){
+                    if (yType == 'datetime') return Highcharts.dateFormat('%H:%M:%S', 1000*this.value);
                     return ((this.value > 1000 || this.value < 0) ? prettify(this.value) : this.value);
-                }
+                },
+            },
+            dateTimeLabelFormats: { //force all formats to be hour:minute:second
+                second: '%H:%M:%S',
+                minute: '%H:%M:%S',
+                hour: '%H:%M:%S',
+                day: '%H:%M:%S',
+                week: '%H:%M:%S',
+                month: '%H:%M:%S',
+                year: '%H:%M:%S'
             }
-            /*dateTimeLabelFormats: { //force all formats to be hour:minute:second
-            second: '%H:%M:%S',
-            minute: '%H:%M:%S',
-            hour: '%H:%M:%S',
-            day: '%H:%M:%S',
-            week: '%H:%M:%S',
-            month: '%H:%M:%S',
-            year: '%H:%M:%S'
-            }*/
+
         },
         tooltip: {
             pointFormatter: formatter,
