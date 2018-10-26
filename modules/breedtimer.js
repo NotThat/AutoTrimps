@@ -151,9 +151,9 @@ function handleGA(currentGame, dailyObj){
     if(zone < 71) return 0;
     
     var GATimer = (game.talents.patience.purchased ? 45 : 30);
-    if (typeof theDailyObj.bogged != 'undefined' || C2name == "Nom"){ //fixed %dmg taken every attack
+    if (typeof theDailyObj.bogged != 'undefined' || C2name == "Nom" || C2name == "Toxicity"){ //fixed %dmg taken every attack
         var stacks = 0;
-        if (C2name == "Nom")
+        if (C2name == "Nom" || C2name == "Toxicity")
             stacks = 5;
         else
             stacks = theDailyObj.bogged.strength;
