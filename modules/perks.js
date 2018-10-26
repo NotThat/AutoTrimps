@@ -23,7 +23,7 @@ function presetObj(header, Helium, Attack, Health, Fluffy, DG, maxZone, amalGoal
 }
 
 AutoPerks.makeDefaultCheckBoxes = function(){
-    return presetCheckObj("default", false, false, false, true);
+    return presetCheckObj("default", false, false, false, false);
 }
 
 function presetCheckObj(header, userMaxFuel, userRespecAfterAmal, userMaintainMode, userSaveATSettings){

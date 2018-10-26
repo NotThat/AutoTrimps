@@ -505,6 +505,11 @@ function autoMap() {
                     selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1]; //the map we just created
                 } 
             }
+            if(typeof selectedMap === 'undefined'){
+                debug("maps: selectedMap === 'undefined' error. resuming.");
+                mapsClicked(true);
+                return;
+            }
             selectMap(selectedMap.id);
             if(!spireMapBonusFarming && stackSpireGetMinDamage){ //equip low shield - enter map, go to premaps. enter map - manual fight - go to premaps - exit to world - manual fight
                 debug("Lowering damage for Spire IV");
@@ -539,10 +544,6 @@ function autoMap() {
                 return;
             }
             else{
-                if(typeof selectedMap === 'undefined'){
-                    debug("maps: selectedMap === 'undefined' error. resuming.");
-                    return;
-                }
                 var levelText = " Level: " + selectedMap.level;
                 var voidorLevelText = selectedMap.location == "Void" ? " Void: " : levelText;
                 var stanceText = "";
@@ -907,11 +908,12 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
         if(readNiceCheckbox(perfBox) !== perfect) swapNiceCheckbox(perfBox, perfect);
         updateMapCost();        
         
-        if ((updateMapCost(true) <= game.resources.fragments.owned)) {
-            var perfectText = (perfect ? "Perfect" : "");
-            var specialModText = (specialMod ? specialMod : "vanilla");
-            var typeText = (type == "Plentiful" ? "Garden" : type);
-            debug("Level = "+(baseLevel+extraLevels)+"|"+parseFloat(lootSlider)+"|"+parseFloat(sizeSlider)+"|"+parseFloat(diffSlider)+"|"+specialModText+"|"+perfectText+"|"+typeText+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.", "maps");
+        var perfectText = (perfect ? "Perfect" : "");
+        var specialModText = (specialMod ? specialMod : "vanilla");
+        var typeText = (type == "Plentiful" ? "Garden" : type);
+        debug("Level = "+(baseLevel+extraLevels)+"|"+parseFloat(lootSlider)+"|"+parseFloat(sizeSlider)+"|"+parseFloat(diffSlider)+"|"+specialModText+"|"+perfectText+"|"+typeText+" cost: " + cost.toPrecision(3) + " / " + game.resources.fragments.owned.toPrecision(3) + " fragments.", "maps");
+        
+        if ((updateMapCost(true) <= game.resources.fragments.owned)){
             var result = buyMap();
             if (result == -2) {
                 debug("Too many maps, recycling now: ", "maps", 'th-large');
@@ -921,9 +923,9 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
             }
             return true;
         }
-        else {
+        else{
             debug("Failed to prestige raid. We can't afford the map.");
-            debug("Expected map level " + (game.global.world+extraLevels) + " is " + cost + " and we have " + fragments + " frags.");
+            debug("Expected map level " + (game.global.world+extraLevels) + " is " + prettify(updateMapCost(true)) + " and we have " + prettify(game.resources.fragments.owned) + " frags.");
             return false;
         }
     }
