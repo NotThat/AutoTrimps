@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "45.10";
-var verDate = "25.10.18";
+var ver = "45.11";
+var verDate = "26.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -114,7 +114,7 @@ function startAT() {
     activateClicked = (function(makeUp, now) {
         var cached_function = activateClicked;
         return function(makeUp, now) {
-            if(autoTrimpSettings.APCheckBoxes.userSaveATSettings){ //save relevant AT settings
+            if(typeof autoTrimpSettings.APCheckBoxes !== 'undefined' && autoTrimpSettings.APCheckBoxes.userSaveATSettings){ //save relevant AT settings
                 setPageSetting('TillWeHaveAmalg',   autoTrimpSettings.APValueBoxes.amalGoal); //amal goal
                 setPageSetting('NoCoordBuyStartZ',  (autoTrimpSettings.APValueBoxes.amalZone - autoTrimpSettings.APValueBoxes.coordsBehind)); //start no coord buy
                 setPageSetting('FuelFromZ',         AutoPerks.fuelStartZone); //fuel start zone
