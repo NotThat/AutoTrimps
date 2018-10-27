@@ -733,8 +733,9 @@ function timeEstimator(currentGame, fromCell, zone, dailyObj, toText){
         if(ret < 60) timeText = Math.floor(ret) + "s";
         else if (ret < 3600)  timeText = Math.floor(ret/60) + "m" + Math.floor(ret % 60) + "s";
         else if (ret < 86400) timeText = Math.floor(ret / 3600) + "h" + Math.floor((ret % 3600)/60) + "m";
-        else timeText = Math.floor(ret / 86400) + "d" + Math.floor((ret % 86400)/3600) + "h";
-        return timeText;// + " " + Math.floor(ret);
+        else if (ret < 3.154e7) timeText = Math.floor(ret / 86400) + "d" + Math.floor((ret % 86400)/3600) + "h";
+        else timeText = prettify(Math.floor(ret / 3.154e7)) + "y" + Math.floor((ret % 3.154e7)/86400) + "d";
+        return timeText;
     }
     else if(!isFinite(dmgToUse) || !isFinite(totalHP)) return Number.MAX_VALUE;
     else return ret;
