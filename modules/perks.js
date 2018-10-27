@@ -236,6 +236,7 @@ AutoPerks.clickAllocate = function() {
             $text.innerHTML = msg;
             return;
         }
+        if(typeof attacksPerSecondAT === 'undefined') attacksPerSecondAT = calcAttacksPerSecond();
         AutoPerks.useLivePerks = false; //use perk setup as calculated by AutoPerks. used by GU currently.
         AutoPerks.totalHelium = AutoPerks.getHelium(); //differs whether we're in the portal screen or mid run respec
         AutoPerks.gearLevels  = 1;
@@ -379,7 +380,8 @@ AutoPerks.spendHelium = function(helium) {
         
         for(var i = 0; i < AutoPerks.workPerks.length; i++){
             price = AutoPerks.workPerks[i].getPrice();
-            if (helium <= price){ //can no longer afford a level of this perk, so remove it from AutoPerks.workPerks
+            if (helium <= price || AutoPerks.workPerks[i].level >= AutoPerks.workPerks[i].max){ //can no longer afford a level of this perk, so remove it from AutoPerks.workPerks
+                if (AutoPerks.workPerks[i].level > AutoPerks.workPerks[i].max) throw AutoPerks.workPerks[i].name + " over max level.";
                 AutoPerks.workPerks.splice(i, 1); //remove from array
                 if(AutoPerks.workPerks.length === 0) return false; //all done
                 i--;
@@ -408,6 +410,7 @@ AutoPerks.spendHelium = function(helium) {
         if(mostEff.child && !mostEff.child.isLocked){
             var child = mostEff.child;
             var childLevelTarget = mostEff.childLevelFunc();
+            if(isNaN(childLevelTarget)) throw "childLevelTarget NaN mostEff " + mostEff.name + " level " + mostEff.level;
             var childNewLevel = Math.max(0, childLevelTarget);
             if(childNewLevel > child.level){
                 packLevel = childNewLevel - child.level;
@@ -889,6 +892,8 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
     
     var atk    = Math.round(40 * Math.pow(1.19, ((AutoPerks.prestiges - 1) * 13) + 1)) * AutoPerks.gearLevels; //40 is prestige 0 level 0 total attack values
     var health = Math.round(152 * Math.pow(1.19, ((AutoPerks.prestiges - 1) * 14) + 1)) * AutoPerks.gearLevels; //152 is prestige 0 level 0 total health values
+    if(isNaN(atk)) throw "calcIncome NaN attack";
+    if(isNaN(health)) throw "calcIncome NaN health";
     if(toRet === 1) return atk;
     else if(toRet === 2) return health;
     else if(toRet === 3){ //save values
@@ -1021,6 +1026,7 @@ function calcPopBreed(toRet){
         AutoPerks.breedMult = breed;
         AutoPerks.maxNurseries = nurseries;
     }
+    if(isNaN(breed)) throw "calcPopBreed NaN breed";
     return breed;
 }
 
@@ -1068,7 +1074,7 @@ AutoPerks.initializePerks = function () {
     //the rest of the perks
     var cunning      = {name: "Cunning",      benefits: [bFluff],            baseCost: 1e11};
     var curious      = {name: "Curious",      benefits: [bFluff],            baseCost: 1e14};
-    var classy       = {name: "Classy",       benefits: [bFluff],            baseCost: 1e17};
+    var classy       = {name: "Classy",       benefits: [bFluff],            baseCost: 1e17, max:50};
     var pheromones   = {name: "Pheromones",   benefits: [bHlth],             baseCost: 3,       popBreedFlag:true};
     var artisanistry = {name: "Artisanistry", benefits: [bHlth, bAtk],       baseCost: 15,      incomeFlag: true};
     var resilience   = {name: "Resilience",   benefits: [bHlth],             baseCost: 100};
