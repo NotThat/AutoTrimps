@@ -4,10 +4,10 @@ AutoPerks.Squared = "ChallengeSquared";
 
 //someday might implement presets back
 AutoPerks.makeDefaultValueBoxes = function(){
-    return presetObj("default", 2200, 333, 11, 1500, 55, 605, 7, 522, 21);
+    return presetObj("default", 2200, 333, 11, 1500, 55, 605, 7, 522, 21, 0);
 }
 
-function presetObj(header, Helium, Attack, Health, Fluffy, DG, maxZone, amalGoal, amalZone, coordsBehind){
+function presetObj(header, Helium, Attack, Health, Fluffy, DG, maxZone, amalGoal, amalZone, coordsBehind, maxPrestigeZ){
     if(typeof autoTrimpSettings.APValueBoxes === 'undefined') autoTrimpSettings.APValueBoxes = {};
     var preset = {header:header, 
         Helium:      typeof autoTrimpSettings.APValueBoxes.Helium       !== 'undefined' ? autoTrimpSettings.APValueBoxes.Helium       : Helium,
@@ -18,7 +18,9 @@ function presetObj(header, Helium, Attack, Health, Fluffy, DG, maxZone, amalGoal
         maxZone:     typeof autoTrimpSettings.APValueBoxes.maxZone      !== 'undefined' ? autoTrimpSettings.APValueBoxes.maxZone      : maxZone,
         amalGoal:    typeof autoTrimpSettings.APValueBoxes.amalGoal     !== 'undefined' ? autoTrimpSettings.APValueBoxes.amalGoal     : amalGoal,
         amalZone:    typeof autoTrimpSettings.APValueBoxes.amalZone     !== 'undefined' ? autoTrimpSettings.APValueBoxes.amalZone     : amalZone,
-        coordsBehind:typeof autoTrimpSettings.APValueBoxes.coordsBehind !== 'undefined' ? autoTrimpSettings.APValueBoxes.coordsBehind : coordsBehind};
+        coordsBehind:typeof autoTrimpSettings.APValueBoxes.coordsBehind !== 'undefined' ? autoTrimpSettings.APValueBoxes.coordsBehind : coordsBehind,
+        maxPrestigeZ:typeof autoTrimpSettings.APValueBoxes.maxPrestigeZ !== 'undefined' ? autoTrimpSettings.APValueBoxes.maxPrestigeZ : maxPrestigeZ
+    };
     return preset;
 }
 
@@ -33,7 +35,8 @@ function presetCheckObj(header, userMaxFuel, userBattleGU, userMaintainMode, use
         userBattleGU:       typeof autoTrimpSettings.APCheckBoxes.userBattleGU        !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userBattleGU        : userBattleGU, 
         userSharpTrimps:    typeof autoTrimpSettings.APCheckBoxes.userSharpTrimps     !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userSharpTrimps     : userSharpTrimps, 
         userMaintainMode:   typeof autoTrimpSettings.APCheckBoxes.userMaintainMode    !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userMaintainMode    : userMaintainMode, 
-        userSaveATSettings: typeof autoTrimpSettings.APCheckBoxes.userSaveATSettings  !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userSaveATSettings  : userSaveATSettings};
+        userSaveATSettings: typeof autoTrimpSettings.APCheckBoxes.userSaveATSettings  !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userSaveATSettings  : userSaveATSettings
+    };
     return preset;
 }
 
@@ -89,12 +92,18 @@ AutoPerks.initializeGUI = function() {
     
     var portalZone   = AutoPerks.createInput("maxZone",apGUI.$ratiosLine2);
     portalZone.setAttribute("onmouseover", 'tooltip("Portal Zone", "customText", event, "The zone you intend to portal on.")');
+    
     var amalGoal     = AutoPerks.createInput("amalGoal",apGUI.$ratiosLine2);
     amalGoal.setAttribute("onmouseover", 'tooltip("Amalgamator Goal", "customText", event, "How many Amalgamators do you want to get.")');
+    
     var amalZone     = AutoPerks.createInput("amalZone",apGUI.$ratiosLine2);
     amalZone.setAttribute("onmouseover", 'tooltip("Amalgamator Zone", "customText", event, "On which zone do you wish to hit your Amalgamator goal. 1-20 zones after a spire is generally a good place, starting spire 2.")');
+    
     var coordsBehind = AutoPerks.createInput("coordsBehind",apGUI.$ratiosLine2);
     coordsBehind.setAttribute("onmouseover", 'tooltip("Coordinations Behind", "customText", event, "How many unspent Coordination upgrades will you have at your Amalgamator Zone. Pick an amount that doesnt slow you down.")');
+    
+    var maxPrestigeZ = AutoPerks.createInput("maxPrestigeZ",apGUI.$ratiosLine2);
+    maxPrestigeZ.setAttribute("onmouseover", 'tooltip("Maximum Prestige Zone", "customText", event, "The highest zone that youve raided for gear. If 0, will use the same logic as Aggressive mode with max raid levels of 10. Use this if you plan on BW Raiding. For example, if your max zone is 600 and you raid bw 620, enter 620. Assumes input values of xx0 or xx5 (so no partial prestiges).")');    
     
     //check boxes line
     apGUI.$checkBoxesLine3 = document.createElement("DIV");
@@ -160,10 +169,10 @@ AutoPerks.UpdateCustomCheckBox = function(name, value){
 AutoPerks.updateBoxesUI = function() {
     var $perkRatioBoxes = document.getElementsByClassName("perkRatios");
     
-    for(var i = 0; i < 9; i++) //set ratio boxes values from currently selected preset
+    for(var i = 0; i < 10; i++) //set ratio boxes values from currently selected preset
         $perkRatioBoxes[i].value = autoTrimpSettings.APValueBoxes[$perkRatioBoxes[i].name];
     
-    for(var i = 9; i < 14; i++) //set ratio boxes values from currently selected preset
+    for(var i = 10; i < 15; i++) //set ratio boxes values from currently selected preset
         $perkRatioBoxes[i].checked = autoTrimpSettings.APCheckBoxes["user"+$perkRatioBoxes[i].name];
 };
 
@@ -872,7 +881,10 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
     var cycleModifier = 0;
     var cycle = autoTrimpSettings.APValueBoxes.maxZone >= 236 ? cycleZone(autoTrimpSettings.APValueBoxes.maxZone) : -1;
     if(cycle <= 4 || (cycle >= 15 && cycle <= 24)) cycleModifier = 2;
-    AutoPerks.prestiges = Math.floor((autoTrimpSettings.APValueBoxes.maxZone-1)/10) * 2 + 2 + cycleModifier; //roundup to next xx5 zone for prestige, anticipating praid cycles
+    if(autoTrimpSettings.APValueBoxes.maxPrestigeZ <= 0)
+        AutoPerks.prestiges = Math.floor((autoTrimpSettings.APValueBoxes.maxZone-1)/10) * 2 + 2 + cycleModifier; //roundup to next xx5 zone for prestige, anticipating praid cycles
+    else
+        AutoPerks.prestiges = Math.ceil(autoTrimpSettings.APValueBoxes.maxPrestigeZ/10) * 2; //user entered prestige zone
     
     var prestigeMod = (AutoPerks.prestiges - 3) * 0.85 + 2;
     AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1) * AutoPerks.DailyEquipmentMult * (AutoPerks.ChallengeName == "Obliterated" ? 1e12 : 1); //this is the cost of all gear at max prestige level 1
