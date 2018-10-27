@@ -881,10 +881,12 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
     var cycleModifier = 0;
     var cycle = autoTrimpSettings.APValueBoxes.maxZone >= 236 ? cycleZone(autoTrimpSettings.APValueBoxes.maxZone) : -1;
     if(cycle <= 4 || (cycle >= 15 && cycle <= 24)) cycleModifier = 2;
+    var normalRaidingPrestige = Math.floor((autoTrimpSettings.APValueBoxes.maxZone-1)/10) * 2 + 2 + cycleModifier; //roundup to next xx5 zone for prestige, anticipating praid cycles
+    var userInputPrestige     = Math.ceil(autoTrimpSettings.APValueBoxes.maxPrestigeZ/10) * 2; //user entered prestige zone
     if(autoTrimpSettings.APValueBoxes.maxPrestigeZ <= 0)
-        AutoPerks.prestiges = Math.floor((autoTrimpSettings.APValueBoxes.maxZone-1)/10) * 2 + 2 + cycleModifier; //roundup to next xx5 zone for prestige, anticipating praid cycles
+        AutoPerks.prestiges = normalRaidingPrestige
     else
-        AutoPerks.prestiges = Math.ceil(autoTrimpSettings.APValueBoxes.maxPrestigeZ/10) * 2; //user entered prestige zone
+        AutoPerks.prestiges = Math.max(normalRaidingPrestige, userInputPrestige);
     
     var prestigeMod = (AutoPerks.prestiges - 3) * 0.85 + 2;
     AutoPerks.gearCost = baseCost * Math.pow(1.069, prestigeMod * 53 + 1) * AutoPerks.DailyEquipmentMult * (AutoPerks.ChallengeName == "Obliterated" ? 1e12 : 1); //this is the cost of all gear at max prestige level 1
