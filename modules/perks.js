@@ -486,7 +486,7 @@ AutoPerks.spendHelium = function(helium) {
     
     minMaxMi(); //recalculate mi efficiency
     
-    var fluffyGrowth = (game.global.fluffyExp === 0 ? 0 : ((AutoPerks.benefitHolderObj.Fluffy.benefit*100 / game.global.fluffyExp).toFixed(3)));
+    var fluffyGrowth = (game.global.fluffyExp === 0 ? 0 : 100*AutoPerks.benefitHolderObj.Fluffy.benefit / game.global.fluffyExp);
     var heliumMod = AutoPerks.benefitHolderObj.Helium.benefit.toExponential(2);
     var timeText = timeEstimator(false, 0, autoTrimpSettings.APValueBoxes.maxZone, AutoPerks.dailyObj, true);
     
@@ -498,7 +498,7 @@ AutoPerks.spendHelium = function(helium) {
     
     var VMs             = expectedVMsAmount(); //how many VMs we expect to have
     var VMsEffMult      = VMsEfficiencyMult(VMs);
-    var singleVM        = singleVMWorth();
+    var singleVM        = singleVMWorth(autoTrimpSettings.APValueBoxes.maxZone, false, AutoPerks.battleGUMult == 1);
     var heliumFromVMs   = VMs*VMsEffMult*singleVM;
     var totalHelium     = AutoPerks.totalHelium;
     var heliumGrowth    = (heliumFromVMs*1.4*AutoPerks.DailyWeight/totalHelium*100).toFixed(3) + '%'; //1.4 to account for non VM helium. TODO
@@ -506,7 +506,7 @@ AutoPerks.spendHelium = function(helium) {
     
     var spireText = autoTrimpSettings.APValueBoxes.maxZone >= 200 && autoTrimpSettings.APValueBoxes.maxZone % 100 === 0 ? "Spire " : "Zone ";
     var msg2 = spireText + autoTrimpSettings.APValueBoxes.maxZone + " will take approx " + timeText + ". Army Health / Enemy Damage: " + prettify(healthToDamageRatio)+ (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? " Start Fuel: " + AutoPerks.fuelStartZone + " End Fuel: " + AutoPerks.fuelEndZone : "") + " Carp1/2/Coord: " + AutoPerks.getPct().toFixed(2)+"%" + (missingCoords === 0 ? "" : " Missing Coords: " + missingCoords);
-    var msg3 = (AutoPerks.dailyObj === AutoPerks.Squared ? "" : "Helium Growth: " + heliumGrowth + " ") + (fluffyGrowth > 0 ? "Fluffy Growth: " + fluffyGrowth + "%" : "") + (AutoPerks.DGGrowthRun > 0 ? " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)" : "");
+    var msg3 = (AutoPerks.dailyObj === AutoPerks.Squared ? "" : "Helium Growth: " + heliumGrowth + " ") + (fluffyGrowth.toFixed(3) > 0 ? "Fluffy Growth: " + fluffyGrowth.toFixed(3) + "%" : "") + (AutoPerks.DGGrowthRun > 0 ? " DG Growth: " + (AutoPerks.DGGrowthRun*100).toFixed(3) + "% ("+AutoPerks.totalMi + " Mi)" : "");
     var $text = document.getElementById("textAreaAllocate");
     $text.innerHTML += msg2 + '<br>' + msg3;
 };

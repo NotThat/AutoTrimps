@@ -914,7 +914,7 @@ function VMsEfficiencyMult(VMAmount){
     return arr[VMAmount-1];
 }
 
-function singleVMWorth(zoneInput, currentPortal){
+function singleVMWorth(zoneInput, currentPortal, useHeliumGU){
     var zone = typeof zoneInput === 'undefined' ? autoTrimpSettings.APValueBoxes.maxZone : zoneInput;
     //round down last poison zone 
     var cycle = cycleZone(zone);
@@ -928,7 +928,7 @@ function singleVMWorth(zoneInput, currentPortal){
     var c = 2;
     var d = Math.pow(1.005, zone);
     var e = 1;
-    var f = (getMaxBattleGU(zone)-1)/3-0.3+1; //assumes full helium GU after 60% void
+    var f = 1 + (useHeliumGU ? (getMaxBattleGU(zone)-1)/3-0.3 : 0); //assumes full helium GU after 60% void
     var g = 1 + 0.05   * (currentPortal ? game.portal.Looting.level    : AutoPerks.perksByName.Looting.level);
     var h = 1 + 0.0025 * (currentPortal ? game.portal.Looting_II.level : AutoPerks.perksByName.Looting_II.level);
     var spireRowBonus = game.talents.stillRowing.purchased ? 0.03 : 0.02;
