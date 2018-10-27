@@ -23,14 +23,15 @@ function presetObj(header, Helium, Attack, Health, Fluffy, DG, maxZone, amalGoal
 }
 
 AutoPerks.makeDefaultCheckBoxes = function(){
-    return presetCheckObj("default", false, false, false, false);
+    return presetCheckObj("default", false, false, false, false, false);
 }
 
-function presetCheckObj(header, userMaxFuel, userRespecAfterAmal, userMaintainMode, userSaveATSettings){
+function presetCheckObj(header, userMaxFuel, userBattleGU, userMaintainMode, userSharpTrimps, userSaveATSettings){
     if(typeof autoTrimpSettings.APCheckBoxes === 'undefined') autoTrimpSettings.APCheckBoxes = {};
     var preset = {header:header, 
         userMaxFuel:        typeof autoTrimpSettings.APCheckBoxes.userMaxFuel         !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userMaxFuel         : userMaxFuel,
-        userRespecAfterAmal:typeof autoTrimpSettings.APCheckBoxes.userRespecAfterAmal !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userRespecAfterAmal : userRespecAfterAmal,
+        userBattleGU:       typeof autoTrimpSettings.APCheckBoxes.userBattleGU        !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userBattleGU        : userBattleGU, 
+        userSharpTrimps:    typeof autoTrimpSettings.APCheckBoxes.userSharpTrimps     !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userSharpTrimps     : userSharpTrimps, 
         userMaintainMode:   typeof autoTrimpSettings.APCheckBoxes.userMaintainMode    !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userMaintainMode    : userMaintainMode, 
         userSaveATSettings: typeof autoTrimpSettings.APCheckBoxes.userSaveATSettings  !== 'undefined' ? autoTrimpSettings.APCheckBoxes.userSaveATSettings  : userSaveATSettings};
     return preset;
@@ -48,6 +49,7 @@ AutoPerks.createInput = function(name,div, isCheckBox) {
     else input.setAttribute('style', oldstyle);
     input.setAttribute('class', 'perkRatios');
     isCheckBox ? input.setAttribute('onchange', 'AutoPerks.UpdateCustomCheckBox(this.name, this.checked)') : input.setAttribute('onchange', 'AutoPerks.UpdateCustomValueBox(this.name, this.value)');
+    input.setAttribute("onmouseout", 'tooltip("hide")');
     var label = document.createElement("Label");
     label.id = name + 'Label';
     label.innerHTML = name;
@@ -97,19 +99,25 @@ AutoPerks.initializeGUI = function() {
     //check boxes line
     apGUI.$checkBoxesLine3 = document.createElement("DIV");
     apGUI.$checkBoxesLine3.setAttribute('style', 'display: inline-block; text-align: left; width: 100%');
+    
     var checkBoxMaxFuel = AutoPerks.createInput("MaxFuel", apGUI.$checkBoxesLine3, true);
     checkBoxMaxFuel.setAttribute("onmouseover", 'tooltip("Max Fuel", "customText", event, "Force use max fuel, even after Amalgamator goal has been reached.")');
-    var checkBoxRespecAfterAmal = AutoPerks.createInput("RespecAfterAmal", apGUI.$checkBoxesLine3, true);
+    
+    /*var checkBoxRespecAfterAmal = AutoPerks.createInput("RespecAfterAmal", apGUI.$checkBoxesLine3, true);
     checkBoxRespecAfterAmal.setAttribute("onmouseover", 'tooltip("Respec After Reaching Amalgamator Goal", "customText", event, "After reaching Amalgamator goal, will respec to maintain amalgamators by Portal Zone.")');
+    checkBoxRespecAfterAmal.disabled = true;*/
+    
+    var checkBoxBattleGU = AutoPerks.createInput("BattleGU", apGUI.$checkBoxesLine3, true);
+    checkBoxBattleGU.setAttribute("onmouseover", 'tooltip("Use Battle Golden Upgrades", "customText", event, "Will calculate using Battle Golden Upgrades instead of 60% Void + Helium.")');
+    
+    var sharpTrimps = AutoPerks.createInput("SharpTrimps", apGUI.$checkBoxesLine3, true);
+    sharpTrimps.setAttribute("onmouseover", 'tooltip("Calculate Sharp Trimps +50% Damage", "customText", event, "Will calculate using the extra 50% damage from purchasing Sharp Trimps for 25 bones.")');
+    
     var checkBoxMaintainMode = AutoPerks.createInput("MaintainMode", apGUI.$checkBoxesLine3, true);
     checkBoxMaintainMode.setAttribute("onmouseover", 'tooltip("Maintain Amalgamator only", "customText", event, "Check this box if you in the middle of a run and already have Amalgamator Goal and wish to respec to minimum Carp1 / 2 / Coordinated to maintain it until Portal Zone. Assumes fueling until the end of the run.")');
+    
     var checkBoxSaveSettings = AutoPerks.createInput("SaveATSettings", apGUI.$checkBoxesLine3, true);
     checkBoxSaveSettings.setAttribute("onmouseover", 'tooltip("Save Run Settings to AT", "customText", event, "Will save Fuel Start / Fuel End / Disables Fuel until Amalgamator / Start no Buy Coords / Amalgamator Goal to AT settings. Only occurs when the confirm button is pressed.")');
-    var checkBoxArr = [portalZone, amalGoal, amalZone, coordsBehind, checkBoxMaxFuel, checkBoxRespecAfterAmal, checkBoxMaintainMode, checkBoxSaveSettings];
-    for (i in checkBoxArr)
-        checkBoxArr[i].setAttribute("onmouseout", 'tooltip("hide")');
-    
-    checkBoxArr[5].disabled = true;
     
     //create text allocate area
     apGUI.$textArea = document.createElement("DIV");
@@ -155,7 +163,7 @@ AutoPerks.updateBoxesUI = function() {
     for(var i = 0; i < 9; i++) //set ratio boxes values from currently selected preset
         $perkRatioBoxes[i].value = autoTrimpSettings.APValueBoxes[$perkRatioBoxes[i].name];
     
-    for(var i = 9; i < 13; i++) //set ratio boxes values from currently selected preset
+    for(var i = 9; i < 14; i++) //set ratio boxes values from currently selected preset
         $perkRatioBoxes[i].checked = autoTrimpSettings.APCheckBoxes["user"+$perkRatioBoxes[i].name];
 };
 
@@ -244,8 +252,6 @@ AutoPerks.clickAllocate = function() {
         AutoPerks.gearLevels  = 0;
         AutoPerks.compoundingImp = Math.pow(1.003, autoTrimpSettings.APValueBoxes.maxZone * 3 - 1);
         AutoPerks.windMod = 1 + (autoTrimpSettings.APValueBoxes.maxZone >= 241 ? 13 * game.empowerments.Wind.getModifier() * 10 : 0); //13 minimum stacks
-
-        AutoPerks.sharpBonusMult = 1; //AutoPerks.sharpBonusMult = 1.5; //TODO: checkbox this
 
         /* benefitStat captures how much of a stat we have, and what the change will be from increasing a perk.
          * increasing a weight by a factor of 2 means we are willing to spend twice as much helium for the same increase.
@@ -1074,7 +1080,7 @@ AutoPerks.initializePerks = function () {
     //the rest of the perks
     var cunning      = {name: "Cunning",      benefits: [bFluff],            baseCost: 1e11};
     var curious      = {name: "Curious",      benefits: [bFluff],            baseCost: 1e14};
-    var classy       = {name: "Classy",       benefits: [bFluff],            baseCost: 1e17, max:50};
+    var classy       = {name: "Classy",       benefits: [bFluff],            baseCost: 1e17};
     var pheromones   = {name: "Pheromones",   benefits: [bHlth],             baseCost: 3,       popBreedFlag:true};
     var artisanistry = {name: "Artisanistry", benefits: [bHlth, bAtk],       baseCost: 15,      incomeFlag: true};
     var resilience   = {name: "Resilience",   benefits: [bHlth],             baseCost: 100};
@@ -1107,7 +1113,7 @@ AutoPerks.initializePerks = function () {
         AutoPerks.perkHolder[i].getBenefit    = calcBenefits;
         AutoPerks.perkHolder[i].buyLevel      = buyLevel;
         AutoPerks.perkHolder[i].isLocked      = game.portal[AutoPerks.perkHolder[i].name].locked;
-        AutoPerks.perkHolder[i].max           = typeof AutoPerks.perkHolder[i].max === 'undefined' ? Number.MAX_VALUE : AutoPerks.perkHolder[i].max;
+        AutoPerks.perkHolder[i].max           = typeof game.portal[AutoPerks.perkHolder[i].name].max === 'undefined' ? Number.MAX_VALUE : game.portal[AutoPerks.perkHolder[i].name].max;
         AutoPerks.perksByName[AutoPerks.perkHolder[i].name] = AutoPerks.perkHolder[i];
     }
     
@@ -1658,11 +1664,10 @@ AutoPerks.updateDailyMods = function(){
                                     * (AutoPerks.dailyObj.hasOwnProperty("dysfunctional") ? dailyModifiers.dysfunctional.getMult(AutoPerks.dailyObj.dysfunctional.strength) : 1); 
     AutoPerks.DailyEquipmentMult =    (AutoPerks.dailyObj.hasOwnProperty("metallicThumb") ? dailyModifiers.metallicThumb.getMult(AutoPerks.dailyObj.metallicThumb.strength) : 1);
     
-    AutoPerks.battleGUMult = 1;
+    AutoPerks.battleGUMult   = autoTrimpSettings.APCheckBoxes.userBattleGU || AutoPerks.dailyObj == AutoPerks.Squared ? getMaxBattleGU(autoTrimpSettings.APValueBoxes.maxZone) : 1; //we force battle GU in C2 mode
+    AutoPerks.sharpBonusMult = autoTrimpSettings.APCheckBoxes.userSharpTrimps ? 1.5 : 1;
     AutoPerks.DailyWeight = 1;
-    if(AutoPerks.dailyObj === AutoPerks.Squared)
-        AutoPerks.battleGUMult = getMaxBattleGU(autoTrimpSettings.APValueBoxes.maxZone);
-    else if(AutoPerks.dailyObj != "" && AutoPerks.dailyObj != AutoPerks.Squared)
+    if(AutoPerks.dailyObj != "" && AutoPerks.dailyObj != AutoPerks.Squared)
         AutoPerks.DailyWeight = 1 + (portalWindowOpen ? getDailyHeliumValue(countDailyWeight(getDailyChallenge(readingDaily, true)))/100 : getDailyHeliumValue(countDailyWeight())/100);    
 };
 
