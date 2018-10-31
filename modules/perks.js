@@ -103,7 +103,7 @@ AutoPerks.initializeGUI = function() {
     coordsBehind.setAttribute("onmouseover", 'tooltip("Coordinations Behind", "customText", event, "How many unspent Coordination upgrades will you have at your Amalgamator Zone. Pick an amount that doesnt slow you down.")');
     
     var maxPrestigeZ = AutoPerks.createInput("maxPrestigeZ",apGUI.$ratiosLine2);
-    maxPrestigeZ.setAttribute("onmouseover", 'tooltip("Maximum Prestige Zone", "customText", event, "The highest zone that youve raided for gear. If 0, will use the same logic as Aggressive mode with max raid levels of 10. Use this if you plan on BW Raiding. For example, if your max zone is 600 and you raid bw 620, enter 620. Assumes input values of xx0 or xx5 (so no partial prestiges).")');    
+    maxPrestigeZ.setAttribute("onmouseover", 'tooltip("Maximum Prestige Zone", "customText", event, "If you plan on running Bionic Warfare, put the highest level BW map you intend to raid here. Otherwise leave at 0.")');    
     
     //check boxes line
     apGUI.$checkBoxesLine3 = document.createElement("DIV");
@@ -259,6 +259,7 @@ AutoPerks.clickAllocate = function() {
         AutoPerks.gearLevels  = 1;
         AutoPerks.breedMult   = 1;
         AutoPerks.gearLevels  = 0;
+        AutoPerks.magmamancers = 31500;
         AutoPerks.compoundingImp = Math.pow(1.003, autoTrimpSettings.APValueBoxes.maxZone * 3 - 1);
         AutoPerks.windMod = 1 + (autoTrimpSettings.APValueBoxes.maxZone >= 241 ? 13 * game.empowerments.Wind.getModifier() * 10 : 0); //13 minimum stacks
 
@@ -389,7 +390,7 @@ AutoPerks.spendHelium = function(helium) {
     
     //iterate and find highest efficiency perk
     var effQueue;
-    function iterateArr(){
+    function iterateArr(roundTwo){
         calcZeroState();
         effQueue = new PriorityQueue(function(a,b) { return a.efficiency > b.efficiency; } ); // Queue that keeps most efficient purchase at the top
         
@@ -405,6 +406,8 @@ AutoPerks.spendHelium = function(helium) {
             AutoPerks.workPerks[i].efficiency = AutoPerks.workPerks[i].getBenefit()/price;
             if(AutoPerks.workPerks[i].efficiency < 0)
                 throw AutoPerks.workPerks[i].name + " " + AutoPerks.workPerks[i].level + " efficiency is negative " + prettify(AutoPerks.workPerks[i].efficiency);
+            
+            if(roundTwo && AutoPerks.workPerks[i].efficiency === 0) continue; //in round 1 we keep 0 efficiency in array because other perks might increase this efficiency above 0. round 2 is finishing touchups so it won't happen anymore.
             
             effQueue.add(AutoPerks.workPerks[i]);
         }
@@ -459,7 +462,7 @@ AutoPerks.spendHelium = function(helium) {
     var loopT2 = 0;
     //Repeat the process for spending round 2.
     var pct = 0.01; //when a T2 perk is most efficient, buy as many as we can afford with helium * pct of our total helium (min 1 level)
-    while (mostEff = iterateArr()){
+    while (mostEff = iterateArr(true)){
         if(mostEff.isT2){
             var extraLevels = Math.max(1,mostEff.getBulkAmountT2(helium * pct)); //returns how many additional levels of this perk we can afford with helium.;
             var newCost = mostEff.getTotalPrice(mostEff.level + extraLevels);
@@ -881,7 +884,9 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
     var cycleModifier = 0;
     var cycle = autoTrimpSettings.APValueBoxes.maxZone >= 236 ? cycleZone(autoTrimpSettings.APValueBoxes.maxZone) : -1;
     if(cycle <= 4 || (cycle >= 15 && cycle <= 24)) cycleModifier = 2;
-    var normalRaidingPrestige = Math.floor((autoTrimpSettings.APValueBoxes.maxZone-1)/10) * 2 + 2 + cycleModifier; //roundup to next xx5 zone for prestige, anticipating praid cycles
+    var normalRaidingPrestige = autoTrimpSettings.APValueBoxes.maxZone >= 236 ? 
+                                Math.floor((autoTrimpSettings.APValueBoxes.maxZone-1)/10) * 2 + 2 + cycleModifier : //roundup to next xx5 zone for prestige, anticipating praid cycles
+                                Math.ceil(autoTrimpSettings.APValueBoxes.maxPrestigeZ/10) * 2; //do not use praid logic below zone 236
     var userInputPrestige     = Math.ceil(autoTrimpSettings.APValueBoxes.maxPrestigeZ/10) * 2; //user entered prestige zone
     if(autoTrimpSettings.APValueBoxes.maxPrestigeZ <= 0)
         AutoPerks.prestiges = normalRaidingPrestige

@@ -194,7 +194,6 @@ function buyBuildings() {
     if(game.global.spireActive && !isActiveSpireAT() && getPageSetting('NurseriesSurvive')){
         var howMany = calcCurrSendHealth(true, true, false, game.global.world);
         if(howMany > 0){
-            debug(howMany);
             safeBuyBuilding('Nursery');
             postBuy2(oldBuy);
             return;

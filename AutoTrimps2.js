@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "46.4";
-var verDate = "27.10.18";
+var ver = "46.5";
+var verDate = "31.10.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -478,6 +478,12 @@ function oncePerZoneCode(){
     setTitle(); //Set the browser title
     buildWorldArray();
     setEmptyStats(); //also clears graph data
+
+    maxAnti = game.talents.patience.purchased ? 45 : 30;
+    if(game.global.mapsActive) currMap = getCurrentMapObject();
+    attacksPerSecondAT = calcAttacksPerSecond();
+    expectedPortalZone = autoTrimpSettings.AutoPortal.selected !== "Custom" ? 0 : getPageSetting('CustomAutoPortal') + (game.global.challengeActive == "Daily" ? getPageSetting('AutoFinishDailyNew') : 0);
+    bsZone = (0.5*game.talents.blacksmith.purchased + 0.25*game.talents.blacksmith2.purchased + 0.15*game.talents.blacksmith3.purchased)*(game.global.highestLevelCleared + 1);    
     
     calcBaseDamageinB();
 }

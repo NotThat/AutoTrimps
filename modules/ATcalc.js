@@ -712,7 +712,8 @@ function timeEstimator(currentGame, fromCell, zone, dailyObj, toText){
                 sugarRemoved = true;
             }
             if(magmamancerStacks > 12) break;
-            magmaDmgMult = getBonusPercentAT(false, magmamancerStacks++);
+            magmaDmgMult = zone >= 230 ? getBonusPercentAT(false, magmamancerStacks) : 1;
+            magmamancerStacks++;
             damageDone += 600 * dmgToUse * magmaDmgMult;
             time += 600;
         } while(damageDone < totalHP);
@@ -746,7 +747,7 @@ function getBonusPercentAT(justStacks, forceTime, count){
     var boostMax = 3;
     var expInc = 1.2;
     var timeOnZone;
-    var howMany = typeof count === 'undefined' ? 31500 : count; //TODO: calculate actual magmamancers count based on gems
+    var howMany = typeof count === 'undefined' ? AutoPerks.magmamancers : count; //TODO: calculate actual magmamancers count based on gems
     if (typeof forceTime === 'undefined'){
         var timeOnZone = getGameTime() - game.global.zoneStarted;
         if (game.talents.magmamancer.purchased) timeOnZone += 300000;
@@ -755,7 +756,7 @@ function getBonusPercentAT(justStacks, forceTime, count){
         if (timeOnZone > 12) timeOnZone = 12;
         else if (timeOnZone <= 0) return 1;
     }
-    else timeOnZone = forceTime;
+    else timeOnZone = Math.min(12,forceTime);
     if (justStacks) return timeOnZone;
     return 1 + ((((1 - Math.pow(boostMult, howMany)) * boostMax)) * (Math.pow(expInc, timeOnZone) - 1));
 }
