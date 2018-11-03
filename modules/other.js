@@ -225,7 +225,7 @@ function dropsAtZone(itemName, nextLevel){
 
 function fightManualAT(){
     //run a check to see how much health we'll have if we attack now, and compare it to enemy health. if its not looking good only fight when we have full pop.
-    if(game.resources.trimps.owned/trimpsRealMax < 1){
+    if(game.resources.trimps.owned/trimpsRealMax < 1 && game.global.challengeActive != "Trapper"){
         var nextArmyHealth = calcCurrSendHealth(true, false, false, game.global.world);
         var enemyDamage    = currEnemyDamage();
         

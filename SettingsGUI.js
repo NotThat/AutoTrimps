@@ -374,6 +374,7 @@ function initializeAllSettings() {
     createSetting('BWraidingmin', 'BWRaid Start', 'Starting this zone, BWRaid becomes a possibility. BW Raiding always takes place at the last Poison zone.', 'value', 999, null, 'Maps');
     createSetting('BWraidingmaxLevel', 'BWRaid Max Extra', 'The maximum level difference between world zone and BW map level.', 'value', 20, null, 'Maps');
     createSetting('BWraidingmax', 'BWRaid Cap', 'The highest level BW map to raid.', 'value', 999, null, 'Maps');
+    createSetting('MoreFarming', 'More Farming', 'Will attempt to run 1 LMC, 1 LSW, and 1 LWW maps each zone. Used to min-max pre-zone 230 for the 3 big C2s (obliterated, coordinate, trimp).', 'boolean', false, null, 'Maps');
 
 //Spire
     //Line 1

@@ -3,7 +3,7 @@ var theScientistRatio2 = 10;       //used for lowlevel and Watch challenge
 var tierMagmamancers = 0;
 
 function getFreeWorkers(){
-    return (game.global.challengeActive !== "Trapper" ? Math.ceil(trimpsRealMax / 2) : game.resources.trimps.owned-game.resources.trimps.getCurrentSend()) - game.resources.trimps.employed;
+    return (game.global.challengeActive !== "Trapper" ? Math.ceil(trimpsRealMax / 2) : game.resources.trimps.owned - 1.001*game.resources.trimps.getCurrentSend()) - game.resources.trimps.employed;
 }
 
 function safeBuyJob(jobTitle, amount){
@@ -22,7 +22,7 @@ function safeBuyJob(jobTitle, amount){
         game.global.firing = false;
         game.global.buyAmt = amount;
         //if can afford, buy what we wanted,
-        result = canAffordJob(jobTitle, false) && getFreeWorkers() > 0;
+        result = canAffordJob(jobTitle, false) && (getFreeWorkers() > 0 || (trimpsRealMax == trimpsRealMax - amount && jobTitle == "Explorer")); //fix for large number rounding errors
         if (!result) {
             game.global.buyAmt = 'Max';
             game.global.maxSplit = 1;
@@ -81,6 +81,12 @@ function buyJobs() {
     var farmerRatio     = parseInt(getPageSetting('FarmerRatio'));
     var lumberjackRatio = game.jobs.Lumberjack.locked !== 0 ? 0 : parseInt(getPageSetting('LumberjackRatio'));
     var minerRatio      = (game.jobs.Miner.locked !== 0 || game.global.challengeActive === 'Metal') ? 0 : parseInt(getPageSetting('MinerRatio'));
+    
+    if(game.global.mapsActive){ //want to shift workers in cache maps
+        if(currMap.bonus == "lmc") minerRatio *= 1e12;
+        if(currMap.bonus == "lwc") lumberjackRatio *= 1e12;
+        if(currMap.bonus == "lsc") farmerRatio *= 1e12;
+    }
     
     var totalRatio = farmerRatio + lumberjackRatio + minerRatio;
     var scientistRatio = totalRatio / theScientistRatio;
@@ -154,10 +160,12 @@ function buyJobs() {
             subtract = checkFireandHire('Trainer');
     }
     //Explorers:
-    if (getPageSetting('MaxExplorers') > game.jobs.Explorer.owned || getPageSetting('MaxExplorers') == -1) {
+    if (getPageSetting('MaxExplorers') > game.jobs.Explorer.owned){
         subtract = checkFireandHire('Explorer');
     }
-
+    else if (getPageSetting('MaxExplorers') == -1){
+        subtract = checkFireandHire('Explorer', calculateMaxAfford(game.jobs["Explorer"], false, false, true));
+    }
  
     ratiobuy('Farmer', farmerRatio, totalRatio, subtract);
     if (!ratiobuy('Miner', minerRatio, totalRatio, subtract) && breedFire && game.global.turkimpTimer === 0)
@@ -213,7 +221,6 @@ function buyJobs() {
     }
 }
 
-//used multiple times below: (good job javascript for allowing functions in functions)
 function checkFireandHire(job,amount) {
     var amt = typeof amount === 'undefined' ? 1 : amount;
     var subtract = 0;

@@ -884,7 +884,7 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
     var cycleModifier = 0;
     var cycle = autoTrimpSettings.APValueBoxes.maxZone >= 236 ? cycleZone(autoTrimpSettings.APValueBoxes.maxZone) : -1;
     if(cycle <= 4 || (cycle >= 15 && cycle <= 24)) cycleModifier = 2;
-    var normalRaidingPrestige = autoTrimpSettings.APValueBoxes.maxZone >= 236 ? 
+    var normalRaidingPrestige = (autoTrimpSettings.APValueBoxes.maxZone >= 236 && AutoPerks.ChallengeName != "Trimp") ? //trimp challenge we raid from 236 to max
                                 Math.floor((autoTrimpSettings.APValueBoxes.maxZone-1)/10) * 2 + 2 + cycleModifier : //roundup to next xx5 zone for prestige, anticipating praid cycles
                                 Math.ceil(autoTrimpSettings.APValueBoxes.maxPrestigeZ/10) * 2; //do not use praid logic below zone 236
     var userInputPrestige     = Math.ceil(autoTrimpSettings.APValueBoxes.maxPrestigeZ/10) * 2; //user entered prestige zone
@@ -946,7 +946,8 @@ function calcCacheReward(){
     var looting1        = AutoPerks.useLivePerks ? game.portal["Looting"] : AutoPerks.perksByName.Looting;
     var looting2        = AutoPerks.useLivePerks ? game.portal["Looting_II"] : AutoPerks.perksByName.Looting_II;
     
-    var amt = AutoPerks.basePopToUse * popMultiplier() / 2 * getJobModifierAT() * 20; //game.jobs["Miner"].modifier;
+    var pop = (AutoPerks.ChallengeName == "Trapper" && !portalWindowOpen) ? game.jobs.Miner.owned : (AutoPerks.basePopToUse * popMultiplier() / 2); //in trapper, our current population is fixed (minus some losses to armies)
+    var amt = pop * getJobModifierAT() * 20; //game.jobs["Miner"].modifier;
     amt *= AutoPerks.windMod;
     amt = calcHeirloomBonus("Staff", "MinerSpeed", amt);
 
@@ -1027,7 +1028,12 @@ function calcPopBreed(toRet){
     var gatheredResources = lumberjacks * lumberjackEff * AutoPerks.DailyResourceMult;
     AutoPerks.lootedResources = calcLootedResources() * AutoPerks.DailyResourceMult;
     var nurseries = calculateMaxNurseries(AutoPerks.lootedResources + gatheredResources) / (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 5 : 1); //use all nurseries below 230
-
+    
+    if(AutoPerks.ChallengeName == "Trapper"){
+        AutoPerks.breedMult = 1;
+        AutoPerks.maxNurseries = 1;
+        return 1;
+    }
     if(autoTrimpSettings.APValueBoxes.maxZone < 70){
         AutoPerks.breedMult = 1;
         AutoPerks.maxNurseries = nurseries;
@@ -1319,6 +1325,15 @@ function calcCoords(coordinated, coordinations){
     //if(AutoPerks.calcCoordsLastLevel === level && AutoPerks.calcCoordsLastCoords === coordsToUse && AutoPerks.calcCoordsCoordsPurchased === coordsToUse && population >= 3*AutoPerks.calcCoordsLastArmy)
     //    return AutoPerks.calcCoordsLastArmy;
     AutoPerks.fullSoldiers = 1;
+    
+    if(AutoPerks.ChallengeName == "Trimp"){
+        AutoPerks.calcCoordsCoordsPurchased = 0;
+        AutoPerks.calcCoordsLastLevel  = level;
+        AutoPerks.calcCoordsLastCoords = coordsToUse;
+        AutoPerks.calcCoordsLastArmy   = 1;
+        return 1;
+    }
+    
     var coordMult = 1 + 0.25 * Math.pow(0.98, level);
     for(var i = 0; i < coordsToUse; i++){
         var tmp = Math.ceil(armySize * coordMult);
@@ -1560,7 +1575,7 @@ AutoPerks.initializeAmalg = function(){
                 break;
             //if coordinated level costs less than double carp level, buy coord TODO: use exact efficiency increase
             var price2 = coordperk.getPrice();
-            if(price2 < 2*price){
+            if(price2 < 2*price && AutoPerks.ChallengeName != "Trimp"){ //but not in trimp challenge
                 coordperk.buyLevel();
                 coordperk.spent+= price2;
                 pct = AutoPerks.getPct();

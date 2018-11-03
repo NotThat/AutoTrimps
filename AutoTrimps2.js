@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "46.5";
-var verDate = "31.10.18";
+var ver = "47";
+var verDate = "3.11.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -40,7 +40,7 @@ function startAT() {
     }
     
     //wait until all the scripts are loaded into page
-    if(loadedScriptAmount !== expectedScriptAmount || !window.jQuery){ //jquery is a dependacy of jquery-ui, so check for it specifically here
+    if(loadedScriptAmount !== expectedScriptAmount || typeof jQuery === 'undefined'){ //jquery is a dependacy of jquery-ui, so check for it specifically here
         setTimeout(startAT, 100);
         return;
     }
@@ -122,7 +122,7 @@ function startAT() {
                 setPageSetting('FuelUntilAmal',     false); //fuel until amalgamator
             }
             
-            if(!portalWindowOpen && game.jobs["Miner"].owned > 0){ //respeccing mid-run - fire all miners
+            if(!portalWindowOpen && getPageSetting('BuyJobsNew')){ //respeccing mid-run - fire all miners
                 var wasPaused = false;
                 if (game.options.menu.pauseGame.enabled){ //cant fire while paused
                     wasPaused = true;
@@ -130,8 +130,18 @@ function startAT() {
                 }
                 var old = preBuy2();
                 game.global.firing = true;
-                game.global.buyAmt = game.jobs["Miner"].owned;
-                buyJob("Miner", true, true);
+                if(game.jobs["Miner"].owned > 0){
+                    game.global.buyAmt = game.jobs["Miner"].owned;
+                    buyJob("Miner", true, true);
+                }
+                if(game.jobs["Farmer"].owned > 0){
+                    game.global.buyAmt = game.jobs["Farmer"].owned;
+                    buyJob("Farmer", true, true);
+                }
+                if(game.jobs["Lumberjack"].owned > 0){
+                    game.global.buyAmt = game.jobs["Lumberjack"].owned;
+                    buyJob("Lumberjack", true, true);
+                }
                 postBuy2(old);
                 if(wasPaused) 
                     toggleSetting('pauseGame');
@@ -454,6 +464,11 @@ function oncePerZoneCode(){
             cancelTooltip();
     }
     if (getPageSetting('AutoEggs')) easterEggClicked();
+    
+    //used for farming mode
+    LMCDone = false;
+    LWCDone = false;
+    LSCDone = false;
 
     oblitMultAT = game.global.challengeActive == "Obliterated" ? calcOblitMult(game.global.world) : 1;
     coordMultAT = game.global.challengeActive == "Coordinate" ? calcCoordMult(game.global.world) : 1;
@@ -480,7 +495,14 @@ function oncePerZoneCode(){
     setEmptyStats(); //also clears graph data
 
     maxAnti = game.talents.patience.purchased ? 45 : 30;
-    if(game.global.mapsActive) currMap = getCurrentMapObject();
+    
+    if(game.global.mapsActive){
+        currMap = getCurrentMapObject();
+        if(currMap.bonus == "lmc") LMCDone = true;
+        if(currMap.bonus == "lwc") LWCDone = true;
+        if(currMap.bonus == "lsc") LSCDone = true;
+    }
+    
     attacksPerSecondAT = calcAttacksPerSecond();
     expectedPortalZone = autoTrimpSettings.AutoPortal.selected !== "Custom" ? 0 : getPageSetting('CustomAutoPortal') + (game.global.challengeActive == "Daily" ? getPageSetting('AutoFinishDailyNew') : 0);
     bsZone = (0.5*game.talents.blacksmith.purchased + 0.25*game.talents.blacksmith2.purchased + 0.15*game.talents.blacksmith3.purchased)*(game.global.highestLevelCleared + 1);    

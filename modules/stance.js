@@ -184,7 +184,7 @@ function autoStance(){
     if(game.global.mapsActive)
         return;
     
-    if(game.global.world >= getPageSetting('NoCoordBuyStartZ') && game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg')){ //we're expecting an amalg, so check if we can get it by trimpiciding
+    if(game.global.world >= getPageSetting('NoCoordBuyStartZ') && game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg') && game.global.challengeActive != "Trapper"){ //we're expecting an amalg, so check if we can get it by trimpiciding
         var popArmyRatio = trimpsRealMax/game.resources.trimps.getCurrentSend();
         var spiresBeaten = Math.floor((game.global.spireRows-10) / 10);
         var needed = 1e10 / Math.pow(10, spiresBeaten);

@@ -137,7 +137,9 @@ function buyGemEfficientHousing(){
             
             if (getPageSetting('WarpstationCap') && bestBuilding == "Warpstation"){
                 //Warpstation Cap - if we are past the basewarp+deltagiga level, "cap" and just wait for next giga.
-                if (game.buildings.Warpstation.owned >= (Math.floor(game.upgrades.Gigastation.done * getPageSetting('DeltaGigastation')) + getPageSetting('FirstGigastation')))
+                if ((game.buildings.Warpstation.owned >= (Math.floor(game.upgrades.Gigastation.done * getPageSetting('DeltaGigastation')) + getPageSetting('FirstGigastation')))
+                    && (!getPageSetting('MoreFarming') || game.global.world >= 230) //if morefarming mode is enabled, always buy warpstations below zone 230
+                    ) 
                     continue;
             }
             //WarpStation Wall:

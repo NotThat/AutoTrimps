@@ -39,6 +39,10 @@ var AutoMapsCoordOverride = false;
 var PRaidingActive = false; //used for coordination purchase during praids
 var enoughDamage = true;
 
+var LMCDone = false;
+var LSCDone = false;
+var LWCDone = false;
+
 var prestigeState = 0;
 
 var status = "";
@@ -57,7 +61,7 @@ function calcDmg(){
         if(BWRaidNowLogic()){ //bwraid, buy all
             getDamageCaller(cell.health*8*9999, false, true);
         }
-        else if(game.global.world % 100 === 0){ //mapping for prestige in spire4 without spire stacking. we probably want all the damage.
+        else if(game.global.spireActive){ //mapping for prestige in spire4 without spire stacking. we probably want all the damage.
             var requiredDmgToOK = dmgNeededToOKHelper(80, worldArray[80].maxHealth);
             getDamageCaller(requiredDmgToOK*3, false, true);
         }
@@ -220,6 +224,9 @@ function autoMap() {
     spireMapBonusFarming = getPageSetting('MaxStacksForSpire') && isActiveSpireAT() && game.global.mapBonus < 10;
     if (preSpireFarming || spireMapBonusFarming || stackSpireGetMinDamage)
         shouldDoMaps = true;
+    
+    if(getPageSetting('MoreFarming') && (!LMCDone || !LSCDone || !LWCDone))
+        shouldDoMaps = true;
 
     //Allow automaps to work with in-game Map at Zone option:
     vanillaMapatZone = (game.options.menu.mapAtZone.enabled && game.global.canMapAtZone && !isActiveSpireAT());
@@ -261,23 +268,46 @@ function autoMap() {
     
     //if we dont need the resources and arent in wind zones, always farm lowest map that gives map bonus
     var preferFAMaps = false;
-    if(game.equipment["Dagger"].level > 100 && game.equipment["Greatsword"].level > 100 && !windZone())
+    
+    if(game.equipment["Dagger"].level > 100 && game.equipment["Greatsword"].level > 100 && !windZone() && (!getPageSetting('MoreFarming') || (LMCDone && LSCDone && LWCDone)))
         preferFAMaps = true;
+    
+    if(game.talents.hyperspeed2.purchased && game.global.world <= Math.floor((game.global.highestLevelCleared+1)/2))
+        preferFAMaps = false; //FA and hyper2 do not stack. if hyper2 is active no reason to use fa
     
     var obj = {};
     var siphonMap = -1;
-    for (var map in game.global.mapsOwnedArray) {
-        if (!game.global.mapsOwnedArray[map].noRecycle) { //not a unique map
+    for (var map in game.global.mapsOwnedArray){
+        if (!game.global.mapsOwnedArray[map].noRecycle){ //not a unique map
             obj[map] = game.global.mapsOwnedArray[map].level; //find map with correct level
             //Get matching map for our siphonology level
-
-            if (preferFAMaps && game.global.mapsOwnedArray[map].level == siphlvl && (game.global.highestLevelCleared < 185 || game.global.mapsOwnedArray[map].bonus == "fa")){
-                siphonMap = map;
-                break;
+            if(game.global.mapsOwnedArray[map].level != siphlvl) continue;
+            
+            if(game.global.highestLevelCleared < 185){ //havent unlocked lmc maps yet
+                if (game.global.mapsOwnedArray[map].bonus == "fa" && game.global.mapsOwnedArray[map].level == siphlvl){
+                    siphonMap = map;
+                    break;
+                }
             }
-            else if (!preferFAMaps && game.global.mapsOwnedArray[map].level == siphlvl && (game.global.highestLevelCleared < 185 || game.global.mapsOwnedArray[map].bonus == "lmc")){
-                siphonMap = map;
-                break;
+            else{
+                if (preferFAMaps){
+                    if(game.global.mapsOwnedArray[map].bonus == "fa" && game.global.mapsOwnedArray[map].level == siphlvl){
+                        siphonMap = map;
+                        break;
+                    }
+                }
+                else if(getPageSetting('MoreFarming') && (!LMCDone || !LSCDone || !LWCDone) && game.global.mapsOwnedArray[map].level == game.global.world+10){
+                    if( game.global.mapsOwnedArray[map].bonus == "lmc" && !LMCDone ||
+                        game.global.mapsOwnedArray[map].bonus == "lsc" && !LSCDone ||
+                        game.global.mapsOwnedArray[map].bonus == "lwc" && !LWCDone){
+                            siphonMap = map;
+                            break;
+                    }
+                }
+                else if(game.global.mapsOwnedArray[map].bonus == "lmc" && game.global.mapsOwnedArray[map].level == siphlvl){
+                    siphonMap = map;
+                    break;
+                }
             }
         }
     }
@@ -289,7 +319,7 @@ function autoMap() {
     
     //if there are no non-unique maps, there will be nothing in keysSorted, so set to create a map
     var highestMap;
-    if (keysSorted[0])
+    if (keysSorted[0] && !(getPageSetting('MoreFarming') && (!LMCDone || !LSCDone || !LWCDone)))
         highestMap = keysSorted[0];
     else
         selectedMap = "create";
@@ -353,14 +383,14 @@ function autoMap() {
     
     //LEAD EVEN ZONE EXIT
     //don't map on even worlds if on Lead Challenge, except if person wants to void on even
-    if (game.global.challengeActive == 'Lead' && !doVoids && game.global.world % 2 == 0) {
+    /*if (game.global.challengeActive == 'Lead' && !doVoids && game.global.world % 2 == 0) {
         if (game.global.preMapsActive)
             mapsClicked();
         return; //exit
-    }
+    }*/
     
     //this code prevents automaps from killing our army and going into map screen under certain conditions:    
-    if (game.global.soldierHealth > 1000){//if we have an army currently fighting
+    if (game.global.soldierHealth > 1000 && !getPageSetting('MoreFarming')){//if we have an army currently fighting
         if(!doVoids){ //and we dont need to voids
             if(!game.global.mapsActive && !game.global.preMapsActive){ //and we are in the world screen
                 if (game.resources.trimps.owned < trimpsRealMax){ //and we dont have another army ready, then we may as well stay in the world until another army is ready. may not be true for some dailies
@@ -377,20 +407,20 @@ function autoMap() {
 
 
     //MAPS CREATION pt1:
-    if ((shouldDoMaps || doVoids || needPrestige || shouldDoMapsVanillaRepeat) && selectedMap == "world") {
+    if ((shouldDoMaps || doVoids || needPrestige || shouldDoMapsVanillaRepeat) && selectedMap == "world"){
         selectedMap = "create";
         
-        if (preSpireFarming) { //if preSpireFarming x minutes is true, switch over from wood maps to metal maps.
+        if (preSpireFarming){ //if preSpireFarming x minutes is true, switch over from wood maps to metal maps.
             statusMsg = "Spire Farm: ";
             var spiremaplvl = game.talents.mapLoot.purchased ? game.global.world - 1 : game.global.world;
-            if (game.global.mapsActive) {
+            if (game.global.mapsActive){
                 if(currMap.level === spiremaplvl)
                     selectedMap = currMap;
             }
             else if (game.global.mapsOwnedArray[highestMap].level >= spiremaplvl && game.global.mapsOwnedArray[highestMap].location == ((!getPageSetting('PreferMetal') && game.global.decayDone) ? 'Plentiful' : 'Mountain'))
                 selectedMap = game.global.mapsOwnedArray[highestMap];
         }
-        else if (needPrestige) { //if needPrestige, TRY to find current level map as the highest level map we own.
+        else if (needPrestige){ //if needPrestige, TRY to find current level map as the highest level map we own.
             var level = lastPrestigeZone(true);
             for(var i = 0; i < game.global.mapsOwnedArray.length; i++){
                 if (level == game.global.mapsOwnedArray[i].level && !game.global.mapsOwnedArray[i].noRecycle){
@@ -422,7 +452,7 @@ function autoMap() {
     3) in premap screen - create/select a map and run it, or go back to world*/
     
     //#1 in a map, figure out repeat button
-    if (game.global.mapsActive) {
+    if (game.global.mapsActive){
         if(currMap.location == "Void"){
             AutoMapsCoordOverride = true;
             if(doVoids && !game.global.repeatMap)
@@ -463,7 +493,7 @@ function autoMap() {
             if(specials > 0)            statusMsg = "Prestige: " + addSpecialsAT(game.global.world);//specials;
             else if(repeatChoice === 0) statusMsg = "Mapping at z" + game.global.world;
             else if(repeatChoice == 1)  statusMsg = "Map bonus ";
-            while (game.options.menu.repeatUntil.enabled != repeatChoice) { //select the correct repeat until option
+            while (game.options.menu.repeatUntil.enabled != repeatChoice){ //select the correct repeat until option
                 toggleSetting('repeatUntil');
             }
         }
@@ -471,17 +501,17 @@ function autoMap() {
     }
 
     //#2 in the world
-    else if (!game.global.preMapsActive && !game.global.mapsActive) { 
+    else if (!game.global.preMapsActive && !game.global.mapsActive){
         if (selectedMap != "world") //we want to run a map
             mapsClicked(true);
     } 
     
     //#3 in premap screen
-    if (game.global.preMapsActive) {
-        if (selectedMap == "world") {
+    if (game.global.preMapsActive){
+        if (selectedMap == "world"){
             mapsClicked(); //go back to world
         } else {
-            if (selectedMap == "create") {
+            if (selectedMap == "create"){
                 var lvl = (needPrestige ? lastPrestigeZone(true) : siphlvl);
                 var flag;
                 if(needPrestige)
@@ -492,9 +522,32 @@ function autoMap() {
                 }
                 else if(preferFAMaps)
                     flag = decideMapParams(lvl, lvl, "FA", enoughDamage); //cheap or no cheap
+                else if(getPageSetting('MoreFarming') && (!LMCDone || !LSCDone || !LWCDone)){
+                    if (!LSCDone){
+                        flag = decideMapParams(lvl, game.global.world+10, "LSC", false, 0.5);
+                        LSCDone = true;
+                    }
+                    else if(!LMCDone){
+                        flag = decideMapParams(lvl, game.global.world+10, "LMC", false, 0.5);
+                        LMCDone = true;
+                    }
+                    else if (!LWCDone){
+                        flag = decideMapParams(lvl, game.global.world+10, "LWC", false, 0.5);
+                        LWCDone = true;
+                    }
+                    else{
+                        debug("maps MoreFarming error");
+                        return;
+                    }
+                }
+                //LMCDone = false;
+                //LSCDone = false;
+                //LWCDone = false;
+                //(getPageSetting('MoreFarming') && (!LMCDone || !LSCDone || !LWCDone))
                 else
                     flag = decideMapParams(lvl, lvl, "LMC", enoughDamage); //cheap or no cheap
                 
+                if(extraLevels>0) lvl = game.global.world;
                 var flag2 = createAMap(lvl, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
                 if(!flag || !flag2){
                     debug("Can't afford map with parameters. level: " + lvl + " type: " + type, "maps");
@@ -506,12 +559,12 @@ function autoMap() {
                 } 
             }
             if(typeof selectedMap === 'undefined'){
-                debug("maps: selectedMap === 'undefined' error. resuming.");
+                debug("no selected map, exiting.");
                 mapsClicked(true);
                 return;
             }
             selectMap(selectedMap.id);
-            if(!spireMapBonusFarming && stackSpireGetMinDamage){ //equip low shield - enter map, go to premaps. enter map - manual fight - go to premaps - exit to world - manual fight
+            if(!spireMapBonusFarming && stackSpireGetMinDamage){ //enter map, go to premaps. enter map - manual fight - go to premaps - exit to world - manual fight
                 debug("Lowering damage for Spire IV");
                 var deltaGenes = getDeltaGenes(1);
                 if(deltaGenes > 0 && game.global.antiStacks >= 3){ //if we need to fire geneticists
@@ -565,7 +618,7 @@ function autoMap() {
 }
 
 //update the UI with stuff from automaps.
-function updateAutoMapsStatus(get, msg, final) {
+function updateAutoMapsStatus(get, msg, final){
     var minSp = getPageSetting('MinutestoFarmBeforeSpire');
 
     if (msg === "" || msg === undefined || msg.length === 0) 
@@ -573,7 +626,7 @@ function updateAutoMapsStatus(get, msg, final) {
     else
         status = msg+"<br>";
 
-    if (preSpireFarming) {
+    if (preSpireFarming){
         if(getPageSetting('MinutestoFarmBeforeSpire') < 0){ //farm for infinity
             var hours = Math.floor(spireTime / 60).toFixed(2);    
             var mins = Math.floor(spireTime - 60*hours).toFixed(0);
@@ -826,7 +879,7 @@ function BWRaidNowLogic(){
     if(setting === 0)                                                                                        return false; //never
     else if(setting === 1 && !game.global.runningChallengeSquared)                                           return false; //c2 only
     else if(setting === 2 && !game.global.runningChallengeSquared && game.global.challengeActive != "Daily") return false; //c2 + dailies
-    else if(game.global.world < getPageSetting('BWraidingmin') || (game.global.world >= 236 && !(cycleZone() == 4 || cycleZone() == 19))) return false;
+    else if(game.global.world < getPageSetting('BWraidingmin') || (game.global.challengeActive != "Trimp" && game.global.world >= 236 && !(cycleZone() == 4 || cycleZone() == 19))) return false;
     return true;                                                                                                                
 }
 
@@ -898,6 +951,10 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
             document.getElementById('advSpecialSelect').value = "fa"; 
         else if(specialMod == "LMC")
             document.getElementById('advSpecialSelect').value = "lmc"; 
+        else if(specialMod == "LWC")
+            document.getElementById('advSpecialSelect').value = "lwc"; 
+        else if(specialMod == "LSC")
+            document.getElementById('advSpecialSelect').value = "lsc"; 
         else
             document.getElementById('advSpecialSelect').value = "0";
         document.getElementById("lootAdvMapsRange").value = lootSlider;
@@ -924,8 +981,7 @@ function createAMap(baseLevel, type, extraLevels, specialMod, lootSlider, diffSl
             return true;
         }
         else{
-            debug("Failed to prestige raid. We can't afford the map.");
-            debug("Expected map level " + (game.global.world+extraLevels) + " is " + prettify(updateMapCost(true)) + " and we have " + prettify(game.resources.fragments.owned) + " frags.");
+            debug("Can't afford map. Map level: " + (game.global.world+extraLevels) + ", " + prettify(game.resources.fragments.owned) + " / " + prettify(updateMapCost(true)) + " frags.");
             return false;
         }
     }
@@ -984,7 +1040,8 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
     }
 
     var fragments = game.resources.fragments.owned * (fragCap === undefined ? 1 : fragCap);
-    if(special == "LMC")
+    var backupSpecial = special;
+    if(special == "LMC" || special == "LWC" || special == "LSC") //shoe-horning lwc and lsc maps to fit lmc logic. they cost the same so store in backup and restore later
         specialModLast = "LMC";
     
     //order of importance for prestigious maps (prestige mode):
@@ -1065,7 +1122,8 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
     
     }
     
-    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
+    if(specialMod == "LMC") specialMod = backupSpecial;
+    cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type); //this last calcMapCost call also sets the special map type (lmc/lwc/lsc) to the correct type
     
     if(cheap && cost > fragments * 0.01){
         lootSlider = 0;
@@ -1229,7 +1287,7 @@ function calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, 
     baseCost = baseCost * (baseLevel >= 60 ? 0.74 : 1);
     if(specialMod == "Prestigious")
         baseCost += 10;
-    else if(specialMod == "LMC")
+    else if(specialMod == "LMC" || specialMod == "LWC" || specialMod == "LSC")
         baseCost += 18;
     else if(specialMod == "FA")
         baseCost += 7;
