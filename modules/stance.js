@@ -168,8 +168,6 @@ function autoStance(){
     allowBuyingCoords = !getPageSetting('DelayCoordsForWind'); //dont buy coords unless we explicitly permit it. automaps() can also allow it if player runs a map for ratio.
 
     if (game.global.soldierHealth <= 0){ 
-        if(!game.global.mapsActive)
-            goDefaultStance(); //D if we have it, X otherwise
         if (game.global.challengeActive == "Trapper" || (game.global.breedBack <= 0 && (hiddenBreedTimer > wantedAnticipation || typeof game.global.dailyChallenge.empower === 'undefined')) || (DHratio > easyRatioThreshold && !stackSpire)){
             if(typeof game.global.dailyChallenge.bogged !== 'undefined' && DHratio > 10 && !stackSpire){ //bogged is special because death occurs all the time
                 wantGoodShield = false;
