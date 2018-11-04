@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "47.2";
+var ver = "47.3";
 var verDate = "4.11.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -59,6 +59,7 @@ function startAT() {
     equipMainShield();
     
     if(game.global.mapsActive) currMap = getCurrentMapObject();
+    trimpsRealMax = game.resources.trimps.realMax();
     
     oncePerZoneCode();
     
@@ -283,7 +284,7 @@ var allowBuyingCoords = true;
 var lastCell = -1;
 var bsZone;
 var holdingBack = false;
-var trimpsRealMax = game.resources.trimps.realMax();
+var trimpsRealMax;
 var PRaidStartZone = 999;
 
 var highCritChance;
@@ -372,7 +373,7 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
     }
     ATmakeUp = makeUp;
     
-    trimpsRealMax = game.resources.trimps.realMax();     
+    trimpsRealMax = game.resources.trimps.realMax();
     
     hiddenBreedTimer = game.jobs.Amalgamator.owned > 0 ? Math.floor((getGameTime() - game.global.lastSoldierSentAt) / 1000) : Math.floor(game.global.lastBreedTime / 1000);
     if(hiddenBreedTimer != hiddenBreedTimerLast && typeof addbreedTimerInsideText !== 'undefined'){
