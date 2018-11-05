@@ -347,7 +347,7 @@ AutoPerks.clickAllocate = function() {
     catch(err){
         debug("AutoPerks Critical Error: " + err);
         var $text = document.getElementById("textAreaAllocate");
-        $text.innerHTML += 'Error: ' + err + '<br>' + '<a href="https://discord.gg/79hDRT" target="_blank">Report it on the Trimps Discord</a>';
+        $text.innerHTML += 'Error: ' + err + '<br>' + '<a href="https://discord.gg/W2Ajv4j" target="_blank">Report it on the Trimps Discord</a>';
     }
     finally{
         //numTab(1, true); //refresh all helium displays. without this at the very least Helium Left Over would show wrong until user manually adds/removes a level to something
@@ -1050,7 +1050,7 @@ function calcPopBreed(toRet){
                 * AutoPerks.DailyBreedingMult; //toxic daily modifier
     
     var desiredAmalMult = (armySize / (AutoPerks.AntiStacks === 0 ? 1 : AutoPerks.AntiStacks)) / breed;
-    var geneticists = Math.floor(Math.log(desiredAmalMult) / Math.log(0.98));
+    var geneticists = Math.log(desiredAmalMult) / Math.log(0.98);
     var genHealthBonus = Math.pow(1.01, geneticists);
     breed = genHealthBonus;
     if(toRet === 3){ //also save

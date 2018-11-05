@@ -101,7 +101,7 @@ function autoStance(){
         mapsClicked(true);
         calcBaseDamageinB();
         trimpicides++;
-        debug("Negative damage error! You should probably let somebody know at https://discord.gg/sf88fD " + wrongDamage.toExponential(2));
+        debug("Negative damage error! You should probably let somebody know at https://discord.gg/W2Ajv4j " + wrongDamage.toExponential(2));
         debug("Trimpiciding to set things straight.");
         return; 
     }

@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "47.4";
+var ver = "47.5";
 var verDate = "5.11.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -222,7 +222,7 @@ function printChangelog() {
     }
     var footer =
         '<b>Ongoing Development</b> - <u>Report any bugs/problems please</u>!\
-        <br>Talk with the dev: <b>Meowchan_#0720</b> @ <a target="#" href="https://discord.gg/0VbWe0dxB9kIfV2C">AutoTrimps Discord Channel</a>'
+        <br>Talk with the dev: <b>Meowchan_#0720</b> @ <a target="#" href="https://discord.gg/W2Ajv4j">AutoTrimps Discord Channel</a>'
     ,   action = 'cancelTooltip()'
     ,   title = "AutoTrimps - Meowchan's Fork<br>" + "v" + ver + " " + verDate
     ,   acceptBtnText = "Thank you for playing AutoTrimps!"
