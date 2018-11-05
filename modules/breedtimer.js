@@ -185,11 +185,10 @@ function handleGA(currentGame, dailyObj){
     if(((currentGame && isActiveSpireAT()) || (!currentGame && zone >= 200 && zone % 100 === 0)) && getPageSetting('GASettingSpire') > 0) //spire manual input
         GATimer = getPageSetting('GASettingSpire');
 
-    if(getPageSetting('GASetting') && currentGame && game.global.Geneticistassist && GATimer > 0 && game.global.Geneticistassist)
+    if(currentGame && game.global.Geneticistassist && GATimer > 0){
         game.global.GeneticistassistSteps = [-1, 0.5, 0.6, GATimer];
-
-    if(getPageSetting('GASetting') && currentGame)
         switchOnGA(); //under normal uses getTargetAntiStack should turn autoGA back on, but if loading from a save it could stay off
+    }
     
     return GATimer;
 }

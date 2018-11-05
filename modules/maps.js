@@ -42,6 +42,8 @@ var enoughDamage = true;
 var LMCDone = false;
 var LSCDone = false;
 var LWCDone = false;
+var LWCDoneAmount = 0;
+var LWCLastCell = -1;
 
 var prestigeState = 0;
 
@@ -225,8 +227,17 @@ function autoMap() {
     if (preSpireFarming || spireMapBonusFarming || stackSpireGetMinDamage)
         shouldDoMaps = true;
     
-    if(getPageSetting('MoreFarming') && (!LMCDone || !LSCDone || !LWCDone))
+    var moreFarmingFlag = false;
+    if(getPageSetting('MoreFarming') && (!LMCDone || !LSCDone || !LWCDone)){
         shouldDoMaps = true;
+        moreFarmingFlag = true;
+    }
+    
+    var SpireLWCFlag = false;
+    if(isActiveSpireAT() && getPageSetting('SpireLWCAmount') !== 0 && (LWCDoneAmount < getPageSetting('SpireLWCAmount') || getPageSetting('SpireLWCAmount') < 0)){
+        shouldDoMaps = true;
+        SpireLWCFlag = true;
+    }
 
     //Allow automaps to work with in-game Map at Zone option:
     vanillaMapatZone = (game.options.menu.mapAtZone.enabled && game.global.canMapAtZone && !isActiveSpireAT());
@@ -269,8 +280,11 @@ function autoMap() {
     //if we dont need the resources and arent in wind zones, always farm lowest map that gives map bonus
     var preferFAMaps = false;
     
-    if(game.equipment["Dagger"].level > 100 && game.equipment["Greatsword"].level > 100 && !windZone() && (!getPageSetting('MoreFarming') || (LMCDone && LSCDone && LWCDone)))
+    if(game.equipment["Dagger"].level > 100 && game.equipment["Greatsword"].level > 100 && !windZone())
         preferFAMaps = true;
+    
+    if(SpireLWCFlag || moreFarmingFlag)
+        preferFAMaps = false;
     
     if(game.talents.hyperspeed2.purchased && game.global.world <= Math.floor((game.global.highestLevelCleared+1)/2))
         preferFAMaps = false; //FA and hyper2 do not stack. if hyper2 is active no reason to use fa
@@ -280,11 +294,25 @@ function autoMap() {
     for (var map in game.global.mapsOwnedArray){
         if (!game.global.mapsOwnedArray[map].noRecycle){ //not a unique map
             obj[map] = game.global.mapsOwnedArray[map].level; //find map with correct level
-            //Get matching map for our siphonology level
-            if(game.global.mapsOwnedArray[map].level != siphlvl) continue;
             
             if(game.global.highestLevelCleared < 185){ //havent unlocked lmc maps yet
                 if (game.global.mapsOwnedArray[map].bonus == "fa" && game.global.mapsOwnedArray[map].level == siphlvl){
+                    siphonMap = map;
+                    break;
+                }
+            }
+            else if(moreFarmingFlag){
+                if(game.global.mapsOwnedArray[map].level == game.global.world+10){
+                    if( game.global.mapsOwnedArray[map].bonus == "lmc" && !LMCDone ||
+                        game.global.mapsOwnedArray[map].bonus == "lsc" && !LSCDone ||
+                        game.global.mapsOwnedArray[map].bonus == "lwc" && !LWCDone){
+                            siphonMap = map;
+                            break;
+                    }
+                }
+            }
+            else if(SpireLWCFlag){
+                if(game.global.mapsOwnedArray[map].bonus == "lwc" && game.global.mapsOwnedArray[map].level == game.global.world-1){
                     siphonMap = map;
                     break;
                 }
@@ -296,14 +324,6 @@ function autoMap() {
                         break;
                     }
                 }
-                else if(getPageSetting('MoreFarming') && (!LMCDone || !LSCDone || !LWCDone) && game.global.mapsOwnedArray[map].level == game.global.world+10){
-                    if( game.global.mapsOwnedArray[map].bonus == "lmc" && !LMCDone ||
-                        game.global.mapsOwnedArray[map].bonus == "lsc" && !LSCDone ||
-                        game.global.mapsOwnedArray[map].bonus == "lwc" && !LWCDone){
-                            siphonMap = map;
-                            break;
-                    }
-                }
                 else if(game.global.mapsOwnedArray[map].bonus == "lmc" && game.global.mapsOwnedArray[map].level == siphlvl){
                     siphonMap = map;
                     break;
@@ -312,17 +332,18 @@ function autoMap() {
         }
     }
     
+    var highestMap;
     //Organize a list of the sorted map's levels and their index in the mapOwnedarray
-    var keysSorted = Object.keys(obj).sort(function(a, b) {
+    /*var keysSorted = Object.keys(obj).sort(function(a, b) {
         return obj[b] - obj[a];
     });
     
     //if there are no non-unique maps, there will be nothing in keysSorted, so set to create a map
     var highestMap;
-    if (keysSorted[0] && !(getPageSetting('MoreFarming') && (!LMCDone || !LSCDone || !LWCDone)))
+    if (keysSorted[0] && !moreFarmingFlag && !SpireLWCFlag)
         highestMap = keysSorted[0];
     else
-        selectedMap = "create";
+        selectedMap = "create";*/
 
     //Look through all the maps we have and figure out, find and Run Uniques if we need to
     var runUniques = (getPageSetting('AutoMaps') == 1);
@@ -407,7 +428,7 @@ function autoMap() {
 
 
     //MAPS CREATION pt1:
-    if ((shouldDoMaps || doVoids || needPrestige || shouldDoMapsVanillaRepeat) && selectedMap == "world"){
+    if ((shouldDoMaps || doVoids || needPrestige || shouldDoMapsVanillaRepeat) && (selectedMap == "world" || selectedMap == "create")){
         selectedMap = "create";
         
         if (preSpireFarming){ //if preSpireFarming x minutes is true, switch over from wood maps to metal maps.
@@ -471,28 +492,40 @@ function autoMap() {
                 repeatClicked();
 
             var repeatChoice = 1; //0 - forever 1 - map bonus 2 - items 3 - any
-            
-            if(shouldDoMapsVanillaRepeat)
-                repeatChoice = 0;
-            
-            var specials = addSpecialsAT(currMap.level);
-            
-            if(specials > 0) //we still need prestige from our current map
-                repeatChoice = 2;
-            
+                        
             if((DHratio / ourBaseDamage * ourBaseDamagePlusOne) > threshold)
                 repeatChoice = 2; //psuedo 'repeat off' if we dont need more damage
             
-            if(preSpireFarming)
+            //if(isActiveSpireAT() && getPageSetting('SpireLWCAmount') > 0 && LWCDoneAmount < getPageSetting('SpireLWCAmount')){
+            if(SpireLWCFlag && (LWCDoneAmount < getPageSetting('SpireLWCAmount') || getPageSetting('SpireLWCAmount') < 0) && currMap.bonus == "lwc"){ //in a wooden cache map farming wood for spire
                 repeatChoice = 0;
+                if(LWCLastCell > game.global.lastClearedMapCell + 1) //if LWCLastCell is smaller, that means we've finished a map, so increase the wooden maps done count by 1
+                    LWCDoneAmount++;
+                LWCLastCell = game.global.lastClearedMapCell + 1;
+                var txt = getPageSetting('SpireLWCAmount') < 0 ? "∞" : getPageSetting('SpireLWCAmount');
+                statusMsg = "Spire LWC " + LWCDoneAmount + " / " + txt;
+            }
+            
+            if(shouldDoMapsVanillaRepeat){
+                repeatChoice = 0;
+                statusMsg = "Mapping at z" + game.global.world;
+            }
+            
+            if(addSpecialsAT(currMap.level) > 0){ //we still need prestige from our current map
+                repeatChoice = 2;
+                statusMsg = "Prestige: " + addSpecialsAT(game.global.world);//specials;
+            }
+            
+            if(preSpireFarming){
+                repeatChoice = 0;
+                statusMsg = "Pre Spire Farming";
+            }
             
             //turn off repeat if we're running a unique map that isnt BW
             else if (currMap.noRecycle && currMap.name != 'Bionic Wonderland')
                 repeatClicked();
             
-            if(specials > 0)            statusMsg = "Prestige: " + addSpecialsAT(game.global.world);//specials;
-            else if(repeatChoice === 0) statusMsg = "Mapping at z" + game.global.world;
-            else if(repeatChoice == 1)  statusMsg = "Map bonus ";
+            if(repeatChoice == 1)  statusMsg = "Map bonus ";
             while (game.options.menu.repeatUntil.enabled != repeatChoice){ //select the correct repeat until option
                 toggleSetting('repeatUntil');
             }
@@ -540,10 +573,10 @@ function autoMap() {
                         return;
                     }
                 }
-                //LMCDone = false;
-                //LSCDone = false;
-                //LWCDone = false;
-                //(getPageSetting('MoreFarming') && (!LMCDone || !LSCDone || !LWCDone))
+                else if (SpireLWCFlag){
+                    lvl = game.global.world-1;
+                    flag = decideMapParams(lvl, lvl, "LWC", false);
+                }
                 else
                     flag = decideMapParams(lvl, lvl, "LMC", enoughDamage); //cheap or no cheap
                 
@@ -739,7 +772,9 @@ function PrestigeRaid() {
         return true; 
     if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 2) //have all
         return true; 
-    if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 1 && game.global.world % 100 !== 0 && !BWRaidNowLogic() && (maxDesiredLevel >= expectedPortalZone || bsZone >= maxDesiredLevel)) //when to skip last gambes
+    var aboutToSpire = game.global.world % 100 === 0 || game.global.world % 100 >= 95; //when spire is coming up, we want that last gambesome prestige as well
+    if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 1 && !aboutToSpire && !BWRaidNowLogic() && (maxDesiredLevel >= expectedPortalZone || bsZone >= maxDesiredLevel)) //when to skip last gambes
+    //if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 1 && game.global.world % 100 !== 0 && !BWRaidNowLogic() && (maxDesiredLevel >= expectedPortalZone || bsZone >= maxDesiredLevel)) //when to skip last gambes
         return true;
     if(expectedPortalZone == game.global.world && !doVoids) //last zone and we dont need any void maps
         return true;

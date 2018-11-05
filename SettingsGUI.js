@@ -392,10 +392,10 @@ function initializeAllSettings() {
     createSetting('PRaidSpireMulti', ['Raid Spire Off', 'Raid +5 Active Spires', 'Raid +5 Active Spires -1'], 'Overrides Map Raiding Start. Raid +5 Active Spires: Raid +5 levels for gear in active spires. Raid +5 Active Spires -1: Will also raid 1 spire before the first active spire.', 'multitoggle', 0, null, 'Spire');
     createSetting('StackSpire4', ['Windstack Spire IV: Never','Windstack Spire IV: Dailies', 'Windstack Spire IV: Always'], 'Attempts to maximize windstacks in Spire IV. Recommended you have Raid +5 in Spire enabled when you use this. You also probably want a few more nurseries when using this.', 'multitoggle', 0, null, 'Spire');
     createSetting('Spire3Time', 'Daily Spire 3 Time', 'Dailies only. The maximum time in seconds that we willing to spend in Spire 3. If you find yourself missing stacks in early 400s due to too much damage setting this value higher could help. -1 or 0 to disable.', 'value', '50', '-1', 'Spire');
-//['Windstack Spire IV: Never','Windstack Spire IV: Dailies', 'Windstack Spire IV: Always']
+    createSetting('SpireLWCAmount', 'Spire LWC #', 'In active Spires, will run this many Large Wooden Caches maps before beginning. This is used to afford more nurseries. AT will automatically adjust worker amount in cache maps.', 'value', '0', null, 'Spire');
+
 //Combat
     //Subsection1Line1
-
     createSetting('AutoStance', ['Off', 'Helium Mode', 'Dark Essence Mode', 'Push Mode', 'Hybrid'], 'Combat settings. Helium mode: will attempt to windstack any cell thats worth more than threshold. Be sure to have shield swapping enabled with this! Dark Essence Mode: Buys all damage and uses S stance. Push Mode: Buys all damage and uses D stance. Hybrid: Push in Wind/Ice, DE in Poison.', 'multitoggle', 0, null, 'Combat');
     createSetting('WindStackingPctHe', 'He/Hr% Threshold', 'For use with Helium Mode. Will lower damage for stacking on cells that yield higher than this threshold. Lower threshold -> more stacking. You should set this to about x2-3 times your filler He/Hr percent of total. In % units (type 0.5 for 0.5% He/Hr etc)', 'value', '-1', null, 'Combat');
     createSetting('DelayCoordsForWind', 'Stall Coords For Wind', 'With this on, AS will micromanage Coordination for windstacking. Logic is: Buy all Coords utill *Start No Coord Buy* zone, then stop until Amalgamator amount, then let AS micromanage. Will always buy all coords for active spires, Void Map zone BW Raid and Prestige Raids.', 'boolean', true, null, 'Combat');
