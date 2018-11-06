@@ -332,7 +332,6 @@ function autoMap() {
         }
     }
     
-    var highestMap;
     //Organize a list of the sorted map's levels and their index in the mapOwnedarray
     /*var keysSorted = Object.keys(obj).sort(function(a, b) {
         return obj[b] - obj[a];
@@ -438,8 +437,8 @@ function autoMap() {
                 if(currMap.level === spiremaplvl)
                     selectedMap = currMap;
             }
-            else if (game.global.mapsOwnedArray[highestMap].level >= spiremaplvl && game.global.mapsOwnedArray[highestMap].location == ((!getPageSetting('PreferMetal') && game.global.decayDone) ? 'Plentiful' : 'Mountain'))
-                selectedMap = game.global.mapsOwnedArray[highestMap];
+            else if (siphonMap != -1 && siphonMap.level >= spiremaplvl && siphonMap.location == ((!getPageSetting('PreferMetal') && game.global.decayDone) ? 'Plentiful' : 'Mountain'))
+                selectedMap = siphonMap;
         }
         else if (needPrestige){ //if needPrestige, TRY to find current level map as the highest level map we own.
             var level = lastPrestigeZone(true);
@@ -582,10 +581,10 @@ function autoMap() {
                 
                 if(extraLevels>0) lvl = game.global.world;
                 var flag2 = createAMap(lvl, type, extraLevels, specialMod, lootSlider, diffSlider, sizeSlider, perfect);
-                if(!flag || !flag2){
+                if((!flag || !flag2) && siphonMap != -1){
                     debug("Can't afford map with parameters. level: " + lvl + " type: " + type, "maps");
                     debug("error in creating map process. Can't afford it? Running existing map instead.", "maps");
-                    selectedMap = game.global.mapsOwnedArray[highestMap]; //revert to highest existing map
+                    selectedMap = siphonMap; //revert to highest existing map
                 }
                 else{
                     selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1]; //the map we just created
