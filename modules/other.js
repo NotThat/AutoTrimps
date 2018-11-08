@@ -229,7 +229,7 @@ function fightManualAT(){
         var nextArmyHealth = calcCurrSendHealth(true, false, false, game.global.world);
         var enemyDamage    = currEnemyDamage();
         
-        if(nextArmyHealth/enemyDamage < 1000) return;
+        if(game.global.mapsActive || nextArmyHealth/enemyDamage < 1000) return;
         if(handleGA(true) < maxAnti) return; //in nom/bogged/electricity, never send armies before max pop
     }
     
