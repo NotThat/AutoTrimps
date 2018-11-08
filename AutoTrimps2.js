@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "47.8";
-var verDate = "7.11.18";
+var ver = "48";
+var verDate = "8.11.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -199,6 +199,7 @@ function initializeAutoTrimps() {
 }
 
 var changelogList = [];
+changelogList.push({date: "8.11.2018", version: "", description: "Improved early game." , isNew: true});
 changelogList.push({date: "22.10.2018", version: "", description: "Reworked AutoAllocate, check your weights. Also BW raid setting." , isNew: true});
 changelogList.push({date: "20.10.2018", version: "", description: "Pumpkins patch." , isNew: true});
 //changelogList.push({date: "", version: "", description: "Combat setting: Helium mode / Dark Essence Mode / Push Mode.", isNew: true});
@@ -251,6 +252,9 @@ var ATmoduleList = [];
 var sugarEventAT = true;
 var bestBuilding;
 var scienceNeeded;
+var metalNeeded;
+var woodNeeded;
+var foodNeeded;
 var breedFire = false;
 var hiddenBreedTimer;
 var hiddenBreedTimerLast;

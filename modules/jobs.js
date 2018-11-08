@@ -99,12 +99,16 @@ function buyJobs() {
     }
 
     //FRESH GAME LOWLEVEL NOHELIUM CODE.
-    if (game.global.world == 1 && game.global.totalHeliumEarned <= 5000 && game.resources.trimps.owned < trimpsRealMax * 0.9) 
-        return buyJobsEarlyGame();
+    if (game.global.world == 1 || game.global.totalHeliumEarned <= 5000){
+        if (game.resources.trimps.owned < trimpsRealMax * 0.9) 
+            return buyJobsEarlyGame();
+        else if (game.resources.trimps.owned == trimpsRealMax && game.global.soldierHealth === 0)
+            fightManualAT();
+    }
     
     if (game.jobs.Farmer.owned == 0 && game.jobs.Lumberjack.locked && getFreeWorkers())
         safeBuyJob('Farmer', 1);
-    else if (getPageSetting('MaxScientists')!=0 && game.jobs.Scientist.owned < 10 && scienceNeeded > 100 && getFreeWorkers() && game.jobs.Farmer.owned >= 10)
+    else if (getPageSetting('MaxScientists') != 0 && game.jobs.Scientist.owned < 10 && !game.jobs.Scientist.locked && scienceNeeded >= 60 && getFreeWorkers() && game.jobs.Farmer.owned >= 10)
         safeBuyJob('Scientist', 1);
     
     totalDistributableWorkers = getFreeWorkers() + game.jobs.Farmer.owned + game.jobs.Miner.owned + game.jobs.Lumberjack.owned;

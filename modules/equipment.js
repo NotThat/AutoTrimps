@@ -195,9 +195,9 @@ function evaluateEquipmentEfficiency(equipName) {
         Factor = 0;
         Wall = true;
     }
-    if (gameResource.level < 25 && equip.Stat != "attack") {
-        Factor = 999 - gameResource.prestige;
-    }
+    //if (gameResource.level < 25 && equip.Stat != "attack") {
+    //    Factor = 999 - gameResource.prestige;
+    //}
     //skip buying shields (w/ shieldblock) if we need gymystics
     if (equipName == 'Shield' && gameResource.blockNow &&
         game.upgrades['Gymystic'].allowed - game.upgrades['Gymystic'].done > 0)
@@ -354,7 +354,7 @@ function autoLevelEquipment(buyDamage, colorStyle) {
             }
             //If we're considering an attack item, we want to buy weapons if we don't have enough damage, or if we don't need health (so we default to buying some damage)
             if (buyDamage && BuyWeaponLevels && DaThing.Stat == 'attack'){ 
-                if (DaThing.Equip && canAffordBuilding(equipName, null, null, true)) {
+                if (DaThing.Equip && canAffordBuilding(equipName, null, null, true) && (metalNeeded === 0 || game.global.totalHeliumEarned > 50000)){
                     var allow = true;
                     if(getPageSetting('AutoStance')==1 && getPageSetting('DelayWeaponsForWind') && (buyWeaponsMode === 0)){
                         allow = false;
@@ -382,8 +382,8 @@ function autoLevelEquipment(buyDamage, colorStyle) {
             }
             //If we're considering a health item, buy it if we don't have enough health, otherwise we default to buying damage
             if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health' || DaThing.Stat == 'block') && game.global.soldierHealth < wantedHP && game.global.soldierHealth > 1) {
-                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(equipName, null, null, true)) {
-                    var howMany = calculateMaxAfford(game.equipment[equipName], false, true, false, false, 0.01); //1% of available resources
+                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(equipName, null, null, true) && (metalNeeded === 0 || game.global.totalHeliumEarned > 50000)){ //only buy if we dont need metal for upgrades
+                    var howMany = calculateMaxAfford(game.equipment[equipName], false, true, false, false, 0.5); //20% of available resources
                     game.global.buyAmt = Math.min(25, howMany);
                     buyEquipment(equipName, null, true);
                     evalObjAT[equipName] = evaluateEquipmentEfficiency(equipName);

@@ -74,7 +74,7 @@ function autoMap(){
     
     
     //are we behind on prestige? ignores last gambesop on portal zone
-    needPrestige = (lastPrestigeZone() < lastDropZone()) || (lastPrestigeZone() == lastDropZone() && prestigeState != 2 && game.global.world !== expectedPortalZone);
+    needPrestige = getScientistLevel() >= 5 && ((lastPrestigeZone() < lastDropZone()) || (lastPrestigeZone() == lastDropZone() && prestigeState != 2 && game.global.world !== expectedPortalZone));
     
     shouldDoMaps = (!enoughDamage && game.global.mapBonus < 10) || needPrestige;
     

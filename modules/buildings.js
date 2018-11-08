@@ -159,12 +159,12 @@ function buyGemEfficientHousing(){
 }
 
 function buyBuildings() {
-    if ((game.jobs.Miner.locked && game.global.challengeActive != 'Metal') || (game.jobs.Scientist.locked && game.global.challengeActive != "Scientist"))
-        return;
     var customVars = MODULES["buildings"];
     var oldBuy = preBuy2();
     game.global.buyAmt = 1;
     buyFoodEfficientHousing();  //["Hut", "House", "Mansion", "Hotel", "Resort"];
+    if ((game.jobs.Miner.locked && game.global.challengeActive != 'Metal') || (game.jobs.Scientist.locked && game.global.challengeActive != "Scientist"))
+        return;
     buyGemEfficientHousing();   //["Hotel", "Resort", "Gateway", "Collector", "Warpstation"];
     //WormHoles:
     if ((game.buildings.Wormhole.owned < getPageSetting('MaxWormhole') || getPageSetting('MaxWormhole') < 0) && !game.buildings.Wormhole.locked) {

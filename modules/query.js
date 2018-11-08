@@ -60,15 +60,28 @@ function checkJobPercentageCost(what, toBuy) {
     return [true,percent];
 }
 
-function getScienceCostToUpgrade(upgrade) {
+function getScienceCostToUpgrade(upgrade){
     var upgradeObj = game.upgrades[upgrade];
-    if (upgradeObj.cost.resources.science !== undefined ? upgradeObj.cost.resources.science[0] !== undefined : false) {
-        return Math.floor(upgradeObj.cost.resources.science[0] * Math.pow(upgradeObj.cost.resources.science[1], (upgradeObj.done)));
-    } else if (upgradeObj.cost.resources.science !== undefined && upgradeObj.cost.resources.science[0] == undefined){
-        return upgradeObj.cost.resources.science;
-    } else {
-        return 0;
-    }
+
+    if (upgradeObj.cost.resources.food !== undefined ? upgradeObj.cost.resources.food[0] !== undefined : false)
+        foodNeeded += Math.floor(upgradeObj.cost.resources.food[0] * Math.pow(upgradeObj.cost.resources.food[1], (upgradeObj.done)));
+    else if (upgradeObj.cost.resources.food !== undefined && upgradeObj.cost.resources.food[0] == undefined)
+        foodNeeded += upgradeObj.cost.resources.food;
+    
+    if (upgradeObj.cost.resources.wood !== undefined ? upgradeObj.cost.resources.wood[0] !== undefined : false)
+        woodNeeded += Math.floor(upgradeObj.cost.resources.wood[0] * Math.pow(upgradeObj.cost.resources.wood[1], (upgradeObj.done)));
+    else if (upgradeObj.cost.resources.wood !== undefined && upgradeObj.cost.resources.wood[0] == undefined)
+        woodNeeded += upgradeObj.cost.resources.wood;
+    
+    if (upgradeObj.cost.resources.metal !== undefined ? upgradeObj.cost.resources.metal[0] !== undefined : false)
+        metalNeeded += Math.floor(upgradeObj.cost.resources.metal[0] * Math.pow(upgradeObj.cost.resources.metal[1], (upgradeObj.done)));
+    else if (upgradeObj.cost.resources.metal !== undefined && upgradeObj.cost.resources.metal[0] == undefined)
+        metalNeeded += upgradeObj.cost.resources.metal;
+    
+    if (upgradeObj.cost.resources.science !== undefined ? upgradeObj.cost.resources.science[0] !== undefined : false)
+        scienceNeeded += Math.floor(upgradeObj.cost.resources.science[0] * Math.pow(upgradeObj.cost.resources.science[1], (upgradeObj.done)));
+    else if (upgradeObj.cost.resources.science !== undefined && upgradeObj.cost.resources.science[0] == undefined)
+        scienceNeeded += upgradeObj.cost.resources.science;
 }
 
 function getEnemyMaxHealth(world, level, corrupt) {
@@ -192,13 +205,16 @@ function getArmyTime() {
 
 function setScienceNeeded() {
     scienceNeeded = 0;
+    metalNeeded = 0;
+    woodNeeded = 0;
+    foodNeeded = 0;
     for (var upgrade in upgradeList) {
         upgrade = upgradeList[upgrade];
         if (game.upgrades[upgrade].allowed > game.upgrades[upgrade].done) { //If the upgrade is available
             if (game.global.world == 1 && game.global.totalHeliumEarned<=1000 && upgrade.startsWith("Speed")) continue;  //skip speed upgrades on fresh game until level 2
-            scienceNeeded += getScienceCostToUpgrade(upgrade);
+            getScienceCostToUpgrade(upgrade);
         }
     }
     if (needGymystic)
-        scienceNeeded += getScienceCostToUpgrade('Gymystic');
+        getScienceCostToUpgrade('Gymystic');
 }

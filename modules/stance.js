@@ -42,9 +42,9 @@ var negativeDamageCounter = 0;
 var easyRatioThreshold = 10;
 
 function autoStance(){
+    if(game.global.autoBattle && game.global.pauseFight) pauseFight(); //autofight on
     if (game.global.gridArray.length === 0) return false; //zone didnt initialize yet
     getDamageCaller(0); //buys health if we need it
-    if(game.global.autoBattle && game.global.pauseFight) pauseFight(); //autofight on
     
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];

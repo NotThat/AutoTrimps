@@ -123,7 +123,7 @@ function calcArmyDamage(printout, currentGame, zone, dailyObj, armySizeUncapped,
     //Sugar Rush
     if(game.global.sugarRush > 0 || (!currentGame && sugarEventAT)){ //remaining time on sugar rush
         var sugar = 2 + Math.floor((zone - 200) / 100);
-         dmg *= sugar;
+         dmg *= Math.max(1,sugar);
          if(printout) debug("sugar rush x" + sugar + " dmg " + dmg.toExponential(2));
     }
     
@@ -708,7 +708,7 @@ function timeEstimator(currentGame, fromCell, zone, dailyObj, toText){
         var sugarRemoved = false;
         do{
             if(sugarEventAT && time >= 1500 && !sugarRemoved){
-                dmgToUse = dmgToUse / (2 + Math.floor((zone - 200) / 100)); //if zone lasts >25m we lose the damage buff
+                dmgToUse = dmgToUse / Math.max(1,(2 + Math.floor((zone - 200) / 100))); //if zone lasts >25m we lose the damage buff
                 sugarRemoved = true;
             }
             if(magmamancerStacks > 12) break;
@@ -917,10 +917,11 @@ function VMsEfficiencyMult(VMAmount){
 
 function singleVMWorth(zoneInput, currentPortal, useHeliumGU){
     var zone = typeof zoneInput === 'undefined' ? autoTrimpSettings.APValueBoxes.maxZone : zoneInput;
-    //round down last poison zone 
-    var cycle = cycleZone(zone);
-    if(cycle > 19) zone = zone - cycle + 19; 
-    else if(cycle > 4 && cycle < 15) zone = zone - cycleZone(zone) + 4;
+    if(zone >= 240){//round down last poison zone 
+        var cycle = cycleZone(zone);
+        if(cycle > 19) zone = zone - cycle + 19; 
+        else if(cycle > 4 && cycle < 15) zone = zone - cycleZone(zone) + 4;
+    }
     
     var AA = 1.35*(zone-19);
     var AAA = Math.pow(1.23, Math.sqrt(AA));
