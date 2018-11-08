@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "47.7";
+var ver = "47.8";
 var verDate = "7.11.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -382,7 +382,7 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
     }
     
     wantGoodShield = true;
-    maxAnti = game.talents.patience.purchased ? 45 : 30;
+    maxAnti = game.portal.Anticipation.level > 0 ? (game.talents.patience.purchased ? 45 : 30) : 0;
     if(game.global.mapsActive) currMap = getCurrentMapObject();
     attacksPerSecondAT = calcAttacksPerSecond();
     expectedPortalZone = autoTrimpSettings.AutoPortal.selected !== "Custom" ? 0 : getPageSetting('CustomAutoPortal') + (game.global.challengeActive == "Daily" ? getPageSetting('AutoFinishDailyNew') : 0);
@@ -495,7 +495,7 @@ function oncePerZoneCode(){
     buildWorldArray();
     setEmptyStats(); //also clears graph data
 
-    maxAnti = game.talents.patience.purchased ? 45 : 30;
+    maxAnti = game.portal.Anticipation.level > 0 ? (game.talents.patience.purchased ? 45 : 30) : 0;
     
     if(game.global.mapsActive){
         currMap = getCurrentMapObject();
