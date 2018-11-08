@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "47.6";
+var ver = "47.7";
 var verDate = "7.11.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
@@ -190,7 +190,7 @@ function initializeAutoTrimps() {
     ATscriptLoad('','SettingsGUI');   //populate Settings GUI
     ATscriptLoad('','Graphs');        //populate Graphs
     //Load modules:
-    ATmoduleList = ['chat', 'jQuery', 'jQuery-UI', 'query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'maps', 'breedtimer', 'dynprestige', 'magmite', 'other', 'import-export', 'perks', 'fight-info', 'performance', 'ATcalc'];
+    ATmoduleList = ['chat', 'jQuery', 'jQuery-UI', 'query', 'portal', 'upgrades', 'heirlooms', 'buildings', 'jobs', 'equipment', 'gather', 'stance', 'maps', 'breedtimer', 'magmite', 'other', 'import-export', 'perks', 'fight-info', 'performance', 'ATcalc'];
     for (var m in ATmoduleList) 
         ATscriptLoad(modulepath, ATmoduleList[m]);
     
@@ -381,6 +381,7 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
         hiddenBreedTimerLast = hiddenBreedTimer;
     }
     
+    wantGoodShield = true;
     maxAnti = game.talents.patience.purchased ? 45 : 30;
     if(game.global.mapsActive) currMap = getCurrentMapObject();
     attacksPerSecondAT = calcAttacksPerSecond();
@@ -428,7 +429,7 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
     
     if (getPageSetting('BuyJobsNew')) buyJobs();                                              
     if (getPageSetting('ManualGather2')) manualLabor();  //"Auto Gather/Build"       (gather.js)
-     
+    
     autoMap(); //automaps() is in charge of maps combat
     updateAutoMapsStatus("", statusMsg, true); //update status
 
@@ -443,9 +444,6 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
     if(!game.global.Geneticistassist && game.jobs.Geneticist.locked === 0) breedAT(); //autogeneticistassist unlocks after clearing cell 80 of bw 4 (z170)
     
     if (getPageSetting('UseAutoGen')) autoGenerator();          //"Auto Generator ON" (magmite.js)
-    var forcePrecZ = (getPageSetting('ForcePresZ')<0) || (game.global.world<getPageSetting('ForcePresZ'));                                                      //dagger push etc
-    if (getPageSetting('DynamicPrestige2')>0 && forcePrecZ) prestigeChanging2(); //"Dynamic Prestige" (dynprestige.js)                                          //dagger push etc
-    else autoTrimpSettings.Prestige.selected = document.getElementById('Prestige').value; //just make sure the UI setting and the internal setting are aligned. //dagger push etc
     if (getPageSetting('AutoMagmiteSpender2')==2 && !magmiteSpenderChanged)  autoMagmiteSpender();   //Auto Magmite Spender (magmite.js)
     if (getPageSetting('AutoNatureTokens')) autoNatureTokens();     //Nature     (other.js)
     
