@@ -1663,8 +1663,6 @@ AutoPerks.initializeAmalg = function(){
         }
     }
     
-    debug(carp1perk.level + " " + coordperk.level + " AutoPerks.coordsUsed " + AutoPerks.coordsUsed);
-    
     document.getElementById("textAreaAllocate").innerHTML = finalMsg;
     if(AutoPerks.currAmalgamators < 0) AutoPerks.currAmalgamators = 0;
     AutoPerks.amalMultPre = Math.pow(1000, AutoPerks.currAmalgamators-1);
