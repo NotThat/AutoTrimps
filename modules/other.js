@@ -231,7 +231,7 @@ function fightManualAT(){
         var block = game.global.soldierCurrentBlock;
         
         if(!game.global.mapsActive || block < enemyDamage){
-            if(game.global.mapsActive || nextArmyHealth/enemyDamage < 1000) return;
+            if(nextArmyHealth/enemyDamage < 1000) return;
             if(handleGA(true) < maxAnti) return; //in nom/bogged/electricity, never send armies before max pop
         }
     }
