@@ -172,9 +172,9 @@ function buyJobs() {
     }
  
     ratiobuy('Farmer', farmerRatio, totalRatio, subtract);
-    if (!ratiobuy('Miner', minerRatio, totalRatio, subtract) && game.global.turkimpTimer === 0)
+    if (!game.jobs.Miner.locked && !ratiobuy('Miner', minerRatio, totalRatio, subtract) && game.global.turkimpTimer === 0)
         safeBuyJob('Miner', game.jobs.Miner.owned * -1);
-    if (!ratiobuy('Lumberjack', lumberjackRatio, totalRatio, subtract))
+    if (!game.jobs.Lumberjack.locked && !ratiobuy('Lumberjack', lumberjackRatio, totalRatio, subtract))
         safeBuyJob('Lumberjack', game.jobs.Lumberjack.owned * -1);
     
     //Magmamancers code:

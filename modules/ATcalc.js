@@ -437,7 +437,9 @@ function calcEnemyAttack(mutation, corrupted, name, level, zone, currentGame, da
                 var critMult = dailyModifiers.crits.getMult(theDailyObj.crits.strength);
                 attack *= 1 + 0.25 * critMult;
             }
-            
+                            
+            if (typeof theDailyObj.badMapStrength !== 'undefined' && game.global.mapsActive)
+              attack *= dailyModifiers.badMapStrength.getMult(theDailyObj.badMapStrength.strength);
             
             if(currentGame){
                 if (typeof theDailyObj.empower !== 'undefined' && !game.global.mapsActive)
@@ -445,9 +447,6 @@ function calcEnemyAttack(mutation, corrupted, name, level, zone, currentGame, da
                 
                 if (typeof theDailyObj.bloodthirst !== 'undefined')
                     attack *= dailyModifiers.bloodthirst.getMult(theDailyObj.bloodthirst.strength, theDailyObj.bloodthirst.stacks);
-                
-                //if (typeof theDailyObj.badMapStrength !== 'undefined' && game.global.mapsActive)
-                //  attack *= dailyModifiers.badMapStrength.getMult(theDailyObj.badMapStrength.strength);
             }
             
             if (typeof theDailyObj.mirrored !== 'undefined'){
@@ -485,6 +484,9 @@ function calcEnemyHealth(mutation, corrupted, name, level, zone, currentGame, da
             var theDailyObj   = currentGame ? game.global.dailyChallenge : dailyObj;
             if(typeof theDailyObj.badHealth !== 'undefined')
                 amt *= dailyModifiers.badHealth.getMult(theDailyObj.badHealth.strength);
+            
+            if (typeof theDailyObj.badMapStrength !== 'undefined' && game.global.mapsActive)
+                amt *= dailyModifiers.badMapHealth.getMult(theDailyObj.badMapHealth.strength);
 
             if(currentGame){
                 if(typeof theDailyObj.empower !== 'undefined')
