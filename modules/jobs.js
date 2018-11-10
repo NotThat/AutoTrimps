@@ -1,5 +1,5 @@
-var theScientistRatio = 25;        //ratio for scientists. (totalRatios / this)
-var theScientistRatio2 = 10;       //used for lowlevel and Watch challenge
+var theScientistRatio = 15;        //ratio for scientists. (totalRatios / this)
+var theScientistRatio2 = 7;       //used for lowlevel and Watch challenge
 var tierMagmamancers = 0;
 
 function getFreeWorkers(){
@@ -115,7 +115,7 @@ function buyJobs() {
  
    //exit if we are havent bred to at least 90% breedtimer yet...
     var breeding = (game.resources.trimps.owned - game.resources.trimps.employed);
-    if (!(game.global.challengeActive == "Trapper") && game.resources.trimps.owned < trimpsRealMax * 0.9 && !breedFire) {
+    if (!(game.global.challengeActive == "Trapper") && game.resources.trimps.owned < trimpsRealMax * 0.9) {
         if (breeding > trimpsRealMax * 0.33) {
             //only hire if we have less than 300k trimps (dont spam up the late game with meaningless 1's)
             if (getFreeWorkers() && trimpsRealMax <= 3e5) {
@@ -134,7 +134,7 @@ function buyJobs() {
     //Scientists:
     totalDistributableWorkers = getFreeWorkers() + game.jobs.Farmer.owned + game.jobs.Miner.owned + game.jobs.Lumberjack.owned;
     var ms = getPageSetting('MaxScientists');
-    if (ms != 0 && !game.jobs.Scientist.locked && !breedFire) {
+    if (ms != 0 && !game.jobs.Scientist.locked) {
         var buyScientists = Math.floor((scientistRatio / totalRatio) * totalDistributableWorkers) - game.jobs.Scientist.owned - subtract;
         var sci = game.jobs.Scientist.owned;
         if((buyScientists > 0 && getFreeWorkers()) && (ms > sci || ms == -1)) {
@@ -172,9 +172,9 @@ function buyJobs() {
     }
  
     ratiobuy('Farmer', farmerRatio, totalRatio, subtract);
-    if (!ratiobuy('Miner', minerRatio, totalRatio, subtract) && breedFire && game.global.turkimpTimer === 0)
+    if (!ratiobuy('Miner', minerRatio, totalRatio, subtract) && game.global.turkimpTimer === 0)
         safeBuyJob('Miner', game.jobs.Miner.owned * -1);
-    if (!ratiobuy('Lumberjack', lumberjackRatio, totalRatio, subtract) && breedFire)
+    if (!ratiobuy('Lumberjack', lumberjackRatio, totalRatio, subtract))
         safeBuyJob('Lumberjack', game.jobs.Lumberjack.owned * -1);
     
     //Magmamancers code:
@@ -250,7 +250,7 @@ function findJobWithWorker(){
 //Buy/Fire Miners:
 //Buy/Fire Lumberjacks:
 function ratiobuy(job, jobratio, totalRatio, subtract) {
-    if(!game.jobs[job].locked && !breedFire) {
+    if(!game.jobs[job].locked) {
         totalDistributableWorkers = getFreeWorkers() + game.jobs.Farmer.owned + game.jobs.Miner.owned + game.jobs.Lumberjack.owned;
         var toBuy = Math.floor((jobratio / totalRatio) * totalDistributableWorkers) - game.jobs[job].owned - subtract;
         var canBuy = Math.floor(game.resources.trimps.owned - game.resources.trimps.employed);

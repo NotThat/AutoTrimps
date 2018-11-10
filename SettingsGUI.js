@@ -319,7 +319,7 @@ function initializeAllSettings() {
     createSetting('FarmerRatio', 'Farmer Ratio', '', 'value', '1', null, "Jobs"); //realistically gems are not that useful by the time you have magmamancers... maybe just set it to only spend 50% of your gems at a time and leave it at that? 10% is kinda low anyway
     createSetting('LumberjackRatio', 'Lumberjack Ratio', '', 'value', '1', null, "Jobs");
     createSetting('MinerRatio', 'Miner Ratio', '', 'value', '1', null, "Jobs");
-    //createSetting('ScientistRatio', 'Scientist Ratio', 'Advanced. This will allow you to cap your scientist to worker ratio, as well as disable the hiring of scientists. <br><b>-1</b> Allows the ratio to be set automatically (Recommended)<br><b>0 </b> Turns off Scientist hiring<br><b>\>0</b> Set a custom ratio.', 'value', '-1', null, "Jobs");
+    //createSetting('ScientistRatio', 'Scientist Ratio', '', 'value', '1', null, "Jobs");
     createSetting('MaxScientists', 'Max Scientists', 'Advanced. Cap your scientists (This is an absolute number not a ratio). recommend: -1 (infinite still controls itself)', 'value', '-1', null, "Jobs");
     //Line2
     createSetting('MaxExplorers', 'Max Explorers', 'Advanced. Cap your explorers (This is an absolute number not a ratio). recommend: -1', 'value', '-1', null, "Jobs"); //Explorers are important now! outdated setting tbh
@@ -451,6 +451,8 @@ function initializeAllSettings() {
     createSetting('HeirloomSwapping', 'Heirloom Swapping', 'Enables heirloom swapping (Endgame only feature). You need a 5/5 shield and a 2/5 shield that has exactly Plaguebringer and Void Maps and no damage mods. With this enabled the script will juggle between them for optimal windstacking. Your no-damage shield should prioritize Plaguebringer and your high-damage shield should prioritize Void Map Drop. You can force the script to use specific shields as your good/low shield by naming them ' + highShieldName + ' and ' + lowShieldName, 'boolean', false, null, 'Heirlooms');
     createSetting('HeirloomEvalNew', 'Use Plagued Evaluation', 'For Plagued items, what matters is what affixes they have and empty slots. This setting also auto protects any heirloom that survives a portal. Use this when you already have Plagued items.', 'boolean', false, null, 'Heirlooms');
     
+    createSetting('HeirloomMetalStaves', 'Keep Staves', 'Will hold onto any Plagued staff capable of having metal drop + miner eff + fragment drop + explorer eff + fluffy. Used as main staff.', 'boolean', true, null, 'Heirlooms');
+    createSetting('HeirloomWoodStaves', 'Keep Wood Staves', 'Will hold onto any Plagued staff capable of having lumberjack eff + miner eff + fragment drop + explorer eff + fluffy. Used as main staff for more wood for nurseries. Mostly useful for Spire V alongside the Spire LWC option.', 'boolean', false, null, 'Heirlooms');
     createSetting('HeirloomStaves', 'Keep Staves', 'Will hold onto any Plagued staff capable of having metal drop + miner eff + fragment drop + explorer eff + fluffy. Used as main staff.', 'boolean', true, null, 'Heirlooms');
     createSetting('HeirloomHighShield', 'Keep 5/5 Shields', 'Will hold onto any Plagued shield capable of having crit chance + crit damage + attack + Plaguebringer + VMDC. Used as main shield.', 'boolean', true, null, 'Heirlooms');
     createSetting('HeirloomLowShield', 'Keep 2/5 Shields', 'Will hold onto any Plagued shield capable of having Plaguebringer+VMDC and no damage mods. Used for shield swaps for windstacking.', 'boolean', true, null, 'Heirlooms');

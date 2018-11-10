@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "48.1";
-var verDate = "8.11.18";
+var ver = "48.2";
+var verDate = "10.11.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -255,7 +255,6 @@ var scienceNeeded;
 var metalNeeded;
 var woodNeeded;
 var foodNeeded;
-var breedFire = false;
 var hiddenBreedTimer;
 var hiddenBreedTimerLast;
 

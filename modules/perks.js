@@ -1254,7 +1254,7 @@ function calcBasePop(useMaxFuel){
         var endZone = (autoTrimpSettings.APValueBoxes.amalGoal > 0 ? autoTrimpSettings.APValueBoxes.amalZone : autoTrimpSettings.APValueBoxes.maxZone);
     }
     for (var i = start; i < endZone; i++){
-        pop *= 1.009; //tauntimp average increase
+        pop *= Math.pow(1.003, 2.97); //tauntimp average increase
         
         if(i <= endFuel){
             var fuelFromMagmaCell = Math.min(0.2 + (i-230) * 0.01, supMax);

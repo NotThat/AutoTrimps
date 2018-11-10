@@ -63,6 +63,16 @@ function checkJobPercentageCost(what, toBuy) {
 function getScienceCostToUpgrade(upgrade){
     var upgradeObj = game.upgrades[upgrade];
 
+    if (upgradeObj.cost.resources.science !== undefined ? upgradeObj.cost.resources.science[0] !== undefined : false)
+        scienceNeeded += Math.floor(upgradeObj.cost.resources.science[0] * Math.pow(upgradeObj.cost.resources.science[1], (upgradeObj.done)));
+    else if (upgradeObj.cost.resources.science !== undefined && upgradeObj.cost.resources.science[0] == undefined)
+        scienceNeeded += upgradeObj.cost.resources.science;
+    
+    //these upgrades potentially are unbought for various reasons, so dont count their metal/wood/food for the sake of saving resources
+    if(upgrade == "Coordination" || upgrade == "Supershield" || upgrade == "Dagadder" || upgrade == "Bootboost" || upgrade == "Megamace" || 
+       upgrade == "Hellishment" || upgrade == "Polierarm" || upgrade == "Pantastic" || upgrade == "Axeidic" || upgrade == "Smoldershoulder" ||
+       upgrade == "Greatersword" || upgrade == "Bestplate" || upgrade == "Harmbalest" || upgrade == "GambesOP") return;
+
     if (upgradeObj.cost.resources.food !== undefined ? upgradeObj.cost.resources.food[0] !== undefined : false)
         foodNeeded += Math.floor(upgradeObj.cost.resources.food[0] * Math.pow(upgradeObj.cost.resources.food[1], (upgradeObj.done)));
     else if (upgradeObj.cost.resources.food !== undefined && upgradeObj.cost.resources.food[0] == undefined)
@@ -77,11 +87,6 @@ function getScienceCostToUpgrade(upgrade){
         metalNeeded += Math.floor(upgradeObj.cost.resources.metal[0] * Math.pow(upgradeObj.cost.resources.metal[1], (upgradeObj.done)));
     else if (upgradeObj.cost.resources.metal !== undefined && upgradeObj.cost.resources.metal[0] == undefined)
         metalNeeded += upgradeObj.cost.resources.metal;
-    
-    if (upgradeObj.cost.resources.science !== undefined ? upgradeObj.cost.resources.science[0] !== undefined : false)
-        scienceNeeded += Math.floor(upgradeObj.cost.resources.science[0] * Math.pow(upgradeObj.cost.resources.science[1], (upgradeObj.done)));
-    else if (upgradeObj.cost.resources.science !== undefined && upgradeObj.cost.resources.science[0] == undefined)
-        scienceNeeded += upgradeObj.cost.resources.science;
 }
 
 function getEnemyMaxHealth(world, level, corrupt) {

@@ -105,13 +105,14 @@ function valueLoomsNew(){
         }
         if(loom.rarity < 8) //not plagued, ignore it
             continue;
-        var keepStaves     = isValidStaff(loom, true)      && getPageSetting('HeirloomStaves');
-        var keepHighShield = isValidHighShield(loom, true) && getPageSetting('HeirloomHighShield');
-        var keepLowShield  = isValidLowShield(loom, true)  && getPageSetting('HeirloomLowShield');
-        var keepPushShield = isValidPushShield(loom, true) && getPageSetting('HeirloomPushShield');
-        var keepHighPush   = isValidHighShield(loom, true) && isValidPushShield(loom, true) && getPageSetting('HeirloomHighPushShield');
+        var keepMetalStaves = isValidMetalStaff(loom, true) && getPageSetting('HeirloomMetalStaves');
+        var keepWoodStaves  = isValidWoodStaff(loom, true)  && getPageSetting('HeirloomWoodStaves');
+        var keepHighShield  = isValidHighShield(loom, true) && getPageSetting('HeirloomHighShield');
+        var keepLowShield   = isValidLowShield(loom, true)  && getPageSetting('HeirloomLowShield');
+        var keepPushShield  = isValidPushShield(loom, true) && getPageSetting('HeirloomPushShield');
+        var keepHighPush    = isValidHighShield(loom, true) && isValidPushShield(loom, true) && getPageSetting('HeirloomHighPushShield');
         
-        if(keepLowShield || keepHighShield || keepPushShield || keepStaves || keepHighPush){
+        if(keepLowShield || keepHighShield || keepPushShield || keepMetalStaves || keepWoodStaves || keepHighPush){
             //debug("carrying heirloom " + loom);
             selectHeirloom(game.global.heirloomsExtra.indexOf(loom), 'heirloomsExtra', true);
             newCarryHeirloom(); //this reshuffles game.global.heirloomsExtra, so lets recall the function for the new array
@@ -738,7 +739,7 @@ function isValidPushShield(loom, acceptEmpty){
     return (matchCounter === 5);
 }
 
-function isValidStaff(loom, acceptEmpty){
+function isValidMetalStaff(loom, acceptEmpty){
     if(loom.type != "Staff")
         return false;
     var matchCounter = 0;
@@ -754,6 +755,36 @@ function isValidStaff(loom, acceptEmpty){
                 matchCounter++;
                 break;
             case "metalDrop":
+                matchCounter++;
+                break;
+            case "MinerSpeed":
+                matchCounter++;
+                break;
+            case "empty":
+                if(acceptEmpty)
+                    matchCounter++;
+                break;
+        }
+    }
+    return (matchCounter === 5);
+}
+
+function isValidWoodStaff(loom, acceptEmpty){
+    if(loom.type != "Staff")
+        return false;
+    var matchCounter = 0;
+    for (mod of loom.mods){
+        switch (mod[0]) {
+            case "FluffyExp":
+                matchCounter++;
+                break;
+            case "ExplorerSpeed":
+                matchCounter++;
+                break;
+            case "fragmentsDrop":
+                matchCounter++;
+                break;
+            case "LumberjackSpeed":
                 matchCounter++;
                 break;
             case "MinerSpeed":
