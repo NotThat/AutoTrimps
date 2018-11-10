@@ -453,7 +453,6 @@ function initializeAllSettings() {
     
     createSetting('HeirloomMetalStaves', 'Keep Staves', 'Will hold onto any Plagued staff capable of having metal drop + miner eff + fragment drop + explorer eff + fluffy. Used as main staff.', 'boolean', true, null, 'Heirlooms');
     createSetting('HeirloomWoodStaves', 'Keep Wood Staves', 'Will hold onto any Plagued staff capable of having lumberjack eff + miner eff + fragment drop + explorer eff + fluffy. Used as main staff for more wood for nurseries. Mostly useful for Spire V alongside the Spire LWC option.', 'boolean', false, null, 'Heirlooms');
-    createSetting('HeirloomStaves', 'Keep Staves', 'Will hold onto any Plagued staff capable of having metal drop + miner eff + fragment drop + explorer eff + fluffy. Used as main staff.', 'boolean', true, null, 'Heirlooms');
     createSetting('HeirloomHighShield', 'Keep 5/5 Shields', 'Will hold onto any Plagued shield capable of having crit chance + crit damage + attack + Plaguebringer + VMDC. Used as main shield.', 'boolean', true, null, 'Heirlooms');
     createSetting('HeirloomLowShield', 'Keep 2/5 Shields', 'Will hold onto any Plagued shield capable of having Plaguebringer+VMDC and no damage mods. Used for shield swaps for windstacking.', 'boolean', true, null, 'Heirlooms');
     createSetting('HeirloomPushShield', 'Keep Push Shields', 'Will hold onto any Plagued shield capable of having crit chance + crit damage + attack + Plaguebringer + health. Used as a push shield for spire/C2s/HZE.', 'boolean', true, null, 'Heirlooms');
@@ -882,7 +881,8 @@ function updateCustomButtons() {
     getPageSetting('GASetting') ? turnOff("GASettingManual"): turnOn("GASettingManual");
     //getPageSetting('PRaidSetting') ? turnOff("PRaidingZoneStart") : turnOn("PRaidingZoneStart");
     
-    getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomStaves"): turnOff("HeirloomStaves");
+    getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomMetalStaves"): turnOff("HeirloomMetalStaves");
+    getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomWoodStaves"): turnOff("HeirloomWoodStaves");
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomHighShield"): turnOff("HeirloomHighShield");
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomLowShield"): turnOff("HeirloomLowShield");
     getPageSetting('HeirloomEvalNew') ? turnOn("HeirloomPushShield"): turnOff("HeirloomPushShield");

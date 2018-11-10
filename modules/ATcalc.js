@@ -380,19 +380,22 @@ function calcCurrSendHealth(currentGame, getNurseCount, printout, zone, dailyObj
 
 //helper functions to check our accuracy
 function currEnemyDamage(){
-    if(game.global.mapsActive || game.global.preMapsActive) return;
+    //if(game.global.mapsActive || game.global.preMapsActive) return;
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
+    var ret = game.global.mapsActive ? currMap.difficulty * calcEnemyAttack(cell.mutation, cell.corrupted, cell.name, cellNum, currMap.level, true) : calcEnemyAttack(cell.mutation, cell.corrupted, cell.name, cellNum, game.global.world, true);
 
-    return calcEnemyAttack(cell.mutation, cell.corrupted, cell.name, cellNum, game.global.world, true).toExponential(2);
+    return ret.toExponential(2);
 }
 
 function currEnemyHealth(){
-    if(game.global.mapsActive || game.global.preMapsActive) return;
+    //if(game.global.mapsActive || game.global.preMapsActive) return;
+    if(game.global.mapsActive) mapMult = currMap.difficulty;
     var cellNum = (game.global.mapsActive) ? game.global.lastClearedMapCell + 1 : game.global.lastClearedCell + 1;
     var cell = (game.global.mapsActive) ? game.global.mapGridArray[cellNum] : game.global.gridArray[cellNum];
     
-    return calcEnemyHealth(cell.mutation, cell.corrupted, cell.name, cellNum, game.global.world, true).toExponential(2);
+    var ret = game.global.mapsActive ? currMap.difficulty * calcEnemyHealth(cell.mutation, cell.corrupted, cell.name, cellNum, currMap.level, true) : calcEnemyHealth(cell.mutation, cell.corrupted, cell.name, cellNum, game.global.world, true);
+    return ret.toExponential(2);
 }
 
 function calcEnemyAttack(mutation, corrupted, name, level, zone, currentGame, dailyObj){

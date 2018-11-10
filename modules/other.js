@@ -228,9 +228,12 @@ function fightManualAT(){
     if(game.resources.trimps.owned/trimpsRealMax < 1 && game.global.challengeActive != "Trapper"){
         var nextArmyHealth = calcCurrSendHealth(true, false, false, game.global.world);
         var enemyDamage    = currEnemyDamage();
+        var block = game.global.soldierCurrentBlock;
         
-        if(game.global.mapsActive || nextArmyHealth/enemyDamage < 1000) return;
-        if(handleGA(true) < maxAnti) return; //in nom/bogged/electricity, never send armies before max pop
+        if(!game.global.mapsActive || block < enemyDamage){
+            if(game.global.mapsActive || nextArmyHealth/enemyDamage < 1000) return;
+            if(handleGA(true) < maxAnti) return; //in nom/bogged/electricity, never send armies before max pop
+        }
     }
     
     if(wantGoodShield != highDamageHeirloom){

@@ -44,7 +44,7 @@ function autoMap(){
     if(getPageSetting('AutoMaps') === 0 || !game.global.mapsUnlocked || game.global.challengeActive == "Mapology") return;
     
     //dont enter maps before cell 90 in last poison zone, except in spire or for map bonus
-    if((enoughDamage || game.global.mapBonus >= 10) && game.global.world >= 236 && (cycleZone() === 4 || cycleZone() === 19) && game.global.lastClearedCell + 1 < 90 && !game.global.spireActive){
+    if((enoughDamage || game.global.mapBonus >= 10) && game.global.world >= 236 && (cycleZone() === 4 || cycleZone() === 19 || (game.global.world % 10 === 9 && game.global.challengeActive == "Obliterated")) && game.global.lastClearedCell + 1 < 90 && !game.global.spireActive){
         if(game.global.preMapsActive)
             mapsClicked(true);
         return;
@@ -299,6 +299,9 @@ function autoMap(){
     
     //#1 in a map, figure out repeat button
     if (game.global.mapsActive){
+        if (game.global.soldierHealth <= 0)
+            fightManualAT(); //smart enough to only attack early if our army can survive for decent chunk of time
+        
         if(currMap.location == "Void"){
             AutoMapsCoordOverride = true;
             if(doVoids && !game.global.repeatMap)
@@ -675,7 +678,7 @@ function BWRaidNowLogic(){
     if(setting === 0)                                                                                        return false; //never
     else if(setting === 1 && !game.global.runningChallengeSquared)                                           return false; //c2 only
     else if(setting === 2 && !game.global.runningChallengeSquared && game.global.challengeActive != "Daily") return false; //c2 + dailies
-    else if(game.global.world < getPageSetting('BWraidingmin') || (game.global.challengeActive != "Trimp" && game.global.world >= 236 && !(cycleZone() == 4 || cycleZone() == 19))) return false;
+    else if(game.global.world < getPageSetting('BWraidingmin') || (game.global.challengeActive != "Trimp" && game.global.world >= 236 && !((cycleZone() == 4 || cycleZone() == 19) || (game.global.world % 10 === 9 && game.global.challengeActive == "Obliterated")))) return false;
     return true;                                                                                                                
 }
 
