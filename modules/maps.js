@@ -377,8 +377,7 @@ function autoMap(){
                 if(!flag || !flag2){
                     debug("Can't afford map with parameters. level: " + desiredMapLevel + " type: " + type, "maps");
                     debug("error in creating map process. Can't afford it? Running existing map instead.", "maps");
-                    mapsClicked(true);
-                    return;
+                    selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1]; //the map we just created
                 }
                 else
                     selectedMap = game.global.mapsOwnedArray[game.global.mapsOwnedArray.length-1]; //the map we just created
