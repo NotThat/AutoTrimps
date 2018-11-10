@@ -1564,41 +1564,68 @@ AutoPerks.initializeAmalg = function(){
         AutoPerks.finalAmalRatio = getAmalFinal(basePopAtZToUse);
         while(AutoPerks.finalAmalRatio < safety && pct < AutoPerks.MAXPCT){
             //we cant reach our amalgamators, so increase carp1/coordinated/carp2 until we can
-            //increase carp1
-            var price = carp1perk.getPrice();
-            carp1perk.buyLevel();
-            carp1perk.spent+= price;
-            pct = AutoPerks.getPct();
-            AutoPerks.popMult = popMultiplier(); //pop calc, uses carp1/2
-            AutoPerks.finalAmalRatio = getAmalFinal(basePopAtZToUse);
-            if(AutoPerks.finalAmalRatio >= safety || pct >= AutoPerks.MAXPCT)
-                break;
-            //if coordinated level costs less than double carp level, buy coord TODO: use exact efficiency increase
-            var price2 = coordperk.getPrice();
-            if(price2 < 2*price && AutoPerks.ChallengeName != "Trimp"){ //but not in trimp challenge
+            //we calculate the efficiency (amal goal divided by helium cost) of leveling coordinated and compare it to the efficiency of leveling carp1&carp2
+            var carp1Price = carp1perk.getPrice();
+            var carp1Increase = 1.1;
+            
+            //we may not always buy carp2 for low levels of carp1
+            var carp2Price = 0;
+            var carp2Increase = 1;
+            if(!carp2perk.isLocked){
+                //carp2 level func
+                var x = carp1perk.level;
+                var levelTarget = Math.floor(1/100*(Math.sqrt(5)*Math.sqrt(x + Math.pow(2,1-x)*Math.pow(5,2-x)*Math.pow(13,x)+76050000)-20500));
+                var newLevel = Math.max(0, levelTarget);
+                if(newLevel > carp2perk.level){
+                    var packLevel = newLevel - carp2perk.level;
+                    carp2Price = carp2perk.getTotalPrice(newLevel) - carp2perk.spent;
+                    carp2Increase = (1 + 0.0025 * newLevel) / (1 + 0.0025 * carp2perk.level)
+                }
+            }
+            
+            var carp12Price = carp1Price + carp2Price;
+            var carp12Increase = carp1Increase * carp2Increase;
+            var carp12Eff = carp12Increase / carp12Price;
+            
+            var coordPrice = coordperk.getPrice();
+            var coordIncrease = calcCoords(coordperk.level+1) / AutoPerks.finalArmySize;
+            var coordEff = coordIncrease / coordPrice;
+            if(carp12Eff >= coordEff){ //level up carp1 and maybe carp2
+                carp1perk.buyLevel();
+                carp1perk.spent+= carp1Price;
+                pct = AutoPerks.getPct();
+                AutoPerks.popMult = popMultiplier(); //pop calc, uses carp1/2
+                AutoPerks.finalAmalRatio = getAmalFinal(basePopAtZToUse);
+                if(AutoPerks.finalAmalRatio >= safety || pct >= AutoPerks.MAXPCT)
+                    break;
+                
+                //calculate carp2 based off of carp1.
+                if(!carp2perk.isLocked){
+                    var levelTarget = carp1perk.childLevelFunc();
+                    var newLevel = Math.max(0, levelTarget);
+                    if(newLevel > carp2perk.level){
+                        var packLevel = newLevel - carp2perk.level;
+                        var packPrice = carp2perk.getTotalPrice(newLevel) - carp2perk.spent;
+                        carp2perk.level += packLevel;
+                        carp2perk.spent += packPrice;
+                    }
+
+                    pct = AutoPerks.getPct();
+                    AutoPerks.popMult = popMultiplier(); //pop calc, uses carp1/2
+                    AutoPerks.finalAmalRatio = getAmalFinal(basePopAtZToUse);
+                    if(AutoPerks.finalAmalRatio >= safety || pct >= AutoPerks.MAXPCT)
+                        break;
+                }
+            }
+            else{ //level up coord
                 coordperk.buyLevel();
-                coordperk.spent+= price2;
+                coordperk.spent += coordPrice;
                 pct = AutoPerks.getPct();
                 AutoPerks.finalArmySize = calcCoords(); //uses coordinated //recalculate army size
                 AutoPerks.finalAmalRatio = getAmalFinal(basePopAtZToUse);
                 if(AutoPerks.finalAmalRatio >= safety || pct >= AutoPerks.MAXPCT)
                     break;
             }
-            //calculate carp2 based off of carp1.
-            var levelTarget = carp1perk.childLevelFunc();
-            var newLevel = Math.max(0, levelTarget);
-            if(newLevel > carp2perk.level){
-                var packLevel = newLevel - carp2perk.level;
-                var packPrice = carp2perk.getTotalPrice(newLevel) - carp2perk.spent;
-                carp2perk.level += packLevel;
-                carp2perk.spent += packPrice;
-            }
-
-            pct = AutoPerks.getPct();
-            AutoPerks.popMult = popMultiplier(); //pop calc, uses carp1/2
-            AutoPerks.finalAmalRatio = getAmalFinal(basePopAtZToUse);
-            if(AutoPerks.finalAmalRatio >= safety || pct >= AutoPerks.MAXPCT)
-                break;
         }
         if(AutoPerks.finalAmalRatio >= safety){
             //store successful carp1/2/coordinated
@@ -1634,7 +1661,9 @@ AutoPerks.initializeAmalg = function(){
             AutoPerks.currAmalgamators--;
             break;
         }
-    }   
+    }
+    
+    debug(carp1perk.level + " " + coordperk.level + " AutoPerks.coordsUsed " + AutoPerks.coordsUsed);
     
     document.getElementById("textAreaAllocate").innerHTML = finalMsg;
     if(AutoPerks.currAmalgamators < 0) AutoPerks.currAmalgamators = 0;
