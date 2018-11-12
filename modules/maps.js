@@ -931,7 +931,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
     if(specialMod == "lmc") specialMod = backupSpecial;
     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type); //this last calcMapCost call also sets the special map type (lmc/lwc/lsc) to the correct type
     
-    if(cheap && cost > fragments * 0.01){
+    if(cheap && cost > fragments * 0.1){
         lootSlider = 0;
         perfect = false;
         type = "Random";
