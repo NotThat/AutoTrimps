@@ -74,7 +74,7 @@ function buyJobsEarlyGame(){
 }
 
 //Hires and Fires all workers (farmers/lumberjacks/miners/scientists/trainers/explorers)
-function buyJobs() {
+function buyJobs(){
     var breeding = (game.resources.trimps.owned - game.resources.trimps.employed);
     var totalDistributableWorkers = getFreeWorkers() + game.jobs.Farmer.owned + game.jobs.Miner.owned + game.jobs.Lumberjack.owned;
     

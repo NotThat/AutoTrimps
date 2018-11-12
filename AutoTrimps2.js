@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "48.7";
-var verDate = "10.11.18";
+var ver = "49";
+var verDate = "12.11.18";
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -500,12 +500,8 @@ function oncePerZoneCode(){
 
     maxAnti = game.portal.Anticipation.level > 0 ? (game.talents.patience.purchased ? 45 : 30) : 0;
     
-    if(game.global.mapsActive){
+    if(game.global.mapsActive)
         currMap = getCurrentMapObject();
-        if(currMap.bonus == "lmc") LMCDone = true;
-        if(currMap.bonus == "lwc") LWCDone = true;
-        if(currMap.bonus == "lsc") LSCDone = true;
-    }
     
     attacksPerSecondAT = calcAttacksPerSecond();
     expectedPortalZone = autoTrimpSettings.AutoPortal.selected !== "Custom" ? 0 : getPageSetting('CustomAutoPortal') + (game.global.challengeActive == "Daily" ? getPageSetting('AutoFinishDailyNew') : 0);

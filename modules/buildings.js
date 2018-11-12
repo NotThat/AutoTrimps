@@ -162,6 +162,9 @@ function buyBuildings() {
     var customVars = MODULES["buildings"];
     var oldBuy = preBuy2();
     game.global.buyAmt = 1;
+    if(game.resources.trimps.owned < 20 && canAffordBuilding('Trap') && game.global.buildingsQueue.length === 0)
+        safeBuyBuilding('Trap');
+    
     buyFoodEfficientHousing();  //["Hut", "House", "Mansion", "Hotel", "Resort"];
     if ((game.jobs.Miner.locked && game.global.challengeActive != 'Metal') || (game.jobs.Scientist.locked && game.global.challengeActive != "Scientist"))
         return;

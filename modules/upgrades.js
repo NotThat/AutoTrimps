@@ -69,18 +69,18 @@ function buyUpgrades(coordsOnly) {
         if (upgrade == 'Bloodlust' && game.global.challengeActive == 'Scientist') continue;
 
         if (!available) continue;
-        if (game.upgrades.Scientists.done < game.upgrades.Scientists.allowed && upgrade != 'Scientists') continue;
+        if (game.upgrades.Scientists.done < game.upgrades.Scientists.allowed && upgrade != 'Scientists' && upgrade != 'Miners') continue;
         
         if (upgrade == 'Coordination'){
-            //var buyCoordsFlag = game.global.challengeActive != "Trapper" && game.resources.trimps.owned/trimpsRealMax <= 0.9; //only buy coordination when we're above 90% pop
-            //if(buyCoords && !buyCoordsFlag)
             if(buyCoords)
                 buyUpgrade(upgrade, true, true);
             else
                 continue;
         }
-        else
+        else{
             buyUpgrade(upgrade, true, true);
+            if(upgrade == "Battle") buildWorldArray(); //purchasing battle upgrade creates world grid, so add it
+        }
         debug('Upgraded ' + upgrade, "upgrades", "*upload2");
     }
 }

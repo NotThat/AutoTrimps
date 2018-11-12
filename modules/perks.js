@@ -728,7 +728,7 @@ function calcZeroState(){
 function benefitHeliumCalc(){
     var looting1 = AutoPerks.useLivePerks ? game.portal["Looting"] : AutoPerks.perksByName.Looting;
     var looting2 = AutoPerks.useLivePerks ? game.portal["Looting_II"] : AutoPerks.perksByName.Looting_II;
-    
+
     this.benefit = (AutoPerks.dailyObj === AutoPerks.Squared) ? 1 : (1 + 0.05*looting1.level) * (1 + 0.0025*looting2.level) * AutoPerks.DailyWeight;
     
     if(isNaN(this.benefit)) throw "Helium NaN benefit";
@@ -868,7 +868,7 @@ function calcIncome(toRet){ //returns: 1 - equipment attack, 2 - equipment healt
                         staffBonusMining *
                         2 *                                 //sharing food
                         AutoPerks.DailyResourceMult;          //daily         
-                        
+
     AutoPerks.cacheResources = calcCacheReward() * AutoPerks.DailyResourceMult; //LMC
 
     AutoPerks.baseZoneLoot = baseZoneDrop() * AutoPerks.DailyResourceMult;
@@ -947,7 +947,7 @@ function calcCacheReward(){
     var looting2        = AutoPerks.useLivePerks ? game.portal["Looting_II"] : AutoPerks.perksByName.Looting_II;
     
     var pop = (AutoPerks.ChallengeName == "Trapper" && !portalWindowOpen) ? game.jobs.Miner.owned : (AutoPerks.basePopToUse * popMultiplier() / 2); //in trapper, our current population is fixed (minus some losses to armies)
-    var amt = pop * getJobModifierAT() * 20; //game.jobs["Miner"].modifier;
+    var amt = pop * getJobModifierAT() * 20; //includes motivation!
     amt *= AutoPerks.windMod;
     amt = calcHeirloomBonus("Staff", "MinerSpeed", amt);
 

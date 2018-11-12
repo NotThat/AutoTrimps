@@ -22,12 +22,24 @@ function manualLabor() {
         else if(maxWorkers == game.jobs.Miner.owned) desired = 'metal';
     }
     
-    if (!game.talents.foreman.purchased && game.global.buildingsQueue.length >= 1 && (game.global.autoCraftModifier == 0 || game.global.buildingsQueue[0].indexOf("Trap") == -1))
-        desired = 'buildings';
-    
     //if we have some upgrades sitting around which we don't have enough science for, gather science
     if ((game.resources.science.owned < scienceNeeded || game.resources.science.owned < 100) && document.getElementById('scienceCollectBtn').style.display == 'block')
         desired = 'science';
+    
+    if (!game.talents.foreman.purchased && game.global.buildingsQueue.length >= 1 && (game.global.autoCraftModifier == 0 || game.global.buildingsQueue[0].indexOf("Trap") == -1))
+        desired = 'buildings';
+    
+    if (game.resources.trimps.owned < 20 && game.buildings.Trap.owned > 0)
+        desired = 'trimps';
+    
+    if(desired == 'science' && document.getElementById('science').style.visibility == "hidden")
+        desired = 'metal';
+    
+    if(desired == 'metal' && document.getElementById('metal').style.visibility == "hidden")
+        desired = 'wood';
+    
+    if(desired == 'wood' && (document.getElementById('wood').style.visibility == "hidden" || game.resources.food.owned < 10))
+        desired = 'food';
     
     if(game.global.playerGathering != desired)
         setGather(desired);
