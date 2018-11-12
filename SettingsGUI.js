@@ -366,7 +366,7 @@ function initializeAllSettings() {
 
     //createSetting('PRaidSetting', 'Auto PRaid', 'With this on AT will decide automatically when to Prestige Raid based on zone, damage and zone type.', 'boolean', true, null, 'Maps');
     createSetting('PRaidingZoneStart', 'Map Raiding Start', 'Starting this zone, begin raiding higher maps for prestige. -1 for never.', 'value', -1, null, 'Maps');
-    createSetting('PAggression', ['PRaid: Light', 'PRaid: Aggressive'], 'How aggressively should AT chase after prestige. Aggressive costs more fragments. If you have a plagued staff with fragment drop then you probably want aggressive mode.', 'multitoggle', 1, null, 'Maps');
+    createSetting('PAggression', ['PRaid: Light', 'PRaid: Aggressive', 'PRaid: Endgame'], 'How aggressively should AT chase after prestige. Aggressive costs more fragments. If you have a plagued staff with fragment drop then you probably want aggressive mode. Endgame will more liberally buy perfect prestigious maps.', 'multitoggle', 1, null, 'Maps');
     createSetting('PRaidingMaxZones', 'Max Extra Zones', 'Caps maximum extra Zones AT should ever buy chasing prestige. If BW Raid is enabled then will always attempt to prestige raid the highest possible before beginning BW raiding.', 'value', 10, null, 'Maps');
     
     //createSetting('BWraidDailyCOnly', 'BW Raiding Daily/C2 Only', 'Only BW raid in dailies and challenges', 'boolean', false, null, 'Maps');

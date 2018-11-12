@@ -581,7 +581,7 @@ function PrestigeRaid() {
         }
     }
     
-    if(cycleZone() === 0 && getPageSetting('PAggression') === 1){ //xx6 poison zone in aggressive mode
+    if(cycleZone() === 0 && getPageSetting('PAggression') > 0){ //xx6 poison zone in aggressive mode
         decideMapParams(maxDesiredLevel, maxDesiredLevel, "Prestigious", true, 0.8); //this updates the global variables for selected map level (+7: xx3)
         if(cost <= 0.5 * game.resources.fragments.owned) //if map is easily affordable, get all +9 prestiges at once
             maxDesiredLevel = maxDesiredLevel + 2; //raid +9: xx5 instead of +7: xx3. used so we wont have to trimpicide twice in same 5 zones
@@ -620,7 +620,8 @@ function PrestigeRaid() {
     
     //Let's see if we already own a map of suitable level
     var map = false;
-    for(var i = minDesiredLevel; i <= maxDesiredLevel; i++){
+    var mod = (cycleZone() === 0 && getPageSetting('PAggression') > 0) ? 2 : 0;
+    for(var i = minDesiredLevel; i <= maxDesiredLevel + mod; i++){
         map = findMap(i); //ignores uniques
         if(map)
             break;
@@ -931,7 +932,7 @@ function decideMapParams(minLevel, maxLevel, special, cheap, fragCap){
     if(specialMod == "lmc") specialMod = backupSpecial;
     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type); //this last calcMapCost call also sets the special map type (lmc/lwc/lsc) to the correct type
     
-    if(cheap && cost > fragments * 0.1){
+    if(cheap && cost > fragments * 0.1 && getPageSetting('PAggression') < 2){ //perfect map costs <10% frags, or endgame praid mode
         lootSlider = 0;
         perfect = false;
         type = "Random";
