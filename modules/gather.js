@@ -29,7 +29,7 @@ function manualLabor() {
     if (!game.talents.foreman.purchased && game.global.buildingsQueue.length >= 1 && (game.global.autoCraftModifier == 0 || game.global.buildingsQueue[0].indexOf("Trap") == -1))
         desired = 'buildings';
     
-    if (game.resources.trimps.owned < 20 && game.buildings.Trap.owned > 0)
+    if (game.resources.trimps.owned < 20 && game.resources.trimps.owned < trimpsRealMax && game.buildings.Trap.owned > 0)
         desired = 'trimps';
     
     if(desired == 'science' && document.getElementById('science').style.visibility == "hidden")
