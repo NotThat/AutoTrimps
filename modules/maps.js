@@ -531,7 +531,7 @@ function PrestigeRaid() {
     
     var havePrestigeUpTo = lastPrestigeZone(); // check currently owned prestige levels
     findDesiredMapLevel(PRaidMax, PAggro, havePrestigeUpTo); //finds min and max levels we want to raid
-
+    
     if(havePrestigeUpTo > maxDesiredLevel) //have all the prestige levels that we want.
         return true; 
     if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 2) //have all
@@ -581,13 +581,6 @@ function PrestigeRaid() {
         }
     }
     
-    if(cycleZone() === 0 && getPageSetting('PAggression') > 0){ //xx6 poison zone in aggressive mode
-        decideMapParams(maxDesiredLevel, maxDesiredLevel, "Prestigious", true, 0.8); //this updates the global variables for selected map level (+7: xx3)
-        if(cost <= 0.5 * game.resources.fragments.owned || perfect) //if map is easily affordable, get all +9 prestiges at once
-            maxDesiredLevel = maxDesiredLevel + 2; //raid +9: xx5 instead of +7: xx3. used so we wont have to trimpicide twice in same 5 zones
-    }
-    
-    
     //first, lets create maps for each level between minDesiredLevel and maxDesiredLevel
     var map = false;
     for(var lvl = maxDesiredLevel; lvl >= minDesiredLevel; lvl--){
@@ -620,8 +613,7 @@ function PrestigeRaid() {
     
     //Let's see if we already own a map of suitable level
     var map = false;
-    var mod = (cycleZone() === 0 && getPageSetting('PAggression') > 0) ? 2 : 0;
-    for(var i = minDesiredLevel; i <= maxDesiredLevel + mod; i++){
+    for(var i = minDesiredLevel; i <= maxDesiredLevel; i++){
         map = findMap(i); //ignores uniques
         if(map)
             break;
@@ -1018,9 +1010,10 @@ function findDesiredMapLevel(PRaidMax, PAggro, havePrestigeUpTo){
                 minDesiredLevel = game.global.world + 1; //+1 level is still fine, just dont get xx6
             }
             else{ //xx6-xx9 special case, we want to run xx1 then xx2 then xx3 for faster clear
+                var mod = (getPageSetting('PAggression') == 2) ? 2 : 0; //upto xx5 in endgame praid mode
                 maxDesiredLevel = game.global.world - lastDigitZone + 15;
-                if(maxDesiredLevel > game.global.world + 7)
-                    maxDesiredLevel = game.global.world+7;
+                if(maxDesiredLevel > game.global.world + 7 + mod)
+                    maxDesiredLevel = game.global.world+7 + mod;
                 minDesiredLevel = game.global.world - lastDigitZone + 11;
             }
         }
