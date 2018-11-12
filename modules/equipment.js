@@ -382,7 +382,7 @@ function autoLevelEquipment(buyDamage, colorStyle) {
             }
             //If we're considering a health item, buy it if we don't have enough health, otherwise we default to buying damage
             if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health' || DaThing.Stat == 'block') && game.global.soldierHealth < wantedHP && game.global.soldierHealth > 1) {
-                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(equipName, null, null, true) && (metalNeeded === 0 || game.global.totalHeliumEarned > 50000)){ //only buy if we dont need metal for upgrades
+                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(equipName, null, null, true) && ((metalNeeded === 0 && woodNeeded === 0) || game.global.totalHeliumEarned > 50000)){ //only buy if we dont need metal for upgrades
                     var ratio = (game.resources.metal.owned - metalNeeded) / (game.resources.metal.owned * 2)
                     var howMany = calculateMaxAfford(game.equipment[equipName], false, true, false, false, ratio); //20% of available resources
                     game.global.buyAmt = Math.min(25, howMany);
@@ -393,7 +393,7 @@ function autoLevelEquipment(buyDamage, colorStyle) {
             }
             //Always LVL 25:
             if (!buyDamage && BuyArmorLevels && (DaThing.Stat == 'health') && game.equipment[equipName].level < 25){
-                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(equipName, null, null, true)) {
+                if (DaThing.Equip && !Best[stat].Wall && canAffordBuilding(equipName, null, null, true) && ((metalNeeded === 0 && woodNeeded === 0)  || game.global.totalHeliumEarned > 50000)) {
                     var ratio = (game.resources.metal.owned - metalNeeded) / (game.resources.metal.owned * 10)
                     var howMany = calculateMaxAfford(game.equipment[equipName], false, true, false, false, ratio); //1% of available resources
                     game.global.buyAmt = Math.min(24, howMany);
