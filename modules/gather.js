@@ -26,11 +26,11 @@ function manualLabor() {
     if ((game.resources.science.owned < scienceNeeded || game.resources.science.owned < 100) && document.getElementById('scienceCollectBtn').style.display == 'block')
         desired = 'science';
     
-    if (!game.talents.foreman.purchased && game.global.buildingsQueue.length >= 1 && (game.global.autoCraftModifier == 0 || game.global.buildingsQueue[0].indexOf("Trap") == -1))
-        desired = 'buildings';
-    
     if (game.resources.trimps.owned < 20 && game.resources.trimps.owned < trimpsRealMax && game.buildings.Trap.owned > 0)
         desired = 'trimps';
+    
+    if (!game.talents.foreman.purchased && game.global.buildingsQueue.length >= 1 && (game.global.autoCraftModifier == 0 || game.global.buildingsQueue[0].indexOf("Trap") == -1))
+        desired = 'buildings';
     
     if(desired == 'science' && document.getElementById('science').style.visibility == "hidden")
         desired = 'metal';

@@ -162,7 +162,7 @@ function buyBuildings() {
     var customVars = MODULES["buildings"];
     var oldBuy = preBuy2();
     game.global.buyAmt = 1;
-    if(game.resources.trimps.owned < 20 && game.resources.trimps.owned < trimpsRealMax && canAffordBuilding('Trap') && game.global.buildingsQueue.length === 0)
+    if(game.resources.trimps.owned < 20 && game.resources.trimps.owned < trimpsRealMax - 1 && canAffordBuilding('Trap') && game.global.buildingsQueue.length === 0 && game.buildings.Trap.owned === 0)
         safeBuyBuilding('Trap');
     
     buyFoodEfficientHousing();  //["Hut", "House", "Mansion", "Hotel", "Resort"];
