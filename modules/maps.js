@@ -583,7 +583,7 @@ function PrestigeRaid() {
     
     if(cycleZone() === 0 && getPageSetting('PAggression') > 0){ //xx6 poison zone in aggressive mode
         decideMapParams(maxDesiredLevel, maxDesiredLevel, "Prestigious", true, 0.8); //this updates the global variables for selected map level (+7: xx3)
-        if(cost <= 0.5 * game.resources.fragments.owned) //if map is easily affordable, get all +9 prestiges at once
+        if(cost <= 0.5 * game.resources.fragments.owned || perfect) //if map is easily affordable, get all +9 prestiges at once
             maxDesiredLevel = maxDesiredLevel + 2; //raid +9: xx5 instead of +7: xx3. used so we wont have to trimpicide twice in same 5 zones
     }
     
