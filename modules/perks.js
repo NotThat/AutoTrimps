@@ -1519,7 +1519,7 @@ AutoPerks.initializeAmalg = function(){
     AutoPerks.updateBoxesUI();        //populate UI boxes based on selected preset. also updates userWeights from box values
     
     //army calc
-    AutoPerks.coordsUsed = (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + autoTrimpSettings.APCheckBoxes.userMaintainMode ? autoTrimpSettings.APValueBoxes.maxZone : autoTrimpSettings.APValueBoxes.amalZone-autoTrimpSettings.APValueBoxes.coordsBehind;
+    AutoPerks.coordsUsed = (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + (autoTrimpSettings.APCheckBoxes.userMaintainMode ? autoTrimpSettings.APValueBoxes.maxZone : autoTrimpSettings.APValueBoxes.amalZone-autoTrimpSettings.APValueBoxes.coordsBehind);
     AutoPerks.finalArmySize = calcCoords(); //uses coordinated
     
     //step 1: find max amalgamators we can afford. calculate carp1/2/coordinated along the way
