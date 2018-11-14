@@ -111,6 +111,9 @@ function buyJobs(){
     else if (getPageSetting('MaxScientists') != 0 && game.jobs.Scientist.owned < 10 && !game.jobs.Scientist.locked && scienceNeeded >= 60 && getFreeWorkers() && game.jobs.Farmer.owned >= 10)
         safeBuyJob('Scientist', 1);
     
+    if(game.jobs.Scientist.owned > getPageSetting('MaxScientists'))
+        safeFireJob('Scientist', game.jobs.Scientist.owned - getPageSetting('MaxScientists'));
+    
     totalDistributableWorkers = getFreeWorkers() + game.jobs.Farmer.owned + game.jobs.Miner.owned + game.jobs.Lumberjack.owned;
  
    //exit if we are havent bred to at least 90% breedtimer yet...
