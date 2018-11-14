@@ -1219,18 +1219,19 @@ function calcStartingPop(){ //this is pre carp1/2 population
 function calcBasePopArr(){
     AutoPerks.startingPop = calcStartingPop();
     AutoPerks.basePopArr = [];
+    AutoPerks.startingFuelArr = [];
     for (AutoPerks.fuelMaxZones = 0; AutoPerks.fuelMaxZones <= (autoTrimpSettings.APValueBoxes.amalGoal > 0 ? autoTrimpSettings.APValueBoxes.amalZone : autoTrimpSettings.APValueBoxes.maxZone) - 230; AutoPerks.fuelMaxZones += 1)
         AutoPerks.basePopArr[AutoPerks.fuelMaxZones] = calcBasePop();
     
     AutoPerks.fuelMaxZones = Math.max(0,(autoTrimpSettings.APValueBoxes.amalGoal > 0 ? autoTrimpSettings.APValueBoxes.amalZone : autoTrimpSettings.APValueBoxes.maxZone) - 230);
-    AutoPerks.maxFuelBasePopAtMaxZ = calcBasePop(true); //basepop if we fuel from 230 to maxZ
+    //AutoPerks.maxFuelBasePopAtMaxZ = calcBasePop(true); //basepop if we fuel from 230 to maxZ
+    AutoPerks.maxFuelBasePopAtMaxZ = AutoPerks.basePopArr[AutoPerks.fuelMaxZones]; //basepop if we fuel from 230 to maxZ
     
     return AutoPerks.basePopArr;
 }
 
 //base pop only depends on DG stats and fuel zones.
 function calcBasePop(useMaxFuel){
-    findStartEndFuel();
     //fuel and tauntimps
     var eff = game.generatorUpgrades["Efficiency"].upgrades;
     var fuelCapacity = 3 + game.generatorUpgrades["Capacity"].baseIncrease * game.generatorUpgrades["Capacity"].upgrades;
@@ -1239,36 +1240,42 @@ function calcBasePop(useMaxFuel){
     var magmaCells = game.talents.magmaFlow.purchased ? 18 : 16;
     var burn = game.permanentGeneratorUpgrades.Slowburn.owned ? 0.4 : 0.5;
     
-    var pop = AutoPerks.startingPop;
-    var currFuel = 0;
-    
     var popTick = Math.floor(Math.sqrt(fuelCapacity)* 500000000 * (1 + 0.1*eff) * OCEff);
-    if(useMaxFuel){
-        var start   = 230;
-        var endFuel = autoTrimpSettings.APValueBoxes.maxZone;
-        var endZone = autoTrimpSettings.APValueBoxes.maxZone;
-    }
-    else{
-        var start   = AutoPerks.fuelStartZone;
-        var endFuel = AutoPerks.fuelEndZone;
-        var endZone = (autoTrimpSettings.APValueBoxes.amalGoal > 0 ? autoTrimpSettings.APValueBoxes.amalZone : autoTrimpSettings.APValueBoxes.maxZone);
-    }
-    for (var i = start; i < endZone; i++){
-        pop *= Math.pow(1.003, 2.97); //tauntimp average increase
+    var endZone = (autoTrimpSettings.APValueBoxes.amalGoal > 0 ? autoTrimpSettings.APValueBoxes.amalZone : autoTrimpSettings.APValueBoxes.maxZone);
+    
+    var maxPopFound = 0;
+    var maxPopFuelStart = 230;
+    
+    AutoPerks.fuelStartZone = 230;
+    
+    for(AutoPerks.fuelStartZone = 230; AutoPerks.fuelStartZone <= endZone - AutoPerks.fuelMaxZones + 1; AutoPerks.fuelStartZone++){
+        AutoPerks.fuelEndZone = Math.min((autoTrimpSettings.APValueBoxes.amalGoal > 0 ? autoTrimpSettings.APValueBoxes.amalZone : autoTrimpSettings.APValueBoxes.maxZone), AutoPerks.fuelStartZone + AutoPerks.fuelMaxZones - 1);
         
-        if(i <= endFuel){
-            var fuelFromMagmaCell = Math.min(0.2 + (i-230) * 0.01, supMax);
-            var fuelFromZone = magmaCells * fuelFromMagmaCell;
-            currFuel += fuelFromZone;
-            if(currFuel > 2*fuelCapacity){
-                var ticks = Math.ceil((currFuel - 2*fuelCapacity) / burn);
-                pop += ticks * popTick;
-                currFuel -= burn * ticks;
+        var pop = AutoPerks.startingPop;
+        var currFuel = 0;
+        for (var i = AutoPerks.fuelStartZone; i < endZone; i++){
+            pop *= Math.pow(1.003, 2.97); //tauntimp average increase
+
+            if(i <=  AutoPerks.fuelEndZone){
+                var fuelFromMagmaCell = Math.min(0.2 + (i-230) * 0.01, supMax);
+                var fuelFromZone = magmaCells * fuelFromMagmaCell;
+                currFuel += fuelFromZone;
+                if(currFuel > 2*fuelCapacity){
+                    var ticks = Math.ceil((currFuel - 2*fuelCapacity) / burn);
+                    pop += ticks * popTick;
+                    currFuel -= burn * ticks;
+                }
             }
+        }
+        if(maxPopFound < pop){
+            maxPopFound = pop;
+            maxPopFuelStart = AutoPerks.fuelStartZone;
         }
     }
     
-    return Math.floor(pop * AutoPerks.DailyHousingMult);
+    AutoPerks.totalMi = (game.talents.magmaFlow.purchased ? 18 : 16) * (autoTrimpSettings.APValueBoxes.maxZone - 230 - AutoPerks.fuelMaxZones);
+    AutoPerks.startingFuelArr[AutoPerks.fuelMaxZones] = maxPopFuelStart;
+    return Math.floor(maxPopFound * AutoPerks.DailyHousingMult);
 }
 
 //base pop at maxZ, used for respec
@@ -1357,20 +1364,10 @@ function getAmalFinal(basePopAtZ){
     return basePopAtZ * AutoPerks.popMult / AutoPerks.finalArmySize / AutoPerks.amalMultPre / AutoPerks.RatioToAmal;
 }
 
-function findStartEndFuel(){
-    AutoPerks.fuelStartZone = Math.max(230, Math.min(320 - Math.ceil(AutoPerks.fuelMaxZones/2), autoTrimpSettings.APValueBoxes.amalZone - AutoPerks.fuelMaxZones));
-    AutoPerks.fuelEndZone = Math.min((autoTrimpSettings.APValueBoxes.amalGoal > 0 ? autoTrimpSettings.APValueBoxes.amalZone : autoTrimpSettings.APValueBoxes.maxZone), AutoPerks.fuelStartZone + AutoPerks.fuelMaxZones - 1);
-    AutoPerks.totalMi = (game.talents.magmaFlow.purchased ? 18 : 16) * (autoTrimpSettings.APValueBoxes.maxZone - 230 - AutoPerks.fuelMaxZones);
-}
-
 function minMaxMi(){
-    //for a given carp1/2/coordinated/amalgamator, figure out min fuel zones in jumps of 10
+    //for a given carp1/2/coordinated/amalgamator, figure out min fuel zones in 1 fuel zone decreases
     AutoPerks.popMult = popMultiplier(); //pop calc, uses carp1/2
-    //AutoPerks.finalArmySize = calcCoords(); //uses coordinated
-    AutoPerks.calcArmySizes();
-    //AutoPerks.armySizeAmalZ = calcCoords(coordperk.level, (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + autoTrimpSettings.APValueBoxes.amalZone-autoTrimpSettings.APValueBoxes.coordsBehind);
-    //AutoPerks.armySizeMaxZ  = calcCoords(coordperk.level, (autoTrimpSettings.APValueBoxes.maxZone >= 230 ? 99 : -1) + autoTrimpSettings.APValueBoxes.maxZone);
-    //var amalZToMaxZ = Math.pow(1.009, autoTrimpSettings.APValueBoxes.maxZone - autoTrimpSettings.APValueBoxes.amalZone);
+    AutoPerks.calcArmySizes(); //calculates AutoPerks.armySizeAmalZ and AutoPerks.armySizeMaxZ
     var amalZToMaxZ = AutoPerks.currAmalgamators > 0 ? Math.pow(1.009, autoTrimpSettings.APValueBoxes.maxZone - autoTrimpSettings.APValueBoxes.amalZone) : 1;
     
     if(AutoPerks.useMaxFuel)
@@ -1392,26 +1389,28 @@ function minMaxMi(){
             //we need to check 2 things: hitting amalgoal at amalzone and maintaining it by maxzone
             //check pop goal at amalZ
             AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[AutoPerks.fuelMaxZones]; //must be called before every getAmalFinal
-            AutoPerks.RatioToAmal = Math.pow(10, 10-AutoPerks.clearedSpiresBonus);
-            AutoPerks.finalArmySize = AutoPerks.armySizeAmalZ;
+            AutoPerks.RatioToAmal    = Math.pow(10, 10-AutoPerks.clearedSpiresBonus);
+            AutoPerks.finalArmySize  = AutoPerks.armySizeAmalZ;
             AutoPerks.finalAmalRatio = getAmalFinal(AutoPerks.basePopAtAmalZ);
             
             //check pop goal at maxZ
-            AutoPerks.basePopAtMaxZ = AutoPerks.basePopAtAmalZ * amalZToMaxZ;
-            AutoPerks.RatioToAmal = 1000000; //x1000 to preserve amal, x1000 to "reach" next one (forces loop amal loop to fit maintain mode)
-            AutoPerks.finalArmySize = AutoPerks.armySizeMaxZ;
+            AutoPerks.basePopAtMaxZ   = AutoPerks.basePopAtAmalZ * amalZToMaxZ;
+            AutoPerks.RatioToAmal     = 1000000; //x1000 to preserve amal, x1000 to "reach" next one (forces loop amal loop to fit maintain mode)
+            AutoPerks.finalArmySize   = AutoPerks.armySizeMaxZ;
             AutoPerks.finalAmalRatio2 = getAmalFinal(AutoPerks.basePopAtMaxZ);
             
             if(AutoPerks.finalAmalRatio < 1.05 || (AutoPerks.currAmalgamators > 0 && AutoPerks.finalAmalRatio2 < 1.05)){ //below threshold, undo last
                 AutoPerks.fuelMaxZones += 1;
                 AutoPerks.basePopAtAmalZ = AutoPerks.basePopArr[AutoPerks.fuelMaxZones]; //must be called before every getAmalFinal
-                AutoPerks.finalAmalRatio = getAmalFinal(AutoPerks.basePopAtAmalZ);
+                AutoPerks.finalAmalRatio = getAmalFinal(AutoPerks.basePopAtAmalZ); //probably not needed
                 break;
             }
         }
     }
     
-    findStartEndFuel(); //updates start zone, end zone and Mi
+    AutoPerks.fuelStartZone = AutoPerks.startingFuelArr[Math.min(AutoPerks.startingFuelArr.length-1, AutoPerks.fuelMaxZones)];
+    AutoPerks.fuelEndZone = AutoPerks.fuelStartZone + AutoPerks.fuelMaxZones - 1;
+    AutoPerks.totalMi = (game.talents.magmaFlow.purchased ? 18 : 16) * (autoTrimpSettings.APValueBoxes.maxZone - 230 - AutoPerks.fuelMaxZones);
     if(AutoPerks.useMaxFuel) AutoPerks.totalMi = 0;
     return AutoPerks.totalMi;
 }

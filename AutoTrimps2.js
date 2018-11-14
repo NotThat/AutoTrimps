@@ -18,8 +18,14 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "49.9";
-var verDate = "12.11.18";
+var ver = "50";
+var verDate = "14.11.18";
+
+var changelogList = [];
+changelogList.push({date: "14.11.2018", version: "", description: "Improved Auto Allocate fuel zones range." , isNew: true});
+changelogList.push({date: "8.11.2018", version: "", description: "Improved early game." , isNew: true});
+changelogList.push({date: "22.10.2018", version: "", description: "Reworked AutoAllocate, check your weights. Also BW raid setting." , isNew: true});
+changelogList.push({date: "13/06/2018", version: "", description: "War was beginning ", isNew: false});
 
 var atscript = document.getElementById('AutoTrimps-script'), 
         basepath = (local ? 'http://localhost:8383/Trimps%204/Trimps.github.io/AutoTrimps/' : 'https://notthat.github.io/AutoTrimps/'),
@@ -198,16 +204,6 @@ function initializeAutoTrimps() {
     debug('AutoTrimps v' + ATversion + ' ' + ver);
 }
 
-var changelogList = [];
-changelogList.push({date: "8.11.2018", version: "", description: "Improved early game." , isNew: true});
-changelogList.push({date: "22.10.2018", version: "", description: "Reworked AutoAllocate, check your weights. Also BW raid setting." , isNew: true});
-changelogList.push({date: "20.10.2018", version: "", description: "Pumpkins patch." , isNew: true});
-//changelogList.push({date: "", version: "", description: "Combat setting: Helium mode / Dark Essence Mode / Push Mode.", isNew: true});
-//changelogList.push({date: "", version: "", description: "AT Control GA - Automatic breed timers (smart enough for bleed/bogged dailies) and optional spire breed timer.", isNew: true});
-//changelogList.push({date: "", version: "", description: "Trimpicide on Empower Dailies (toggle-able).", isNew: true});
-//changelogList.push({date: "28/06/2018", version: "", description: "PRaiding. BWRaiding. Stop Coords to get next Amal. Never lose Amal. Heirloom Swapping. No Nurseries in Ice. Massive overhaul to AS windstacking he/hr% based. Stall Coords/items for more stacking. Calculate cell by cell. AutoTrimps->Display->General Spam for less spam.", isNew: false});
-changelogList.push({date: "13/06/2018", version: "", description: "War was beginning ", isNew: false});
-
 function assembleChangelog(date,version,description,isNew) {
     return (isNew)
     ? (`<b class="AutoEggs">${date} ${version} </b><b style="background-color:#32CD32"> New:</b> ${description}<br>`)
@@ -249,7 +245,7 @@ var MODULESdefault = {};
 var ATMODULES = {};
 var ATmoduleList = [];
 
-var sugarEventAT = true;
+var sugarEventAT = false; //enable pumpkin imps
 var bestBuilding;
 var scienceNeeded;
 var metalNeeded;
