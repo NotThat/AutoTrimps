@@ -24,7 +24,7 @@ var verDate = "14.11.18";
 var changelogList = [];
 changelogList.push({date: "14.11.2018", version: "", description: "Improved Auto Allocate fuel zones range." , isNew: true});
 changelogList.push({date: "8.11.2018", version: "", description: "Improved early game." , isNew: true});
-changelogList.push({date: "22.10.2018", version: "", description: "Reworked AutoAllocate, check your weights. Also BW raid setting." , isNew: true});
+changelogList.push({date: "22.10.2018", version: "", description: "Reworked AutoAllocate, check your weights. Also BW raid setting." , isNew: false});
 changelogList.push({date: "13/06/2018", version: "", description: "War was beginning ", isNew: false});
 
 var atscript = document.getElementById('AutoTrimps-script'), 
