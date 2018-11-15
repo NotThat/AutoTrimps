@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "50.3";
-var verDate = "14.11.18";
+var ver = "50.4";
+var verDate = "15.11.18";
 
 var changelogList = [];
 changelogList.push({date: "14.11.2018", version: "", description: "Improved Auto Allocate fuel zones range." , isNew: true});

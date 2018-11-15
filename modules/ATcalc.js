@@ -485,7 +485,7 @@ function calcEnemyHealth(mutation, corrupted, name, level, zone, currentGame, da
             if(typeof theDailyObj.badHealth !== 'undefined')
                 amt *= dailyModifiers.badHealth.getMult(theDailyObj.badHealth.strength);
             
-            if (typeof theDailyObj.badMapStrength !== 'undefined' && game.global.mapsActive)
+            if (typeof theDailyObj.badMapHealth !== 'undefined' && game.global.mapsActive)
                 amt *= dailyModifiers.badMapHealth.getMult(theDailyObj.badMapHealth.strength);
 
             if(currentGame){
