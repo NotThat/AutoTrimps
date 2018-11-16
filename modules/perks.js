@@ -4,10 +4,10 @@ AutoPerks.Squared = "ChallengeSquared";
 
 //someday might implement presets back
 AutoPerks.makeDefaultValueBoxes = function(){
-    return presetObj("default", 2200, 333, 11, 1500, 55, 605, 7, 522, 21, 0);
+    return presetObj("default", 2200, 333, 11, 1500, 55, 0, 605, 7, 522, 21, 0);
 }
 
-function presetObj(header, Helium, Attack, Health, Fluffy, DG, maxZone, amalGoal, amalZone, coordsBehind, maxPrestigeZ){
+function presetObj(header, Helium, Attack, Health, Fluffy, DG, Income, maxZone, amalGoal, amalZone, coordsBehind, maxPrestigeZ){
     if(typeof autoTrimpSettings.APValueBoxes === 'undefined') autoTrimpSettings.APValueBoxes = {};
     var preset = {header:header, 
         Helium:      typeof autoTrimpSettings.APValueBoxes.Helium       !== 'undefined' ? autoTrimpSettings.APValueBoxes.Helium       : Helium,
@@ -15,6 +15,7 @@ function presetObj(header, Helium, Attack, Health, Fluffy, DG, maxZone, amalGoal
         Health:      typeof autoTrimpSettings.APValueBoxes.Health       !== 'undefined' ? autoTrimpSettings.APValueBoxes.Health       : Health,
         Fluffy:      typeof autoTrimpSettings.APValueBoxes.Fluffy       !== 'undefined' ? autoTrimpSettings.APValueBoxes.Fluffy       : Fluffy,
         DG:          typeof autoTrimpSettings.APValueBoxes.DG           !== 'undefined' ? autoTrimpSettings.APValueBoxes.DG           : DG,
+        Income:      typeof autoTrimpSettings.APValueBoxes.Income       !== 'undefined' ? autoTrimpSettings.APValueBoxes.Income       : Income,
         maxZone:     typeof autoTrimpSettings.APValueBoxes.maxZone      !== 'undefined' ? autoTrimpSettings.APValueBoxes.maxZone      : maxZone,
         amalGoal:    typeof autoTrimpSettings.APValueBoxes.amalGoal     !== 'undefined' ? autoTrimpSettings.APValueBoxes.amalGoal     : amalGoal,
         amalZone:    typeof autoTrimpSettings.APValueBoxes.amalZone     !== 'undefined' ? autoTrimpSettings.APValueBoxes.amalZone     : amalZone,
@@ -81,9 +82,28 @@ AutoPerks.initializeGUI = function() {
     //Line 1 of the UI
     apGUI.$ratiosLine1 = document.createElement("DIV");
     apGUI.$ratiosLine1.setAttribute('style', 'display: inline-block; text-align: left; width: 100%');
-    var listratiosLine1 = ["Helium","Attack","Health","Fluffy","DG"];
-    for (var i in listratiosLine1)
-        AutoPerks.createInput(listratiosLine1[i],apGUI.$ratiosLine1);
+    //var listratiosLine1 = ["Helium","Attack","Health","Fluffy","DG","Income"];
+    
+    var heliumBox = AutoPerks.createInput("Helium",apGUI.$ratiosLine1);
+    heliumBox.setAttribute("onmouseover", 'tooltip("Helium Weight", "customText", event, "How much you value helium")');
+    
+    var attackBox = AutoPerks.createInput("Attack",apGUI.$ratiosLine1);
+    attackBox.setAttribute("onmouseover", 'tooltip("Attack Weight", "customText", event, "How much you value attack")');
+    
+    var healthBox = AutoPerks.createInput("Health",apGUI.$ratiosLine1);
+    healthBox.setAttribute("onmouseover", 'tooltip("Health Weight", "customText", event, "How much you value health")');
+    
+    var fluffyBox = AutoPerks.createInput("Fluffy",apGUI.$ratiosLine1);
+    fluffyBox.setAttribute("onmouseover", 'tooltip("Fluffy Weight", "customText", event, "How much you value fluffy")');
+    
+    var dgBox = AutoPerks.createInput("DG",apGUI.$ratiosLine1);
+    dgBox.setAttribute("onmouseover", 'tooltip("DG Weight", "customText", event, "How much you value dg")');
+    
+    var incomeBox = AutoPerks.createInput("Income",apGUI.$ratiosLine1);
+    incomeBox.setAttribute("onmouseover", 'tooltip("Income Weight", "customText", event, "This should normally be kept at 0. Only increase this when using More Farming mode and attempting to increase the early game for the big C2s and intending to use a respec later.")');
+    
+    //for (var i in listratiosLine1)
+    //    AutoPerks.createInput(listratiosLine1[i],apGUI.$ratiosLine1);
 
     apGUI.$customRatios.appendChild(apGUI.$ratiosLine1);
     //Line 2 of the UI
@@ -100,7 +120,7 @@ AutoPerks.initializeGUI = function() {
     amalZone.setAttribute("onmouseover", 'tooltip("Amalgamator Zone", "customText", event, "On which zone do you wish to hit your Amalgamator goal. 1-20 zones after a spire is generally a good place, starting spire 2.")');
     
     var coordsBehind = AutoPerks.createInput("coordsBehind",apGUI.$ratiosLine2);
-    coordsBehind.setAttribute("onmouseover", 'tooltip("Coordinations Behind", "customText", event, "How many unspent Coordination upgrades will you have at your Amalgamator Zone. Pick an amount that doesnt slow you down.")');
+    coordsBehind.setAttribute("onmouseover", 'tooltip("Coordinations Behind", "customText", event, "How many unspent Coordination upgrades will you have at your Amalgamator Zone. Pick an amount that doesnt slow you down. If first equals amalZone (you wish to amal without buying a single Coordination) will force coordinated to level 0.")');
     
     var maxPrestigeZ = AutoPerks.createInput("maxPrestigeZ",apGUI.$ratiosLine2);
     maxPrestigeZ.setAttribute("onmouseover", 'tooltip("Maximum Prestige Zone", "customText", event, "If you plan on running Bionic Warfare, put the highest level BW map you intend to raid here. Otherwise leave at 0.")');    
@@ -111,10 +131,6 @@ AutoPerks.initializeGUI = function() {
     
     var checkBoxMaxFuel = AutoPerks.createInput("MaxFuel", apGUI.$checkBoxesLine3, true);
     checkBoxMaxFuel.setAttribute("onmouseover", 'tooltip("Max Fuel", "customText", event, "Force use max fuel, even after Amalgamator goal has been reached.")');
-    
-    /*var checkBoxRespecAfterAmal = AutoPerks.createInput("RespecAfterAmal", apGUI.$checkBoxesLine3, true);
-    checkBoxRespecAfterAmal.setAttribute("onmouseover", 'tooltip("Respec After Reaching Amalgamator Goal", "customText", event, "After reaching Amalgamator goal, will respec to maintain amalgamators by Portal Zone.")');
-    checkBoxRespecAfterAmal.disabled = true;*/
     
     var checkBoxBattleGU = AutoPerks.createInput("BattleGU", apGUI.$checkBoxesLine3, true);
     checkBoxBattleGU.setAttribute("onmouseover", 'tooltip("Use Battle Golden Upgrades", "customText", event, "Will calculate using Battle Golden Upgrades instead of 60% Void + Helium.")');
@@ -169,10 +185,10 @@ AutoPerks.UpdateCustomCheckBox = function(name, value){
 AutoPerks.updateBoxesUI = function() {
     var $perkRatioBoxes = document.getElementsByClassName("perkRatios");
     
-    for(var i = 0; i < 10; i++) //set ratio boxes values from currently selected preset
+    for(var i = 0; i < 11; i++) //set ratio boxes values from currently selected preset
         $perkRatioBoxes[i].value = autoTrimpSettings.APValueBoxes[$perkRatioBoxes[i].name];
     
-    for(var i = 10; i < 15; i++) //set ratio boxes values from currently selected preset
+    for(var i = 11; i < 16; i++) //set ratio boxes values from currently selected preset
         $perkRatioBoxes[i].checked = autoTrimpSettings.APCheckBoxes["user"+$perkRatioBoxes[i].name];
 };
 
@@ -725,6 +741,31 @@ function calcZeroState(){
         AutoPerks.benefitHolder[i].benefitBak = AutoPerks.benefitHolder[i].calc(false, false, false); //with all perks' levels frozen, calculate the benefits, and store each in that benefit's benefitBak.
 }
 
+function benefitIncomeCalc(){
+    var looting1 = AutoPerks.useLivePerks ? game.portal["Looting"] : AutoPerks.perksByName.Looting;
+    var looting2 = AutoPerks.useLivePerks ? game.portal["Looting_II"] : AutoPerks.perksByName.Looting_II;
+    var motivation1Perk = AutoPerks.useLivePerks ? game.portal["Motivation"] : AutoPerks.perksByName.Motivation;
+    var motivation2Perk = AutoPerks.useLivePerks ? game.portal["Motivation_II"] : AutoPerks.perksByName.Motivation_II;
+    var resourcefulPerk = AutoPerks.useLivePerks ? game.portal["Resourceful"] : AutoPerks.perksByName.Resourceful;
+    
+    /*var price = game.buildings.Nursery.cost.wood;
+    var start = price[0];
+    start *= Math.pow(0.95, resourcefulPerk.level);
+    var toBuy = log10(resourcesAvailable / start * (price[1] - 1) + 1) / log10(price[1]);
+    
+    if (mostAfford === -1 || mostAfford > toBuy) mostAfford = toBuy;*/
+    
+    
+            
+    this.benefit =  popMultiplier() * 
+                    (1 + 0.05*motivation1Perk.level) * (1 + 0.01*motivation2Perk.level) * 
+                    (1 + 0.05*looting1.level) * (1 + 0.0025*looting2.level) * AutoPerks.DailyResourceMult / Math.pow(0.95, resourcefulPerk.level);
+    
+    if(isNaN(this.benefit)) throw "Income NaN benefit";
+    
+    return this.getValue();
+}
+
 function benefitHeliumCalc(){
     var looting1 = AutoPerks.useLivePerks ? game.portal["Looting"] : AutoPerks.perksByName.Looting;
     var looting2 = AutoPerks.useLivePerks ? game.portal["Looting_II"] : AutoPerks.perksByName.Looting_II;
@@ -1083,9 +1124,11 @@ AutoPerks.initializePerks = function () {
     var bHlth  = {calc: benefitHealthCalc, weightUser:autoTrimpSettings.APValueBoxes.Health};
     var bFluff = {calc: benefitFluffyCalc, weightUser:autoTrimpSettings.APValueBoxes.Fluffy};
     var bDG    = {calc: benefitDGCalc,     weightUser:autoTrimpSettings.APValueBoxes.DG};
+    var bIncome= {calc: benefitIncomeCalc, weightUser:autoTrimpSettings.APValueBoxes.Income};
+     
     
     AutoPerks.benefitHolderObj = {Helium:bHel, Attack:bAtk, Health:bHlth, Fluffy:bFluff, DG:bDG};
-    AutoPerks.benefitHolder    = [bHel, bAtk, bHlth, bFluff, bDG];
+    AutoPerks.benefitHolder    = [bHel, bAtk, bHlth, bFluff, bDG, bIncome];
     for(var i = 0; i < AutoPerks.benefitHolder.length; i++)
         AutoPerks.benefitHolder[i].getValue   = getBenefitValue;
     
@@ -1110,20 +1153,20 @@ AutoPerks.initializePerks = function () {
     var artisanistry = {name: "Artisanistry", benefits: [bHlth, bAtk],       baseCost: 15,      incomeFlag: true};
     var resilience   = {name: "Resilience",   benefits: [bHlth],             baseCost: 100};
     var coordinated  = {name: "Coordinated",  benefits: [bHlth, bAtk, bDG],  baseCost: 150000,  popBreedFlag:true};
-    var resourceful  = {name: "Resourceful",  benefits: [bHlth],             baseCost: 50000,   incomeFlag: true, popBreedFlag:true};
+    var resourceful  = {name: "Resourceful",  benefits: [bHlth, bIncome],             baseCost: 50000,   incomeFlag: true, popBreedFlag:true};
     
-    var carpentry    = {name: "Carpentry",    benefits: [bHlth, bAtk, bDG],  baseCost: 25, childLevelFunc: carp2LevelFunc,      incomeFlag: true, popBreedFlag:true};
-    var looting      = {name: "Looting",      benefits: [bHlth, bAtk, bHel], baseCost: 1,  childLevelFunc: looting2LevelFunc,   incomeFlag: true, popBreedFlag:true};
+    var carpentry    = {name: "Carpentry",    benefits: [bHlth, bAtk, bDG ,bIncome],  baseCost: 25, childLevelFunc: carp2LevelFunc,      incomeFlag: true, popBreedFlag:true};
+    var looting      = {name: "Looting",      benefits: [bHlth, bAtk, bHel,bIncome], baseCost: 1,  childLevelFunc: looting2LevelFunc,   incomeFlag: true, popBreedFlag:true};
     var toughness    = {name: "Toughness",    benefits: [bHlth],             baseCost: 1,  childLevelFunc: toughness2LevelFunc};
     var power        = {name: "Power",        benefits: [bAtk],              baseCost: 1,  childLevelFunc: power2LevelFunc};
-    var motivation   = {name: "Motivation",   benefits: [bHlth, bAtk],       baseCost: 2,  childLevelFunc: motivation2LevelFunc,incomeFlag: true, popBreedFlag:true};
+    var motivation   = {name: "Motivation",   benefits: [bHlth, bAtk, bIncome],       baseCost: 2,  childLevelFunc: motivation2LevelFunc,incomeFlag: true, popBreedFlag:true};
     
     //Tier2 perks
-    var carpentry_II = {name: "Carpentry_II", benefits: [bHlth, bAtk, bDG],  baseCost: 100000, increase: 10000, incomeFlag: true, popBreedFlag:true};
-    var looting_II   = {name: "Looting_II",   benefits: [bHlth, bAtk, bHel], baseCost: 100000, increase: 10000, incomeFlag: true, popBreedFlag:true};
+    var carpentry_II = {name: "Carpentry_II", benefits: [bHlth, bAtk, bDG,  bIncome],  baseCost: 100000, increase: 10000, incomeFlag: true, popBreedFlag:true};
+    var looting_II   = {name: "Looting_II",   benefits: [bHlth, bAtk, bHel, bIncome], baseCost: 100000, increase: 10000, incomeFlag: true, popBreedFlag:true};
     var toughness_II = {name: "Toughness_II", benefits: [bHlth],             baseCost: 20000,  increase: 500};
     var power_II     = {name: "Power_II",     benefits: [bAtk],              baseCost: 20000,  increase: 500};
-    var motivation_II= {name: "Motivation_II",benefits: [bHlth, bAtk],       baseCost: 50000,  increase: 1000,  incomeFlag: true, popBreedFlag:true};
+    var motivation_II= {name: "Motivation_II",benefits: [bHlth, bAtk, bIncome],       baseCost: 50000,  increase: 1000,  incomeFlag: true, popBreedFlag:true};
            
     //gather these into an array of objects
     AutoPerks.fixedPerks = [siphonology, anticipation, meditation, relentlessness, range, agility, bait, trumps, packrat, overkill, capable];
@@ -1203,14 +1246,13 @@ function calcStartingPop(){ //this is pre carp1/2 population
     if(zone >= 37) startingPop += (getPageSetting('MaxCollector') <= 0 ? howMany : getPageSetting('MaxCollector')) * 5000;//collector
 
     var gigasUnlocked = 0;
-    var gigaStations = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 72, 74, 76, 78, 81, 84, 87, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 180, 190, 200, 210, 220];
     var amt   = Math.max(1, getPageSetting('FirstGigastation'));
     var delta = Math.max(0, getPageSetting('DeltaGigastation'));
-    while(zone >= gigaStations[gigasUnlocked]){
+    while(zone >= AutoPerks.gigaStations[gigasUnlocked]){
         startingPop += Math.floor(amt * 10000 * Math.pow(1.2, gigasUnlocked));
         gigasUnlocked++;
         amt += delta;
-        if(gigasUnlocked >= gigaStations.length) break;
+        if(gigasUnlocked >= AutoPerks.gigaStations.length) break;
     }
     
     return startingPop;
@@ -1224,8 +1266,7 @@ function calcBasePopArr(){
         AutoPerks.basePopArr[AutoPerks.fuelMaxZones] = calcBasePop();
     
     AutoPerks.fuelMaxZones = Math.max(0,(autoTrimpSettings.APValueBoxes.amalGoal > 0 ? autoTrimpSettings.APValueBoxes.amalZone : autoTrimpSettings.APValueBoxes.maxZone) - 230);
-    //AutoPerks.maxFuelBasePopAtMaxZ = calcBasePop(true); //basepop if we fuel from 230 to maxZ
-    AutoPerks.maxFuelBasePopAtMaxZ = AutoPerks.basePopArr[AutoPerks.fuelMaxZones]; //basepop if we fuel from 230 to maxZ
+    AutoPerks.maxFuelBasePopAtMaxZ = AutoPerks.fuelMaxZones > 0 ? AutoPerks.basePopArr[AutoPerks.fuelMaxZones] : AutoPerks.startingPop; //basepop if we fuel from 230 to maxZ
     
     return AutoPerks.basePopArr;
 }
@@ -1333,7 +1374,7 @@ function calcCoords(coordinated, coordinations){
     //    return AutoPerks.calcCoordsLastArmy;
     AutoPerks.fullSoldiers = 1;
     
-    if(AutoPerks.ChallengeName == "Trimp"){
+    if(AutoPerks.ChallengeName == "Trimp" || autoTrimpSettings.APValueBoxes.amalZone == autoTrimpSettings.APValueBoxes.coordsBehind + (autoTrimpSettings.APValueBoxes.amalZone >= 230 ? 100 : 0)){
         AutoPerks.calcCoordsCoordsPurchased = 0;
         AutoPerks.calcCoordsLastLevel  = level;
         AutoPerks.calcCoordsLastCoords = coordsToUse;
@@ -1589,7 +1630,7 @@ AutoPerks.initializeAmalg = function(){
             var coordPrice = coordperk.getPrice();
             var coordIncrease = calcCoords(coordperk.level+1) / AutoPerks.finalArmySize;
             var coordEff = coordIncrease / coordPrice;
-            if(carp12Eff >= coordEff){ //level up carp1 and maybe carp2
+            if(carp12Eff >= coordEff || autoTrimpSettings.APValueBoxes.amalZone == autoTrimpSettings.APValueBoxes.coordsBehind + (autoTrimpSettings.APValueBoxes.amalZone >= 230 ? 100 : 0)){ //level up carp1 and maybe carp2. if coordsbehind equals amal zone that means we dont buy any coordinations so hardcap coord to level 0
                 carp1perk.buyLevel();
                 carp1perk.spent+= carp1Price;
                 pct = AutoPerks.getPct();
@@ -1744,6 +1785,7 @@ AutoPerks.firstRun = function(){
     //these are also calculated here for time estimate function
     AutoPerks.windMod = 1 + (autoTrimpSettings.APValueBoxes.maxZone >= 241 ? 13 * game.empowerments.Wind.getModifier() * 10 : 0); //13 minimum stacks
     AutoPerks.compoundingImp = Math.pow(1.003, autoTrimpSettings.APValueBoxes.maxZone * 3 - 1);
+    AutoPerks.gigaStations = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 72, 74, 76, 78, 81, 84, 87, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 180, 190, 200, 210, 220];
 }
 
 

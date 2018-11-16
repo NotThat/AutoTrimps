@@ -29,9 +29,11 @@ var AutoMapsCoordOverride = false;
 var PRaidingActive = false; //used for coordination purchase during praids
 var enoughDamage = true;
 
-var LMCDone = false;
-var LSCDone = false;
-var LWCDone = false;
+var moreFarmingReset = false;
+var nextCacheCounter = "";
+var LMCDone = 0;
+var LSCDone = 0;
+var LWCDone = 0;
 var LWCDoneAmount = 0;
 var LWCLastCell = -1;
 
@@ -60,14 +62,6 @@ function autoMap(){
         else
             mapsClicked();
         trimpicides++;
-    }
-    
-    if (game.global.mapsActive){
-        if(currMap.location == "Void" && useScryhard2()){
-            goDefaultStance(4); //S
-        }
-        else
-            goDefaultStance(); //D if we have it, X otherwise
     }
     
     if (!enoughDamage) AutoMapsCoordOverride = true; //if automaps thinks we need damage, override helium mode coord delay (not amalgamators' coord delay)
@@ -198,9 +192,28 @@ function autoMap(){
         statusMsg = 'Spire Bonus<br>';
 
     var moreFarmingFlag = false;
-    if(getPageSetting('MoreFarming') && (!LMCDone || !LSCDone || !LWCDone)){
+    var desiredLMC = game.global.world < 60 ? getPageSetting('Pre60LMC') : getPageSetting('Post60LMC');
+    var desiredLSC = game.global.world < 60 ? getPageSetting('Pre60LSC') : getPageSetting('Post60LSC');
+    var desiredLWC = game.global.world < 60 ? getPageSetting('Pre60LWC') : getPageSetting('Post60LWC');
+    if(nextCacheCounter == "lmc" && game.global.lastClearedMapCell == -1){
+        nextCacheCounter = "";
+        LMCDone++;
+    }
+    if(nextCacheCounter == "lsc" && game.global.lastClearedMapCell == -1){
+        nextCacheCounter = "";
+        LSCDone++;
+    }
+    if(nextCacheCounter == "lwc" && game.global.lastClearedMapCell == -1){
+        nextCacheCounter = "";
+        LWCDone++;
+    }
+    if(getPageSetting('MoreFarming') && (LMCDone < desiredLMC || LSCDone < desiredLSC || LWCDone < desiredLWC)){
         shouldDoMaps = true;
         moreFarmingFlag = true;
+    }
+    if(!moreFarmingReset && AutoPerks.gigaStations.indexOf(game.global.world) != -1 && game.global.lastClearedCell >= 22){
+        resetMoreFarming();
+        moreFarmingReset = true;
     }
 
     var SpireLWCFlag = false;
@@ -244,9 +257,9 @@ function autoMap(){
             desiredMapLevel = game.global.world + 10;
             desiredMapCheap = false;
             desiredMapFrags = 0.5;
-            if(!LMCDone)      desiredMapType = "lmc";
-            else if(!LSCDone) desiredMapType = "lsc";
-            else if(!LWCDone) desiredMapType = "lwc";
+            if(LMCDone < desiredLMC)      desiredMapType = "lmc";
+            else if(LSCDone < desiredLSC) desiredMapType = "lsc";
+            else if(LWCDone < desiredLWC) desiredMapType = "lwc";
         }
         else if(needPrestige){
             desiredMapLevel = lastPrestigeZone(true);
@@ -305,7 +318,7 @@ function autoMap(){
     if (game.global.mapsActive){
         if (game.global.soldierHealth <= 0)
             fightManualAT(); //smart enough to only attack early if our army can survive for decent chunk of time
-        
+
         if(currMap.location == "Void"){
             AutoMapsCoordOverride = true;
             if(doVoids && !game.global.repeatMap)
@@ -320,9 +333,9 @@ function autoMap(){
                 repeatClicked();
         }
         else{
-            if(currMap.bonus == "lmc") LMCDone = true;
-            else if(currMap.bonus == "lwc") LWCDone = true;
-            else if(currMap.bonus == "lsc") LSCDone = true;
+            if(currMap.bonus == "lmc" && game.global.lastClearedMapCell > 0) nextCacheCounter = "lmc";
+            else if(currMap.bonus == "lsc" && game.global.lastClearedMapCell > 0) nextCacheCounter = "lsc";
+            else if(currMap.bonus == "lwc" && game.global.lastClearedMapCell > 0) nextCacheCounter = "lwc";
 
             if (!game.global.repeatMap) //start with repeat button on
                 repeatClicked();
@@ -351,6 +364,13 @@ function autoMap(){
                 statusMsg = "Spire LWC " + LWCDoneAmount + " / " + txt;
             }
             
+            if(moreFarmingFlag){
+                goDefaultStance(4); //S
+                statusMsg = "More Farming"+"</br>"+LMCDone+"/"+desiredLMC+" "+LSCDone+"/"+desiredLSC+" "+LWCDone+"/"+desiredLWC;
+            }
+            else
+                goDefaultStance(); //D if we have it, X otherwise
+            
             if(shouldDoMapsVanillaRepeat)
                 repeatChoice = 0;
             
@@ -368,8 +388,23 @@ function autoMap(){
     
     //#2 in the world
     else if (!game.global.preMapsActive && !game.global.mapsActive){
-        if (selectedMap || shouldDoMaps) //we want to run a map
+        if (selectedMap || shouldDoMaps){ //we want to run a map
+            //before we go into premap screen, lets see that we are able to run a map that we want
+            decideMapParams(desiredMapLevel, desiredMapType, desiredMapCheap, desiredMapFrags);
+            var desiredMapLevelBackup = desiredMapLevel;
+            if(extraLevels > 0) desiredMapLevel = game.global.world;
+
+            //search for existing map in our maps
+            for (var map in game.global.mapsOwnedArray)
+                if (!game.global.mapsOwnedArray[map].noRecycle && game.global.mapsOwnedArray[map].level == desiredMapLevel+extraLevels && (specialMod == "" || game.global.mapsOwnedArray[map].bonus == specialMod)){
+                    selectedMap = game.global.mapsOwnedArray[map];
+                    break;
+                }
+            if(!selectedMap && cost > game.resources.fragments.owned) //if we dont have a map we want to run and cant afford one, dont go to premap screen
+                return;
+            desiredMapLevel = desiredMapLevelBackup; //return to previous since we are about to go into next premaps part
             mapsClicked(true);
+        }
     } 
     
     //#3 in premap screen
@@ -444,7 +479,7 @@ function autoMap(){
                     stanceText = " in S";
                 }
                 else {
-                    goDefaultStance(2);
+                    //goDefaultStance(2);
                     if (selectedMap.location == "Void")
                         stanceText = " not in S";
                 }
@@ -637,8 +672,8 @@ function PrestigeRaid() {
     selectMap(map.id);
     
     //debug("havePrestigeUpTo = " + havePrestigeUpTo + " | minDesiredLevel = " + minDesiredLevel + " | maxDesiredLevel = " + maxDesiredLevel);
-    
     runMap();
+    goDefaultStance(); //D if we have it, X otherwise
     currMap = map;
     statusMsg = "Prestige Raid: " + addSpecialsAT(maxDesiredLevel);
 
@@ -730,6 +765,7 @@ function BWraiding() {
 
     selectMap(nextBionicMap.id);
     runMap();
+    goDefaultStance(); //D if we have it, X otherwise
     currMap = nextBionicMap;
     if (!game.global.repeatMap) {
         repeatClicked();

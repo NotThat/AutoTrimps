@@ -49,7 +49,7 @@ function buyUpgrades(coordsOnly) {
 
         if(dontBuyStartZ === game.global.world + 1)
             buyCoords = true;
-        else if (dontBuyStartZ > 0 && game.global.world > dontBuyStartZ && getPageSetting('TillWeHaveAmalg') > 0 && spiresSuccessfullyDoneFlag) { //if dontBuyStartZ is set and we've passed it, and also did not fail a spire
+        else if (dontBuyStartZ >= 0 && game.global.world > dontBuyStartZ && getPageSetting('TillWeHaveAmalg') > 0 && spiresSuccessfullyDoneFlag) { //if dontBuyStartZ is set and we've passed it, and also did not fail a spire
             if (game.jobs.Amalgamator.owned < getPageSetting('TillWeHaveAmalg'))
                 buyCoords = false;
         }

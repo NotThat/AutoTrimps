@@ -997,11 +997,11 @@ function goDefaultStance(chosenFormation){
     
     //check formation is unlocked
     if(formation == 2 && !game.upgrades.Dominance.done)
-        formation = 0;
+        formation = '0';
     else if (formation == 3 && !game.upgrades.Barrier.done)
-        formation = 0;
+        formation = '0';
     else if (formation == 4 && !(game.global.world >= 60 && game.global.highestLevelCleared >= 180))
-        formation = 0;
+        formation = '0';
     
     if(formation != game.global.formation)
         setFormation(formation);

@@ -153,7 +153,11 @@ function buyJobs(){
     }
     
     //Trainers:
-    if (getPageSetting('MaxTrainers') > game.jobs.Trainer.owned || getPageSetting('MaxTrainers') == -1) {
+    if(getPageSetting('MaxTrainers') > game.jobs.Trainer.owned || getPageSetting('MaxTrainers') == -1){
+        //var max = calculateMaxAfford(game.jobs["Trainer"], false, false, true);
+        //if(getPageSetting('MaxTrainers') > 0) 
+        //    max = Math.min(max, getPageSetting('MaxTrainers')-game.jobs.Trainer.owned);
+        
         // capped to tributes percentage.
         var trainerpercent = getPageSetting('TrainerCaptoTributes');
         if (trainerpercent > 0 && !game.buildings.Tribute.locked) {

@@ -43,7 +43,7 @@ function safeBuyBuilding(building){
     //thereafter, buy only 1 warpstation
     
     if (building == 'Warpstation'){
-        if (game.buildings.Warpstation.owned < 2) {
+        if (game.buildings.Warpstation.owned < 2 || getPageSetting('MoreFarming')){
             game.global.buyAmt = 'Max';
             game.global.maxSplit = 1;
         }else

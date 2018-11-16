@@ -18,12 +18,13 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "50.4";
-var verDate = "15.11.18";
+var ver = "51";
+var verDate = "17.11.18";
 
 var changelogList = [];
+changelogList.push({date: "17.11.2018", version: "", description: "Added Income weight to Auto Allocate. Leave it at 0 unless you're deep running one of the big 3 C2s." , isNew: true});
 changelogList.push({date: "14.11.2018", version: "", description: "Improved Auto Allocate fuel zones range." , isNew: true});
-changelogList.push({date: "8.11.2018", version: "", description: "Improved early game." , isNew: true});
+changelogList.push({date: "8.11.2018", version: "", description: "Improved early game.", isNew: false});
 changelogList.push({date: "22.10.2018", version: "", description: "Reworked AutoAllocate, check your weights. Also BW raid setting." , isNew: false});
 changelogList.push({date: "13/06/2018", version: "", description: "War was beginning ", isNew: false});
 
@@ -452,6 +453,14 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
     return;
 }
 
+function resetMoreFarming(){
+    moreFarmingReset = false;
+    nextCacheCounter = "";
+    LMCDone = 0;
+    LWCDone = 0;
+    LSCDone = 0;
+}
+
 function oncePerZoneCode(){
     // Auto-close dialogues.
     switch (document.getElementById('tipTitle').innerHTML) {
@@ -464,9 +473,8 @@ function oncePerZoneCode(){
     if (getPageSetting('AutoEggs')) easterEggClicked();
     
     //used for farming mode
-    LMCDone = false;
-    LWCDone = false;
-    LSCDone = false;
+    resetMoreFarming();
+
     //used for spire LWC
     LWCDoneAmount = 0;
 

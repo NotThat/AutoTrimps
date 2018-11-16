@@ -374,7 +374,13 @@ function initializeAllSettings() {
     createSetting('BWraidingmin', 'BWRaid Start', 'Starting this zone, BWRaid becomes a possibility. BW Raiding always takes place at the last Poison zone.', 'value', 999, null, 'Maps');
     createSetting('BWraidingmaxLevel', 'BWRaid Max Extra', 'The maximum level difference between world zone and BW map level.', 'value', 20, null, 'Maps');
     createSetting('BWraidingmax', 'BWRaid Cap', 'The highest level BW map to raid.', 'value', 999, null, 'Maps');
-    createSetting('MoreFarming', 'More Farming', 'Will attempt to run 1 LMC, 1 LSW, and 1 LWW maps each zone. Used to min-max pre-zone 230 for the 3 big C2s (obliterated, coordinate, trimp).', 'boolean', false, null, 'Maps');
+    createSetting('MoreFarming', 'More Farming', 'Will attempt to run LMC/LSW/LWW maps each zone (and twice on giga zones). Used to min-max pre-zone 230 for the 3 big C2s (Obliterated, Coordinated, Trimp).', 'boolean', false, null, 'Maps');
+    createSetting('Pre60LMC', 'Pre60 LMC', 'Will run this many LMC maps each zone until zone 60.', 'value', 0, null, 'Maps');
+    createSetting('Pre60LSC', 'Pre60 LSC', 'Will run this many LSC maps each zone until zone 60.', 'value', 3, null, 'Maps');
+    createSetting('Pre60LWC', 'Pre60 LWC', 'Will run this many LWC maps each zone until zone 60.', 'value', 0, null, 'Maps');
+    createSetting('Post60LMC', 'Post60 LMC', 'Will run this many LMC maps each zone (twice on giga zones) past zone 60.', 'value', 5, null, 'Maps');
+    createSetting('Post60LSC', 'Post60 LSC', 'Will run this many LSC maps each zone (twice on giga zones) past zone 60.', 'value', 0, null, 'Maps');
+    createSetting('Post60LWC', 'Post60 LWC', 'Will run this many LWC maps each zone (twice on giga zones) past zone 60.', 'value', 0, null, 'Maps');
 
 //Spire
     //Line 1
@@ -890,7 +896,22 @@ function updateCustomButtons() {
     getPageSetting('AutoStance') == 1 ? turnOn("WindStackingPctHe"): turnOff("WindStackingPctHe");
     getPageSetting('AutoStance') == 1 ? turnOn("DelayCoordsForWind"): turnOff("DelayCoordsForWind");
     getPageSetting('AutoStance') == 1 ? turnOn("DelayWeaponsForWind"): turnOff("DelayWeaponsForWind");
-    
+    if(getPageSetting('MoreFarming')){
+        turnOn('Pre60LMC');
+        turnOn('Pre60LSC');
+        turnOn('Pre60LWC');
+        turnOn('Post60LMC');
+        turnOn('Post60LSC');
+        turnOn('Post60LWC');
+    }
+    else{
+        turnOff('Pre60LMC');
+        turnOff('Pre60LSC');
+        turnOff('Pre60LWC');
+        turnOff('Post60LMC');
+        turnOff('Post60LSC');
+        turnOff('Post60LWC');
+    }
     
     //Show and Hide useless settings to reduce UI clutter
     var turnonofflist = [

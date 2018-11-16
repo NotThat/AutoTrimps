@@ -14,6 +14,7 @@ function pushData(){
         gigas: game.upgrades.Gigastation.done,
         gigasleft: game.upgrades.Gigastation.allowed - game.upgrades.Gigastation.done,
         trimps: trimpsRealMax,
+        trimpsBase: trimpsRealMax / (Math.pow(1.1, game.portal.Carpentry.level) * (1 + 0.0025 * game.portal.Carpentry_II.level)),
         coord: game.upgrades.Coordination.done,
         lastwarp: game.global.lastWarp,
         essence: getTotalDarkEssenceCount(),
@@ -65,7 +66,7 @@ document.getElementById("graphParent").innerHTML += '<div id="graphFooter" style
 var $graphFooter = document.getElementById('graphFooterLine1');
 //$graphFooter.innerHTML += '\
 //Create the dropdown for what graph to show    (these correspond to headings in setGraph() and have to match)
-var graphList = ['Efficiency and Stacks', 'Helium - He/Hr', 'Helium - Total', 'Helium - He/Hr Instant', 'Helium - He/Hr Delta', 'HeHr % / LifetimeHe', 'He % / LifetimeHe', 'Clear Time', 'Cumulative Clear Time', 'Run Time', 'Map Bonus', 'Void Maps', 'Void Map History', 'Loot Sources', 'Coordinations', 'GigaStations', 'Unused Gigas', 'Last Warpstation', 'Trimps', 'Nullifium Gained', 'Dark Essence', 'Dark Essence PerHour', 'OverkillCells', 'Magmite', 'Magmamancers', 'Fluffy XP', 'Fluffy XP PerHour', 'Nurseries'];
+var graphList = ['Efficiency and Stacks', 'Helium - He/Hr', 'Helium - Total', 'Helium - He/Hr Instant', 'Helium - He/Hr Delta', 'HeHr % / LifetimeHe', 'He % / LifetimeHe', 'Clear Time', 'Cumulative Clear Time', 'Run Time', 'Map Bonus', 'Void Maps', 'Void Map History', 'Loot Sources', 'Coordinations', 'GigaStations', 'Unused Gigas', 'Last Warpstation', 'Trimps', 'Trimps Base', 'Nullifium Gained', 'Dark Essence', 'Dark Essence PerHour', 'OverkillCells', 'Magmite', 'Magmamancers', 'Fluffy XP', 'Fluffy XP PerHour', 'Nurseries'];
 var $graphSel = document.createElement("select");
 $graphSel.id = 'graphSelection';
 $graphSel.setAttribute("style", "");
@@ -707,6 +708,13 @@ function setGraphData(graph) {
             title = 'Total Trimps Owned';
             xTitle = 'Zone';
             yTitle = 'Cumulative Number of Trimps';
+            yType = 'Linear';
+            break;
+        case 'Trimps Base':
+            graphData = allPurposeGraph('trimpsBase',true,"number");
+            title = 'Base Trimps Owned (pre Carpentry 1 & 2)';
+            xTitle = 'Zone';
+            yTitle = 'Base Number of Trimps';
             yType = 'Linear';
             break;
         case 'Nullifium Gained':
