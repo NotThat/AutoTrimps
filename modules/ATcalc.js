@@ -371,7 +371,7 @@ function calcCurrSendHealth(currentGame, getNurseCount, printout, zone, dailyObj
         return nurseNeeded;
     }
     else{
-        base *= currentGame ? Math.pow(1.01, game.global.lowestGen) : breedMult; //breedMult includes 1/5 max nurseries built
+        base *= currentGame ? (game.global.breedBack > 0 ? 1 : Math.pow(1.01, game.global.lowestGen)) : breedMult; //breedMult includes 1/5 max nurseries built
         if(printout) debug("after geneticists: " + base.toExponential(2));
 
         return base;
