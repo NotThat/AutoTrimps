@@ -100,7 +100,7 @@ AutoPerks.initializeGUI = function() {
     dgBox.setAttribute("onmouseover", 'tooltip("DG Weight", "customText", event, "How much you value dg")');
     
     var incomeBox = AutoPerks.createInput("Income",apGUI.$ratiosLine1);
-    incomeBox.setAttribute("onmouseover", 'tooltip("Income Weight", "customText", event, "This should normally be kept at 0. Only increase this when using More Farming mode and attempting to increase the early game for the big C2s and intending to use a respec later.")');
+    incomeBox.setAttribute("onmouseover", 'tooltip("Income Weight", "customText", event, "This should normally be kept at 0. Only increase this when using More Farming mode and attempting to increase early game population (pre z230) for the big C2s and intending to use a respec later.")');
     
     //for (var i in listratiosLine1)
     //    AutoPerks.createInput(listratiosLine1[i],apGUI.$ratiosLine1);
