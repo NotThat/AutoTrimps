@@ -66,7 +66,6 @@ function autoMap(){
     
     if (!enoughDamage) AutoMapsCoordOverride = true; //if automaps thinks we need damage, override helium mode coord delay (not amalgamators' coord delay)
     
-    
     //are we behind on prestige? ignores last gambesop on portal zone
     needPrestige = getScientistLevel() >= 5 && ((lastPrestigeZone() < lastDropZone()) || (lastPrestigeZone() == lastDropZone() && prestigeState != 2 && game.global.world !== expectedPortalZone));
     
@@ -84,7 +83,7 @@ function autoMap(){
     //PRaidStartZone = getPageSetting('PRaidSetting') ? Math.min(PRaidStartZone, praidAutoStart()) : getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid
     //if (!needPrestige && (getPageSetting('PRaidingZoneStart') > 0 || getPageSetting('PRaidSetting'))){
     PRaidStartZone = getPageSetting('PRaidingZoneStart'); //from this zone we prestige raid
-    if (!needPrestige && getPageSetting('PRaidingZoneStart') > 0){
+    if (!needPrestige){
         if(!PrestigeRaid()){ //not done yet so we'll return to it in the next visit to autoMaps() function. until then go back to main AT so we can purchase prestiges and stuff
             PRaidingActive = true; //tells buyUpgrades() that we should buy coords
             return; 
@@ -565,9 +564,7 @@ function PrestigeRaid() {
     //at the zone where we BW, we want the most gear from normal maps that is possible.
     if (BWRaidNowLogic())
         PRaidMax = 10;
-    else if (PRaidStartZone === -1 || game.global.world < PRaidStartZone || PRaidMax <= 0){
-        //if(isActiveSpireAT() || getPageSetting('PRaidSpireMulti') == 0)
-        //    return true; 
+    else if (getPageSetting('PRaidingZoneStart') <= 0 || PRaidStartZone === -1 || game.global.world < PRaidStartZone || PRaidMax <= 0){
         //normal raiding setting are kicking us out, but first check for spire raiding specific settings:
         if(!game.global.spireActive) return true; //not in spire, leave
         if(getPageSetting('PRaidSpireMulti') == 0) return true; //spire raiding off, leave
@@ -587,7 +584,7 @@ function PrestigeRaid() {
     if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 1 && !aboutToSpire && !BWRaidNowLogic() && (maxDesiredLevel >= expectedPortalZone || bsZone >= maxDesiredLevel)) //when to skip last gambes
     //if(havePrestigeUpTo === maxDesiredLevel && prestigeState === 1 && game.global.world % 100 !== 0 && !BWRaidNowLogic() && (maxDesiredLevel >= expectedPortalZone || bsZone >= maxDesiredLevel)) //when to skip last gambes
         return true;
-    if(expectedPortalZone == game.global.world && !doVoids) //last zone and we dont need any void maps
+    if(expectedPortalZone == game.global.world && !doVoids && !isActiveSpireAT()) //last zone and we dont need any void maps
         return true;
     
     if (game.global.mapsActive){ //if we are in a map
