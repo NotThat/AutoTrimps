@@ -12,7 +12,8 @@ function automationMenuInit() {
     }
     //create the AutoTrimps Script button (bottom toolbar)
     var newItem = document.createElement("TD");
-    newItem.appendChild(document.createTextNode("AutoTrimps"));
+    //newItem.appendChild(document.createTextNode("AutoTrimps"));
+    newItem.appendChild(document.createTextNode("AutoTrimps v" + ver));
     newItem.setAttribute("class", "btn btn-default");
     newItem.setAttribute("onclick", "autoToggle()");
     var settingbarRow = document.getElementById("settingsTable").firstElementChild.firstElementChild;
@@ -309,7 +310,7 @@ function initializeAllSettings() {
     createSetting('DeltaGigastation', 'Delta Gigastation', 'How many extra warpstations to buy for each gigastation. Supports decimal values. For example 2.5 will buy +2/+3/+2/+3...', 'value', '2', null, "Buildings");
     createSetting('WarpstationWall3', 'Warpstation Wall', 'Conserves Metal. Only buys 1 Warpstation when you can afford <b>X</b> warpstations metal cost (at the first one\'s price, simple math). -1, 0, 1 = disable. In other words, only allows warps that cost less than 1/nth your currently owned metal. (to save metal for prestiges)', 'value', -1, null, 'Buildings');
     createSetting('MaxNursery', 'Max Nurseries', 'Advanced. Recommend: 9999 until you reach Magma (z230+)', 'value', '-1', null, "Buildings");
-    createSetting('NoNurseriesUntil', 'No Nurseries Until z', 'For Magma z230+ purposes. Nurseries get shut down, and wasting nurseries early on is probably a bad idea. Might want to set this to 230+ for now. Can use combined with the old Max Nurseries cap setting.', 'value', -1, null, 'Buildings');
+    createSetting('NoNurseriesUntil', 'No Nurseries Until z', 'For Magma z230+ purposes. Nurseries get shut down, and wasting nurseries early on is probably a bad idea. Might want to set this to 230+ for now. Can use combined with the old Max Nurseries cap setting.', 'value', 1, null, 'Buildings');
     createSetting('NoNurseriesIce', 'No Nurseries Ice', 'Do not buy Nurseries in Ice zones. ', 'boolean', true, null, 'Buildings');
 
 

@@ -188,11 +188,8 @@ function buyBuildings() {
         }
         if(buyCoords && game.upgrades.Coordination.done < game.upgrades.Coordination.allowed)
             skipGym = true;
-        //needGymystic is eval'ed by equipment.js line 204, Which is called AFTER buildings.js (spans two cycles)
-        if (needGymystic) skipGym = true;
         if (!skipGym)
             safeBuyBuilding('Gym');
-        needGymystic = false;  //needs reset after buyBuildings
     }
     //Tributes:
     var tributes = getPageSetting('MaxTribute');

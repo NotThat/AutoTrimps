@@ -220,6 +220,4 @@ function setScienceNeeded() {
             getScienceCostToUpgrade(upgrade);
         }
     }
-    if (needGymystic)
-        getScienceCostToUpgrade('Gymystic');
 }

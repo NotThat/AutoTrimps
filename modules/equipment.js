@@ -171,7 +171,6 @@ function evaluateEquipmentEfficiency(equipName) {
             StatusBorder = 'yellow';
         } else {
             if (!equip.Equip) {
-                //Gymystic is always cool, f*** shield - lol
                 StatusBorder = 'red';
             } else {
                 var CurrEffect = gameResource.level * Effect;
@@ -202,7 +201,6 @@ function evaluateEquipmentEfficiency(equipName) {
     if (equipName == 'Shield' && gameResource.blockNow &&
         game.upgrades['Gymystic'].allowed - game.upgrades['Gymystic'].done > 0)
         {
-            needGymystic = true;
             Factor = 0;
             Wall = true;
             StatusBorder = 'orange';
@@ -276,7 +274,7 @@ function autoLevelEquipment(buyDamage, colorStyle) {
                 if(colorStyle) $equipUpgrade.style.color = evaluation.StatusBorder;
             if (evaluation.StatusBorder == 'yellow' && $equipUpgrade) 
                 if(colorStyle) $equipUpgrade.style.color = 'white';
-            if (equipName == 'Gym' && needGymystic) {
+            if (equipName == 'Gym'){
                 if(colorStyle) $equipName.style.color = 'white';
                 if(colorStyle) $equipName.style.border = '1px solid white';
                 if ($equipUpgrade) {
@@ -344,7 +342,7 @@ function autoLevelEquipment(buyDamage, colorStyle) {
         if (equipName !== '') {
             var $eqName = document.getElementById(equipName);
             var DaThing = equipmentList[equipName];
-            if (equipName == 'Gym' && needGymystic) {
+            if (equipName == 'Gym') {
                 if(colorStyle) $eqName.style.color = 'white';
                 if(colorStyle) $eqName.style.border = '1px solid white';
                 continue;

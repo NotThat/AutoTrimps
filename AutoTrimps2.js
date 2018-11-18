@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "52";
+var ver = "52.1";
 var verDate = "18.11.18";
 
 var changelogList = [];
@@ -263,7 +263,6 @@ var preBuymaxSplit;
 
 var currentworld = 0;
 var aWholeNewWorld = false;
-var needGymystic = true;    //used in setScienceNeeded, buildings.js, equipment.js
 var heirloomFlag = false;
 var heirloomCache;
 var magmiteSpenderChanged = false;
