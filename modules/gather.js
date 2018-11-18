@@ -26,7 +26,9 @@ function manualLabor() {
     if ((game.resources.science.owned < scienceNeeded || game.resources.science.owned < 100) && document.getElementById('scienceCollectBtn').style.display == 'block')
         desired = 'science';
     
-    if (game.resources.trimps.owned < 20 && game.resources.trimps.owned < trimpsRealMax && game.buildings.Trap.owned > 0)
+    var perTrap = 1 + game.portal.Bait.level;
+    var trapFlag = perTrap > game.resources.trimps.owned / (game.global.challengeActive == "Trapper" ? 1000 : 100); //if trap produces more than 1/100th of our population (1/1000th in trapper), use traps
+    if (trapFlag && game.resources.trimps.owned < trimpsRealMax && game.buildings.Trap.owned > 0)
         desired = 'trimps';
     
     if (!game.talents.foreman.purchased && game.global.buildingsQueue.length >= 1 && (game.global.autoCraftModifier == 0 || game.global.buildingsQueue[0].indexOf("Trap") == -1))

@@ -162,7 +162,9 @@ function buyBuildings() {
     var customVars = MODULES["buildings"];
     var oldBuy = preBuy2();
     game.global.buyAmt = 1;
-    if(game.resources.trimps.owned < 20 && game.resources.trimps.owned < trimpsRealMax - 1 && canAffordBuilding('Trap') && game.global.buildingsQueue.length === 0 && game.buildings.Trap.owned === 0)
+    var perTrap = 1 + game.portal.Bait.level;
+    var trapFlag = perTrap > game.resources.trimps.owned / (game.global.challengeActive == "Trapper" ? 1000 : 100); //if trap produces more than 1/100th of our population (1/1000th in trapper), use traps
+    if(trapFlag && game.resources.trimps.owned < trimpsRealMax - 1 && canAffordBuilding('Trap') && game.global.buildingsQueue.length === 0 && game.buildings.Trap.owned === 0)
         safeBuyBuilding('Trap');
     
     buyFoodEfficientHousing();  //["Hut", "House", "Mansion", "Hotel", "Resort"];

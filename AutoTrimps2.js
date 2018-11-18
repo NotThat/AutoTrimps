@@ -18,10 +18,11 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "51.3";
-var verDate = "17.11.18";
+var ver = "52";
+var verDate = "18.11.18";
 
 var changelogList = [];
+changelogList.push({date: "18.11.2018", version: "", description: "Jobs reworked." , isNew: true});
 changelogList.push({date: "17.11.2018", version: "", description: "Added Income weight to Auto Allocate. Leave it at 0 unless you're deep running one of the big 3 C2s." , isNew: true});
 changelogList.push({date: "14.11.2018", version: "", description: "Improved Auto Allocate fuel zones range." , isNew: true});
 changelogList.push({date: "8.11.2018", version: "", description: "Improved early game.", isNew: false});
@@ -86,8 +87,8 @@ function startAT() {
     tab.appendChild(ATbutton);
     document.getElementById('logBtnGroup').appendChild(tab);
     
-    if (game.achievements.zones.finished < 8)   //z60
-        printLowerLevelPlayerNotice();
+    //if (game.achievements.zones.finished < 8)   //z60
+    //    printLowerLevelPlayerNotice();
     //Set some game ars after we load.
     game.global.addonUser = true;
     game.global.autotrimps = true;

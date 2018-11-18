@@ -43,6 +43,8 @@ var easyRatioThreshold = 10;
 
 function autoStance(){
     if(game.global.autoBattle && game.global.pauseFight) pauseFight(); //autofight on
+    if (game.resources.trimps.owned == trimpsRealMax && game.global.soldierHealth === 0)
+            fightManualAT(); //for when we dont have auto battle upgraded
     if (game.global.gridArray.length === 0) return false; //zone didnt initialize yet
     getDamageCaller(0); //buys health if we need it
     
