@@ -301,7 +301,7 @@ function autoMap(){
 
         //now we know desired map level and type, lets check if we already have such a map
         for (var map in game.global.mapsOwnedArray)
-            if(game.global.mapsOwnedArray[map].level == desiredMapLevel && (desiredMapType == "" || game.global.mapsOwnedArray[map].bonus == desiredMapType)){
+            if(!game.global.mapsOwnedArray[map].noRecycle && game.global.mapsOwnedArray[map].level == desiredMapLevel && (desiredMapType == "" || game.global.mapsOwnedArray[map].bonus == desiredMapType)){
                 selectedMap = game.global.mapsOwnedArray[map];
                 break;
             }
