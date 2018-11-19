@@ -156,7 +156,7 @@ function buyJobs(){
     //fix for large number rounding error: if maxscientist is positive number but much smaller than total population, the game will round maxscientists down to zero.
     //make sure we actually get our scientists no matter what
     var maxScientists = getPageSetting('MaxScientists')
-    if(maxScientists > 0 && maxScientists !== game.jobs.Scientist.owned && calculateMaxAfford(game.jobs["Scientist"], false, false, true) >= maxScientists){
+    if(!game.jobs.Scientist.locked && maxScientists > 0 && maxScientists !== game.jobs.Scientist.owned && calculateMaxAfford(game.jobs["Scientist"], false, false, true) >= maxScientists){
         //find a job with enough workers and fire all of them
         if(game.jobs.Farmer.owned > maxScientists)          safeFireJob('Farmer', game.jobs.Farmer.owned);
         else if(game.jobs.Lumberjack.owned > maxScientists) safeFireJob('Lumberjack', game.jobs.Lumberjack.owned);

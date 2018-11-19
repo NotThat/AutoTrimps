@@ -18,7 +18,7 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "52.3";
+var ver = "52.4";
 var verDate = "19.11.18";
 
 var changelogList = [];
