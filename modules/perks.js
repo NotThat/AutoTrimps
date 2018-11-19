@@ -1374,7 +1374,7 @@ function calcCoords(coordinated, coordinations){
     //    return AutoPerks.calcCoordsLastArmy;
     AutoPerks.fullSoldiers = 1;
     
-    if(AutoPerks.ChallengeName == "Trimp" || autoTrimpSettings.APValueBoxes.amalZone == autoTrimpSettings.APValueBoxes.coordsBehind + (autoTrimpSettings.APValueBoxes.amalZone >= 230 ? 100 : 0)){
+    if(AutoPerks.ChallengeName == "Trimp" || (autoTrimpSettings.APValueBoxes.amalGoal > 0 && autoTrimpSettings.APValueBoxes.amalZone == autoTrimpSettings.APValueBoxes.coordsBehind + (autoTrimpSettings.APValueBoxes.amalZone >= 230 ? 100 : 0))){
         AutoPerks.calcCoordsCoordsPurchased = 0;
         AutoPerks.calcCoordsLastLevel  = level;
         AutoPerks.calcCoordsLastCoords = coordsToUse;

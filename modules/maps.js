@@ -232,6 +232,14 @@ function autoMap(){
              }
         }
     
+    var preferFAMaps = false;
+
+    if(game.equipment["Dagger"].level > 100 && game.equipment["Greatsword"].level > 100 && !windZone())
+        preferFAMaps = true;
+
+    if(game.talents.hyperspeed2.purchased && game.global.world <= Math.floor((game.global.highestLevelCleared+1)/2))
+        preferFAMaps = false; //FA and hyper2 do not stack. if hyper2 is active no reason to use fa
+
     var siphlvl = game.global.world - game.portal.Siphonology.level;
     var desiredMapLevel = siphlvl;
     var desiredMapType  = preferFAMaps ? "fa" : (game.global.highestLevelCleared < 185 ? "" : "lmc"); //havent unlocked LMC yet
@@ -239,14 +247,6 @@ function autoMap(){
     var desiredMapFrags = 0.5;
     
     if(!selectedMap && shouldDoMaps){ //if we want to run a unique map or void, selectedMap is already pointing at the map object.
-        var preferFAMaps = false;
-
-        if(game.equipment["Dagger"].level > 100 && game.equipment["Greatsword"].level > 100 && !windZone())
-            preferFAMaps = true;
-
-        if(game.talents.hyperspeed2.purchased && game.global.world <= Math.floor((game.global.highestLevelCleared+1)/2))
-            preferFAMaps = false; //FA and hyper2 do not stack. if hyper2 is active no reason to use fa
-
         if(SpireLWCFlag){
             desiredMapLevel = game.global.world - (game.talents.mapLoot.purchased ? 1 : 0);
             desiredMapType  = "lwc";

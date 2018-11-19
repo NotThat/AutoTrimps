@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "52.1";
-var verDate = "18.11.18";
+var ver = "52.2";
+var verDate = "19.11.18";
 
 var changelogList = [];
 changelogList.push({date: "18.11.2018", version: "", description: "Jobs reworked." , isNew: true});
