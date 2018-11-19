@@ -72,7 +72,8 @@ function autoMap(){
     shouldDoMaps = (!enoughDamage && game.global.mapBonus < 10) || needPrestige;
     
     doVoids = checkNeedToVoid();
-    if(doVoids && game.options.menu.repeatVoids.enabled != 1) toggleSetting('repeatVoids');
+    //if(doVoids && game.options.menu.repeatVoids.enabled != 1) toggleSetting('repeatVoids');
+    if(doVoids && game.options.menu.repeatVoids.enabled != 0) toggleSetting('repeatVoids'); //toggle repeat all voids off. theres no benefit in running with 'finish all voids' enabled since you lose titimp bonus upon void clear anyway, and by having it off we can go do prestige raid we didnt have frags for earlier
     else if(!doVoids && game.options.menu.repeatVoids.enabled != 0) toggleSetting('repeatVoids');
     
     //force equip first mode
