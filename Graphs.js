@@ -2,6 +2,11 @@ function pushData(){
     var dailyMultGraph = 1 + (countDailyWeight() === 0 ? 0 : getDailyHeliumValue(countDailyWeight()) / 100);
 
     allSaveData.push({
+        AAHelium: autoTrimpSettings.APValueBoxes.Helium,
+        AAAttack: autoTrimpSettings.APValueBoxes.Attack,
+        AAHealth: autoTrimpSettings.APValueBoxes.Health,
+        AAFluffy: autoTrimpSettings.APValueBoxes.Fluffy,
+        AADG: autoTrimpSettings.APValueBoxes.DG,
         totalPortals: game.global.totalPortals,
         heliumOwned: game.resources.helium.owned,
         currentTime: getGameTime(),
@@ -9,6 +14,7 @@ function pushData(){
         world: game.global.world,
         challenge: game.global.challengeActive,
         voids: game.global.totalVoidMaps,
+        maxVoids: ATMaxVoids,
         heirlooms: {"value": game.stats.totalHeirlooms.value, "valueTotal":game.stats.totalHeirlooms.valueTotal},
         nullifium: recycleAllExtraHeirlooms(true),
         gigas: game.upgrades.Gigastation.done,
@@ -934,7 +940,10 @@ function setGraphData(graph) {
                 continue;
             if (allSaveData[i].totalPortals != currentPortal){
                 graphData.push({
-                    name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
+                    //name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
+                    name: '#' + allSaveData[i].totalPortals + ' ' 
+                            + (getPageSetting('AutoAllocatePerks') == 1 ? allSaveData[i].AAHelium+'/'+allSaveData[i].AAAttack+'/'+allSaveData[i].AAHealth+'/'+allSaveData[i].AAFluffy+'/'+allSaveData[i].AADG : '')
+                            + (/*item == 'hehr'*/ true ? ' ' + ATMaxVoids : '') + ': ' + allSaveData[i].challenge,
                     data: []
                 });
                 currentPortal = allSaveData[i].totalPortals;

@@ -18,8 +18,8 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "52.5";
-var verDate = "19.11.18";
+var ver = "52.6";
+var verDate = "20.11.18";
 
 var changelogList = [];
 changelogList.push({date: "18.11.2018", version: "", description: "Jobs reworked." , isNew: true});
@@ -308,6 +308,7 @@ var ASMode;
 var expectedPortalZone = 0;
 
 var ATmakeUp = false;
+var ATMaxVoids = 0;
 
 function pauseRemovalLoop(){
     var wrapper = document.getElementById("wrapper");
@@ -398,6 +399,7 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
         highestPrestigeOwned = 0;
     }
     heirloomFlag = heirloomsShown;
+    if(ATMaxVoids < game.global.totalVoidMaps) ATMaxVoids = game.global.totalVoidMaps; //used by graphs
     
     //Stuff to do Every new Zone
     if (aWholeNewWorld) {
@@ -406,6 +408,7 @@ function ATLoop(makeUp){ //makeUp = true when game is in catchup mode, so we can
             if (getPageSetting('AutoAllocatePerks')==2) lootdump();
             zonePostpone = 0;
             PRaidStartZone = 999;
+            ATMaxVoids = 0;
         }
         
         oncePerZoneCode();

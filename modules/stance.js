@@ -139,7 +139,7 @@ function autoStance(){
                 mapsClicked(true);
             trimpicides++;
         }
-        if (game.global.soldierHealth <= 0 && game.global.spireDeaths <= 2 && !isActiveSpireAT()) //if not activespireAT, we can give 2 deaths for speedup. probably wont need the lives
+        if (game.global.soldierHealth <= 0 && game.global.spireDeaths <= 1 && !isActiveSpireAT()) //if not activespireAT, we can give 2 deaths for speedup. probably wont need the lives
             fightManualAT();
         
         allowBuyingCoords = true;
