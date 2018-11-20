@@ -65,9 +65,10 @@ function autoMap(){
     }
     
     if (!enoughDamage) AutoMapsCoordOverride = true; //if automaps thinks we need damage, override helium mode coord delay (not amalgamators' coord delay)
-    
     //are we behind on prestige? ignores last gambesop on portal zone
-    needPrestige = getScientistLevel() >= 5 && ((lastPrestigeZone() < lastDropZone()) || (lastPrestigeZone() == lastDropZone() && prestigeState != 2 && game.global.world !== expectedPortalZone));
+    needPrestige = (getScientistLevel() >= 5 ? 
+    ((lastPrestigeZone() < lastDropZone()) || (lastPrestigeZone() == lastDropZone() && prestigeState != 2 && game.global.world !== expectedPortalZone)) :
+    preScience5NeedPrestige());
     
     shouldDoMaps = (!enoughDamage && game.global.mapBonus < 10) || needPrestige;
     
@@ -262,10 +263,10 @@ function autoMap(){
             else if(LWCDone < desiredLWC) desiredMapType = "lwc";
         }
         else if(needPrestige){
-            desiredMapLevel = lastPrestigeZone(true);
+            desiredMapLevel = getScientistLevel() >= 5 ? lastPrestigeZone(true) : game.global.world;
             desiredMapType  = "p";
             desiredMapFrags = 0.7;
-            statusMsg = "Prestige: " + addSpecialsAT(game.global.world);
+            statusMsg = "Prestige" + (getScientistLevel() >= 5 ? ": " + addSpecialsAT(game.global.world) : "");
         }
         else if(preSpireFarming){
             desiredMapLevel = game.global.world - (game.talents.mapLoot.purchased ? 1 : 0);
@@ -981,6 +982,10 @@ function decideMapParams(baseLevel, special, cheap, fragCap){
         type = "Random";
     }
     
+    //check if specialMod is unlocked already
+    if(specialMod == "p" && game.global.highestLevelCleared < 135) specialMod = "";
+    if(specialMod == "lmc" && game.global.highestLevelCleared < 185) specialMod = "";
+    
     cost = calcMapCost(baseLevel, sizeSlider, diffSlider, lootSlider, specialMod, perfect, extraLevels, type);
     
     if(fragments >= cost)
@@ -1176,6 +1181,89 @@ function updateMapCost(getValue){
 	document.getElementById("mapCostFragmentCost").innerHTML = prettify(baseCost);
 }
 
+function lastPrestigeZone(getMin){
+    var max = 1;
+    var min = 999;
+    var tmp;
+    
+    var prestigeList = ['Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest', 'Bootboost', 'Hellishmet', 'Pantastic', 'Smoldershoulder', 'Bestplate', 'GambesOP'];
+    for (var i in prestigeList){
+        tmp = dropsAtZone(prestigeList[i], false);
+        var dropAt = (game.upgrades[prestigeList[i]].allowed+1)/2*10;
+        
+        if (tmp>max)
+            max=tmp;
+        if (dropAt < min)
+            min = dropAt;
+    }
+    if(getMin) return Math.min(game.global.world, Math.floor(min/10)*10+5);
+    
+    prestigeState = 0;
+    if(max % 1 > 0.35 && max % 1 < 0.45){
+        //debug("only missing 1 armor prestige " + max);
+        prestigeState = 1; //0 - have something from zone (zone xx5 and we have greatsword and possibly breastplate) 1 - have all but last armor 2 - have everything from zone
+    }
+    else if(max % 1 > 0.45){
+        //debug("have everything from zone " + max);
+        prestigeState = 2;
+    }
+    //if(prestigeState === 0)
+        //debug("have 1-2 things from zone " + max);
+
+    return Math.floor(max);
+}
+
+function dropsAtZone(itemName, nextLevel){
+    var slotModifier=0;
+    var calcNext;
+    if(nextLevel === undefined)
+        calcNext = false;
+    else
+        calcNext = nextLevel;
+    switch(itemName){
+        case "Dagadder":
+                slotModifier=1.4;
+                break;
+            case "Bootboost": 
+                slotModifier=1.5;
+                break;
+            case "Megamace":
+                slotModifier=2.4;
+                break;
+            case "Hellishmet":
+                slotModifier=2.5;
+                break;
+            case "Polierarm": 
+                slotModifier=3.4;
+                break;
+            case "Pantastic": 
+                slotModifier=3.5;
+                break;
+            case "Axeidic": 
+                slotModifier=4.4;
+                break;
+            case "Smoldershoulder": 
+                slotModifier=4.5;
+                break;
+            case "Greatersword": 
+                slotModifier=5.2;
+                break;
+            case "Bestplate": 
+                slotModifier=5.3;
+                break;
+            case "Harmbalest": 
+                slotModifier=5.4;
+                break;
+            case "GambesOP": 
+                slotModifier=5.5;
+                break;
+            default:
+                return 0;
+    }
+    
+    return (game.upgrades[itemName].allowed+1)/2*10-(calcNext ? 0 : 10)+slotModifier;
+}
+
 function lastDropZone(zone) {
     lastPrestigeZone(); //sets prestigeState which indicates how many drops we already have of possible drops in our last prestige zone
     var lastPrestigeZ;
@@ -1189,6 +1277,62 @@ function lastDropZone(zone) {
         lastPrestigeZ = zone;
     
     return lastPrestigeZ;
+}
+
+function preScience5NeedPrestige(){
+    var prestigeList = ['Dagadder', 'Megamace', 'Polierarm', 'Axeidic', 'Greatersword', 'Harmbalest', 'Bootboost', 'Hellishmet', 'Pantastic', 'Smoldershoulder', 'Bestplate', 'GambesOP'];
+    for (var i in prestigeList){
+        if((prestigeList[i] == "Harmbalest" || prestigeList[i] == "GambesOP") && !game.global.slowDone) //not available yet
+            continue;
+        
+        //calculate maximum allowed prestiges for each gear if we create and raid a map of world level
+        var zoneModifier = 1;
+        switch(prestigeList[i]){
+        case "Dagadder":
+                zoneModifier = 1;
+                break;
+            case "Bootboost": 
+                zoneModifier = 1;
+                break;
+            case "Megamace":
+                zoneModifier = 2;
+                break;
+            case "Hellishmet":
+                zoneModifier = 2;
+                break;
+            case "Polierarm": 
+                zoneModifier = 3;
+                break;
+            case "Pantastic": 
+                zoneModifier = 3;
+                break;
+            case "Axeidic": 
+                zoneModifier = 4;
+                break;
+            case "Smoldershoulder": 
+                zoneModifier = 4;
+                break;
+            case "Greatersword": 
+                zoneModifier = 5;
+                break;
+            case "Bestplate": 
+                zoneModifier = 5;
+                break;
+            case "Harmbalest": 
+                zoneModifier = 5;
+                break;
+            case "GambesOP": 
+                zoneModifier = 5;
+                break;
+            default:
+                zoneModifier = 1;
+        }
+        
+        var maxAllowed = Math.floor((game.global.world - zoneModifier) / 5);
+        if(game.upgrades[prestigeList[i]].allowed < maxAllowed) 
+            return true;
+    }
+    return false;
 }
 
 function checkNeedToVoid(){

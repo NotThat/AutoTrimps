@@ -179,6 +179,8 @@ function buyBuildings() {
     //Gyms:
     if (!game.buildings.Gym.locked) {
         var skipGym = false;
+        if(game.upgrades.Gymystic.allowed > game.upgrades.Gymystic.done)
+            skipGym = true; //dont spend wood on gyms when we need gymystic upgrade. should add a check to buy gyms until they cost some percentage of gymystic
         //ShieldBlock cost Effectiveness:
         if (game.equipment['Shield'].blockNow) {
             var gymEff = evaluateEquipmentEfficiency('Gym');
