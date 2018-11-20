@@ -940,10 +940,10 @@ function setGraphData(graph) {
                 continue;
             if (allSaveData[i].totalPortals != currentPortal){
                 graphData.push({
-                    //name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
-                    name: '#' + allSaveData[i].totalPortals + ' ' 
-                            + (getPageSetting('AutoAllocatePerks') == 1 ? allSaveData[i].AAHelium+'/'+allSaveData[i].AAAttack+'/'+allSaveData[i].AAHealth+'/'+allSaveData[i].AAFluffy+'/'+allSaveData[i].AADG : '')
-                            + (/*item == 'hehr'*/ true ? ' ' + allSaveData[i].maxVoids : '') + ': ' + allSaveData[i].challenge,
+                    name: 'Portal ' + allSaveData[i].totalPortals + ': ' + allSaveData[i].challenge,
+                    //name: '#' + allSaveData[i].totalPortals + ' ' 
+                    //        + (getPageSetting('AutoAllocatePerks') == 1 ? allSaveData[i].AAHelium+'/'+allSaveData[i].AAAttack+'/'+allSaveData[i].AAHealth+'/'+allSaveData[i].AAFluffy+'/'+allSaveData[i].AADG : '')
+                    //        + (/*item == 'hehr'*/ true ? ' ' + allSaveData[i].maxVoids : '') + ': ' + allSaveData[i].challenge,
                     data: []
                 });
                 currentPortal = allSaveData[i].totalPortals;
