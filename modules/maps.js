@@ -1337,7 +1337,7 @@ function preScience5NeedPrestige(){
 
 function checkNeedToVoid(){
     if(game.global.totalVoidMaps === 0) return false;
-    if(game.global.world >= 300 && !poisonZone()) return false;
+    //if(game.global.world >= 300 && !poisonZone()) return false;
     var voidMapZone = getPageSetting('VoidMaps');
     
     //Add your daily zone mod onto the void maps level

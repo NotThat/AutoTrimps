@@ -41,7 +41,11 @@ var wantMoreDamage = false;
 var negativeDamageCounter = 0;
 var easyRatioThreshold = 10;
 
+var ATmaxWind = game.empowerments.Wind.maxStacks;
+//game.empowerments.Wind.retainLevel
+
 function autoStance(){
+    ATmaxWind = game.empowerments.Wind.maxStacks;
     if(game.global.autoBattle && game.global.pauseFight) pauseFight(); //autofight on
     if (game.resources.trimps.owned == trimpsRealMax && game.global.soldierHealth === 0)
             fightManualAT(); //for when we dont have auto battle upgraded
@@ -210,9 +214,9 @@ function autoStance(){
     
     if(windZone()){
         var stacks = game.empowerments.Wind.currentDebuffPower;
-               var maxDesiredStacks = ((game.global.challengeActive == "Daily") ? 196 : 192); //overshooting is really bad, so take a safety margin on non dailies. note that with plaguebringer the script will overshoot this by quite a bit on occasions so a big safety margin is recommended
+               var maxDesiredStacks = ((game.global.challengeActive == "Daily") ? ATmaxWind-4 : ATmaxWind-8); //overshooting is really bad, so take a safety margin on non dailies. note that with plaguebringer the script will overshoot this by quite a bit on occasions so a big safety margin is recommended
         if((cell.corrupted !== undefined && cell.corrupted.includes("healthy")) || cellNum == 99)
-            maxDesiredStacks = 196; //still want max stacks for healthy/end cells
+            maxDesiredStacks = ATmaxWind-4; //still want max stacks for healthy/end cells
         
         var missingStacks = Math.max(maxDesiredStacks-stacks, -5);
 
@@ -233,8 +237,8 @@ function autoStance(){
         if(cellNum < 99){
             worldArray[cellNum+1].health = Math.max(worldArray[cellNum+1].maxHealth - nextPBDmgtmp, 0.05*worldArray[cellNum+1].maxHealth); //extra damage on next cell from PB
             worldArray[cellNum+1].pbHits = pbHitstmp; //extra wind stacks on next cell from PB
-            var nextStartingStacks = Math.min(1 + Math.ceil(stacks * getRetainModifier("Wind") + pbHitstmp + expectedNumHitsD * (pbMult + getRetainModifier("Wind")) + Math.ceil(worldArray[cellNum+1].health/ourAvgDmgD)), 200);
-            var nextStartingStacksCurrent = Math.min(1 + Math.ceil((stacks+1) * getRetainModifier("Wind") + pbHitstmp), 200);
+            var nextStartingStacks = Math.min(1 + Math.ceil(stacks * getRetainModifier("Wind") + pbHitstmp + expectedNumHitsD * (pbMult + getRetainModifier("Wind")) + Math.ceil(worldArray[cellNum+1].health/ourAvgDmgD)), ATmaxWind);
+            var nextStartingStacksCurrent = Math.min(1 + Math.ceil((stacks+1) * getRetainModifier("Wind") + pbHitstmp), ATmaxWind);
             if(cellNum == 80){
                 if(nextZoneDHratio <= poisonMult * windMult && worldArray[99].geoRelativeCellWorth > 0){
                     worldArray[99].geoRelativeCellWorth = 0; //need to update previous cells as well
@@ -342,18 +346,18 @@ function autoStance(){
         var cmp = 0; //cmp uses nextStartingStacks which includes an approximation of how many more hits we need
         var cmpActual = 0; //this is precise (used for display)
 
-        if(stacks < 192)
+        if(stacks < ATmaxWind-8)
             cmp += worldArray[cellNum].baseWorth;
-        if(nextStartingStacks < 194)
+        if(nextStartingStacks < ATmaxWind-6)
             cmp += worldArray[cellNum].PBWorth;
-        if(stacks < 192 && nextStartingStacks < 194)
+        if(stacks < ATmaxWind-8 && nextStartingStacks < ATmaxWind-6)
             cmp += worldArray[cellNum].geoRelativeCellWorth;
 
-        if(stacks < 200)
+        if(stacks < ATmaxWind)
             cmpActual += worldArray[cellNum].baseWorth;
-        if(nextStartingStacksCurrent < 200)
+        if(nextStartingStacksCurrent < ATmaxWind)
             cmpActual += worldArray[cellNum].PBWorth;
-        if(stacks < 200 && nextStartingStacksCurrent < 200)
+        if(stacks < ATmaxWind && nextStartingStacksCurrent < ATmaxWind)
             cmpActual += worldArray[cellNum].geoRelativeCellWorth;
 
         if(worldArray[cellNum].corrupted == "corruptDodge" && !stackSpire) {cmp *= 0.7; cmpActual *= 0.7;} //dodge cells are worth less
@@ -387,7 +391,7 @@ function autoStance(){
         else if (DHratio < limit) //if DHratio falls below limit, we allow buying of gear and coordinates to get it
             getDamageCaller(8*baseDamageHigh * limit / DHratio, false);
 
-        if(stacks < 185 && nextStartingStacks < 180 && zoneWorth > 0.8 && expectedNumHitsS < missingStacks-5 && (stackSpire ? worldArray[cellNum].finalWorth > 1 : worldArray[cellNum].baseWorth > 0 && cmp > 1))
+        if(stacks < ATmaxWind-15 && nextStartingStacks < ATmaxWind-20 && zoneWorth > 0.8 && expectedNumHitsS < missingStacks-5 && (stackSpire ? worldArray[cellNum].finalWorth > 1 : worldArray[cellNum].baseWorth > 0 && cmp > 1))
             wantLessDamage = true;
 
         var boggedFlag = (typeof game.global.dailyChallenge.bogged !== 'undefined' && DHratio > 10);
@@ -400,7 +404,7 @@ function autoStance(){
             else
                 worldArray[cellNum].PBWorth = 0;*/
 
-            if(stacks >= 200) //stats keeping
+            if(stacks >= ATmaxWind) //stats keeping
                 wantMoreDamage = true;
 
             chosenFormation = 2;
@@ -529,8 +533,8 @@ function autoStance(){
 
                         minAnticipationStacks = Math.ceil(Math.max(1, wantedStacks));
                         var ourNewLowDamage = baseDamageLow*(1 + 0.2 * minAnticipationStacks)/(1 + 0.2 * game.global.antiStacks);
-                        var before = Math.min(stacks      + expectedNumHitsS, 200); //stacks if we dont trimpicide
-                        var after  = Math.min(0.85*stacks + enemyHealth / ourNewLowDamage, 200); //stacks if we do trimpicide
+                        var before = Math.min(stacks      + expectedNumHitsS, ATmaxWind); //stacks if we dont trimpicide
+                        var after  = Math.min(getRetainModifier("Wind")*stacks + enemyHealth / ourNewLowDamage, ATmaxWind); //stacks if we do trimpicide
                         //debug("before " + before.toFixed(0) + " after " + after.toFixed(0));
                         if(before <= after+10 && game.global.antiStacks - minAnticipationStacks > 1){ 
                             wantedAnticipation = minAnticipationStacks;
@@ -557,8 +561,8 @@ function autoStance(){
     if(worldArray[cellNum].health !== lastMobHP){ //an attack has occured, 1 "turn"
         var lastDamageDealt = lastMobHP - worldArray[cellNum].health;
         lastMobHP = worldArray[cellNum].health;
-        if(stacksAtDeath == 200) wastedStacksAtEnd++;
-        if(lastNextStartingStacksCurrent == 200) wastedStacksAtStart++;
+        if(stacksAtDeath == ATmaxWind) wastedStacksAtEnd++;
+        if(lastNextStartingStacksCurrent == ATmaxWind) wastedStacksAtStart++;
     }
     stacksAtDeath = stacks;
     shieldUsedAtCellDeath = (highDamageHeirloom ? 1 : 0);
@@ -580,7 +584,7 @@ function saveStats(cellNum){
     
     stanceStats.timeDead = timeDead;
     if(cellNum > lastCell + 1){ //we overkilled some cells
-        var stacks = Math.min(lastNextStartingStacksCurrent, 200);
+        var stacks = Math.min(lastNextStartingStacksCurrent, ATmaxWind);
         for(var i = lastCell + 1; i < cellNum; i++){
             stanceStats.cmp[i] = parseFloat(worldArray[i].finalWorth.toFixed(2));
             

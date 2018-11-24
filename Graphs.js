@@ -1215,7 +1215,7 @@ function setGraph2(title, xTitle, yTitle, yTitle2, names, valueSuffix, formatter
             },
             floor: 0,
             min: 0,
-            max: 200,
+            max: game.empowerments.Wind.maxStacks,
             tickInterval: 50,
             opposite: true,
             tooltip: {

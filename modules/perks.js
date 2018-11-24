@@ -82,7 +82,6 @@ AutoPerks.initializeGUI = function() {
     //Line 1 of the UI
     apGUI.$ratiosLine1 = document.createElement("DIV");
     apGUI.$ratiosLine1.setAttribute('style', 'display: inline-block; text-align: left; width: 100%');
-    //var listratiosLine1 = ["Helium","Attack","Health","Fluffy","DG","Income"];
     
     var heliumBox = AutoPerks.createInput("Helium",apGUI.$ratiosLine1);
     heliumBox.setAttribute("onmouseover", 'tooltip("Helium Weight", "customText", event, "How much you value helium")');
@@ -101,9 +100,6 @@ AutoPerks.initializeGUI = function() {
     
     var incomeBox = AutoPerks.createInput("Income",apGUI.$ratiosLine1);
     incomeBox.setAttribute("onmouseover", 'tooltip("Income Weight", "customText", event, "This should normally be kept at 0. Only increase this when using More Farming mode and attempting to increase early game population (pre z230) for the big C2s and intending to use a respec later.")');
-    
-    //for (var i in listratiosLine1)
-    //    AutoPerks.createInput(listratiosLine1[i],apGUI.$ratiosLine1);
 
     apGUI.$customRatios.appendChild(apGUI.$ratiosLine1);
     //Line 2 of the UI
@@ -220,9 +216,9 @@ AutoPerks.calculateTotalPrice = function(perk, finalLevel) {
     if(perk.priceLinearScaling === 'linear') return AutoPerks.calculateTIIprice(perk, finalLevel);
     
     var totalPrice = 0;
-    for(var i = 0; i < finalLevel; i++) {
+    for(var i = 0; i < finalLevel; i++)
         totalPrice += AutoPerks.calculatePrice(perk, i);
-    }
+    
     return totalPrice;
 };
 
@@ -260,7 +256,6 @@ AutoPerks.heliumInaccuracy = function(checkTemp){
 
 //green "Allocate Perks" button:
 AutoPerks.clickAllocate = function() {
-    
     try{
         if(!game.global.canRespecPerks){
             var $text = document.getElementById("textAreaAllocate");
@@ -355,9 +350,7 @@ AutoPerks.clickAllocate = function() {
         var ret = AutoPerks.applyCalculations(true);
         if(ret < 0)
             throw "setup not affordable, missing " + prettify(-ret) + " helium.";
-        //if(!AutoPerks.checkValid()) throw "invalid helium amount.";
         AutoPerks.applyCalculations(); //re-arrange perk points
-        //if(!AutoPerks.checkValid()) throw "invalid helium amount.";
         debug("AutoPerks: Auto-Allocate Finished.","perks");
     }
     catch(err){
@@ -371,7 +364,6 @@ AutoPerks.clickAllocate = function() {
 };
 
 AutoPerks.spendHelium = function(helium) {
-    //if(!AutoPerks.checkValid()) throw "invalid helium amount.";
     debug("Calculating how to spend " + prettify(helium) + " Helium...","perks");
     if(helium < 0) 
         throw "Not enough helium to buy fixed perks.";
@@ -654,9 +646,8 @@ function respecPerksAT(){
 function testPerks(){
     for (var i in AutoPerks.perkHolder){
         var diff = AutoPerks.perkHolder[i].getTotalPrice() - AutoPerks.perkHolder[i].spent;
-        if(diff !== 0){
+        if(diff !== 0)
             debug("Discrepency perk " + AutoPerks.perkHolder[i].name + " diff " + diff);
-        }
     }
 }
 
@@ -742,20 +733,12 @@ function calcZeroState(){
 }
 
 function benefitIncomeCalc(){
+    if(autoTrimpSettings.APValueBoxes.Income === 0) return 1;
     var looting1 = AutoPerks.useLivePerks ? game.portal["Looting"] : AutoPerks.perksByName.Looting;
     var looting2 = AutoPerks.useLivePerks ? game.portal["Looting_II"] : AutoPerks.perksByName.Looting_II;
     var motivation1Perk = AutoPerks.useLivePerks ? game.portal["Motivation"] : AutoPerks.perksByName.Motivation;
     var motivation2Perk = AutoPerks.useLivePerks ? game.portal["Motivation_II"] : AutoPerks.perksByName.Motivation_II;
     var resourcefulPerk = AutoPerks.useLivePerks ? game.portal["Resourceful"] : AutoPerks.perksByName.Resourceful;
-    
-    /*var price = game.buildings.Nursery.cost.wood;
-    var start = price[0];
-    start *= Math.pow(0.95, resourcefulPerk.level);
-    var toBuy = log10(resourcesAvailable / start * (price[1] - 1) + 1) / log10(price[1]);
-    
-    if (mostAfford === -1 || mostAfford > toBuy) mostAfford = toBuy;*/
-    
-    
             
     this.benefit =  popMultiplier() * 
                     (1 + 0.05*motivation1Perk.level) * (1 + 0.01*motivation2Perk.level) * 
@@ -878,10 +861,8 @@ function benefitDGCalc(){
     if(autoTrimpSettings.APCheckBoxes.userMaintainMode) return 1; //using max fuel for amalg maintain mode
     
     //when we change DG perks, we potentially change the amount of Mi we get and DG growth. if Mi changed we need to recalculate AutoPerks.benefitDG
-    //var miBefore = AutoPerks.totalMi;
-    var miPerRun = minMaxMi(); //calculates maximum Mi using carp1/carp2/coordinated to maintain amalgamator goal
-    //if(miBefore !== miPerRun)
-        this.benefit = MiToDGGrowth(miPerRun); //mi changed, update benefit
+    minMaxMi(); //calculates maximum Mi using carp1/carp2/coordinated to maintain amalgamator goal
+    this.benefit = MiToDGGrowth(); //Mi changed, update benefit
     
     if(isNaN(this.benefit)) throw "DG NaN benefit";
 
@@ -1153,16 +1134,16 @@ AutoPerks.initializePerks = function () {
     var artisanistry = {name: "Artisanistry", benefits: [bHlth, bAtk],       baseCost: 15,      incomeFlag: true};
     var resilience   = {name: "Resilience",   benefits: [bHlth],             baseCost: 100};
     var coordinated  = {name: "Coordinated",  benefits: [bHlth, bAtk, bDG],  baseCost: 150000,  popBreedFlag:true};
-    var resourceful  = {name: "Resourceful",  benefits: [bHlth, bIncome],             baseCost: 50000,   incomeFlag: true, popBreedFlag:true};
+    var resourceful  = {name: "Resourceful",  benefits: [bHlth, bIncome],            baseCost: 50000,   incomeFlag: true, popBreedFlag:true};
     
-    var carpentry    = {name: "Carpentry",    benefits: [bHlth, bAtk, bDG ,bIncome],  baseCost: 25, childLevelFunc: carp2LevelFunc,      incomeFlag: true, popBreedFlag:true};
+    var carpentry    = {name: "Carpentry",    benefits: [bHlth, bAtk, bDG ,bIncome], baseCost: 25, childLevelFunc: carp2LevelFunc,      incomeFlag: true, popBreedFlag:true};
     var looting      = {name: "Looting",      benefits: [bHlth, bAtk, bHel,bIncome], baseCost: 1,  childLevelFunc: looting2LevelFunc,   incomeFlag: true, popBreedFlag:true};
     var toughness    = {name: "Toughness",    benefits: [bHlth],             baseCost: 1,  childLevelFunc: toughness2LevelFunc};
     var power        = {name: "Power",        benefits: [bAtk],              baseCost: 1,  childLevelFunc: power2LevelFunc};
     var motivation   = {name: "Motivation",   benefits: [bHlth, bAtk, bIncome],       baseCost: 2,  childLevelFunc: motivation2LevelFunc,incomeFlag: true, popBreedFlag:true};
     
     //Tier2 perks
-    var carpentry_II = {name: "Carpentry_II", benefits: [bHlth, bAtk, bDG,  bIncome],  baseCost: 100000, increase: 10000, incomeFlag: true, popBreedFlag:true};
+    var carpentry_II = {name: "Carpentry_II", benefits: [bHlth, bAtk, bDG,  bIncome], baseCost: 100000, increase: 10000, incomeFlag: true, popBreedFlag:true};
     var looting_II   = {name: "Looting_II",   benefits: [bHlth, bAtk, bHel, bIncome], baseCost: 100000, increase: 10000, incomeFlag: true, popBreedFlag:true};
     var toughness_II = {name: "Toughness_II", benefits: [bHlth],             baseCost: 20000,  increase: 500};
     var power_II     = {name: "Power_II",     benefits: [bAtk],              baseCost: 20000,  increase: 500};
@@ -1453,7 +1434,6 @@ function minMaxMi(){
     AutoPerks.fuelEndZone = AutoPerks.fuelStartZone + AutoPerks.fuelMaxZones - 1;
     AutoPerks.totalMi = (game.talents.magmaFlow.purchased ? 18 : 16) * (autoTrimpSettings.APValueBoxes.maxZone - 230 - AutoPerks.fuelMaxZones);
     if(AutoPerks.useMaxFuel) AutoPerks.totalMi = 0;
-    return AutoPerks.totalMi;
 }
 
 //printout
@@ -1478,7 +1458,8 @@ function printBenefitsPerks(levels, shush){
 }
 
 //we care about DG growth, not straight Mi numbers, so convert the two based off how fast we can expect our DG to grow.
-function MiToDGGrowth(MiPerRun){
+function MiToDGGrowth(){
+    var MiPerRun = AutoPerks.totalMi;
     if(MiPerRun === 0) return AutoPerks.DGGrowthRun = 0;
     
     //get levels
@@ -1511,6 +1492,10 @@ function MiToDGGrowth(MiPerRun){
     var OCEff  = (OCPopPlusOne /popCurr - 1) / OCRuns;
     
     AutoPerks.DGGrowthRun = Math.max(effEff, capEff, OCEff);
+    /*if(AutoPerks.DGGrowthRun == effEff) AutoPerks.DGWhat = "efficiency";
+    if(AutoPerks.DGGrowthRun == capEff) AutoPerks.DGWhat = "cap";
+    if(AutoPerks.DGGrowthRun == OCEff)  AutoPerks.DGWhat = "OC";
+    AutoPerks.DGWhat2 = (effEff*10000).toFixed(2) + "/" + (capEff*10000).toFixed(2) + "/" + (OCEff*10000).toFixed(2);*/
     return AutoPerks.DGGrowthRun;
 }
 
