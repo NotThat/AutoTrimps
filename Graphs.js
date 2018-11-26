@@ -2,11 +2,12 @@ function pushData(){
     var dailyMultGraph = 1 + (countDailyWeight() === 0 ? 0 : getDailyHeliumValue(countDailyWeight()) / 100);
 
     allSaveData.push({
-        AAHelium: autoTrimpSettings.APValueBoxes.Helium,
-        AAAttack: autoTrimpSettings.APValueBoxes.Attack,
-        AAHealth: autoTrimpSettings.APValueBoxes.Health,
-        AAFluffy: autoTrimpSettings.APValueBoxes.Fluffy,
-        AADG: autoTrimpSettings.APValueBoxes.DG,
+        //AAHelium: autoTrimpSettings.APValueBoxes.Helium,
+        //AAAttack: autoTrimpSettings.APValueBoxes.Attack,
+        //AAHealth: autoTrimpSettings.APValueBoxes.Health,
+        //AAFluffy: autoTrimpSettings.APValueBoxes.Fluffy,
+        //AADG: autoTrimpSettings.APValueBoxes.DG,
+        //maxVoids: ATMaxVoids,
         totalPortals: game.global.totalPortals,
         heliumOwned: game.resources.helium.owned,
         currentTime: getGameTime(),
@@ -14,7 +15,6 @@ function pushData(){
         world: game.global.world,
         challenge: game.global.challengeActive,
         voids: game.global.totalVoidMaps,
-        maxVoids: ATMaxVoids,
         heirlooms: {"value": game.stats.totalHeirlooms.value, "valueTotal":game.stats.totalHeirlooms.valueTotal},
         nullifium: recycleAllExtraHeirlooms(true),
         gigas: game.upgrades.Gigastation.done,
