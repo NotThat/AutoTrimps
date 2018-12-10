@@ -22,8 +22,8 @@ function autoGoldenUpgradesAT(){
     game.options.menu.lockOnUnlock.enabled = 0;
     while(getAvailableGoldenUpgrades() > 0){
         var what = "";
-        if(!game.global.runningChallengeSquared && getPageSetting('MaxVoid')   && game.goldenUpgrades.Void.nextAmt() != 0.12 && buyGoldenUpgrade("Void")) continue;
-        else if(game.global.runningChallengeSquared  && getPageSetting('MaxVoidC2') && game.goldenUpgrades.Void.nextAmt() != 0.12 && buyGoldenUpgrade("Void")) continue;
+        if(!game.global.runningChallengeSquared && getPageSetting('MaxVoid') && buyGoldenUpgrade("Void")) continue;
+        else if(game.global.runningChallengeSquared  && getPageSetting('MaxVoidC2') && buyGoldenUpgrade("Void")) continue;
         else if(game.global.runningChallengeSquared || setting === "Battle") what = "Battle";
         else if (setting === "Helium") what = "Helium";
         else{ //'Match Perks' mode: aim to buy Helium/Battle at a ratio that matches our perk setup
