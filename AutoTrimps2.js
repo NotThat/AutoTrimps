@@ -18,13 +18,14 @@ var ATversion = '2.1.7.1'; //when this increases it forces users setting update 
 
 var local = false;
 //local = true;
-var ver = "52.12";
-var verDate = "24.11.18";
+var ver = "53";
+var verDate = "11.12.18";
 
 var changelogList = [];
-changelogList.push({date: "18.11.2018", version: "", description: "Jobs reworked." , isNew: true});
-changelogList.push({date: "17.11.2018", version: "", description: "Added Income weight to Auto Allocate. Leave it at 0 unless you're deep running one of the big 3 C2s." , isNew: true});
-changelogList.push({date: "14.11.2018", version: "", description: "Improved Auto Allocate fuel zones range." , isNew: true});
+changelogList.push({date: "11.12.2018", version: "", description: "New Void GU Cap.", isNew: true});
+changelogList.push({date: "18.11.2018", version: "", description: "Jobs reworked." , isNew: false});
+changelogList.push({date: "17.11.2018", version: "", description: "Added Income weight to Auto Allocate. Leave it at 0 unless you're deep running one of the big 3 C2s." , isNew: false});
+changelogList.push({date: "14.11.2018", version: "", description: "Improved Auto Allocate fuel zones range." , isNew: false});
 changelogList.push({date: "8.11.2018", version: "", description: "Improved early game.", isNew: false});
 changelogList.push({date: "22.10.2018", version: "", description: "Reworked AutoAllocate, check your weights. Also BW raid setting." , isNew: false});
 changelogList.push({date: "13/06/2018", version: "", description: "War was beginning ", isNew: false});
